@@ -4,20 +4,20 @@
 
 // ---------- 属性 ----------
 const ELEMENTS = {
-  fire:   { name: '火',  color: '#ff8f5c', icon: '🔥' },
-  water:  { name: '水',  color: '#6ec8e8', icon: '💧' },
-  nature: { name: '自然', color: '#9fd47a', icon: '🌿' },
-  light:  { name: '光',  color: '#ffe08a', icon: '✨' },
-  dark:   { name: '闇',  color: '#c9a8f0', icon: '🌙' },
+  fire:   { name: '火',  color: '#a8532a', icon: '🔥' },
+  water:  { name: '水',  color: '#3f6f8f', icon: '💧' },
+  nature: { name: '自然', color: '#5f7a3f', icon: '🌿' },
+  light:  { name: '光',  color: '#a9822f', icon: '✨' },
+  dark:   { name: '闇',  color: '#6b4a96', icon: '🌙' },
 };
 // 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
 
 const RARITY = {
-  normal: { name: 'ノーマル', color: '#c9c2e0', glow: 'none' },
-  rare:   { name: 'レア',    color: '#7ec8f0', glow: '0 0 10px #7ec8f099' },
-  epic:   { name: 'エピック', color: '#c9a8f0', glow: '0 0 12px #c9a8f0aa' },
-  legend: { name: 'レジェンド', color: '#ffd66b', glow: '0 0 16px #ffd66bcc' },
+  normal: { name: 'ノーマル', color: '#75767f', glow: 'none' },
+  rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
+  epic:   { name: 'エピック', color: '#6b4fa0', glow: '0 0 12px #8a5fc966' },
+  legend: { name: 'レジェンド', color: '#a8853a', glow: '0 0 16px #e8c87799' },
 };
 
 // ---------- カードマスターデータ ----------
