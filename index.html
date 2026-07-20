@@ -204,6 +204,33 @@
     display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px #00000033, 0 0 0 1px var(--gold-soft);}
   .cg-tab-main .lb{color:var(--gold-bright); font-weight:700; margin-top:1px;}
   .cg-tab-main .ic{font-size:22px;}
+
+  /* ---------- ショップ ---------- */
+  .cg-shop-currency{display:flex; gap:8px; padding:8px 14px 4px;}
+  .cg-shop-packs{display:flex; flex-direction:column; gap:12px; padding:10px 14px 20px;}
+  .cg-pack-card{display:flex; align-items:center; gap:12px; background:var(--bg-panel); border:1px solid var(--hairline-panel);
+    border-radius:14px; padding:12px; color:var(--text-panel);}
+  .cg-pack-icon{width:56px; height:56px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:26px; background:linear-gradient(160deg,var(--bg-panel2),#1c150d); border:1px solid var(--hairline-panel);}
+  .cg-pack-info{flex:1; min-width:0;}
+  .cg-pack-name{font-size:14px; font-weight:700; margin-bottom:2px;}
+  .cg-pack-desc{font-size:11px; color:var(--text-dim-panel); line-height:1.5;}
+  .cg-pack-buy{flex-shrink:0; padding:8px 14px; font-size:12px; white-space:nowrap;}
+  .cg-pack-buy:disabled{opacity:.4; cursor:default;}
+
+  /* ---------- パック開封演出 ---------- */
+  .cg-reveal-overlay{position:absolute; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; background:#14100ae6; opacity:1; transition:opacity .2s ease;}
+  .cg-reveal-overlay.hidden{opacity:0; pointer-events:none;}
+  .cg-reveal-inner{display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px;}
+  .cg-reveal-label{color:var(--gold-bright); font-size:13px; letter-spacing:4px;}
+  .cg-reveal-card{width:150px; animation:revealPop .5s ease-out;}
+  .cg-reveal-caption{color:var(--text-panel); font-size:13px; text-align:center;}
+  @keyframes revealPop{
+    0%{transform:scale(.4) rotateY(90deg); opacity:0;}
+    60%{transform:scale(1.08) rotateY(0deg); opacity:1;}
+    100%{transform:scale(1) rotateY(0deg);}
+  }
 </style>
 </head>
 <body>
@@ -305,6 +332,29 @@
     </div>
   </section>
 
+  <!-- ============ ショップ画面 ============ -->
+  <section id="screen-shop" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-shop">←</button>
+      <span class="cg-section-title" style="padding:0;">ショップ</span>
+    </div>
+    <div class="cg-shop-currency">
+      <span class="cg-currency">💰 <span id="shop-gold">0</span></span>
+      <span class="cg-currency">💎 <span id="shop-gems">0</span></span>
+    </div>
+    <div id="shop-packs" class="cg-shop-packs"></div>
+  </section>
+
+  <!-- ============ パック開封演出 ============ -->
+  <div id="shop-reveal-overlay" class="cg-reveal-overlay hidden">
+    <div class="cg-reveal-inner">
+      <div class="cg-reveal-label">獲得！</div>
+      <div id="shop-reveal-card" class="cg-reveal-card"></div>
+      <div id="shop-reveal-caption" class="cg-reveal-caption"></div>
+      <button class="cg-btn cg-btn-main" id="shop-reveal-close">閉じる</button>
+    </div>
+  </div>
+
   <!-- ============ ランクマッチ結果画面 ============ -->
   <section id="screen-result" class="cg-screen">
     <div class="cg-result-wrap">
@@ -333,7 +383,7 @@
 <script src="cg-game.js"></script>
 <script>
   // 戻るボタンの共通処理（各back-btnクラスに紐付け）
-  document.querySelectorAll('.cg-back-btn-collection, .cg-back-btn-detail').forEach(b=>{
+  document.querySelectorAll('.cg-back-btn-collection, .cg-back-btn-detail, .cg-back-btn-shop').forEach(b=>{
     b.addEventListener('click', ()=>{ showScreen('home'); renderHome(); });
   });
 </script>

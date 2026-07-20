@@ -455,13 +455,92 @@ function openCollectionScreen(seg) {
   showScreen('collection');
 }
 
+// ---------- ショップ ----------
+const SHOP_PACKS = [
+  { id: 'normal', name: 'ノーマルパック', icon: '📦', currency: 'gold', cost: 300,
+    desc: 'ノーマル〜レアが出やすい基本パック', weights: { normal: 60, rare: 30, epic: 8, legend: 2 } },
+  { id: 'rare', name: 'レアパック', icon: '🎁', currency: 'gems', cost: 10,
+    desc: 'レア以上が確定で出るパック', weights: { normal: 0, rare: 65, epic: 28, legend: 7 } },
+  { id: 'premium', name: 'プレミアムパック', icon: '👑', currency: 'gems', cost: 30,
+    desc: 'エピック以上が確定で出る豪華パック', weights: { normal: 0, rare: 0, epic: 70, legend: 30 } },
+];
+
+function pickWeightedCardId(weights) {
+  const pool = [];
+  Object.keys(weights).forEach(rarity => {
+    const w = weights[rarity];
+    if (w <= 0) return;
+    Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity).forEach(id => pool.push({ id, w }));
+  });
+  if (!pool.length) return Object.keys(CARD_DEFS)[0];
+  const total = pool.reduce((s, p) => s + p.w, 0);
+  let r = Math.random() * total;
+  for (const p of pool) { r -= p.w; if (r <= 0) return p.id; }
+  return pool[pool.length - 1].id;
+}
+
+function renderShop() {
+  document.getElementById('shop-gold').textContent = state.gold.toLocaleString();
+  document.getElementById('shop-gems').textContent = state.gems.toLocaleString();
+  const wrap = document.getElementById('shop-packs');
+  wrap.innerHTML = SHOP_PACKS.map(pack => {
+    const currencyIcon = pack.currency === 'gold' ? '💰' : '💎';
+    const affordable = state[pack.currency] >= pack.cost;
+    return `
+      <div class="cg-pack-card">
+        <div class="cg-pack-icon">${pack.icon}</div>
+        <div class="cg-pack-info">
+          <div class="cg-pack-name">${pack.name}</div>
+          <div class="cg-pack-desc">${pack.desc}</div>
+        </div>
+        <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
+      </div>`;
+  }).join('');
+  wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
+    btn.addEventListener('click', () => buyPack(btn.dataset.pack));
+  });
+}
+
+function buyPack(packId) {
+  const pack = SHOP_PACKS.find(p => p.id === packId);
+  if (!pack || state[pack.currency] < pack.cost) return;
+  state[pack.currency] -= pack.cost;
+
+  const cardId = pickWeightedCardId(pack.weights);
+  const owned = state.cards[cardId];
+  owned.count = (owned.count || 1) + 1;
+  owned.exp += 20;
+  let leveledUp = false;
+  if (owned.exp >= 100) { owned.exp -= 100; owned.level += 1; leveledUp = true; }
+  saveState();
+
+  showReveal(cardId, leveledUp);
+  renderShop();
+  renderHome();
+}
+
+function showReveal(cardId, leveledUp) {
+  const def = CARD_DEFS[cardId];
+  const rarity = RARITY[def.rarity];
+  document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId);
+  document.getElementById('shop-reveal-caption').innerHTML =
+    `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` +
+    (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
+  document.getElementById('shop-reveal-overlay').classList.remove('hidden');
+}
+
+function hideReveal() {
+  document.getElementById('shop-reveal-overlay').classList.add('hidden');
+}
+
 // ---------- 初期化 ----------
 function init() {
   renderHome();
   document.getElementById('nav-battle').addEventListener('click', startBattle);
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
-  document.getElementById('nav-shop').addEventListener('click', () => alert('ショップは準備中です'));
+  document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('nav-mission').addEventListener('click', () => alert('ミッションは準備中です'));
+  document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
   document.querySelectorAll('.cg-back-btn:not(#battle-back-btn)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
