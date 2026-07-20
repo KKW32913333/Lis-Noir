@@ -58,6 +58,10 @@ function defaultState() {
     trophy: 1250,
     dailyProgress: 3, dailyMax: 5,
     winProgress: 1, winMax: 3,
+    totalWins: 0,
+    totalPacksOpened: 0,
+    totalUpgrades: 0,
+    missionsClaimed: {},
     cards: owned,
     deck: Object.keys(CARD_DEFS).slice(0, 12),
   };
@@ -212,6 +216,7 @@ function openCardDetail(id) {
       state.gold -= 400;
       state.cards[id].exp += 20;
       if (state.cards[id].exp >= 100) { state.cards[id].exp = 0; state.cards[id].level += 1; }
+      state.totalUpgrades = (state.totalUpgrades || 0) + 1;
       saveState();
       openCardDetail(id);
       renderHome();
@@ -433,7 +438,11 @@ function showResult(won) {
   state.trophy = Math.max(0, state.trophy + delta);
   document.getElementById('result-trophy-delta').textContent = (delta > 0 ? '+' : '') + delta;
   document.getElementById('result-trophy').textContent = state.trophy.toLocaleString();
-  if (won) { state.gold += 120; state.gems += 10; }
+  if (won) {
+    state.gold += 120; state.gems += 10;
+    state.totalWins = (state.totalWins || 0) + 1;
+    state.winProgress = Math.min(state.winMax, state.winProgress + 1);
+  }
   saveState();
   document.getElementById('result-reward-gold').textContent = won ? '+120' : '+0';
   document.getElementById('result-reward-gem').textContent = won ? '+10' : '+0';
@@ -512,6 +521,7 @@ function buyPack(packId) {
   owned.exp += 20;
   let leveledUp = false;
   if (owned.exp >= 100) { owned.exp -= 100; owned.level += 1; leveledUp = true; }
+  state.totalPacksOpened = (state.totalPacksOpened || 0) + 1;
   saveState();
 
   showReveal(cardId, leveledUp);
@@ -533,13 +543,76 @@ function hideReveal() {
   document.getElementById('shop-reveal-overlay').classList.add('hidden');
 }
 
+// ---------- ミッション ----------
+const MISSIONS = [
+  { id: 'win1', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
+  { id: 'win3', title: '勝利を重ねる', desc: 'バトルに3回勝利する', target: 3, check: s => s.totalWins || 0, reward: { gold: 500 } },
+  { id: 'win10', title: '歴戦の証', desc: 'バトルに10回勝利する', target: 10, check: s => s.totalWins || 0, reward: { gems: 20 } },
+  { id: 'pack1', title: '初めてのパック', desc: 'カードパックを1回開封する', target: 1, check: s => s.totalPacksOpened || 0, reward: { gems: 5 } },
+  { id: 'pack5', title: 'パックコレクター', desc: 'カードパックを5回開封する', target: 5, check: s => s.totalPacksOpened || 0, reward: { gems: 15 } },
+  { id: 'upgrade3', title: 'カードを鍛える', desc: 'カードを3回強化する', target: 3, check: s => s.totalUpgrades || 0, reward: { gold: 400 } },
+  { id: 'deck20', title: 'デッキを整える', desc: 'デッキを20枚以上編成する', target: 20, check: s => s.deck.length, reward: { gold: 300 } },
+];
+
+function formatReward(reward) {
+  const parts = [];
+  if (reward.gold) parts.push(`💰${reward.gold}`);
+  if (reward.gems) parts.push(`💎${reward.gems}`);
+  return parts.join(' ');
+}
+
+function renderMissions() {
+  const wrap = document.getElementById('mission-list');
+  wrap.innerHTML = MISSIONS.map(m => {
+    const progress = Math.min(m.target, m.check(state));
+    const done = progress >= m.target;
+    const claimed = !!state.missionsClaimed[m.id];
+    const pct = Math.round((progress / m.target) * 100);
+    let btnLabel = '未達成';
+    let btnClass = 'cg-mission-claim';
+    let disabled = 'disabled';
+    if (done && !claimed) { btnLabel = '受け取る'; disabled = ''; }
+    if (claimed) { btnLabel = '受取済み'; btnClass += ' claimed'; disabled = 'disabled'; }
+    return `
+      <div class="cg-mission-card ${done ? 'done' : ''}">
+        <div class="cg-mission-top">
+          <div>
+            <div class="cg-mission-title">${m.title}</div>
+            <div class="cg-mission-desc">${m.desc}</div>
+          </div>
+          <div class="cg-mission-reward">${formatReward(m.reward)}</div>
+        </div>
+        <div class="cg-mission-bottom">
+          <div class="cg-mission-progress-track"><div class="cg-mission-progress-fill" style="width:${pct}%"></div></div>
+          <div class="cg-mission-progress-label">${progress}/${m.target}</div>
+          <button class="${btnClass}" data-mission="${m.id}" ${disabled}>${btnLabel}</button>
+        </div>
+      </div>`;
+  }).join('');
+  wrap.querySelectorAll('.cg-mission-claim:not(.claimed):not(:disabled)').forEach(btn => {
+    btn.addEventListener('click', () => claimMission(btn.dataset.mission));
+  });
+}
+
+function claimMission(missionId) {
+  const m = MISSIONS.find(x => x.id === missionId);
+  if (!m || state.missionsClaimed[missionId]) return;
+  if (m.check(state) < m.target) return;
+  state.gold += m.reward.gold || 0;
+  state.gems += m.reward.gems || 0;
+  state.missionsClaimed[missionId] = true;
+  saveState();
+  renderMissions();
+  renderHome();
+}
+
 // ---------- 初期化 ----------
 function init() {
   renderHome();
   document.getElementById('nav-battle').addEventListener('click', startBattle);
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
-  document.getElementById('nav-mission').addEventListener('click', () => alert('ミッションは準備中です'));
+  document.getElementById('nav-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));

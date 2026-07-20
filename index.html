@@ -231,6 +231,22 @@
     60%{transform:scale(1.08) rotateY(0deg); opacity:1;}
     100%{transform:scale(1) rotateY(0deg);}
   }
+
+  /* ---------- ミッション ---------- */
+  .cg-mission-list{display:flex; flex-direction:column; gap:10px; padding:10px 14px 20px;}
+  .cg-mission-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; color:var(--text-panel);}
+  .cg-mission-card.done{border-color:var(--gold-bright);}
+  .cg-mission-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;}
+  .cg-mission-title{font-size:13px; font-weight:700;}
+  .cg-mission-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
+  .cg-mission-reward{font-size:11px; color:var(--gold-bright); white-space:nowrap; flex-shrink:0;}
+  .cg-mission-bottom{display:flex; align-items:center; gap:10px;}
+  .cg-mission-progress-track{flex:1; height:6px; background:#1c150d; border-radius:4px; overflow:hidden;}
+  .cg-mission-progress-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
+  .cg-mission-progress-label{font-size:10px; color:var(--text-dim-panel); white-space:nowrap;}
+  .cg-mission-claim{flex-shrink:0; padding:6px 14px; font-size:11px;}
+  .cg-mission-claim:disabled{opacity:.35; cursor:default;}
+  .cg-mission-claim.claimed{background:var(--bg-panel2); color:var(--text-dim-panel);}
 </style>
 </head>
 <body>
@@ -355,6 +371,15 @@
     </div>
   </div>
 
+  <!-- ============ ミッション画面 ============ -->
+  <section id="screen-mission" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-mission">←</button>
+      <span class="cg-section-title" style="padding:0;">ミッション</span>
+    </div>
+    <div id="mission-list" class="cg-mission-list"></div>
+  </section>
+
   <!-- ============ ランクマッチ結果画面 ============ -->
   <section id="screen-result" class="cg-screen">
     <div class="cg-result-wrap">
@@ -383,7 +408,7 @@
 <script src="cg-game.js"></script>
 <script>
   // 戻るボタンの共通処理（各back-btnクラスに紐付け）
-  document.querySelectorAll('.cg-back-btn-collection, .cg-back-btn-detail, .cg-back-btn-shop').forEach(b=>{
+  document.querySelectorAll('.cg-back-btn-collection, .cg-back-btn-detail, .cg-back-btn-shop, .cg-back-btn-mission').forEach(b=>{
     b.addEventListener('click', ()=>{ showScreen('home'); renderHome(); });
   });
 </script>
