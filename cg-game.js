@@ -1,0 +1,458 @@
+/* =========================================================
+   カードゲーム プロトタイプ ロジック (cg-game.js)
+   ========================================================= */
+
+// ---------- 属性 ----------
+const ELEMENTS = {
+  fire:   { name: '火',  color: '#c2683a', icon: '🔥' },
+  water:  { name: '水',  color: '#5f8fae', icon: '💧' },
+  nature: { name: '自然', color: '#7a9459', icon: '🌿' },
+  light:  { name: '光',  color: '#d9bd7a', icon: '✨' },
+  dark:   { name: '闇',  color: '#7d5fae', icon: '🌙' },
+};
+// 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
+const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
+
+const RARITY = {
+  normal: { name: 'ノーマル', color: '#8f8a7d', glow: 'none' },
+  rare:   { name: 'レア',    color: '#6f93b8', glow: '0 0 10px #6f93b8aa' },
+  epic:   { name: 'エピック', color: '#8a5fc9', glow: '0 0 12px #8a5fc9cc' },
+  legend: { name: 'レジェンド', color: '#e8c877', glow: '0 0 16px #e8c877dd' },
+};
+
+// ---------- カードマスターデータ ----------
+// image: null の間はプレースホルダー（属性色グラデ+絵文字）を表示。
+// 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
+const CARD_DEFS = {
+  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, skill: '攻撃時、敵全体に2ダメージ', image: null, emoji: '🐉' },
+  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  skill: '', image: null, emoji: '👹' },
+  fire_phoenix:   { name: 'フェニックス',     element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  skill: '撃破された時、1/2のHPで復活', image: null, emoji: '🐦' },
+  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  skill: '場に出た時、自分のHPを2回復', image: null, emoji: '🌊' },
+  water_slime:    { name: 'ブルースライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 2,  skill: '', image: null, emoji: '🔵' },
+  water_serpent:  { name: 'シーサーペント',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  skill: '攻撃時、相手カード1体を1ターン行動不能', image: null, emoji: '🐍' },
+  nature_treant:  { name: 'エンシェントツリー', element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  skill: '毎ターン開始時、HPを1回復', image: null, emoji: '🌳' },
+  nature_wolf:    { name: 'フォレストウルフ', element: 'nature', rarity: 'normal', cost: 2, atk: 3, hp: 2,  skill: '', image: null, emoji: '🐺' },
+  nature_panda:   { name: 'ウォーパンダ',     element: 'nature', rarity: 'rare',   cost: 2, atk: 2, hp: 4,  skill: '', image: null, emoji: '🐼' },
+  light_angel:    { name: 'ガーディアンエンジェル', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 6, skill: '場に出た時、味方全体のHPを1回復', image: null, emoji: '👼' },
+  light_unicorn:  { name: 'ホーリーユニコーン', element: 'light', rarity: 'rare',  cost: 3, atk: 3, hp: 5,  skill: '', image: null, emoji: '🦄' },
+  light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  skill: '', image: null, emoji: '🕊️' },
+  dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  skill: '', image: null, emoji: '🐾' },
+  dark_reaper:    { name: 'ソウルリーパー',   element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  skill: '撃破時、相手のコストを1消費させる', image: null, emoji: '💀' },
+  dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 1, skill: '', image: null, emoji: '👻' },
+  rock_giant:     { name: 'ロックジャイアント', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  skill: '', image: null, emoji: '🗿' },
+  storm_bird:     { name: 'サンダーホーク',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  skill: '攻撃時、追加で1ダメージ', image: null, emoji: '🦅' },
+  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, skill: '場に出た時、手札を1枚引く', image: null, emoji: '🦊' },
+};
+
+// ---------- 状態管理 ----------
+const SAVE_KEY = 'cardgame_save_v1';
+
+function defaultState() {
+  const owned = {};
+  Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1 }; });
+  return {
+    playerName: 'プレイヤー',
+    playerLevel: 20,
+    gold: 25300,
+    gems: 1250,
+    trophy: 1250,
+    dailyProgress: 3, dailyMax: 5,
+    winProgress: 1, winMax: 3,
+    cards: owned,
+    deck: Object.keys(CARD_DEFS).slice(0, 12),
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return defaultState();
+    const saved = JSON.parse(raw);
+    const base = defaultState();
+    // バージョンアップ時のマージ漏れ対策: 新カードが旧セーブに無い場合は補完
+    Object.keys(base.cards).forEach(id => {
+      if (!saved.cards || !saved.cards[id]) {
+        saved.cards = saved.cards || {};
+        saved.cards[id] = base.cards[id];
+      }
+    });
+    return Object.assign(base, saved);
+  } catch (e) {
+    console.error('load failed', e);
+    return defaultState();
+  }
+}
+
+function saveState() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+  catch (e) { console.error('save failed', e); }
+}
+
+let state = loadState();
+
+// ---------- カード表示ヘルパー ----------
+function cardArtStyle(def) {
+  const el = ELEMENTS[def.element];
+  return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
+}
+
+function renderCardFace(id, opts) {
+  opts = opts || {};
+  const def = CARD_DEFS[id];
+  if (!def) return '';
+  const rarity = RARITY[def.rarity];
+  const el = ELEMENTS[def.element];
+  const small = opts.small ? ' cg-card-sm' : '';
+  const img = def.image
+    ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
+    : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
+  return `
+    <div class="cg-card${small}" data-id="${id}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+      <div class="cg-card-cost">${def.cost}</div>
+      <div class="cg-card-art">${img}</div>
+      <div class="cg-card-name">${def.name}</div>
+      <div class="cg-card-stats">
+        <span class="cg-stat atk">⚔ ${def.atk}</span>
+        <span class="cg-stat hp">❤ ${def.hp}</span>
+      </div>
+      <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
+    </div>`;
+}
+
+// ---------- 画面切り替え ----------
+const IMMERSIVE_SCREENS = ['battle', 'card-detail', 'result']; // タブバーを隠す画面
+
+function showScreen(name) {
+  document.querySelectorAll('.cg-screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + name);
+  if (el) el.classList.add('active');
+
+  const tabbar = document.getElementById('global-tabbar');
+  if (tabbar) tabbar.classList.toggle('hidden', IMMERSIVE_SCREENS.includes(name));
+}
+
+// ---------- ホーム画面 ----------
+function renderHome() {
+  document.getElementById('home-gold').textContent = state.gold.toLocaleString();
+  document.getElementById('home-gems').textContent = state.gems.toLocaleString();
+  document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
+  document.getElementById('home-level').textContent = 'Lv.' + state.playerLevel;
+  document.getElementById('home-name').textContent = state.playerName;
+  document.getElementById('daily-fill').style.width = (state.dailyProgress / state.dailyMax * 100) + '%';
+  document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
+  document.getElementById('win-fill').style.width = (state.winProgress / state.winMax * 100) + '%';
+  document.getElementById('win-label').textContent = `${state.winProgress}/${state.winMax}`;
+}
+
+// ---------- デッキ編成画面 ----------
+function renderDeck() {
+  const deckEl = document.getElementById('deck-slots');
+  deckEl.innerHTML = state.deck.map(id => renderCardFace(id, { small: true })).join('') +
+    (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
+  document.getElementById('deck-count').textContent = `${state.deck.length}/30`;
+
+  const avgCost = state.deck.length
+    ? (state.deck.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / state.deck.length).toFixed(1)
+    : '0.0';
+  document.getElementById('deck-avgcost').textContent = avgCost;
+
+  const collEl = document.getElementById('collection-list');
+  const owned = Object.keys(state.cards);
+  collEl.innerHTML = owned.map(id => {
+    const inDeck = state.deck.includes(id);
+    return `<div class="cg-coll-item ${inDeck ? 'in-deck' : ''}" data-id="${id}">${renderCardFace(id, { small: true })}</div>`;
+  }).join('');
+
+  collEl.querySelectorAll('.cg-coll-item').forEach(node => {
+    node.addEventListener('click', () => {
+      const id = node.dataset.id;
+      const idx = state.deck.indexOf(id);
+      if (idx >= 0) state.deck.splice(idx, 1);
+      else if (state.deck.length < 30) state.deck.push(id);
+      saveState();
+      renderDeck();
+    });
+  });
+}
+
+// ---------- カード一覧/詳細画面 ----------
+let selectedCardId = null;
+
+function renderCardList() {
+  const listEl = document.getElementById('cardlist-grid');
+  listEl.innerHTML = Object.keys(state.cards).map(id => renderCardFace(id, { small: true })).join('');
+  listEl.querySelectorAll('.cg-card').forEach(node => {
+    node.addEventListener('click', () => openCardDetail(node.dataset.id));
+  });
+}
+
+function openCardDetail(id) {
+  selectedCardId = id;
+  const def = CARD_DEFS[id];
+  const owned = state.cards[id];
+  const el = ELEMENTS[def.element];
+  const rarity = RARITY[def.rarity];
+  document.getElementById('detail-body').innerHTML = `
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${def.name}</div>
+      <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
+      <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${Math.min(100, owned.exp)}%"></div></div>
+      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
+      <div class="cg-detail-stats">
+        <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
+        <div class="cg-detail-stat"><span>攻撃力</span><b>${def.atk}</b></div>
+        <div class="cg-detail-stat"><span>HP</span><b>${def.hp}</b></div>
+      </div>
+      <button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>
+    </div>`;
+  document.getElementById('detail-upgrade-btn').addEventListener('click', () => {
+    if (state.gold >= 400) {
+      state.gold -= 400;
+      state.cards[id].exp += 20;
+      if (state.cards[id].exp >= 100) { state.cards[id].exp = 0; state.cards[id].level += 1; }
+      saveState();
+      openCardDetail(id);
+      renderHome();
+    }
+  });
+  showScreen('card-detail');
+}
+
+// ---------- バトルロジック ----------
+let battle = null;
+
+function newBattleUnit(id) {
+  const def = CARD_DEFS[id];
+  return { id, defId: id, def, curHp: def.hp, canAttack: false, justPlayed: true };
+}
+
+function startBattle() {
+  const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
+  const enemyPool = Object.keys(CARD_DEFS);
+  const enemyDeck = shuffle(enemyPool.slice()).slice(0, 20);
+
+  battle = {
+    turn: 1,
+    activeSide: 'player',
+    playerHp: 30, enemyHp: 30,
+    playerMaxCost: 1, enemyMaxCost: 1,
+    playerCost: 1, enemyCost: 1,
+    playerDeck, enemyDeck,
+    playerHand: playerDeck.splice(0, 4),
+    enemyHand: enemyDeck.splice(0, 4),
+    playerField: [null, null, null, null, null],
+    enemyField: [null, null, null, null, null],
+    selectedHandIdx: null,
+    selectedFieldIdx: null,
+    log: '',
+    over: false,
+  };
+  renderBattle();
+  showScreen('battle');
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function elementMultiplier(atkEl, defEl) {
+  if (ELEMENT_ADVANTAGE[atkEl] === defEl) return 2;   // 有利
+  if (ELEMENT_ADVANTAGE[defEl] === atkEl) return -1;  // 不利
+  return 0;
+}
+
+function skillFlash(text) {
+  const flash = document.getElementById('battle-skill-flash');
+  flash.textContent = text;
+  flash.classList.remove('show');
+  void flash.offsetWidth; // reflow でアニメ再トリガー
+  flash.classList.add('show');
+}
+
+function renderBattle() {
+  if (!battle) return;
+  document.getElementById('battle-turn-timer').textContent = 'ターン ' + battle.turn;
+  document.getElementById('battle-player-hp').textContent = battle.playerHp;
+  document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
+  document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
+  document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
+
+  const enemyFieldEl = document.getElementById('battle-enemy-field');
+  enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => u
+    ? `<div class="cg-field-slot filled" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div></div>`
+    : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`
+  ).join('');
+
+  const playerFieldEl = document.getElementById('battle-player-field');
+  playerFieldEl.innerHTML = battle.playerField.map((u, i) => u
+    ? `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`
+    : `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`
+  ).join('');
+
+  const handEl = document.getElementById('battle-hand');
+  handEl.innerHTML = battle.playerHand.map((id, i) => {
+    const affordable = CARD_DEFS[id].cost <= battle.playerCost;
+    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true })}</div>`;
+  }).join('');
+
+  bindBattleEvents();
+
+  if (battle.playerHp <= 0 || battle.enemyHp <= 0) {
+    battle.over = true;
+    setTimeout(() => showResult(battle.playerHp > 0), 600);
+  }
+}
+
+function bindBattleEvents() {
+  document.querySelectorAll('#battle-hand .cg-hand-card').forEach(node => {
+    node.onclick = () => {
+      const idx = Number(node.dataset.idx);
+      battle.selectedFieldIdx = null;
+      battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
+      renderBattle();
+    };
+  });
+  document.querySelectorAll('#battle-player-field .cg-field-slot').forEach(node => {
+    node.onclick = () => {
+      const idx = Number(node.dataset.idx);
+      if (battle.selectedHandIdx !== null) {
+        playCardFromHand(battle.selectedHandIdx, idx);
+      } else if (battle.playerField[idx] && battle.playerField[idx].canAttack) {
+        battle.selectedHandIdx = null;
+        battle.selectedFieldIdx = (battle.selectedFieldIdx === idx) ? null : idx;
+        renderBattle();
+      }
+    };
+  });
+  document.querySelectorAll('#battle-enemy-field .cg-field-slot').forEach(node => {
+    node.onclick = () => {
+      const idx = Number(node.dataset.idx);
+      if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, idx);
+    };
+  });
+  document.getElementById('battle-enemy-portrait').onclick = () => {
+    if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, null);
+  };
+}
+
+function playCardFromHand(handIdx, fieldIdx) {
+  const id = battle.playerHand[handIdx];
+  const def = CARD_DEFS[id];
+  if (!def || def.cost > battle.playerCost || battle.playerField[fieldIdx]) return;
+  battle.playerCost -= def.cost;
+  battle.playerField[fieldIdx] = newBattleUnit(id);
+  battle.playerHand.splice(handIdx, 1);
+  battle.selectedHandIdx = null;
+  if (def.skill) skillFlash(`${def.name}のスキル！\n${def.skill}`);
+  renderBattle();
+}
+
+function attackTarget(attackerIdx, targetIdx) {
+  const attacker = battle.playerField[attackerIdx];
+  if (!attacker || !attacker.canAttack) return;
+  const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
+  const dmg = Math.max(1, attacker.def.atk + mult);
+
+  if (targetIdx === null) {
+    battle.enemyHp -= dmg;
+  } else {
+    const target = battle.enemyField[targetIdx];
+    target.curHp -= dmg;
+    if (attacker.def.skill && attacker.def.skill.includes('全体')) {
+      battle.enemyField.forEach(u => { if (u) u.curHp -= 2; });
+      skillFlash(`${attacker.def.name}のスキル！\n全ての敵に2ダメージ`);
+    }
+    if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+  }
+  attacker.canAttack = false;
+  battle.selectedFieldIdx = null;
+  battle.enemyField = battle.enemyField.map(u => (u && u.curHp <= 0) ? null : u);
+  renderBattle();
+}
+
+function endTurn() {
+  if (!battle || battle.over) return;
+  // 自分の場のユニットは次ターンから攻撃可能に
+  battle.playerField.forEach(u => { if (u) u.canAttack = true; });
+  enemyTurn();
+}
+
+function enemyTurn() {
+  battle.activeSide = 'enemy';
+  battle.enemyMaxCost = Math.min(10, battle.enemyMaxCost + 1);
+  battle.enemyCost = battle.enemyMaxCost;
+  if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
+
+  // 簡易AI: 出せるカードを場が空いていれば出す
+  battle.enemyHand.slice().forEach(id => {
+    const def = CARD_DEFS[id];
+    const emptyIdx = battle.enemyField.findIndex(s => s === null);
+    if (def.cost <= battle.enemyCost && emptyIdx !== -1) {
+      battle.enemyCost -= def.cost;
+      battle.enemyField[emptyIdx] = newBattleUnit(id);
+      battle.enemyHand.splice(battle.enemyHand.indexOf(id), 1);
+    }
+  });
+  // 攻撃可能な既存ユニットで攻撃
+  battle.enemyField.forEach((u, i) => {
+    if (u && u.canAttack) {
+      const mult = elementMultiplier(u.def.element, 'none');
+      const targetIdx = battle.playerField.findIndex(p => p !== null);
+      if (targetIdx !== -1) {
+        const target = battle.playerField[targetIdx];
+        target.curHp -= Math.max(1, u.def.atk);
+        if (target.curHp <= 0) battle.playerField[targetIdx] = null;
+      } else {
+        battle.playerHp -= u.def.atk;
+      }
+    }
+  });
+  battle.enemyField.forEach(u => { if (u) u.canAttack = true; });
+  battle.playerField = battle.playerField.map(u => (u && u.curHp <= 0) ? null : u);
+
+  // 次は自分のターン
+  battle.turn += 1;
+  battle.activeSide = 'player';
+  battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
+  battle.playerCost = battle.playerMaxCost;
+  if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
+  renderBattle();
+}
+
+function showResult(won) {
+  const el = document.getElementById('result-title');
+  el.textContent = won ? 'WIN' : 'LOSE';
+  el.className = won ? 'cg-result-title win' : 'cg-result-title lose';
+  const delta = won ? 30 : -20;
+  state.trophy = Math.max(0, state.trophy + delta);
+  document.getElementById('result-trophy-delta').textContent = (delta > 0 ? '+' : '') + delta;
+  document.getElementById('result-trophy').textContent = state.trophy.toLocaleString();
+  if (won) { state.gold += 120; state.gems += 10; }
+  saveState();
+  document.getElementById('result-reward-gold').textContent = won ? '+120' : '+0';
+  document.getElementById('result-reward-gem').textContent = won ? '+10' : '+0';
+  showScreen('result');
+}
+
+// ---------- 初期化 ----------
+function init() {
+  renderHome();
+  document.getElementById('nav-battle').addEventListener('click', startBattle);
+  document.getElementById('nav-deck').addEventListener('click', () => { renderDeck(); showScreen('deck'); });
+  document.getElementById('nav-cards').addEventListener('click', () => { renderCardList(); showScreen('cardlist'); });
+  document.getElementById('nav-shop').addEventListener('click', () => alert('ショップは準備中です'));
+  document.getElementById('nav-mission').addEventListener('click', () => alert('ミッションは準備中です'));
+  document.querySelectorAll('.cg-back-btn').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.getElementById('battle-end-turn').addEventListener('click', endTurn);
+  document.getElementById('result-rematch').addEventListener('click', startBattle);
+  document.getElementById('result-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
+  showScreen('home');
+}
+
+document.addEventListener('DOMContentLoaded', init);
