@@ -42,6 +42,17 @@ const CARD_DEFS = {
   rock_giant:     { name: 'ロックジャイアント', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  skill: '', image: null, emoji: '🗿' },
   storm_bird:     { name: 'サンダーホーク',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  skill: '攻撃時、追加で1ダメージ', image: null, emoji: '🦅' },
   crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, skill: '場に出た時、手札を1枚引く', image: null, emoji: '🦊' },
+
+  // ---- スペルカード（即時効果・場には残らない） ----
+  spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: null, emoji: '☄️' },
+  spell_iceshard:   { name: 'アイスシャード',   element: 'water', rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 2 }, skill: '敵1体（または敵本体）に2ダメージ', image: null, emoji: '🧊' },
+  spell_healing:    { name: 'ヒーリングライト', element: 'light', rarity: 'normal', cost: 2, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'heal', value: 5 }, skill: '自分のHPを5回復', image: null, emoji: '💫' },
+  spell_mindsurge:  { name: 'マインドサージ',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 2 }, skill: 'カードを2枚引く', image: null, emoji: '📖' },
+
+  // ---- 装備カード（味方モンスター1体に付与） ----
+  equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: null, emoji: '🗡️' },
+  equip_shield:     { name: 'ガーディアンシールド', element: 'light', rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 0, hp: 4 }, skill: '味方1体のHP+4', image: null, emoji: '🛡️' },
+  equip_dragonmail: { name: 'ドラゴンアーマー',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 3 }, skill: '味方1体の攻撃力+2・HP+3', image: null, emoji: '🎽' },
 };
 
 // ---------- 状態管理 ----------
@@ -100,6 +111,26 @@ function cardArtStyle(def) {
   return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
 }
 
+function cardStatsLine(def) {
+  const type = def.type || 'monster';
+  if (type === 'spell') {
+    const eff = def.effect || {};
+    let label = '効果';
+    if (eff.kind === 'damage') label = `⚡${eff.value}`;
+    else if (eff.kind === 'heal') label = `➕${eff.value}`;
+    else if (eff.kind === 'draw') label = `🃏${eff.value}`;
+    return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
+  }
+  if (type === 'equipment') {
+    const eff = def.effect || {};
+    const parts = [];
+    if (eff.atk) parts.push(`⚔+${eff.atk}`);
+    if (eff.hp) parts.push(`❤+${eff.hp}`);
+    return `<div class="cg-card-stats"><span class="cg-stat equip">装備</span><span class="cg-stat equip-val">${parts.join(' ')}</span></div>`;
+  }
+  return `<div class="cg-card-stats"><span class="cg-stat atk">⚔ ${def.atk}</span><span class="cg-stat hp">❤ ${def.hp}</span></div>`;
+}
+
 function renderCardFace(id, opts) {
   opts = opts || {};
   const def = CARD_DEFS[id];
@@ -115,10 +146,7 @@ function renderCardFace(id, opts) {
       <div class="cg-card-cost">${def.cost}</div>
       <div class="cg-card-art">${img}</div>
       <div class="cg-card-name">${def.name}</div>
-      <div class="cg-card-stats">
-        <span class="cg-stat atk">⚔ ${def.atk}</span>
-        <span class="cg-stat hp">❤ ${def.hp}</span>
-      </div>
+      ${cardStatsLine(def)}
       <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
     </div>`;
 }
@@ -190,6 +218,19 @@ function renderCardList() {
   });
 }
 
+function detailStatsBlock(def) {
+  const type = def.type || 'monster';
+  if (type === 'monster') {
+    return `
+      <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
+      <div class="cg-detail-stat"><span>攻撃力</span><b>${def.atk}</b></div>
+      <div class="cg-detail-stat"><span>HP</span><b>${def.hp}</b></div>`;
+  }
+  return `
+    <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
+    <div class="cg-detail-stat"><span>種別</span><b>${type === 'spell' ? 'スペル' : '装備'}</b></div>`;
+}
+
 function openCardDetail(id) {
   selectedCardId = id;
   const def = CARD_DEFS[id];
@@ -205,9 +246,7 @@ function openCardDetail(id) {
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
-        <div class="cg-detail-stat"><span>攻撃力</span><b>${def.atk}</b></div>
-        <div class="cg-detail-stat"><span>HP</span><b>${def.hp}</b></div>
+        ${detailStatsBlock(def)}
       </div>
       <button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>
     </div>`;
@@ -230,7 +269,7 @@ let battle = null;
 
 function newBattleUnit(id) {
   const def = CARD_DEFS[id];
-  return { id, defId: id, def, curHp: def.hp, canAttack: false, justPlayed: true };
+  return { id, defId: id, def, curHp: def.hp, atkBonus: 0, hpBonus: 0, canAttack: false, justPlayed: true };
 }
 
 function startBattle() {
@@ -318,7 +357,15 @@ function bindBattleEvents() {
   document.querySelectorAll('#battle-hand .cg-hand-card').forEach(node => {
     node.onclick = () => {
       const idx = Number(node.dataset.idx);
+      const id = battle.playerHand[idx];
+      const def = CARD_DEFS[id];
+      if (!def || def.cost > battle.playerCost) return;
+      const type = def.type || 'monster';
       battle.selectedFieldIdx = null;
+      if (type === 'spell' && (def.target || 'none') === 'none') {
+        castSpell(idx, null);
+        return;
+      }
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
       renderBattle();
     };
@@ -327,8 +374,17 @@ function bindBattleEvents() {
     node.onclick = () => {
       const idx = Number(node.dataset.idx);
       if (battle.selectedHandIdx !== null) {
-        playCardFromHand(battle.selectedHandIdx, idx);
-      } else if (battle.playerField[idx] && battle.playerField[idx].canAttack) {
+        const id = battle.playerHand[battle.selectedHandIdx];
+        const def = CARD_DEFS[id];
+        const type = def.type || 'monster';
+        if (type === 'monster') {
+          playCardFromHand(battle.selectedHandIdx, idx);
+        } else if (type === 'equipment' && def.target === 'friendly' && battle.playerField[idx]) {
+          equipCardFromHand(battle.selectedHandIdx, idx);
+        }
+        return;
+      }
+      if (battle.playerField[idx] && battle.playerField[idx].canAttack) {
         battle.selectedHandIdx = null;
         battle.selectedFieldIdx = (battle.selectedFieldIdx === idx) ? null : idx;
         renderBattle();
@@ -338,10 +394,26 @@ function bindBattleEvents() {
   document.querySelectorAll('#battle-enemy-field .cg-field-slot').forEach(node => {
     node.onclick = () => {
       const idx = Number(node.dataset.idx);
+      if (battle.selectedHandIdx !== null) {
+        const id = battle.playerHand[battle.selectedHandIdx];
+        const def = CARD_DEFS[id];
+        if ((def.type || 'monster') === 'spell' && def.target === 'enemy' && battle.enemyField[idx]) {
+          castSpell(battle.selectedHandIdx, idx);
+        }
+        return;
+      }
       if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, idx);
     };
   });
   document.getElementById('battle-enemy-portrait').onclick = () => {
+    if (battle.selectedHandIdx !== null) {
+      const id = battle.playerHand[battle.selectedHandIdx];
+      const def = CARD_DEFS[id];
+      if ((def.type || 'monster') === 'spell' && def.target === 'enemy') {
+        castSpell(battle.selectedHandIdx, null);
+      }
+      return;
+    }
     if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, null);
   };
 }
@@ -358,11 +430,59 @@ function playCardFromHand(handIdx, fieldIdx) {
   renderBattle();
 }
 
+function castSpell(handIdx, targetIdx) {
+  const id = battle.playerHand[handIdx];
+  const def = CARD_DEFS[id];
+  if (!def || def.cost > battle.playerCost) return;
+  battle.playerCost -= def.cost;
+  battle.playerHand.splice(handIdx, 1);
+  battle.selectedHandIdx = null;
+
+  const eff = def.effect || {};
+  if (eff.kind === 'damage') {
+    const dmg = eff.value || 0;
+    if (targetIdx === null) {
+      battle.enemyHp -= dmg;
+    } else {
+      const target = battle.enemyField[targetIdx];
+      if (target) {
+        target.curHp -= dmg;
+        if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+      }
+    }
+  } else if (eff.kind === 'heal') {
+    battle.playerHp = Math.min(30, battle.playerHp + (eff.value || 0));
+  } else if (eff.kind === 'draw') {
+    for (let i = 0; i < (eff.value || 0); i++) {
+      if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
+    }
+  }
+  if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
+  battle.enemyField = battle.enemyField.map(u => (u && u.curHp <= 0) ? null : u);
+  renderBattle();
+}
+
+function equipCardFromHand(handIdx, fieldIdx) {
+  const id = battle.playerHand[handIdx];
+  const def = CARD_DEFS[id];
+  const unit = battle.playerField[fieldIdx];
+  if (!def || !unit || def.cost > battle.playerCost) return;
+  battle.playerCost -= def.cost;
+  const eff = def.effect || {};
+  unit.atkBonus = (unit.atkBonus || 0) + (eff.atk || 0);
+  unit.hpBonus = (unit.hpBonus || 0) + (eff.hp || 0);
+  unit.curHp += (eff.hp || 0);
+  battle.playerHand.splice(handIdx, 1);
+  battle.selectedHandIdx = null;
+  if (def.skill) skillFlash(`${def.name}を装備！\n${def.skill}`);
+  renderBattle();
+}
+
 function attackTarget(attackerIdx, targetIdx) {
   const attacker = battle.playerField[attackerIdx];
   if (!attacker || !attacker.canAttack) return;
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
-  const dmg = Math.max(1, attacker.def.atk + mult);
+  const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + mult);
 
   if (targetIdx === null) {
     battle.enemyHp -= dmg;
@@ -394,11 +514,11 @@ function enemyTurn() {
   battle.enemyCost = battle.enemyMaxCost;
   if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
 
-  // 簡易AI: 出せるカードを場が空いていれば出す
+  // 簡易AI: 出せるモンスターカードを場が空いていれば出す（スペル/装備はAI側では未使用）
   battle.enemyHand.slice().forEach(id => {
     const def = CARD_DEFS[id];
     const emptyIdx = battle.enemyField.findIndex(s => s === null);
-    if (def.cost <= battle.enemyCost && emptyIdx !== -1) {
+    if ((def.type || 'monster') === 'monster' && def.cost <= battle.enemyCost && emptyIdx !== -1) {
       battle.enemyCost -= def.cost;
       battle.enemyField[emptyIdx] = newBattleUnit(id);
       battle.enemyHand.splice(battle.enemyHand.indexOf(id), 1);
