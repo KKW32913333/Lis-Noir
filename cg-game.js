@@ -843,15 +843,15 @@ function bindBattleEvents() {
 let longPressFired = false;
 function bindLongPress(node, onLongPress) {
   let timer = null;
-  const start = () => {
+  const start = (e) => {
     longPressFired = false;
     timer = setTimeout(() => { longPressFired = true; onLongPress(); }, 450);
   };
   const cancel = () => { if (timer) clearTimeout(timer); };
   node.addEventListener('pointerdown', start);
   node.addEventListener('pointerup', cancel);
-  node.addEventListener('pointerleave', cancel);
   node.addEventListener('pointercancel', cancel);
+  node.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 function showCardInfo(unit) {
