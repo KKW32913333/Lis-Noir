@@ -115,9 +115,100 @@ function loadState() {
 function saveState() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
   catch (e) { console.error('save failed', e); }
+  scheduleCloudSync();
 }
 
 let state = loadState();
+
+// ---------- クラウド保存（Firebase） ----------
+let cloudSyncTimer = null;
+function scheduleCloudSync() {
+  if (!window.LisNoirCloud || !window.LisNoirCloud.getUser()) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => {
+    window.LisNoirCloud.saveCloud(state)
+      .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
+      .catch((err) => { console.error('cloud save failed', err); setCloudSyncStatus('⚠️ 同期に失敗しました'); });
+  }, 1500);
+}
+
+function setCloudSyncStatus(text) {
+  const el = document.getElementById('cloud-sync-status');
+  if (el) el.textContent = text;
+}
+
+function refreshCloudAuthUI(user) {
+  const loggedOut = document.getElementById('cloud-section-loggedout');
+  const loggedIn = document.getElementById('cloud-section-loggedin');
+  if (!loggedOut || !loggedIn) return;
+  if (user) {
+    loggedOut.classList.add('hidden');
+    loggedIn.classList.remove('hidden');
+    document.getElementById('cloud-user-email').textContent = user.email || '';
+  } else {
+    loggedOut.classList.remove('hidden');
+    loggedIn.classList.add('hidden');
+  }
+}
+
+async function handleSignUp() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const status = document.getElementById('auth-status');
+  if (!email || !password) { status.textContent = 'メールアドレスとパスワードを入力してください。'; return; }
+  status.textContent = '登録中…';
+  try {
+    await window.LisNoirCloud.signUp(email, password);
+    await window.LisNoirCloud.saveCloud(state); // 新規登録時は今の進行状況をそのままクラウドへ
+    status.textContent = '登録が完了しました！';
+  } catch (e) {
+    status.textContent = e.message || '登録に失敗しました。';
+  }
+}
+
+async function handleLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const status = document.getElementById('auth-status');
+  if (!email || !password) { status.textContent = 'メールアドレスとパスワードを入力してください。'; return; }
+  status.textContent = 'ログイン中…';
+  try {
+    await window.LisNoirCloud.signIn(email, password);
+    status.textContent = 'ログインしました。クラウドのデータを確認しています…';
+    const cloudData = await window.LisNoirCloud.loadCloud();
+    if (cloudData) {
+      const useCloud = confirm('クラウドにセーブデータが見つかりました。読み込みますか？\n\nOK：クラウドのデータを読み込む（この端末のデータは上書きされます）\nキャンセル：この端末のデータのままクラウドに保存する');
+      if (useCloud) {
+        const base = defaultState();
+        Object.keys(base.cards).forEach((id) => {
+          if (!cloudData.cards || !cloudData.cards[id]) {
+            cloudData.cards = cloudData.cards || {};
+            cloudData.cards[id] = base.cards[id];
+          } else if (cloudData.cards[id].evolved === undefined) {
+            cloudData.cards[id].evolved = false;
+          }
+        });
+        state = Object.assign(base, cloudData);
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        renderHome();
+        status.textContent = 'クラウドのデータを読み込みました！';
+      } else {
+        await window.LisNoirCloud.saveCloud(state);
+        status.textContent = 'この端末のデータをクラウドに保存しました。';
+      }
+    } else {
+      await window.LisNoirCloud.saveCloud(state);
+      status.textContent = 'ログインしました。クラウド保存を開始しました。';
+    }
+  } catch (e) {
+    status.textContent = e.message || 'ログインに失敗しました。';
+  }
+}
+
+async function handleLogout() {
+  if (!confirm('ログアウトしますか？（このアカウントで再ログインすれば、いつでも続きから再開できます）')) return;
+  await window.LisNoirCloud.signOutUser();
+}
 
 // ---------- バックアップコード（設定画面） ----------
 function encodeSaveData(obj) {
@@ -132,6 +223,10 @@ function openSettings() {
   document.getElementById('backup-code-in').value = '';
   document.getElementById('backup-copy-status').textContent = '';
   document.getElementById('backup-restore-status').textContent = '';
+  document.getElementById('auth-status').textContent = '';
+  if (window.LisNoirCloud && window.LisNoirCloud.getUser()) {
+    setCloudSyncStatus('同期状態を確認中…');
+  }
   document.getElementById('settings-overlay').classList.remove('hidden');
 }
 
@@ -1322,6 +1417,22 @@ function init() {
   });
   document.getElementById('backup-copy-btn').addEventListener('click', copyBackupCode);
   document.getElementById('backup-restore-btn').addEventListener('click', restoreBackupCode);
+  document.getElementById('auth-signup-btn').addEventListener('click', handleSignUp);
+  document.getElementById('auth-login-btn').addEventListener('click', handleLogin);
+  document.getElementById('cloud-logout-btn').addEventListener('click', handleLogout);
+  document.getElementById('cloud-sync-now-btn').addEventListener('click', () => {
+    if (!window.LisNoirCloud || !window.LisNoirCloud.getUser()) return;
+    setCloudSyncStatus('同期中…');
+    window.LisNoirCloud.saveCloud(state)
+      .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
+      .catch(() => setCloudSyncStatus('⚠️ 同期に失敗しました'));
+  });
+  if (window.LisNoirCloud) {
+    window.LisNoirCloud.onAuthChange((user) => {
+      refreshCloudAuthUI(user);
+      if (user) setCloudSyncStatus('☁️ ログイン中（' + user.email + '）');
+    });
+  }
   showScreen('home');
 }
 

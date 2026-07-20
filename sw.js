@@ -3,13 +3,14 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v12';
+const CACHE_NAME = 'lisnoir-cache-v13';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
   './',
   'index.html',
   'cg-game.js',
+  'firebase-init.js',
   'manifest.json',
   'hero-bg.jpg',
   'card-fire-dragon.png',
