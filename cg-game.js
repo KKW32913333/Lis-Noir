@@ -14,7 +14,7 @@ const ELEMENTS = {
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
 
 const RARITY = {
-  normal: { name: 'ノーマル', color: '#75767f', glow: 'none' },
+  normal: { name: 'ノーマル', color: '#63646c', glow: 'none' },
   rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
   epic:   { name: 'エピック', color: '#6b4fa0', glow: '0 0 12px #8a5fc966' },
   legend: { name: 'レジェンド', color: '#a8853a', glow: '0 0 16px #e8c87799' },

@@ -18,15 +18,15 @@
     --bg-panel:#FFFFFF;
     --bg-panel2:#F5F5F8;
     --gold:#6B4FA0;
-    --gold-bright:#8B6FC4;
+    --gold-bright:#7857A8;
     --gold-soft:#6B4FA033;
     --purple:#9098A8;
     --wine:#A23347;
     --cyan:#7A93A8;
     --text:#23242B;
     --text-panel:#23242B;
-    --text-dim:#6b6d78;
-    --text-dim-panel:#6b6d78;
+    --text-dim:#54565f;
+    --text-dim-panel:#54565f;
     --hp-red:#c1495e;
     --hairline:#d5d8de;
     --hairline-panel:#d5d8de;
@@ -90,10 +90,11 @@
   .cg-card-art{flex:1; position:relative; overflow:hidden;}
   .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:28px;}
   .cg-card-img{width:100%; height:100%; object-fit:cover;}
-  .cg-card-name{font-size:10px; text-align:center; padding:2px 2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cg-card-name{font-size:10.5px; font-weight:600; text-align:center; padding:3px 3px 0; line-height:1.2;
+    white-space:normal; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-all;}
   .cg-card-stats{display:flex; justify-content:space-between; padding:2px 5px 4px; font-size:10px;}
-  .cg-card-stats .atk{color:#a85a2e;}
-  .cg-card-stats .hp{color:#4f7a3f;}
+  .cg-card-stats .atk{color:#95491f;}
+  .cg-card-stats .hp{color:#3f6b30;}
   .cg-card-stats .spell{color:var(--purple);}
   .cg-card-stats .spell-val{color:var(--gold-bright);}
   .cg-card-stats .equip{color:var(--text-dim-panel);}
@@ -112,7 +113,7 @@
   .cg-segment{flex:1; display:flex; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:20px; padding:3px; margin-left:6px;}
   .cg-seg-btn{flex:1; border:none; background:none; color:var(--text-dim-panel); font-family:inherit; font-size:12px;
     padding:8px 4px; border-radius:16px; cursor:pointer;}
-  .cg-seg-btn.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#2a1a00; font-weight:700;}
+  .cg-seg-btn.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; font-weight:700;}
 
   /* ---------- Card list / detail ---------- */
   #cardlist-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:14px; flex:1;}
@@ -133,7 +134,7 @@
   .cg-btn{border:1px solid var(--hairline-panel); border-radius:20px; padding:10px 22px; font-size:13px; font-weight:700; cursor:pointer;
     background:var(--bg-panel2); color:var(--text-panel); transition:transform .1s;}
   .cg-btn:active{transform:scale(.96);}
-  .cg-btn-main{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#2a1a00; border-color:var(--gold-bright);
+  .cg-btn-main{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; border-color:var(--gold-bright);
     box-shadow:0 3px 10px #e0a83f4d;}
   .cg-back-btn{background:none; border:none; color:var(--text); font-size:18px; cursor:pointer; padding:10px 14px;}
   .cg-top-row{display:flex; align-items:center; justify-content:space-between; padding:6px 4px;}
@@ -403,7 +404,7 @@
   .cg-featured-mission-row{display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .cg-featured-mission-title{font-size:13px; font-weight:700; color:var(--text-panel);}
   .cg-featured-mission-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
-  .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:#2a1a00; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+  .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:#FFFFFF; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
     padding:6px 12px; border-radius:14px; white-space:nowrap;}
 
   /* ---------- デッキ編成UX改善 ---------- */
@@ -413,7 +414,7 @@
   .cg-filter-tabs{display:flex; gap:6px; padding:8px 14px 0; overflow-x:auto;}
   .cg-filter-tab{flex-shrink:0; border:1px solid var(--hairline-panel); background:var(--bg-panel2); color:var(--text-dim-panel);
     font-family:inherit; font-size:11px; padding:6px 12px; border-radius:14px; cursor:pointer;}
-  .cg-filter-tab.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#2a1a00; border-color:var(--gold-bright); font-weight:700;}
+  .cg-filter-tab.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; border-color:var(--gold-bright); font-weight:700;}
   .cg-coll-item{position:relative;}
   .cg-coll-item.in-deck .cg-card{border-color:var(--gold-bright) !important;}
   .cg-coll-item.in-deck::after{content:'✓ 編成中'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
