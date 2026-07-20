@@ -174,6 +174,8 @@ function renderCardFace(id, opts) {
 // ---------- 画面切り替え ----------
 const IMMERSIVE_SCREENS = ['battle', 'card-detail', 'result']; // タブバーを隠す画面
 
+const SCREEN_TAB_MAP = { home: 'nav-home', collection: 'nav-cards', stage: 'nav-battle', shop: 'nav-shop', mission: 'nav-mission' };
+
 function showScreen(name) {
   document.querySelectorAll('.cg-screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + name);
@@ -181,6 +183,13 @@ function showScreen(name) {
 
   const tabbar = document.getElementById('global-tabbar');
   if (tabbar) tabbar.classList.toggle('hidden', IMMERSIVE_SCREENS.includes(name));
+
+  document.querySelectorAll('.cg-tab').forEach(t => t.classList.remove('active'));
+  const activeTabId = SCREEN_TAB_MAP[name];
+  if (activeTabId) {
+    const tab = document.getElementById(activeTabId);
+    if (tab) tab.classList.add('active');
+  }
 }
 
 // ---------- ホーム画面 ----------
@@ -1027,6 +1036,7 @@ function claimMission(missionId) {
 // ---------- 初期化 ----------
 function init() {
   renderHome();
+  document.getElementById('nav-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
   document.getElementById('nav-battle').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });

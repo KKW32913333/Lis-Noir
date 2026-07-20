@@ -221,6 +221,8 @@
   .cg-tab .ic{font-size:20px;}
   .cg-tab .lb{font-size:10px;}
   .cg-tab:active{opacity:.7;}
+  .cg-tab.active:not(.cg-tab-main){color:var(--gold-bright);}
+  .cg-tab.active:not(.cg-tab-main) .lb{font-weight:700;}
   .cg-tab-main{position:relative; margin-top:-26px;}
   .cg-tab-main-btn{width:52px; height:52px; border-radius:50%;
     background:linear-gradient(180deg,var(--gold-bright),var(--gold)); border:3px solid var(--bg-panel);
@@ -617,7 +619,8 @@
   <!-- ============ 下部固定タブバー（モバイル向け） ============ -->
   <nav id="global-tabbar" class="cg-tabbar">
     <div class="cg-tab" id="nav-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
-    <div class="cg-tab cg-tab-main" id="nav-battle"><span class="cg-tab-main-btn"><span class="ic">⚔️</span></span><span class="lb">バトル</span></div>
+    <div class="cg-tab" id="nav-battle"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
+    <div class="cg-tab cg-tab-main" id="nav-home"><span class="cg-tab-main-btn"><span class="ic">🏠</span></span><span class="lb">ホーム</span></div>
     <div class="cg-tab" id="nav-shop"><span class="ic">🏪</span><span class="lb">ショップ</span></div>
     <div class="cg-tab" id="nav-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
   </nav>
