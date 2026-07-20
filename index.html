@@ -392,6 +392,7 @@
   .cg-rankcard-sub{font-size:10px; color:var(--text-dim-panel); margin-top:3px; text-align:right;}
 
   .cg-quick-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:0 14px 14px;}
+  .cg-quick-grid-5{grid-template-columns:repeat(5,minmax(0,1fr));}
   .cg-quick-btn{background:linear-gradient(180deg,var(--bg-panel2),var(--bg-panel)); border:1px solid var(--hairline-panel);
     border-radius:12px; padding:12px 4px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 2px 8px #00000033;}
   .cg-quick-btn:active{transform:scale(.94);}
@@ -406,6 +407,53 @@
   .cg-featured-mission-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
   .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:#FFFFFF; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
     padding:6px 12px; border-radius:14px; white-space:nowrap;}
+
+  /* ---------- ドラゴン育成（ホームの概要カード） ---------- */
+  .cg-dragon-summary{display:flex; align-items:center; gap:12px; margin:0 14px 14px; background:var(--bg-panel);
+    border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; box-shadow:0 3px 10px #00000033; cursor:pointer;}
+  .cg-dragon-summary-emoji{font-size:32px; flex-shrink:0;}
+  .cg-dragon-summary-info{flex:1; min-width:0;}
+  .cg-dragon-summary-label{font-size:10px; color:var(--text-dim-panel);}
+  .cg-dragon-summary-stage{font-size:13px; font-weight:700; color:var(--text-panel); margin:1px 0 4px;}
+  .cg-dragon-summary-track{height:5px; background:#e4e6ea; border-radius:3px; overflow:hidden;}
+  .cg-dragon-summary-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
+  .cg-dragon-summary-cta{flex-shrink:0; font-size:11px; color:#FFFFFF; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    padding:6px 12px; border-radius:14px; white-space:nowrap;}
+
+  /* ---------- ドラゴン育成（専用画面） ---------- */
+  .cg-dragon-hero{display:flex; flex-direction:column; align-items:center; padding:20px 14px 6px;}
+  .cg-dragon-emoji{font-size:76px; line-height:1; filter:drop-shadow(0 4px 10px #00000033);}
+  .cg-dragon-stage-name{font-size:15px; font-weight:700; color:var(--text); margin-top:6px;}
+  .cg-dragon-level{font-size:12px; color:var(--text-dim);}
+  .cg-dragon-expwrap{padding:10px 20px 4px;}
+  .cg-dragon-exp-track{height:8px; background:#e4e6ea; border-radius:5px; overflow:hidden; border:1px solid var(--hairline);}
+  .cg-dragon-exp-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
+  .cg-dragon-exp-label{font-size:10px; color:var(--text-dim); text-align:right; margin-top:3px;}
+  .cg-dragon-bonus{margin:10px 14px; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px; padding:10px 14px;}
+  .cg-dragon-bonus-title{font-size:10px; color:var(--gold-bright); margin-bottom:3px;}
+  .cg-dragon-bonus-desc{font-size:12px; color:var(--text-panel);}
+  .cg-dragon-feed-btn{display:block; width:calc(100% - 28px); margin:4px 14px 16px;}
+  .cg-dragon-stages{margin:0 14px 20px;}
+  .cg-dragon-stages-title{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
+  .cg-dragon-stages-list{display:flex; flex-direction:column; gap:6px;}
+  .cg-dragon-stage-row{display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px;
+    background:var(--bg-panel); border:1px solid var(--hairline-panel); font-size:12px; color:var(--text-panel);}
+  .cg-dragon-stage-row.current{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-soft);}
+  .cg-dragon-stage-row .em{font-size:22px; flex-shrink:0;}
+  .cg-dragon-stage-row .lv{margin-left:auto; font-size:10px; color:var(--text-dim);}
+
+  /* ---------- ストーリー会話 ---------- */
+  .cg-story-overlay{position:absolute; inset:0; z-index:70; display:flex; align-items:flex-end; justify-content:center;
+    background:#00000055; opacity:1; transition:opacity .2s ease; padding:16px;}
+  .cg-story-overlay.hidden{opacity:0; pointer-events:none;}
+  .cg-story-box{display:flex; align-items:flex-start; gap:12px; background:var(--bg-panel); border:1px solid var(--gold);
+    border-radius:16px; padding:14px; width:100%; max-width:480px; box-shadow:0 10px 30px #00000055; cursor:pointer;}
+  .cg-story-portrait{width:52px; height:52px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:26px; background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); border:2px solid var(--gold-bright);}
+  .cg-story-textwrap{flex:1; min-width:0;}
+  .cg-story-speaker{font-size:12px; font-weight:700; color:var(--gold-bright); margin-bottom:4px;}
+  .cg-story-text{font-size:13px; color:var(--text-panel); line-height:1.6;}
+  .cg-story-hint{font-size:10px; color:var(--text-dim-panel); text-align:right; margin-top:8px;}
 
   /* ---------- デッキ編成UX改善 ---------- */
   .cg-deck-hint{font-size:10px; color:var(--text-dim); padding:0 14px 6px;}
@@ -463,11 +511,22 @@
       </div>
     </div>
 
-    <div class="cg-quick-grid">
+    <div class="cg-quick-grid cg-quick-grid-5">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">ステージ</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
       <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ショップ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
+      <div class="cg-quick-btn" id="quick-dragon"><span class="ic">🐉</span><span class="lb">ドラゴン</span></div>
+    </div>
+
+    <div id="dragon-summary" class="cg-dragon-summary">
+      <div id="dragon-summary-emoji" class="cg-dragon-summary-emoji">🥚</div>
+      <div class="cg-dragon-summary-info">
+        <div class="cg-dragon-summary-label">相棒ドラゴン</div>
+        <div id="dragon-summary-stage" class="cg-dragon-summary-stage">卵・Lv.1</div>
+        <div class="cg-dragon-summary-track"><div id="dragon-summary-fill" class="cg-dragon-summary-fill"></div></div>
+      </div>
+      <div class="cg-dragon-summary-cta">育成する</div>
     </div>
 
     <div id="featured-mission" class="cg-featured-mission"></div>
@@ -644,6 +703,18 @@
     </div>
   </div>
 
+  <!-- ============ ストーリー会話 ============ -->
+  <div id="story-overlay" class="cg-story-overlay hidden">
+    <div class="cg-story-box">
+      <div id="story-portrait" class="cg-story-portrait">🧙</div>
+      <div class="cg-story-textwrap">
+        <div id="story-speaker" class="cg-story-speaker"></div>
+        <div id="story-text" class="cg-story-text"></div>
+        <div class="cg-story-hint">タップして次へ ▸</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ ミッション画面 ============ -->
   <section id="screen-mission" class="cg-screen cg-scroll-pad">
     <div class="cg-top-row">
@@ -651,6 +722,32 @@
       <span class="cg-section-title" style="padding:0;">ミッション</span>
     </div>
     <div id="mission-list" class="cg-mission-list"></div>
+  </section>
+
+  <!-- ============ ドラゴン育成画面 ============ -->
+  <section id="screen-dragon" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-dragon">←</button>
+      <span class="cg-section-title" style="padding:0;">ドラゴン育成</span>
+    </div>
+    <div class="cg-dragon-hero">
+      <div id="dragon-emoji" class="cg-dragon-emoji">🥚</div>
+      <div id="dragon-stage-name" class="cg-dragon-stage-name">卵</div>
+      <div id="dragon-level" class="cg-dragon-level">Lv.1</div>
+    </div>
+    <div class="cg-dragon-expwrap">
+      <div class="cg-dragon-exp-track"><div id="dragon-exp-fill" class="cg-dragon-exp-fill"></div></div>
+      <div id="dragon-exp-label" class="cg-dragon-exp-label">0/100</div>
+    </div>
+    <div class="cg-dragon-bonus">
+      <div class="cg-dragon-bonus-title">育成による効果</div>
+      <div id="dragon-bonus-desc" class="cg-dragon-bonus-desc">バトル開始時の自分のHPが +0</div>
+    </div>
+    <button class="cg-btn cg-btn-main cg-dragon-feed-btn" id="dragon-feed-btn">🍖 エサをあげる（💰100）</button>
+    <div class="cg-dragon-stages">
+      <div class="cg-dragon-stages-title">成長段階</div>
+      <div id="dragon-stages-list" class="cg-dragon-stages-list"></div>
+    </div>
   </section>
 
   <!-- ============ ランクマッチ結果画面 ============ -->

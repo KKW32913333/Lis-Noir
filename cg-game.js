@@ -83,6 +83,7 @@ function defaultState() {
     totalUpgrades: 0,
     stageProgress: 1,
     hasSeenBattleHelp: false,
+    dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
     cards: owned,
     deck: Object.keys(CARD_DEFS).slice(0, 12),
@@ -231,6 +232,7 @@ function renderHome() {
 
   // 注目ミッション（未達成のうち一番進捗が近いもの／全達成なら受け取り可能なものを優先）
   renderFeaturedMission();
+  renderDragonSummary();
 }
 
 function renderFeaturedMission() {
@@ -256,7 +258,78 @@ function renderFeaturedMission() {
   wrap.onclick = () => { renderMissions(); showScreen('mission'); };
 }
 
-// ---------- デッキ編成画面 ----------
+// ---------- ドラゴン育成 ----------
+const DRAGON_STAGES = [
+  { minLevel: 1,  name: '卵',       emoji: '🥚' },
+  { minLevel: 3,  name: '幼竜',     emoji: '🐣' },
+  { minLevel: 7,  name: '若竜',     emoji: '🐲' },
+  { minLevel: 13, name: '成竜',     emoji: '🐉' },
+  { minLevel: 20, name: '古代竜',   emoji: '✨🐉' },
+];
+const DRAGON_EXP_PER_LEVEL = 100;
+const DRAGON_FEED_EXP = 25;
+
+function getDragonStageInfo(level) {
+  let stage = DRAGON_STAGES[0];
+  for (const s of DRAGON_STAGES) { if (level >= s.minLevel) stage = s; }
+  return stage;
+}
+
+function getDragonBonusHp() {
+  return Math.floor((state.dragon.level || 1) / 2);
+}
+
+function dragonFeedCost() {
+  return 100 + (state.dragon.level - 1) * 20;
+}
+
+function gainDragonExp(amount) {
+  const d = state.dragon;
+  d.exp += amount;
+  while (d.exp >= DRAGON_EXP_PER_LEVEL) {
+    d.exp -= DRAGON_EXP_PER_LEVEL;
+    d.level += 1;
+  }
+  saveState();
+}
+
+function feedDragon() {
+  const cost = dragonFeedCost();
+  if (state.gold < cost) return;
+  state.gold -= cost;
+  gainDragonExp(DRAGON_FEED_EXP);
+  renderDragon();
+  renderHome();
+}
+
+function renderDragonSummary() {
+  const stage = getDragonStageInfo(state.dragon.level);
+  document.getElementById('dragon-summary-emoji').textContent = stage.emoji;
+  document.getElementById('dragon-summary-stage').textContent = `${stage.name}・Lv.${state.dragon.level}`;
+  document.getElementById('dragon-summary-fill').style.width = Math.min(100, (state.dragon.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
+}
+
+function renderDragon() {
+  const d = state.dragon;
+  const stage = getDragonStageInfo(d.level);
+  document.getElementById('dragon-emoji').textContent = stage.emoji;
+  document.getElementById('dragon-stage-name').textContent = stage.name;
+  document.getElementById('dragon-level').textContent = `Lv.${d.level}`;
+  document.getElementById('dragon-exp-fill').style.width = Math.min(100, (d.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
+  document.getElementById('dragon-exp-label').textContent = `${d.exp}/${DRAGON_EXP_PER_LEVEL}`;
+  document.getElementById('dragon-bonus-desc').textContent = `バトル開始時の自分のHPが +${getDragonBonusHp()}（現在 ${30 + getDragonBonusHp()}）`;
+  document.getElementById('dragon-feed-btn').textContent = `🍖 エサをあげる（💰${dragonFeedCost()}）`;
+
+  const listEl = document.getElementById('dragon-stages-list');
+  listEl.innerHTML = DRAGON_STAGES.map(s => {
+    const current = stage.name === s.name;
+    return `<div class="cg-dragon-stage-row ${current ? 'current' : ''}">
+      <span class="em">${s.emoji}</span><span>${s.name}</span><span class="lv">Lv.${s.minLevel}〜</span>
+    </div>`;
+  }).join('');
+}
+
+
 let collectionFilter = 'all';
 
 function renderDeck() {
@@ -414,16 +487,63 @@ let battle = null;
 
 const STAGES = [
   { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16,
-    weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20 },
+    weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '霧深い森の入り口。若きモンスター使いが行く手を阻む。' },
+      { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'ふふ…僕の練習相手になってもらうよ！' },
+    ],
+    storyVictory: { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'く…まだまだ僕は未熟だったようだ…' } },
   { id: 2, name: '森の狩人', portrait: '🏹', hp: 20,
-    weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25 },
+    weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
+    storyIntro: [
+      { speaker: '森の狩人', portrait: '🏹', text: 'この森は我が縄張りだ。侵入者には容赦しない。' },
+    ],
+    storyVictory: { speaker: '森の狩人', portrait: '🏹', text: 'まさか…この森で敗れる日が来るとはな。' } },
   { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26,
-    weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28 },
+    weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
+    storyIntro: [
+      { speaker: '深淵の魔導士', portrait: '🔮', text: 'ほう…なかなかやるようだね。だが、闇の力の前には無力さ。' },
+    ],
+    storyVictory: { speaker: '深淵の魔導士', portrait: '🔮', text: '……面白い。この程度で終わるとはな。' } },
   { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32,
-    weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32 },
+    weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
+    storyIntro: [
+      { speaker: '竜の巫女', portrait: '🐲', text: '我が竜の力、その身に刻んでみせよ。' },
+    ],
+    storyVictory: { speaker: '竜の巫女', portrait: '🐲', text: '……負けたか。だが、それも巫女としての試練。' } },
   { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38,
-    weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40 },
+    weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
+    storyIntro: [
+      { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
+    ],
+    storyVictory: { speaker: 'モンスター使いの女王', portrait: '👑', text: '見事…お前こそ、真のLis Noirの継承者にふさわしい。' } },
 ];
+
+// ---------- ストーリー会話 ----------
+let storyQueue = [];
+let storyOnDone = null;
+
+function showStory(lines, onDone) {
+  if (!lines || !lines.length) { if (onDone) onDone(); return; }
+  storyQueue = lines.slice();
+  storyOnDone = onDone;
+  document.getElementById('story-overlay').classList.remove('hidden');
+  advanceStory();
+}
+
+function advanceStory() {
+  if (!storyQueue.length) {
+    document.getElementById('story-overlay').classList.add('hidden');
+    const done = storyOnDone;
+    storyOnDone = null;
+    if (done) done();
+    return;
+  }
+  const line = storyQueue.shift();
+  document.getElementById('story-portrait').textContent = line.portrait || '💬';
+  document.getElementById('story-speaker').textContent = line.speaker || '';
+  document.getElementById('story-text').textContent = line.text || '';
+}
 
 function renderStageSelect() {
   const wrap = document.getElementById('stage-list');
@@ -443,7 +563,7 @@ function renderStageSelect() {
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
     node.addEventListener('click', () => {
       const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
-      startBattle(stage);
+      showStory(stage.storyIntro, () => startBattle(stage));
     });
   });
 }
@@ -471,12 +591,13 @@ function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
   const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20));
+  const dragonHpBonus = getDragonBonusHp();
 
   battle = {
     stage,
     turn: 1,
     activeSide: 'player',
-    playerHp: 30, enemyHp: stage.hp,
+    playerHp: 30 + dragonHpBonus, playerMaxHp: 30 + dragonHpBonus, enemyHp: stage.hp,
     playerMaxCost: 1, enemyMaxCost: 1,
     playerCost: 1, enemyCost: 1,
     playerDeck, enemyDeck,
@@ -787,7 +908,7 @@ function castSpell(handIdx, targetIdx) {
       }
     }
   } else if (eff.kind === 'heal') {
-    battle.playerHp = Math.min(30, battle.playerHp + (eff.value || 0));
+    battle.playerHp = Math.min(battle.playerMaxHp || 30, battle.playerHp + (eff.value || 0));
   } else if (eff.kind === 'draw') {
     for (let i = 0; i < (eff.value || 0); i++) {
       if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
@@ -923,11 +1044,17 @@ function showResult(won) {
     if (stage.id === state.stageProgress) {
       state.stageProgress = Math.min(STAGES.length, state.stageProgress + 1);
     }
+    gainDragonExp(15);
   }
   saveState();
   document.getElementById('result-reward-gold').textContent = (goldReward > 0 ? '+' : '') + goldReward;
   document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
-  showScreen('result');
+
+  if (won && stage.storyVictory) {
+    showStory([stage.storyVictory], () => showScreen('result'));
+  } else {
+    showScreen('result');
+  }
 }
 
 // ---------- カード画面（デッキ編成／カード一覧）セグメント切替 ----------
@@ -1099,6 +1226,10 @@ function init() {
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
+  document.getElementById('quick-dragon').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
+  document.getElementById('dragon-summary').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
+  document.getElementById('dragon-feed-btn').addEventListener('click', feedDragon);
+  document.getElementById('story-overlay').addEventListener('click', advanceStory);
   document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
