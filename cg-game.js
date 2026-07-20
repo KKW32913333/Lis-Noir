@@ -119,6 +119,62 @@ function saveState() {
 
 let state = loadState();
 
+// ---------- バックアップコード（設定画面） ----------
+function encodeSaveData(obj) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodeSaveData(str) {
+  return JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
+}
+
+function openSettings() {
+  document.getElementById('backup-code-out').value = encodeSaveData(state);
+  document.getElementById('backup-code-in').value = '';
+  document.getElementById('backup-copy-status').textContent = '';
+  document.getElementById('backup-restore-status').textContent = '';
+  document.getElementById('settings-overlay').classList.remove('hidden');
+}
+
+function copyBackupCode() {
+  const textarea = document.getElementById('backup-code-out');
+  const status = document.getElementById('backup-copy-status');
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  const finish = (ok) => { status.textContent = ok ? 'コピーしました。安全な場所に保存してください。' : 'コピーできませんでした。手動で選択してコピーしてください。'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textarea.value).then(() => finish(true)).catch(() => {
+      try { finish(document.execCommand('copy')); } catch (e) { finish(false); }
+    });
+  } else {
+    try { finish(document.execCommand('copy')); } catch (e) { finish(false); }
+  }
+}
+
+function restoreBackupCode() {
+  const code = document.getElementById('backup-code-in').value;
+  const status = document.getElementById('backup-restore-status');
+  if (!code.trim()) { status.textContent = 'コードを貼り付けてください。'; return; }
+  if (!confirm('現在のセーブデータを上書きして復元します。よろしいですか？')) return;
+  try {
+    const restored = decodeSaveData(code);
+    const base = defaultState();
+    Object.keys(base.cards).forEach(id => {
+      if (!restored.cards || !restored.cards[id]) {
+        restored.cards = restored.cards || {};
+        restored.cards[id] = base.cards[id];
+      } else if (restored.cards[id].evolved === undefined) {
+        restored.cards[id].evolved = false;
+      }
+    });
+    state = Object.assign(base, restored);
+    saveState();
+    status.textContent = '復元しました！';
+    renderHome();
+  } catch (e) {
+    status.textContent = 'コードが正しくありません。コピーし直してもう一度お試しください。';
+  }
+}
+
 // ---------- カード表示ヘルパー ----------
 function cardArtStyle(def) {
   const el = ELEMENTS[def.element];
@@ -1260,6 +1316,12 @@ function init() {
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
   });
+  document.getElementById('settings-btn').addEventListener('click', openSettings);
+  document.getElementById('settings-close').addEventListener('click', () => {
+    document.getElementById('settings-overlay').classList.add('hidden');
+  });
+  document.getElementById('backup-copy-btn').addEventListener('click', copyBackupCode);
+  document.getElementById('backup-restore-btn').addEventListener('click', restoreBackupCode);
   showScreen('home');
 }
 
