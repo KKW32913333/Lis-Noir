@@ -4,20 +4,20 @@
 
 // ---------- 属性 ----------
 const ELEMENTS = {
-  fire:   { name: '火',  color: '#a8532a', icon: '🔥' },
-  water:  { name: '水',  color: '#3f6f8f', icon: '💧' },
-  nature: { name: '自然', color: '#5f7a3f', icon: '🌿' },
-  light:  { name: '光',  color: '#a9822f', icon: '✨' },
-  dark:   { name: '闇',  color: '#6b4a96', icon: '🌙' },
+  fire:   { name: '火',  color: '#ff8f5c', icon: '🔥' },
+  water:  { name: '水',  color: '#6ec8e8', icon: '💧' },
+  nature: { name: '自然', color: '#9fd47a', icon: '🌿' },
+  light:  { name: '光',  color: '#ffe08a', icon: '✨' },
+  dark:   { name: '闇',  color: '#c9a8f0', icon: '🌙' },
 };
 // 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
 
 const RARITY = {
-  normal: { name: 'ノーマル', color: '#8f8578', glow: 'none' },
-  rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
-  epic:   { name: 'エピック', color: '#6f45ab', glow: '0 0 12px #8a5fc966' },
-  legend: { name: 'レジェンド', color: '#b8792a', glow: '0 0 16px #e8c87799' },
+  normal: { name: 'ノーマル', color: '#c9c2e0', glow: 'none' },
+  rare:   { name: 'レア',    color: '#7ec8f0', glow: '0 0 10px #7ec8f099' },
+  epic:   { name: 'エピック', color: '#c9a8f0', glow: '0 0 12px #c9a8f0aa' },
+  legend: { name: 'レジェンド', color: '#ffd66b', glow: '0 0 16px #ffd66bcc' },
 };
 
 // ---------- カードマスターデータ ----------
@@ -72,6 +72,7 @@ function defaultState() {
     totalWins: 0,
     totalPacksOpened: 0,
     totalUpgrades: 0,
+    stageProgress: 1,
     missionsClaimed: {},
     cards: owned,
     deck: Object.keys(CARD_DEFS).slice(0, 12),
@@ -267,20 +268,67 @@ function openCardDetail(id) {
 // ---------- バトルロジック ----------
 let battle = null;
 
+const STAGES = [
+  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 20,
+    weights: { normal: 70, rare: 25, epic: 5, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20 },
+  { id: 2, name: '森の狩人', portrait: '🏹', hp: 24,
+    weights: { normal: 50, rare: 35, epic: 13, legend: 2 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25 },
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 28,
+    weights: { normal: 30, rare: 40, epic: 25, legend: 5 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28 },
+  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32,
+    weights: { normal: 15, rare: 35, epic: 35, legend: 15 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32 },
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 36,
+    weights: { normal: 5, rare: 25, epic: 40, legend: 30 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40 },
+];
+
+function renderStageSelect() {
+  const wrap = document.getElementById('stage-list');
+  wrap.innerHTML = STAGES.map(stage => {
+    const unlocked = stage.id <= state.stageProgress;
+    const cleared = stage.id < state.stageProgress;
+    return `
+      <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
+        <div class="cg-stage-portrait">${unlocked ? stage.portrait : '🔒'}</div>
+        <div class="cg-stage-info">
+          <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}</div>
+          <div class="cg-stage-desc">${unlocked ? `敵HP ${stage.hp}　報酬 💰${stage.rewardGold} 💎${stage.rewardGems}` : '前のステージをクリアすると解放'}</div>
+        </div>
+        <div class="cg-stage-go">${unlocked ? '⚔️' : ''}</div>
+      </div>`;
+  }).join('');
+  wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
+    node.addEventListener('click', () => {
+      const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
+      startBattle(stage);
+    });
+  });
+}
+
 function newBattleUnit(id) {
   const def = CARD_DEFS[id];
   return { id, defId: id, def, curHp: def.hp, atkBonus: 0, hpBonus: 0, canAttack: false, justPlayed: true };
 }
 
-function startBattle() {
+function buildWeightedMonsterDeck(weights, count) {
+  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster');
+  const deck = [];
+  for (let i = 0; i < count; i++) {
+    const id = pickWeightedCardId(weights);
+    deck.push(monsterIds.includes(id) ? id : monsterIds[Math.floor(Math.random() * monsterIds.length)]);
+  }
+  return deck;
+}
+
+function startBattle(stage) {
+  stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
-  const enemyPool = Object.keys(CARD_DEFS);
-  const enemyDeck = shuffle(enemyPool.slice()).slice(0, 20);
+  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20));
 
   battle = {
+    stage,
     turn: 1,
     activeSide: 'player',
-    playerHp: 30, enemyHp: 30,
+    playerHp: 30, enemyHp: stage.hp,
     playerMaxCost: 1, enemyMaxCost: 1,
     playerCost: 1, enemyCost: 1,
     playerDeck, enemyDeck,
@@ -293,8 +341,19 @@ function startBattle() {
     log: '',
     over: false,
   };
+  document.getElementById('battle-enemy-emoji').textContent = stage.portrait;
   renderBattle();
   showScreen('battle');
+  showVsIntro(stage);
+}
+
+function showVsIntro(stage) {
+  document.getElementById('vs-enemy-portrait').textContent = stage.portrait;
+  document.getElementById('vs-enemy-name').textContent = stage.name;
+  const overlay = document.getElementById('battle-vs-intro');
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.classList.add('hidden'), 1400);
+  setTimeout(() => showTurnBanner('YOUR TURN'), 1450);
 }
 
 function shuffle(arr) {
@@ -319,6 +378,33 @@ function skillFlash(text) {
   flash.classList.add('show');
 }
 
+function showTurnBanner(text) {
+  const el = document.getElementById('turn-banner');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+function impactEffect() {
+  const app = document.getElementById('app');
+  const flash = document.getElementById('battle-impact-flash');
+  app.classList.remove('shake');
+  void app.offsetWidth;
+  app.classList.add('shake');
+  if (flash) {
+    flash.classList.remove('show');
+    void flash.offsetWidth;
+    flash.classList.add('show');
+  }
+}
+
+function previewDamage(attackerUnit, defenderUnit) {
+  const mult = defenderUnit ? elementMultiplier(attackerUnit.def.element, defenderUnit.def.element) : 0;
+  return { dmg: Math.max(1, attackerUnit.def.atk + (attackerUnit.atkBonus || 0) + mult), mult };
+}
+
 function renderBattle() {
   if (!battle) return;
   document.getElementById('battle-turn-timer').textContent = 'ターン ' + battle.turn;
@@ -328,10 +414,23 @@ function renderBattle() {
   document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
 
   const enemyFieldEl = document.getElementById('battle-enemy-field');
-  enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => u
-    ? `<div class="cg-field-slot filled" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div></div>`
-    : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`
-  ).join('');
+  const previewingAttack = battle.selectedFieldIdx !== null ? battle.playerField[battle.selectedFieldIdx] : null;
+  const selectedSpell = battle.selectedHandIdx !== null ? CARD_DEFS[battle.playerHand[battle.selectedHandIdx]] : null;
+  const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && selectedSpell.target === 'enemy' ? selectedSpell : null;
+
+  enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => {
+    let preview = '';
+    if (u && previewingAttack) {
+      const p = previewDamage(previewingAttack, u);
+      const cls = p.mult > 0 ? 'adv' : p.mult < 0 ? 'dis' : '';
+      preview = `<div class="cg-preview-badge ${cls}">⚔${p.dmg}</div>`;
+    } else if (u && previewingSpell) {
+      preview = `<div class="cg-preview-badge spell">✨${previewingSpell.effect.value}</div>`;
+    }
+    return u
+      ? `<div class="cg-field-slot filled" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
+      : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
+  }).join('');
 
   const playerFieldEl = document.getElementById('battle-player-field');
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => u
@@ -344,6 +443,17 @@ function renderBattle() {
     const affordable = CARD_DEFS[id].cost <= battle.playerCost;
     return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true })}</div>`;
   }).join('');
+
+  const portraitPreviewEl = document.getElementById('battle-portrait-preview');
+  if (previewingAttack) {
+    portraitPreviewEl.textContent = `⚔${previewDamage(previewingAttack, null).dmg}`;
+    portraitPreviewEl.classList.add('show');
+  } else if (previewingSpell) {
+    portraitPreviewEl.textContent = `✨${previewingSpell.effect.value}`;
+    portraitPreviewEl.classList.add('show');
+  } else {
+    portraitPreviewEl.classList.remove('show');
+  }
 
   bindBattleEvents();
 
@@ -441,6 +551,7 @@ function castSpell(handIdx, targetIdx) {
   const eff = def.effect || {};
   if (eff.kind === 'damage') {
     const dmg = eff.value || 0;
+    impactEffect();
     if (targetIdx === null) {
       battle.enemyHp -= dmg;
     } else {
@@ -483,6 +594,7 @@ function attackTarget(attackerIdx, targetIdx) {
   if (!attacker || !attacker.canAttack) return;
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
   const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + mult);
+  impactEffect();
 
   if (targetIdx === null) {
     battle.enemyHp -= dmg;
@@ -505,7 +617,11 @@ function endTurn() {
   if (!battle || battle.over) return;
   // 自分の場のユニットは次ターンから攻撃可能に
   battle.playerField.forEach(u => { if (u) u.canAttack = true; });
-  enemyTurn();
+  showTurnBanner('ENEMY TURN');
+  setTimeout(() => {
+    enemyTurn();
+    if (!battle.over) showTurnBanner('YOUR TURN');
+  }, 700);
 }
 
 function enemyTurn() {
@@ -529,6 +645,7 @@ function enemyTurn() {
     if (u && u.canAttack) {
       const mult = elementMultiplier(u.def.element, 'none');
       const targetIdx = battle.playerField.findIndex(p => p !== null);
+      impactEffect();
       if (targetIdx !== -1) {
         const target = battle.playerField[targetIdx];
         target.curHp -= Math.max(1, u.def.atk);
@@ -551,21 +668,28 @@ function enemyTurn() {
 }
 
 function showResult(won) {
+  const stage = battle.stage || STAGES[0];
   const el = document.getElementById('result-title');
   el.textContent = won ? 'WIN' : 'LOSE';
   el.className = won ? 'cg-result-title win' : 'cg-result-title lose';
-  const delta = won ? 30 : -20;
+  document.getElementById('result-stage-name').textContent = `ステージ${stage.id}　${stage.name}`;
+  const delta = won ? stage.trophyDelta : -20;
   state.trophy = Math.max(0, state.trophy + delta);
   document.getElementById('result-trophy-delta').textContent = (delta > 0 ? '+' : '') + delta;
   document.getElementById('result-trophy').textContent = state.trophy.toLocaleString();
+  const goldReward = won ? stage.rewardGold : 0;
+  const gemReward = won ? stage.rewardGems : 0;
   if (won) {
-    state.gold += 120; state.gems += 10;
+    state.gold += goldReward; state.gems += gemReward;
     state.totalWins = (state.totalWins || 0) + 1;
     state.winProgress = Math.min(state.winMax, state.winProgress + 1);
+    if (stage.id === state.stageProgress) {
+      state.stageProgress = Math.min(STAGES.length, state.stageProgress + 1);
+    }
   }
   saveState();
-  document.getElementById('result-reward-gold').textContent = won ? '+120' : '+0';
-  document.getElementById('result-reward-gem').textContent = won ? '+10' : '+0';
+  document.getElementById('result-reward-gold').textContent = (goldReward > 0 ? '+' : '') + goldReward;
+  document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
   showScreen('result');
 }
 
@@ -729,7 +853,7 @@ function claimMission(missionId) {
 // ---------- 初期化 ----------
 function init() {
   renderHome();
-  document.getElementById('nav-battle').addEventListener('click', startBattle);
+  document.getElementById('nav-battle').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('nav-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
@@ -746,7 +870,7 @@ function init() {
     showScreen('home');
     renderHome();
   });
-  document.getElementById('result-rematch').addEventListener('click', startBattle);
+  document.getElementById('result-rematch').addEventListener('click', () => startBattle(battle.stage));
   document.getElementById('result-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
   showScreen('home');
 }
