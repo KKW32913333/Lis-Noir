@@ -82,6 +82,7 @@ function defaultState() {
     totalPacksOpened: 0,
     totalUpgrades: 0,
     stageProgress: 1,
+    hasSeenBattleHelp: false,
     missionsClaimed: {},
     cards: owned,
     deck: Object.keys(CARD_DEFS).slice(0, 12),
@@ -412,16 +413,16 @@ function evolveCard(id) {
 let battle = null;
 
 const STAGES = [
-  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 20,
-    weights: { normal: 70, rare: 25, epic: 5, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20 },
-  { id: 2, name: '森の狩人', portrait: '🏹', hp: 24,
-    weights: { normal: 50, rare: 35, epic: 13, legend: 2 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25 },
-  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 28,
-    weights: { normal: 30, rare: 40, epic: 25, legend: 5 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28 },
+  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16,
+    weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20 },
+  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20,
+    weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25 },
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26,
+    weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28 },
   { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32,
-    weights: { normal: 15, rare: 35, epic: 35, legend: 15 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32 },
-  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 36,
-    weights: { normal: 5, rare: 25, epic: 40, legend: 30 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40 },
+    weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32 },
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38,
+    weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40 },
 ];
 
 function renderStageSelect() {
@@ -501,7 +502,12 @@ function showVsIntro(stage) {
   const overlay = document.getElementById('battle-vs-intro');
   overlay.classList.remove('hidden');
   setTimeout(() => overlay.classList.add('hidden'), 1400);
-  setTimeout(() => showTurnBanner('YOUR TURN'), 1450);
+  setTimeout(() => {
+    showTurnBanner('YOUR TURN');
+    if (!state.hasSeenBattleHelp) {
+      document.getElementById('battle-help-overlay').classList.remove('hidden');
+    }
+  }, 1450);
 }
 
 function shuffle(arr) {
@@ -612,6 +618,7 @@ function renderBattle() {
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
+  const directAttackReady = !!(previewingAttack || previewingSpell);
   if (previewingAttack) {
     portraitPreviewEl.textContent = `⚔${previewDamage(previewingAttack, null).dmg}`;
     portraitPreviewEl.classList.add('show');
@@ -621,6 +628,8 @@ function renderBattle() {
   } else {
     portraitPreviewEl.classList.remove('show');
   }
+  document.getElementById('battle-enemy-portrait').classList.toggle('attackable', directAttackReady);
+  document.getElementById('battle-direct-attack-label').classList.toggle('show', directAttackReady);
 
   bindBattleEvents();
 
@@ -653,6 +662,7 @@ function bindBattleEvents() {
   });
   document.querySelectorAll('#battle-player-field .cg-field-slot').forEach(node => {
     node.onclick = () => {
+      if (longPressFired) { longPressFired = false; return; }
       const idx = Number(node.dataset.idx);
       if (battle.selectedHandIdx !== null) {
         const id = battle.playerHand[battle.selectedHandIdx];
@@ -671,9 +681,14 @@ function bindBattleEvents() {
         renderBattle();
       }
     };
+    bindLongPress(node, () => {
+      const idx = Number(node.dataset.idx);
+      if (battle.playerField[idx]) showCardInfo(battle.playerField[idx]);
+    });
   });
   document.querySelectorAll('#battle-enemy-field .cg-field-slot').forEach(node => {
     node.onclick = () => {
+      if (longPressFired) { longPressFired = false; return; }
       const idx = Number(node.dataset.idx);
       if (battle.selectedHandIdx !== null) {
         const id = battle.playerHand[battle.selectedHandIdx];
@@ -685,6 +700,10 @@ function bindBattleEvents() {
       }
       if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, idx);
     };
+    bindLongPress(node, () => {
+      const idx = Number(node.dataset.idx);
+      if (battle.enemyField[idx]) showCardInfo(battle.enemyField[idx]);
+    });
   });
   document.getElementById('battle-enemy-portrait').onclick = () => {
     if (battle.selectedHandIdx !== null) {
@@ -697,6 +716,41 @@ function bindBattleEvents() {
     }
     if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, null);
   };
+}
+
+// ---------- 長押し検知（フィールドのモンスターをタップ操作と区別して詳細表示） ----------
+let longPressFired = false;
+function bindLongPress(node, onLongPress) {
+  let timer = null;
+  const start = () => {
+    longPressFired = false;
+    timer = setTimeout(() => { longPressFired = true; onLongPress(); }, 450);
+  };
+  const cancel = () => { if (timer) clearTimeout(timer); };
+  node.addEventListener('pointerdown', start);
+  node.addEventListener('pointerup', cancel);
+  node.addEventListener('pointerleave', cancel);
+  node.addEventListener('pointercancel', cancel);
+}
+
+function showCardInfo(unit) {
+  const def = unit.def;
+  const rarity = RARITY[def.rarity];
+  const el = ELEMENTS[def.element];
+  const atk = def.atk + (unit.atkBonus || 0) + fieldBonusFor(unit);
+  document.getElementById('card-info-body').innerHTML = `
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${def.name}</div>
+      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
+      <div class="cg-detail-stats">
+        <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}</b></div>
+        <div class="cg-detail-stat"><span>現在HP</span><b>${unit.curHp}</b></div>
+      </div>
+    </div>`;
+  document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
 function playCardFromHand(handIdx, fieldIdx) {
@@ -1064,6 +1118,17 @@ function init() {
   });
   document.getElementById('result-rematch').addEventListener('click', () => startBattle(battle.stage));
   document.getElementById('result-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
+  document.getElementById('battle-help-btn').addEventListener('click', () => {
+    document.getElementById('battle-help-overlay').classList.remove('hidden');
+  });
+  document.getElementById('battle-help-close').addEventListener('click', () => {
+    document.getElementById('battle-help-overlay').classList.add('hidden');
+    state.hasSeenBattleHelp = true;
+    saveState();
+  });
+  document.getElementById('card-info-close').addEventListener('click', () => {
+    document.getElementById('card-info-overlay').classList.add('hidden');
+  });
   showScreen('home');
 }
 
