@@ -97,6 +97,8 @@
   .cg-card-stats .spell-val{color:var(--gold-bright);}
   .cg-card-stats .equip{color:var(--text-dim-panel);}
   .cg-card-stats .equip-val{color:var(--gold-bright);}
+  .cg-card-stats .field{color:var(--cyan);}
+  .cg-card-stats .field-val{color:var(--gold-bright);}
   .cg-card-el{position:absolute; top:3px; right:3px; font-size:12px; z-index:2;}
 
   /* ---------- Deck screen ---------- */
@@ -160,6 +162,9 @@
     box-shadow:0 0 6px #7ed957aa;}
 
   .cg-battle-mid{display:flex; align-items:center; justify-content:center; padding:6px 0; color:var(--text-dim); font-size:10px;}
+  .cg-battle-mid-row{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .cg-field-indicator{font-size:10px; color:var(--text-panel); background:var(--bg-panel2); border:1px solid var(--hairline-panel);
+    padding:4px 10px; border-radius:12px; box-shadow:0 2px 6px #00000033;}
 
   .cg-hand-row{display:flex; gap:6px; padding:8px 10px; overflow-x:auto;}
   .cg-hand-card{width:64px; flex-shrink:0; transition:transform .1s;}
@@ -478,6 +483,7 @@
         <button class="cg-filter-tab" data-filter="monster">モンスター</button>
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
+        <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
       <div class="cg-deck-hint">タップで追加・追加済みは✓表示（もう一度タップで解除）</div>
       <div id="collection-list"></div>
@@ -524,7 +530,10 @@
       <div id="battle-enemy-portrait"><span id="battle-enemy-emoji">👹</span><span id="battle-portrait-preview" class="cg-preview-badge"></span></div>
       <div id="battle-skill-flash"></div>
       <div class="cg-field-row" id="battle-enemy-field"></div>
-      <div class="cg-battle-mid">カードをタップ→対象をタップ（攻撃／スペル／装備）</div>
+      <div class="cg-battle-mid-row">
+        <div id="battle-field-indicator" class="cg-field-indicator" style="display:none;"></div>
+        <div class="cg-battle-mid">カードをタップ→対象をタップ（攻撃／スペル／装備／フィールド）</div>
+      </div>
       <div class="cg-field-row" id="battle-player-field"></div>
     </div>
 

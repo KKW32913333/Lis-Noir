@@ -53,6 +53,11 @@ const CARD_DEFS = {
   equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: null, emoji: '🗡️' },
   equip_shield:     { name: 'ガーディアンシールド', element: 'light', rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 0, hp: 4 }, skill: '味方1体のHP+4', image: null, emoji: '🛡️' },
   equip_dragonmail: { name: 'ドラゴンアーマー',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 3 }, skill: '味方1体の攻撃力+2・HP+3', image: null, emoji: '🎽' },
+
+  // ---- フィールドカード（場に出ている間、対応属性のモンスター全体（両陣営）に継続効果） ----
+  field_inferno:   { name: 'インフェルノフィールド', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'fire', atk: 1 }, skill: '場に出ている間、火属性モンスターの攻撃力+1（両陣営）', image: null, emoji: '🌋' },
+  field_sanctuary: { name: 'ホーリーサンクチュアリ', element: 'light', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'light', atk: 1 }, skill: '場に出ている間、光属性モンスターの攻撃力+1（両陣営）', image: null, emoji: '⛩️' },
+  field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'dark', atk: 2 }, skill: '場に出ている間、闇属性モンスターの攻撃力+2（両陣営）', image: null, emoji: '🕳️' },
 };
 
 // ---------- 状態管理 ----------
@@ -134,6 +139,11 @@ function cardStatsLine(def, evolved) {
     if (eff.atk) parts.push(`⚔+${eff.atk}`);
     if (eff.hp) parts.push(`❤+${eff.hp}`);
     return `<div class="cg-card-stats"><span class="cg-stat equip">装備</span><span class="cg-stat equip-val">${parts.join(' ')}</span></div>`;
+  }
+  if (type === 'field') {
+    const eff = def.effect || {};
+    const elIcon = ELEMENTS[eff.boostElement] ? ELEMENTS[eff.boostElement].icon : '🌐';
+    return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}+${eff.atk}</span></div>`;
   }
   const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
   const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
@@ -326,9 +336,10 @@ function detailStatsBlock(def, evolved) {
       <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}</b></div>
       <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}</b></div>`;
   }
+  const typeLabel = type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
   return `
     <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
-    <div class="cg-detail-stat"><span>種別</span><b>${type === 'spell' ? 'スペル' : '装備'}</b></div>`;
+    <div class="cg-detail-stat"><span>種別</span><b>${typeLabel}</b></div>`;
 }
 
 function openCardDetail(id) {
@@ -463,6 +474,7 @@ function startBattle(stage) {
     enemyHand: enemyDeck.splice(0, 4),
     playerField: [null, null, null, null, null],
     enemyField: [null, null, null, null, null],
+    fieldCard: null,
     selectedHandIdx: null,
     selectedFieldIdx: null,
     log: '',
@@ -527,9 +539,16 @@ function impactEffect() {
   }
 }
 
+function fieldBonusFor(unit) {
+  if (!battle || !battle.fieldCard) return 0;
+  const fdef = CARD_DEFS[battle.fieldCard];
+  if (!fdef || !fdef.effect) return 0;
+  return unit.def.element === fdef.effect.boostElement ? (fdef.effect.atk || 0) : 0;
+}
+
 function previewDamage(attackerUnit, defenderUnit) {
   const mult = defenderUnit ? elementMultiplier(attackerUnit.def.element, defenderUnit.def.element) : 0;
-  return { dmg: Math.max(1, attackerUnit.def.atk + (attackerUnit.atkBonus || 0) + mult), mult };
+  return { dmg: Math.max(1, attackerUnit.def.atk + (attackerUnit.atkBonus || 0) + fieldBonusFor(attackerUnit) + mult), mult };
 }
 
 function renderBattle() {
@@ -540,6 +559,17 @@ function renderBattle() {
   document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
   document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
+
+  const fieldIndicatorEl = document.getElementById('battle-field-indicator');
+  if (battle.fieldCard) {
+    const fdef = CARD_DEFS[battle.fieldCard];
+    const fel = ELEMENTS[fdef.effect.boostElement];
+    fieldIndicatorEl.innerHTML = `${fdef.emoji} ${fdef.name}（${fel.icon}+${fdef.effect.atk}）`;
+    fieldIndicatorEl.style.display = '';
+    fieldIndicatorEl.style.borderColor = fel.color;
+  } else {
+    fieldIndicatorEl.style.display = 'none';
+  }
 
   const enemyFieldEl = document.getElementById('battle-enemy-field');
   const previewingAttack = battle.selectedFieldIdx !== null ? battle.playerField[battle.selectedFieldIdx] : null;
@@ -602,6 +632,10 @@ function bindBattleEvents() {
       battle.selectedFieldIdx = null;
       if (type === 'spell' && (def.target || 'none') === 'none') {
         castSpell(idx, null);
+        return;
+      }
+      if (type === 'field') {
+        playFieldCard(idx);
         return;
       }
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
@@ -701,6 +735,18 @@ function castSpell(handIdx, targetIdx) {
   renderBattle();
 }
 
+function playFieldCard(handIdx) {
+  const id = battle.playerHand[handIdx];
+  const def = CARD_DEFS[id];
+  if (!def || def.cost > battle.playerCost) return;
+  battle.playerCost -= def.cost;
+  battle.playerHand.splice(handIdx, 1);
+  battle.selectedHandIdx = null;
+  battle.fieldCard = id;
+  if (def.skill) skillFlash(`${def.name}発動！\n${def.skill}`);
+  renderBattle();
+}
+
 function equipCardFromHand(handIdx, fieldIdx) {
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
@@ -721,7 +767,7 @@ function attackTarget(attackerIdx, targetIdx) {
   const attacker = battle.playerField[attackerIdx];
   if (!attacker || !attacker.canAttack) return;
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
-  const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + mult);
+  const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult);
   impactEffect();
 
   if (targetIdx === null) {
@@ -776,10 +822,10 @@ function enemyTurn() {
       impactEffect();
       if (targetIdx !== -1) {
         const target = battle.playerField[targetIdx];
-        target.curHp -= Math.max(1, u.def.atk);
+        target.curHp -= Math.max(1, u.def.atk + fieldBonusFor(u));
         if (target.curHp <= 0) battle.playerField[targetIdx] = null;
       } else {
-        battle.playerHp -= u.def.atk;
+        battle.playerHp -= Math.max(1, u.def.atk + fieldBonusFor(u));
       }
     }
   });
