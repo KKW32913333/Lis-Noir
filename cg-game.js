@@ -174,6 +174,14 @@ function showScreen(name) {
 }
 
 // ---------- ホーム画面 ----------
+const RANK_TIERS = [
+  { name: 'ブロンズ', min: 0 },
+  { name: 'シルバー', min: 500 },
+  { name: 'ゴールド', min: 1000 },
+  { name: 'プラチナ', min: 2000 },
+  { name: 'ダイヤモンド', min: 3500 },
+];
+
 function renderHome() {
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
@@ -184,14 +192,69 @@ function renderHome() {
   document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
   document.getElementById('win-fill').style.width = (state.winProgress / state.winMax * 100) + '%';
   document.getElementById('win-label').textContent = `${state.winProgress}/${state.winMax}`;
+
+  // ランクカード
+  let tierIdx = 0;
+  for (let i = 0; i < RANK_TIERS.length; i++) { if (state.trophy >= RANK_TIERS[i].min) tierIdx = i; }
+  const tier = RANK_TIERS[tierIdx];
+  const next = RANK_TIERS[tierIdx + 1];
+  document.getElementById('rank-name').textContent = state.playerName;
+  document.getElementById('rank-tier').textContent = `${tier.name}ランク`;
+  if (next) {
+    const pct = Math.min(100, Math.round((state.trophy - tier.min) / (next.min - tier.min) * 100));
+    document.getElementById('rank-fill').style.width = pct + '%';
+    document.getElementById('rank-sub').textContent = `🏆 ${state.trophy.toLocaleString()} / ${next.min.toLocaleString()}`;
+  } else {
+    document.getElementById('rank-fill').style.width = '100%';
+    document.getElementById('rank-sub').textContent = `🏆 ${state.trophy.toLocaleString()}（最高ランク）`;
+  }
+
+  // 注目ミッション（未達成のうち一番進捗が近いもの／全達成なら受け取り可能なものを優先）
+  renderFeaturedMission();
+}
+
+function renderFeaturedMission() {
+  const wrap = document.getElementById('featured-mission');
+  const claimable = MISSIONS.find(m => m.check(state) >= m.target && !state.missionsClaimed[m.id]);
+  const target = claimable || MISSIONS
+    .filter(m => !state.missionsClaimed[m.id])
+    .sort((a, b) => (b.check(state) / b.target) - (a.check(state) / a.target))[0];
+
+  if (!target) { wrap.innerHTML = ''; wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const progress = Math.min(target.target, target.check(state));
+  const done = progress >= target.target;
+  wrap.innerHTML = `
+    <div class="cg-featured-mission-label">${done ? '受け取り可能なミッション' : '注目のミッション'}</div>
+    <div class="cg-featured-mission-row">
+      <div>
+        <div class="cg-featured-mission-title">${target.title}</div>
+        <div class="cg-featured-mission-desc">${target.desc}（${progress}/${target.target}）</div>
+      </div>
+      <div class="cg-featured-mission-cta">${done ? '受け取る' : '確認する'}</div>
+    </div>`;
+  wrap.onclick = () => { renderMissions(); showScreen('mission'); };
 }
 
 // ---------- デッキ編成画面 ----------
+let collectionFilter = 'all';
+
 function renderDeck() {
   const deckEl = document.getElementById('deck-slots');
-  deckEl.innerHTML = state.deck.map(id => renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })).join('') +
-    (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
+  deckEl.innerHTML = state.deck.map(id =>
+    `<div class="cg-deck-slot-item" data-id="${id}">${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}</div>`
+  ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/30`;
+
+  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(node => {
+    node.addEventListener('click', () => {
+      const id = node.dataset.id;
+      const idx = state.deck.indexOf(id);
+      if (idx >= 0) state.deck.splice(idx, 1);
+      saveState();
+      renderDeck();
+    });
+  });
 
   const avgCost = state.deck.length
     ? (state.deck.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / state.deck.length).toFixed(1)
@@ -199,7 +262,10 @@ function renderDeck() {
   document.getElementById('deck-avgcost').textContent = avgCost;
 
   const collEl = document.getElementById('collection-list');
-  const owned = Object.keys(state.cards);
+  const owned = Object.keys(state.cards).filter(id => {
+    if (collectionFilter === 'all') return true;
+    return (CARD_DEFS[id].type || 'monster') === collectionFilter;
+  });
   collEl.innerHTML = owned.map(id => {
     const inDeck = state.deck.includes(id);
     return `<div class="cg-coll-item ${inDeck ? 'in-deck' : ''}" data-id="${id}">${renderCardFace(id, { small: true, evolved: state.cards[id].evolved })}</div>`;
@@ -215,6 +281,28 @@ function renderDeck() {
       renderDeck();
     });
   });
+}
+
+function setCollectionFilter(filter) {
+  collectionFilter = filter;
+  document.querySelectorAll('.cg-filter-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderDeck();
+}
+
+function autoBuildDeck() {
+  const rarityRank = { legend: 4, epic: 3, rare: 2, normal: 1 };
+  const ids = Object.keys(state.cards);
+  const monsters = ids.filter(id => (CARD_DEFS[id].type || 'monster') === 'monster')
+    .sort((a, b) => (rarityRank[CARD_DEFS[b].rarity] - rarityRank[CARD_DEFS[a].rarity]) || (state.cards[b].level - state.cards[a].level));
+  const others = ids.filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster')
+    .sort((a, b) => rarityRank[CARD_DEFS[b].rarity] - rarityRank[CARD_DEFS[a].rarity]);
+
+  const deck = monsters.slice(0, 24).concat(others.slice(0, 6)).slice(0, 30);
+  state.deck = deck;
+  saveState();
+  renderDeck();
 }
 
 // ---------- カード一覧/詳細画面 ----------
@@ -451,6 +539,7 @@ function renderBattle() {
   document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
   document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
   document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
+  document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
 
   const enemyFieldEl = document.getElementById('battle-enemy-field');
   const previewingAttack = battle.selectedFieldIdx !== null ? battle.playerField[battle.selectedFieldIdx] : null;
@@ -896,9 +985,17 @@ function init() {
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('nav-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
+  document.getElementById('quick-stage').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
+  document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
+  document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
+  document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
+  document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
+  document.querySelectorAll('.cg-filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => setCollectionFilter(btn.dataset.filter));
+  });
   document.querySelectorAll('.cg-back-btn:not(#battle-back-btn)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
   document.getElementById('battle-back-btn').addEventListener('click', () => {
