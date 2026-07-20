@@ -4,20 +4,20 @@
 
 // ---------- 属性 ----------
 const ELEMENTS = {
-  fire:   { name: '火',  color: '#c2683a', icon: '🔥' },
-  water:  { name: '水',  color: '#5f8fae', icon: '💧' },
-  nature: { name: '自然', color: '#7a9459', icon: '🌿' },
-  light:  { name: '光',  color: '#d9bd7a', icon: '✨' },
-  dark:   { name: '闇',  color: '#7d5fae', icon: '🌙' },
+  fire:   { name: '火',  color: '#a8532a', icon: '🔥' },
+  water:  { name: '水',  color: '#3f6f8f', icon: '💧' },
+  nature: { name: '自然', color: '#5f7a3f', icon: '🌿' },
+  light:  { name: '光',  color: '#a9822f', icon: '✨' },
+  dark:   { name: '闇',  color: '#6b4a96', icon: '🌙' },
 };
 // 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
 
 const RARITY = {
-  normal: { name: 'ノーマル', color: '#8f8a7d', glow: 'none' },
-  rare:   { name: 'レア',    color: '#6f93b8', glow: '0 0 10px #6f93b8aa' },
-  epic:   { name: 'エピック', color: '#8a5fc9', glow: '0 0 12px #8a5fc9cc' },
-  legend: { name: 'レジェンド', color: '#e8c877', glow: '0 0 16px #e8c877dd' },
+  normal: { name: 'ノーマル', color: '#8f8578', glow: 'none' },
+  rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
+  epic:   { name: 'エピック', color: '#6f45ab', glow: '0 0 12px #8a5fc966' },
+  legend: { name: 'レジェンド', color: '#b8792a', glow: '0 0 16px #e8c87799' },
 };
 
 // ---------- カードマスターデータ ----------
@@ -440,16 +440,40 @@ function showResult(won) {
   showScreen('result');
 }
 
+// ---------- カード画面（デッキ編成／カード一覧）セグメント切替 ----------
+function showCollectionSegment(seg) {
+  const isDeck = seg === 'deck';
+  document.getElementById('seg-deck').classList.toggle('active', isDeck);
+  document.getElementById('seg-list').classList.toggle('active', !isDeck);
+  document.getElementById('collection-deck-view').style.display = isDeck ? '' : 'none';
+  document.getElementById('collection-list-view').style.display = isDeck ? 'none' : '';
+  if (isDeck) renderDeck(); else renderCardList();
+}
+
+function openCollectionScreen(seg) {
+  showCollectionSegment(seg || 'deck');
+  showScreen('collection');
+}
+
 // ---------- 初期化 ----------
 function init() {
   renderHome();
   document.getElementById('nav-battle').addEventListener('click', startBattle);
-  document.getElementById('nav-deck').addEventListener('click', () => { renderDeck(); showScreen('deck'); });
-  document.getElementById('nav-cards').addEventListener('click', () => { renderCardList(); showScreen('cardlist'); });
+  document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('nav-shop').addEventListener('click', () => alert('ショップは準備中です'));
   document.getElementById('nav-mission').addEventListener('click', () => alert('ミッションは準備中です'));
-  document.querySelectorAll('.cg-back-btn').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
+  document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
+  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
+  document.getElementById('battle-back-btn').addEventListener('click', () => {
+    if (battle && !battle.over) {
+      if (!confirm('対戦中です。バトルを中断してホームに戻りますか？（勝敗はつきません）')) return;
+    }
+    battle = null;
+    showScreen('home');
+    renderHome();
+  });
   document.getElementById('result-rematch').addEventListener('click', startBattle);
   document.getElementById('result-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
   showScreen('home');
