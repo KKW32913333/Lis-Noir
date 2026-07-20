@@ -24,7 +24,7 @@ const RARITY = {
 // image: null の間はプレースホルダー（属性色グラデ+絵文字）を表示。
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
-  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, skill: '攻撃時、敵全体に2ダメージ', image: null, emoji: '🐉' },
+  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
   fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  skill: '', image: null, emoji: '👹' },
   fire_phoenix:   { name: 'フェニックス',     element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  skill: '撃破された時、1/2のHPで復活', image: null, emoji: '🐦' },
   water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  skill: '場に出た時、自分のHPを2回復', image: null, emoji: '🌊' },
@@ -57,10 +57,14 @@ const CARD_DEFS = {
 
 // ---------- 状態管理 ----------
 const SAVE_KEY = 'cardgame_save_v1';
+const EVOLVE_LEVEL_REQ = 5;
+const EVOLVE_COST = 800;
+const EVOLVE_BONUS_ATK = 2;
+const EVOLVE_BONUS_HP = 3;
 
 function defaultState() {
   const owned = {};
-  Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1 }; });
+  Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; });
   return {
     playerName: 'プレイヤー',
     playerLevel: 20,
@@ -90,6 +94,8 @@ function loadState() {
       if (!saved.cards || !saved.cards[id]) {
         saved.cards = saved.cards || {};
         saved.cards[id] = base.cards[id];
+      } else if (saved.cards[id].evolved === undefined) {
+        saved.cards[id].evolved = false;
       }
     });
     return Object.assign(base, saved);
@@ -112,7 +118,7 @@ function cardArtStyle(def) {
   return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
 }
 
-function cardStatsLine(def) {
+function cardStatsLine(def, evolved) {
   const type = def.type || 'monster';
   if (type === 'spell') {
     const eff = def.effect || {};
@@ -129,7 +135,9 @@ function cardStatsLine(def) {
     if (eff.hp) parts.push(`❤+${eff.hp}`);
     return `<div class="cg-card-stats"><span class="cg-stat equip">装備</span><span class="cg-stat equip-val">${parts.join(' ')}</span></div>`;
   }
-  return `<div class="cg-card-stats"><span class="cg-stat atk">⚔ ${def.atk}</span><span class="cg-stat hp">❤ ${def.hp}</span></div>`;
+  const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
+  const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
+  return `<div class="cg-card-stats"><span class="cg-stat atk">⚔ ${atk}</span><span class="cg-stat hp">❤ ${hp}</span></div>`;
 }
 
 function renderCardFace(id, opts) {
@@ -139,15 +147,16 @@ function renderCardFace(id, opts) {
   const rarity = RARITY[def.rarity];
   const el = ELEMENTS[def.element];
   const small = opts.small ? ' cg-card-sm' : '';
+  const evolvedClass = opts.evolved ? ' evolved-glow' : '';
   const img = def.image
     ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
   return `
-    <div class="cg-card${small}" data-id="${id}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+    <div class="cg-card${small}${evolvedClass}" data-id="${id}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}</div>
+      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}</div>
       <div class="cg-card-name">${def.name}</div>
-      ${cardStatsLine(def)}
+      ${cardStatsLine(def, opts.evolved)}
       <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
     </div>`;
 }
@@ -180,7 +189,7 @@ function renderHome() {
 // ---------- デッキ編成画面 ----------
 function renderDeck() {
   const deckEl = document.getElementById('deck-slots');
-  deckEl.innerHTML = state.deck.map(id => renderCardFace(id, { small: true })).join('') +
+  deckEl.innerHTML = state.deck.map(id => renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })).join('') +
     (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/30`;
 
@@ -193,7 +202,7 @@ function renderDeck() {
   const owned = Object.keys(state.cards);
   collEl.innerHTML = owned.map(id => {
     const inDeck = state.deck.includes(id);
-    return `<div class="cg-coll-item ${inDeck ? 'in-deck' : ''}" data-id="${id}">${renderCardFace(id, { small: true })}</div>`;
+    return `<div class="cg-coll-item ${inDeck ? 'in-deck' : ''}" data-id="${id}">${renderCardFace(id, { small: true, evolved: state.cards[id].evolved })}</div>`;
   }).join('');
 
   collEl.querySelectorAll('.cg-coll-item').forEach(node => {
@@ -213,19 +222,21 @@ let selectedCardId = null;
 
 function renderCardList() {
   const listEl = document.getElementById('cardlist-grid');
-  listEl.innerHTML = Object.keys(state.cards).map(id => renderCardFace(id, { small: true })).join('');
+  listEl.innerHTML = Object.keys(state.cards).map(id => renderCardFace(id, { small: true, evolved: state.cards[id].evolved })).join('');
   listEl.querySelectorAll('.cg-card').forEach(node => {
     node.addEventListener('click', () => openCardDetail(node.dataset.id));
   });
 }
 
-function detailStatsBlock(def) {
+function detailStatsBlock(def, evolved) {
   const type = def.type || 'monster';
   if (type === 'monster') {
+    const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
+    const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
     return `
       <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
-      <div class="cg-detail-stat"><span>攻撃力</span><b>${def.atk}</b></div>
-      <div class="cg-detail-stat"><span>HP</span><b>${def.hp}</b></div>`;
+      <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}</b></div>
+      <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}</b></div>`;
   }
   return `
     <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
@@ -238,18 +249,27 @@ function openCardDetail(id) {
   const owned = state.cards[id];
   const el = ELEMENTS[def.element];
   const rarity = RARITY[def.rarity];
+  const isMonster = (def.type || 'monster') === 'monster';
   document.getElementById('detail-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
-      <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
+      <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${Math.min(100, owned.exp)}%"></div></div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        ${detailStatsBlock(def)}
+        ${detailStatsBlock(def, owned.evolved)}
       </div>
       <button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>
+      ${isMonster ? `
+        <div class="cg-evolve-row">
+          ${owned.evolved
+            ? `<div class="cg-evolve-done">★ 進化済み（⚔+${EVOLVE_BONUS_ATK} ❤+${EVOLVE_BONUS_HP} 適用中）</div>`
+            : `<button class="cg-btn cg-evolve-btn" id="detail-evolve-btn" ${owned.level < EVOLVE_LEVEL_REQ ? 'disabled' : ''}>
+                 ${owned.level < EVOLVE_LEVEL_REQ ? `進化はLv.${EVOLVE_LEVEL_REQ}で解放` : `進化 (💰${EVOLVE_COST})`}
+               </button>`}
+        </div>` : ''}
     </div>`;
   document.getElementById('detail-upgrade-btn').addEventListener('click', () => {
     if (state.gold >= 400) {
@@ -262,7 +282,22 @@ function openCardDetail(id) {
       renderHome();
     }
   });
+  const evolveBtn = document.getElementById('detail-evolve-btn');
+  if (evolveBtn) evolveBtn.addEventListener('click', () => evolveCard(id));
   showScreen('card-detail');
+}
+
+function evolveCard(id) {
+  const owned = state.cards[id];
+  const def = CARD_DEFS[id];
+  if (!owned || owned.evolved) return;
+  if ((def.type || 'monster') !== 'monster') return;
+  if (owned.level < EVOLVE_LEVEL_REQ || state.gold < EVOLVE_COST) return;
+  state.gold -= EVOLVE_COST;
+  owned.evolved = true;
+  saveState();
+  openCardDetail(id);
+  renderHome();
 }
 
 // ---------- バトルロジック ----------
@@ -304,9 +339,13 @@ function renderStageSelect() {
   });
 }
 
-function newBattleUnit(id) {
+function newBattleUnit(id, isPlayerCard) {
   const def = CARD_DEFS[id];
-  return { id, defId: id, def, curHp: def.hp, atkBonus: 0, hpBonus: 0, canAttack: false, justPlayed: true };
+  const owned = isPlayerCard ? state.cards[id] : null;
+  const evolved = !!(owned && owned.evolved);
+  const bonusAtk = evolved ? EVOLVE_BONUS_ATK : 0;
+  const bonusHp = evolved ? EVOLVE_BONUS_HP : 0;
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, canAttack: false, justPlayed: true };
 }
 
 function buildWeightedMonsterDeck(weights, count) {
@@ -434,14 +473,14 @@ function renderBattle() {
 
   const playerFieldEl = document.getElementById('battle-player-field');
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => u
-    ? `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`
+    ? `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`
     : `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`
   ).join('');
 
   const handEl = document.getElementById('battle-hand');
   handEl.innerHTML = battle.playerHand.map((id, i) => {
     const affordable = CARD_DEFS[id].cost <= battle.playerCost;
-    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true })}</div>`;
+    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}</div>`;
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
@@ -533,7 +572,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   const def = CARD_DEFS[id];
   if (!def || def.cost > battle.playerCost || battle.playerField[fieldIdx]) return;
   battle.playerCost -= def.cost;
-  battle.playerField[fieldIdx] = newBattleUnit(id);
+  battle.playerField[fieldIdx] = newBattleUnit(id, true);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   if (def.skill) skillFlash(`${def.name}のスキル！\n${def.skill}`);
@@ -776,7 +815,7 @@ function buyPack(packId) {
 function showReveal(cardId, leveledUp) {
   const def = CARD_DEFS[cardId];
   const rarity = RARITY[def.rarity];
-  document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId);
+  document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId, { evolved: state.cards[cardId].evolved });
   document.getElementById('shop-reveal-caption').innerHTML =
     `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` +
     (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
