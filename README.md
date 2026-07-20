@@ -1,2 +1,1 @@
-# MONSTER-CATAPULT
 # Lis-Noir
