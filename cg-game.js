@@ -1479,11 +1479,14 @@ function openCollectionScreen(seg) {
 // ---------- ショップ ----------
 const SHOP_PACKS = [
   { id: 'normal', name: 'ノーマルパック', icon: '📦', currency: 'gold', cost: 300,
-    desc: 'ノーマル〜レアが出やすい基本パック', weights: { normal: 60, rare: 30, epic: 8, legend: 2 } },
+    desc: 'ノーマル〜レアが出やすい基本パック', weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
+    preview: ['water_slime', 'nature_wolf', 'water_golem'] },
   { id: 'rare', name: 'レアパック', icon: '🎁', currency: 'gems', cost: 10,
-    desc: 'レア以上が確定で出るパック', weights: { normal: 0, rare: 65, epic: 28, legend: 7 } },
+    desc: 'レア以上が確定で出るパック', weights: { normal: 0, rare: 65, epic: 28, legend: 7 },
+    preview: ['nature_treant', 'dark_wolf', 'light_angel'] },
   { id: 'premium', name: 'プレミアムパック', icon: '👑', currency: 'gems', cost: 30,
-    desc: 'エピック以上が確定で出る豪華パック', weights: { normal: 0, rare: 0, epic: 70, legend: 30 } },
+    desc: 'エピック以上が確定で出る豪華パック', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
+    preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
 ];
 
 function pickWeightedCardId(weights) {
@@ -1507,14 +1510,29 @@ function renderShop() {
   wrap.innerHTML = SHOP_PACKS.map(pack => {
     const currencyIcon = pack.currency === 'gold' ? '💰' : '💎';
     const affordable = state[pack.currency] >= pack.cost;
+    const previewHtml = (pack.preview || []).map(id => {
+      const def = CARD_DEFS[id];
+      if (!def) return '';
+      const rarity = RARITY[def.rarity];
+      const img = def.image
+        ? `<img src="${def.image}" alt="${def.name}"/>`
+        : `<span>${def.emoji}</span>`;
+      return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}">${img}</div>`;
+    }).join('');
     return `
       <div class="cg-pack-card">
-        <div class="cg-pack-icon">${pack.icon}</div>
-        <div class="cg-pack-info">
-          <div class="cg-pack-name">${pack.name}</div>
-          <div class="cg-pack-desc">${pack.desc}</div>
+        <div class="cg-pack-top">
+          <div class="cg-pack-icon">${pack.icon}</div>
+          <div class="cg-pack-info">
+            <div class="cg-pack-name">${pack.name}</div>
+            <div class="cg-pack-desc">${pack.desc}</div>
+          </div>
+          <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
         </div>
-        <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
+        <div class="cg-pack-preview-row">
+          <span class="cg-pack-preview-label">収録例</span>
+          ${previewHtml}
+        </div>
       </div>`;
   }).join('');
   wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
@@ -1526,14 +1544,42 @@ function buyPack(packId) {
   const pack = SHOP_PACKS.find(p => p.id === packId);
   if (!pack || state[pack.currency] < pack.cost) return;
   state[pack.currency] -= pack.cost;
+  state.totalPacksOpened = (state.totalPacksOpened || 0) + 1;
+  saveState();
+  renderShop();
+  renderHome();
 
   const cardId = pickWeightedCardId(pack.weights);
+  showOpeningAnimation(pack, cardId);
+}
+
+function showOpeningAnimation(pack, cardId) {
+  const overlay = document.getElementById('shop-opening-overlay');
+  const inner = document.getElementById('opening-tap-zone');
+  const iconEl = document.getElementById('opening-pack-icon');
+  inner.classList.remove('bursting');
+  iconEl.textContent = pack.icon;
+  overlay.classList.remove('hidden');
+  sfxTap();
+
+  const openNow = () => {
+    inner.removeEventListener('click', openNow);
+    inner.classList.add('bursting');
+    sfxReveal();
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+      applyPackReward(cardId);
+    }, 480);
+  };
+  inner.addEventListener('click', openNow);
+}
+
+function applyPackReward(cardId) {
   const owned = state.cards[cardId];
   owned.count = (owned.count || 1) + 1;
   owned.exp += 20;
   let leveledUp = false;
   if (owned.exp >= 100) { owned.exp -= 100; owned.level += 1; leveledUp = true; }
-  state.totalPacksOpened = (state.totalPacksOpened || 0) + 1;
   saveState();
 
   showReveal(cardId, leveledUp);
