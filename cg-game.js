@@ -740,19 +740,19 @@ const STAGES = [
       { speaker: '森の狩人', portrait: '🏹', text: 'この森は我が縄張りだ。侵入者には容赦しない。' },
     ],
     storyVictory: { speaker: '森の狩人', portrait: '🏹', text: 'まさか…この森で敗れる日が来るとはな。' } },
-  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20, bgTheme: 'ruins',
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20, bgTheme: 'cave',
     weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: '深淵の魔導士', portrait: '🔮', text: 'ほう…なかなかやるようだね。だが、闇の力の前には無力さ。' },
     ],
     storyVictory: { speaker: '深淵の魔導士', portrait: '🔮', text: '……面白い。この程度で終わるとはな。' } },
-  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28, bgTheme: 'shrine',
+  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28, bgTheme: 'volcano',
     weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の巫女', portrait: '🐲', text: '我が竜の力、その身に刻んでみせよ。' },
     ],
     storyVictory: { speaker: '竜の巫女', portrait: '🐲', text: '……負けたか。だが、それも巫女としての試練。' } },
-  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35, bgTheme: 'volcano',
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35, bgTheme: 'castle',
     weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
@@ -835,17 +835,22 @@ function buildWeightedMonsterDeck(weights, count, spellChance) {
 }
 
 const BATTLE_BG_THEMES = {
-  forest:  'radial-gradient(ellipse 340px 220px at 50% 45%, #2d6a4444 0%, transparent 70%)',
-  snow:    'radial-gradient(ellipse 340px 220px at 50% 45%, #4a7a9944 0%, transparent 70%)',
-  ruins:   'radial-gradient(ellipse 340px 220px at 50% 45%, #6b573344 0%, transparent 70%)',
-  shrine:  'radial-gradient(ellipse 340px 220px at 50% 45%, #8a6d2e4d 0%, transparent 70%)',
-  volcano: 'radial-gradient(ellipse 340px 220px at 50% 45%, #8a2e2244 0%, transparent 70%)',
+  forest:  'battle-bg-forest.jpg',
+  snow:    'battle-bg-snow.jpg',
+  cave:    'battle-bg-cave.jpg',
+  volcano: 'battle-bg-volcano.jpg',
+  castle:  'battle-bg-castle.jpg',
 };
 
 function applyBattleBgTheme(theme) {
   const board = document.querySelector('.cg-battle-board');
   if (!board) return;
-  board.style.background = BATTLE_BG_THEMES[theme] || BATTLE_BG_THEMES.forest;
+  const img = BATTLE_BG_THEMES[theme] || BATTLE_BG_THEMES.forest;
+  board.style.backgroundImage =
+    `linear-gradient(180deg, #1A1725b8 0%, #1A1725d9 50%, #1A1725b8 100%), url('${img}')`;
+  board.style.backgroundSize = 'cover';
+  board.style.backgroundPosition = 'center';
+  board.style.backgroundRepeat = 'no-repeat';
 }
 
 function startBattle(stage) {
