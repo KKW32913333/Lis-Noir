@@ -16,6 +16,11 @@ import {
   doc,
   setDoc,
   getDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -88,5 +93,20 @@ window.LisNoirCloud = {
     if (!snap.exists()) return null;
     const raw = snap.data();
     return raw && raw.data ? JSON.parse(raw.data) : null;
+  },
+  async updateLeaderboard(displayName, trophy) {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'leaderboard', currentUser.uid), {
+      displayName: displayName || 'プレイヤー',
+      trophy: trophy || 0,
+      updatedAt: Date.now(),
+    });
+  },
+  async getLeaderboard(topN) {
+    const q = query(collection(db, 'leaderboard'), orderBy('trophy', 'desc'), limit(topN || 50));
+    const snap = await getDocs(q);
+    const list = [];
+    snap.forEach((d) => list.push({ uid: d.id, ...d.data() }));
+    return list;
   },
 };

@@ -78,6 +78,8 @@
   .cg-progress-track{height:6px; background:#e4e6ea; border-radius:4px; overflow:hidden;}
   .cg-progress-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-progress-fill.cyan{background:linear-gradient(90deg,#3a9d92,var(--cyan));}
+  .cg-daily-claim-btn{width:100%; margin-top:6px; font-size:10px; padding:5px; border-radius:8px; border:none; cursor:pointer;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#fff; font-weight:700;}
 
   /* ---------- Card component ---------- */
   .cg-card{position:relative; width:100%; aspect-ratio:3/4; border-radius:12px; overflow:hidden;
@@ -459,6 +461,20 @@
   .cg-dragon-stage-row .em{font-size:22px; flex-shrink:0;}
   .cg-dragon-stage-row .lv{margin-left:auto; font-size:10px; color:var(--text-dim);}
 
+  /* ---------- ランキング ---------- */
+  .cg-rank-list{display:flex; flex-direction:column; gap:6px; padding:10px 14px 20px;}
+  .cg-rank-row{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
+    background:var(--bg-panel); border:1px solid var(--hairline-panel);}
+  .cg-rank-row.me{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-soft);}
+  .cg-rank-pos{width:26px; text-align:center; font-size:13px; font-weight:800; color:var(--text-dim-panel); flex-shrink:0;}
+  .cg-rank-row:nth-child(1) .cg-rank-pos{color:#e0b23a;}
+  .cg-rank-row:nth-child(2) .cg-rank-pos{color:#9aa3ad;}
+  .cg-rank-row:nth-child(3) .cg-rank-pos{color:#b5793f;}
+  .cg-rank-name{flex:1; min-width:0; font-size:13px; font-weight:600; color:var(--text-panel); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cg-rank-trophy{flex-shrink:0; font-size:12px; color:var(--gold-bright); font-weight:700;}
+  .cg-rank-empty{text-align:center; color:var(--text-dim); font-size:12px; padding:30px 20px; line-height:1.7;}
+  .cg-rank-login-btn{display:block; margin:14px auto 0;}
+
   /* ---------- ストーリー会話 ---------- */
   .cg-story-overlay{position:absolute; inset:0; z-index:70; display:flex; align-items:flex-end; justify-content:center;
     background:#00000055; opacity:1; transition:opacity .2s ease; padding:16px;}
@@ -514,7 +530,7 @@
       <div class="cg-hero-title cg-brand">LIS NOIR ― CARD BATTLE</div>
     </div>
 
-    <div class="cg-rankcard">
+    <div class="cg-rankcard" id="rank-card-btn" style="cursor:pointer;">
       <div class="cg-rankcard-left">
         <div class="cg-rankcard-avatar">🛡️</div>
         <div>
@@ -523,7 +539,7 @@
         </div>
       </div>
       <div class="cg-rankcard-right">
-        <div class="cg-rankcard-label">次のランクまで</div>
+        <div class="cg-rankcard-label">次のランクまで（タップでランキング表示）</div>
         <div class="cg-rankcard-track"><div class="cg-rankcard-fill" id="rank-fill"></div></div>
         <div class="cg-rankcard-sub" id="rank-sub">🏆 0 / 0</div>
       </div>
@@ -553,6 +569,7 @@
       <div class="cg-progress-card">
         <div class="cg-progress-label"><span>デイリー報酬</span><span id="daily-label">0/0</span></div>
         <div class="cg-progress-track"><div class="cg-progress-fill" id="daily-fill"></div></div>
+        <button class="cg-daily-claim-btn hidden" id="daily-claim-btn">受け取る</button>
       </div>
       <div class="cg-progress-card">
         <div class="cg-progress-label"><span>勝利報酬</span><span id="win-label">0/0</span></div>
@@ -738,6 +755,10 @@
     <div class="cg-help-panel">
       <div class="cg-help-title">設定・データ管理</div>
       <div class="cg-help-body">
+        <div class="cg-settings-section" style="border-top:none; padding-top:0;">
+          <div class="cg-settings-label">🔊 効果音</div>
+          <button class="cg-btn cg-settings-action-btn" id="sfx-toggle-btn">効果音: ON</button>
+        </div>
         <div class="cg-help-item">
           <b>⚠️ 保存の注意点</b><br>
           セーブデータはこの端末のブラウザ内にのみ保存されています。アプリを消しても残りますが、Safariで「履歴とWebサイトデータを消去」を行うと消えてしまいます。機種変更・バックアップの際は、下記の「バックアップコード」を必ず保存してください。
@@ -810,6 +831,15 @@
       <div class="cg-dragon-stages-title">成長段階</div>
       <div id="dragon-stages-list" class="cg-dragon-stages-list"></div>
     </div>
+  </section>
+
+  <!-- ============ ランキング画面 ============ -->
+  <section id="screen-ranking" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-ranking">←</button>
+      <span class="cg-section-title" style="padding:0;">ランキング</span>
+    </div>
+    <div id="ranking-body"></div>
   </section>
 
   <!-- ============ ランクマッチ結果画面 ============ -->

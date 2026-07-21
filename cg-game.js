@@ -76,13 +76,14 @@ function defaultState() {
     gold: 25300,
     gems: 1250,
     trophy: 1250,
-    dailyProgress: 3, dailyMax: 5,
+    dailyDate: '', dailyProgress: 0, dailyMax: 5, dailyClaimed: false,
     winProgress: 1, winMax: 3,
     totalWins: 0,
     totalPacksOpened: 0,
     totalUpgrades: 0,
     stageProgress: 1,
     hasSeenBattleHelp: false,
+    sfxMuted: false,
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
     cards: owned,
@@ -129,6 +130,7 @@ function scheduleCloudSync() {
     window.LisNoirCloud.saveCloud(state)
       .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
       .catch((err) => { console.error('cloud save failed', err); setCloudSyncStatus('⚠️ 同期に失敗しました'); });
+    window.LisNoirCloud.updateLeaderboard(state.playerName, state.trophy).catch((err) => console.error('leaderboard update failed', err));
   }, 1500);
 }
 
@@ -224,10 +226,23 @@ function openSettings() {
   document.getElementById('backup-copy-status').textContent = '';
   document.getElementById('backup-restore-status').textContent = '';
   document.getElementById('auth-status').textContent = '';
+  updateSfxToggleLabel();
   if (window.LisNoirCloud && window.LisNoirCloud.getUser()) {
     setCloudSyncStatus('同期状態を確認中…');
   }
   document.getElementById('settings-overlay').classList.remove('hidden');
+}
+
+function updateSfxToggleLabel() {
+  const btn = document.getElementById('sfx-toggle-btn');
+  if (btn) btn.textContent = state.sfxMuted ? '効果音: OFF' : '効果音: ON';
+}
+
+function toggleSfx() {
+  state.sfxMuted = !state.sfxMuted;
+  saveState();
+  updateSfxToggleLabel();
+  if (!state.sfxMuted) sfxTap();
 }
 
 function copyBackupCode() {
@@ -354,7 +369,44 @@ const RANK_TIERS = [
   { name: 'ダイヤモンド', min: 3500 },
 ];
 
+const DAILY_REWARD_GOLD = 300;
+const DAILY_REWARD_GEMS = 10;
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function checkDailyReset() {
+  const today = todayStr();
+  if (state.dailyDate !== today) {
+    state.dailyDate = today;
+    state.dailyProgress = 0;
+    state.dailyClaimed = false;
+    saveState();
+  }
+}
+
+function gainDailyProgress() {
+  checkDailyReset();
+  if (state.dailyProgress < state.dailyMax) {
+    state.dailyProgress = Math.min(state.dailyMax, state.dailyProgress + 1);
+    saveState();
+  }
+}
+
+function claimDailyReward() {
+  checkDailyReset();
+  if (state.dailyProgress < state.dailyMax || state.dailyClaimed) return;
+  state.gold += DAILY_REWARD_GOLD;
+  state.gems += DAILY_REWARD_GEMS;
+  state.dailyClaimed = true;
+  saveState();
+  renderHome();
+}
+
 function renderHome() {
+  checkDailyReset();
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -362,6 +414,12 @@ function renderHome() {
   document.getElementById('home-name').textContent = state.playerName;
   document.getElementById('daily-fill').style.width = (state.dailyProgress / state.dailyMax * 100) + '%';
   document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
+  const dailyDone = state.dailyProgress >= state.dailyMax;
+  const dailyBtn = document.getElementById('daily-claim-btn');
+  if (dailyBtn) {
+    dailyBtn.classList.toggle('hidden', !dailyDone || state.dailyClaimed);
+    dailyBtn.textContent = state.dailyClaimed ? '受取済み' : `受け取る（💰${DAILY_REWARD_GOLD} 💎${DAILY_REWARD_GEMS}）`;
+  }
   document.getElementById('win-fill').style.width = (state.winProgress / state.winMax * 100) + '%';
   document.getElementById('win-label').textContent = `${state.winProgress}/${state.winMax}`;
 
@@ -478,6 +536,38 @@ function renderDragon() {
       <span class="em">${s.emoji}</span><span>${s.name}</span><span class="lv">Lv.${s.minLevel}〜</span>
     </div>`;
   }).join('');
+}
+
+// ---------- ランキング ----------
+async function renderRanking() {
+  const wrap = document.getElementById('ranking-body');
+  const user = window.LisNoirCloud && window.LisNoirCloud.getUser();
+  if (!user) {
+    wrap.innerHTML = `
+      <div class="cg-rank-empty">
+        ランキングを見るには、ログインが必要です。<br>ログインすると、あなたのトロフィー数も他のプレイヤーと比較されるようになります。
+      </div>
+      <button class="cg-btn cg-btn-main cg-rank-login-btn" id="rank-goto-settings-btn">ログインする</button>`;
+    document.getElementById('rank-goto-settings-btn').addEventListener('click', () => {
+      showScreen('home');
+      openSettings();
+    });
+    return;
+  }
+  wrap.innerHTML = '<div class="cg-rank-empty">読み込み中…</div>';
+  try {
+    const list = await window.LisNoirCloud.getLeaderboard(50);
+    if (!list.length) { wrap.innerHTML = '<div class="cg-rank-empty">まだランキングデータがありません。</div>'; return; }
+    wrap.innerHTML = `<div class="cg-rank-list">${list.map((entry, i) => `
+      <div class="cg-rank-row ${entry.uid === user.uid ? 'me' : ''}">
+        <div class="cg-rank-pos">${i + 1}</div>
+        <div class="cg-rank-name">${entry.displayName || 'プレイヤー'}${entry.uid === user.uid ? '（あなた）' : ''}</div>
+        <div class="cg-rank-trophy">🏆 ${(entry.trophy || 0).toLocaleString()}</div>
+      </div>`).join('')}</div>`;
+  } catch (e) {
+    console.error('leaderboard fetch failed', e);
+    wrap.innerHTML = '<div class="cg-rank-empty">ランキングの取得に失敗しました。時間をおいて再度お試しください。</div>';
+  }
 }
 
 
@@ -637,32 +727,32 @@ function evolveCard(id) {
 let battle = null;
 
 const STAGES = [
-  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16,
+  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16, spellChance: 0.05,
     weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '霧深い森の入り口。若きモンスター使いが行く手を阻む。' },
       { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'ふふ…僕の練習相手になってもらうよ！' },
     ],
     storyVictory: { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'く…まだまだ僕は未熟だったようだ…' } },
-  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20,
+  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20, spellChance: 0.12,
     weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '森の狩人', portrait: '🏹', text: 'この森は我が縄張りだ。侵入者には容赦しない。' },
     ],
     storyVictory: { speaker: '森の狩人', portrait: '🏹', text: 'まさか…この森で敗れる日が来るとはな。' } },
-  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26,
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20,
     weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: '深淵の魔導士', portrait: '🔮', text: 'ほう…なかなかやるようだね。だが、闇の力の前には無力さ。' },
     ],
     storyVictory: { speaker: '深淵の魔導士', portrait: '🔮', text: '……面白い。この程度で終わるとはな。' } },
-  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32,
+  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28,
     weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の巫女', portrait: '🐲', text: '我が竜の力、その身に刻んでみせよ。' },
     ],
     storyVictory: { speaker: '竜の巫女', portrait: '🐲', text: '……負けたか。だが、それも巫女としての試練。' } },
-  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38,
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35,
     weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
@@ -728,10 +818,16 @@ function newBattleUnit(id, isPlayerCard) {
   return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, canAttack: false, justPlayed: true };
 }
 
-function buildWeightedMonsterDeck(weights, count) {
+function buildWeightedMonsterDeck(weights, count, spellChance) {
   const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster');
+  const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster');
+  const chance = spellChance || 0;
   const deck = [];
   for (let i = 0; i < count; i++) {
+    if (otherIds.length && Math.random() < chance) {
+      deck.push(otherIds[Math.floor(Math.random() * otherIds.length)]);
+      continue;
+    }
     const id = pickWeightedCardId(weights);
     deck.push(monsterIds.includes(id) ? id : monsterIds[Math.floor(Math.random() * monsterIds.length)]);
   }
@@ -741,7 +837,7 @@ function buildWeightedMonsterDeck(weights, count) {
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
-  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20));
+  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20, stage.spellChance || 0));
   const dragonHpBonus = getDragonBonusHp();
 
   battle = {
@@ -824,7 +920,43 @@ function impactEffect() {
     void flash.offsetWidth;
     flash.classList.add('show');
   }
+  sfxAttack();
 }
+
+// ---------- サウンド（合成音） ----------
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  return audioCtx;
+}
+
+function playTone(freq, duration, type, volume, delay) {
+  if (state.sfxMuted) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  const t0 = ctx.currentTime + (delay || 0);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(volume || 0.15, t0 + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + duration + 0.02);
+}
+
+function sfxTap() { playTone(600, 0.06, 'triangle', 0.07); }
+function sfxCardPlay() { playTone(440, 0.09, 'sine', 0.11); playTone(660, 0.09, 'sine', 0.09, 0.05); }
+function sfxAttack() { playTone(120, 0.15, 'sawtooth', 0.13); }
+function sfxWin() { [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.25, 'triangle', 0.13, i * 0.12)); }
+function sfxLose() { [400, 300, 220].forEach((f, i) => playTone(f, 0.35, 'sine', 0.11, i * 0.18)); }
+function sfxReveal() { playTone(880, 0.12, 'triangle', 0.13); playTone(1108, 0.15, 'triangle', 0.11, 0.08); }
 
 function fieldBonusFor(unit) {
   if (!battle || !battle.fieldCard) return 0;
@@ -1033,6 +1165,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.playerField[fieldIdx] = newBattleUnit(id, true);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
+  sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}のスキル！\n${def.skill}`);
   renderBattle();
 }
@@ -1044,6 +1177,7 @@ function castSpell(handIdx, targetIdx) {
   battle.playerCost -= def.cost;
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
+  sfxCardPlay();
 
   const eff = def.effect || {};
   if (eff.kind === 'damage') {
@@ -1078,6 +1212,7 @@ function playFieldCard(handIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   battle.fieldCard = id;
+  sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}発動！\n${def.skill}`);
   renderBattle();
 }
@@ -1094,6 +1229,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   unit.curHp += (eff.hp || 0);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
+  sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}を装備！\n${def.skill}`);
   renderBattle();
 }
@@ -1139,28 +1275,103 @@ function enemyTurn() {
   battle.enemyCost = battle.enemyMaxCost;
   if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
 
-  // 簡易AI: 出せるモンスターカードを場が空いていれば出す（スペル/装備はAI側では未使用）
-  battle.enemyHand.slice().forEach(id => {
-    const def = CARD_DEFS[id];
-    const emptyIdx = battle.enemyField.findIndex(s => s === null);
-    if ((def.type || 'monster') === 'monster' && def.cost <= battle.enemyCost && emptyIdx !== -1) {
-      battle.enemyCost -= def.cost;
-      battle.enemyField[emptyIdx] = newBattleUnit(id);
-      battle.enemyHand.splice(battle.enemyHand.indexOf(id), 1);
+  // AI: モンスター配置 → 装備 → フィールド → スペルの優先順で、出せるカードを出し続ける
+  let progressed = true;
+  let guard = 0;
+  while (progressed && guard < 30) {
+    progressed = false;
+    guard++;
+    for (let i = 0; i < battle.enemyHand.length; i++) {
+      const id = battle.enemyHand[i];
+      const def = CARD_DEFS[id];
+      const type = def.type || 'monster';
+      if (def.cost > battle.enemyCost) continue;
+
+      if (type === 'monster') {
+        const emptyIdx = battle.enemyField.findIndex(s => s === null);
+        if (emptyIdx === -1) continue;
+        battle.enemyCost -= def.cost;
+        battle.enemyField[emptyIdx] = newBattleUnit(id);
+        battle.enemyHand.splice(i, 1);
+        progressed = true;
+        break;
+      }
+
+      if (type === 'equipment' && def.target === 'friendly') {
+        const targetIdx = battle.enemyField.findIndex(u => u !== null);
+        if (targetIdx === -1) continue;
+        const eff = def.effect || {};
+        const unit = battle.enemyField[targetIdx];
+        unit.atkBonus = (unit.atkBonus || 0) + (eff.atk || 0);
+        unit.hpBonus = (unit.hpBonus || 0) + (eff.hp || 0);
+        unit.curHp += (eff.hp || 0);
+        battle.enemyCost -= def.cost;
+        battle.enemyHand.splice(i, 1);
+        progressed = true;
+        skillFlash(`${def.name}を装備！\n${def.skill}`);
+        break;
+      }
+
+      if (type === 'field') {
+        if (battle.fieldCard) continue; // 既にフィールドが出ているなら他を優先
+        battle.fieldCard = id;
+        battle.enemyCost -= def.cost;
+        battle.enemyHand.splice(i, 1);
+        progressed = true;
+        skillFlash(`${def.name}発動！\n${def.skill}`);
+        break;
+      }
+
+      if (type === 'spell') {
+        const eff = def.effect || {};
+        if (def.target === 'enemy') {
+          // AI視点の「敵」＝プレイヤー側
+          battle.enemyCost -= def.cost;
+          battle.enemyHand.splice(i, 1);
+          if (eff.kind === 'damage') {
+            impactEffect();
+            const targetIdx = battle.playerField.findIndex(u => u !== null);
+            if (targetIdx !== -1) {
+              battle.playerField[targetIdx].curHp -= eff.value;
+              if (battle.playerField[targetIdx].curHp <= 0) battle.playerField[targetIdx] = null;
+            } else {
+              battle.playerHp -= eff.value;
+            }
+          }
+          skillFlash(`${def.name}！\n${def.skill}`);
+          progressed = true;
+          break;
+        }
+        if ((def.target || 'none') === 'none') {
+          battle.enemyCost -= def.cost;
+          battle.enemyHand.splice(i, 1);
+          if (eff.kind === 'heal') {
+            battle.enemyHp = Math.min(battle.stage.hp, battle.enemyHp + (eff.value || 0));
+          } else if (eff.kind === 'draw') {
+            for (let k = 0; k < (eff.value || 0); k++) {
+              if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
+            }
+          }
+          skillFlash(`${def.name}！\n${def.skill}`);
+          progressed = true;
+          break;
+        }
+      }
     }
-  });
+  }
+  battle.playerField = battle.playerField.map(u => (u && u.curHp <= 0) ? null : u);
+
   // 攻撃可能な既存ユニットで攻撃
   battle.enemyField.forEach((u, i) => {
     if (u && u.canAttack) {
-      const mult = elementMultiplier(u.def.element, 'none');
       const targetIdx = battle.playerField.findIndex(p => p !== null);
       impactEffect();
       if (targetIdx !== -1) {
         const target = battle.playerField[targetIdx];
-        target.curHp -= Math.max(1, u.def.atk + fieldBonusFor(u));
+        target.curHp -= Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
         if (target.curHp <= 0) battle.playerField[targetIdx] = null;
       } else {
-        battle.playerHp -= Math.max(1, u.def.atk + fieldBonusFor(u));
+        battle.playerHp -= Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
       }
     }
   });
@@ -1178,6 +1389,8 @@ function enemyTurn() {
 
 function showResult(won) {
   const stage = battle.stage || STAGES[0];
+  gainDailyProgress();
+  if (won) sfxWin(); else sfxLose();
   const el = document.getElementById('result-title');
   el.textContent = won ? 'WIN' : 'LOSE';
   el.className = won ? 'cg-result-title win' : 'cg-result-title lose';
@@ -1291,6 +1504,7 @@ function buyPack(packId) {
 function showReveal(cardId, leveledUp) {
   const def = CARD_DEFS[cardId];
   const rarity = RARITY[def.rarity];
+  sfxReveal();
   document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId, { evolved: state.cards[cardId].evolved });
   document.getElementById('shop-reveal-caption').innerHTML =
     `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` +
@@ -1368,6 +1582,9 @@ function claimMission(missionId) {
 // ---------- 初期化 ----------
 function init() {
   renderHome();
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-btn, .cg-stage-card, .cg-help-btn')) sfxTap();
+  });
   document.getElementById('nav-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
   document.getElementById('nav-battle').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
   document.getElementById('nav-cards').addEventListener('click', () => openCollectionScreen('deck'));
@@ -1412,6 +1629,7 @@ function init() {
     document.getElementById('card-info-overlay').classList.add('hidden');
   });
   document.getElementById('settings-btn').addEventListener('click', openSettings);
+  document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
   document.getElementById('settings-close').addEventListener('click', () => {
     document.getElementById('settings-overlay').classList.add('hidden');
   });
@@ -1427,6 +1645,8 @@ function init() {
       .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
       .catch(() => setCloudSyncStatus('⚠️ 同期に失敗しました'));
   });
+  document.getElementById('daily-claim-btn').addEventListener('click', claimDailyReward);
+  document.getElementById('rank-card-btn').addEventListener('click', () => { renderRanking(); showScreen('ranking'); });
   if (window.LisNoirCloud) {
     window.LisNoirCloud.onAuthChange((user) => {
       refreshCloudAuthUI(user);
