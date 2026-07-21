@@ -8,7 +8,7 @@ const ELEMENTS = {
   water:  { name: '水',  color: '#3f6f8f', icon: '💧' },
   nature: { name: '自然', color: '#5f7a3f', icon: '🌿' },
   light:  { name: '光',  color: '#a9822f', icon: '✨' },
-  dark:   { name: '闇',  color: '#6b4a96', icon: '🌙' },
+  dark:   { name: '闇',  color: '#5A2D91', icon: '🌙' },
 };
 // 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
@@ -16,8 +16,8 @@ const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light
 const RARITY = {
   normal: { name: 'ノーマル', color: '#8a8c96', glow: 'none' },
   rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
-  epic:   { name: 'エピック', color: '#6D4AB7', glow: '0 0 14px #C9B3FFaa' },
-  legend: { name: 'レジェンド', color: '#B8892E', glow: '0 0 18px #D9B15Dcc' },
+  epic:   { name: 'エピック', color: '#5A2D91', glow: '0 0 14px #C7B6FFaa' },
+  legend: { name: 'レジェンド', color: '#B8892E', glow: '0 0 18px #D9B45Bcc' },
 };
 
 // ---------- カードマスターデータ ----------

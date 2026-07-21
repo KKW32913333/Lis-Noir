@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Lis Noir - CARD BATTLE</title>
-<meta name="theme-color" content="#EDEDF0">
+<meta name="theme-color" content="#F7F5FF">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -14,27 +14,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#F5F4F8;
+    --bg-deep:#F7F5FF;
     --bg-panel:#FFFFFF;
-    --bg-panel2:#F5F4F8;
-    --gold:#6D4AB7;
-    --gold-bright:#8F6FD1;
-    --gold-soft:#6D4AB733;
-    --purple:#9098A8;
-    --lavender:#C9B3FF;
-    --true-gold:#D9B15D;
+    --bg-panel2:#EDEBFF;
+    --gold:#5A2D91;
+    --gold-bright:#8A4FFF;
+    --gold-soft:#8A4FFF26;
+    --purple:#C9D0E3;
+    --lavender:#C7B6FF;
+    --true-gold:#D9B45B;
     --wine:#A23347;
     --cyan:#7A93A8;
-    --text:#1A1725;
-    --text-panel:#1A1725;
-    --text-dim:#5a5766;
-    --text-dim-panel:#5a5766;
+    --text:#2A1E4F;
+    --text-panel:#2A1E4F;
+    --text-dim:#5A2D91;
+    --text-dim-panel:#5A2D91;
     --hp-red:#c1495e;
-    --hairline:#ddd8ea;
-    --hairline-panel:#ddd8ea;
-    --dark-chip:#1A1725cc;
-    --bg-dark:#1A1725;
-    --bg-dark2:#241f33;
+    --hairline:#C9D0E3;
+    --hairline-panel:#C9D0E3;
+    --dark-chip:#3A1F63cc;
+    --bg-dark:#3A1F63;
+    --bg-dark2:#5A2D91;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; height:100%; background:var(--bg-deep); color:var(--text);
@@ -70,14 +70,34 @@
   /* ---------- 装飾強化：二重枠（額縁風） ---------- */
   .cg-double-frame{outline:1px solid var(--gold-soft); outline-offset:3px;}
 
+  /* ---------- 全画面共通装飾：百合シルエット・光の粒子 ---------- */
+  .cg-global-deco{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+  .cg-lily{position:absolute; width:220px; height:220px; opacity:.05;}
+  .cg-lily-1{top:2%; left:-8%; fill:#FFFFFF; transform:rotate(-15deg);}
+  .cg-lily-2{bottom:-4%; right:-10%; width:260px; height:260px; fill:#1A0F2E; opacity:.06; transform:rotate(20deg);}
+  .cg-deco-particles span{position:absolute; bottom:-6px; width:3px; height:3px; border-radius:50%;
+    background:radial-gradient(circle, #FFFFFF, transparent 70%); opacity:0; animation:cgDecoRise 9s ease-in infinite;}
+  .cg-deco-particles span:nth-child(1){left:12%; animation-delay:0s;}
+  .cg-deco-particles span:nth-child(2){left:28%; animation-delay:1.6s; background:radial-gradient(circle,#8A4FFF,transparent 70%);}
+  .cg-deco-particles span:nth-child(3){left:46%; animation-delay:3.2s;}
+  .cg-deco-particles span:nth-child(4){left:64%; animation-delay:4.8s; background:radial-gradient(circle,#8A4FFF,transparent 70%);}
+  .cg-deco-particles span:nth-child(5){left:80%; animation-delay:6.4s;}
+  .cg-deco-particles span:nth-child(6){left:92%; animation-delay:2.4s; background:radial-gradient(circle,#D9B45B,transparent 70%);}
+  @keyframes cgDecoRise{
+    0%{opacity:0; transform:translateY(0) scale(.6);}
+    12%{opacity:.7;}
+    88%{opacity:.3;}
+    100%{opacity:0; transform:translateY(-100vh) scale(1.3);}
+  }
+
   #app{position:relative; width:100%; height:100vh; height:100dvh; max-width:640px; margin:0 auto;
     background:
-      radial-gradient(circle at 15% 8%, #6D4AB71a 0%, transparent 45%),
-      radial-gradient(circle at 88% 92%, #9098A81a 0%, transparent 50%),
-      linear-gradient(160deg, #f9f8fb 0%, #F5F4F8 45%, #efedf5 100%);
+      radial-gradient(circle at 20% 15%, #FFFFFF66 0%, transparent 40%),
+      radial-gradient(circle at 80% 85%, #3A1F6333 0%, transparent 50%),
+      linear-gradient(180deg, #FFFFFF 0%, #EDEBFF 30%, #C7B6FF 65%, #5A2D91 100%);
     overflow:hidden; box-shadow:0 0 60px #00000022;}
 
-  .cg-screen{position:absolute; inset:0; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden;}
+  .cg-screen{position:absolute; inset:0; z-index:1; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden;}
   .cg-screen.active{display:flex;}
 
   /* ---------- Top status bar ---------- */
@@ -85,7 +105,7 @@
     background:linear-gradient(180deg,var(--bg-panel2),var(--bg-panel)); border-bottom:1px solid var(--hairline-panel); flex-shrink:0;
     color:var(--text-panel); box-shadow:0 2px 10px #00000033;}
   .cg-player-info{display:flex; align-items:center; gap:8px; min-width:0;}
-  .cg-avatar{width:36px; height:36px; border-radius:50%; background:linear-gradient(145deg,var(--purple),#5c3a8a);
+  .cg-avatar{width:36px; height:36px; border-radius:50%; background:linear-gradient(145deg,var(--gold-bright),var(--gold));
     display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid var(--gold-bright); flex-shrink:0;
     box-shadow:0 2px 6px #00000044;}
   .cg-player-name{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -143,8 +163,8 @@
   .cg-progress-track{height:6px; background:#e4e6ea; border-radius:4px; overflow:hidden;}
   .cg-progress-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-progress-fill.cyan{background:linear-gradient(90deg,#3a9d92,var(--cyan));}
-  .cg-daily-claim-btn{width:100%; margin-top:6px; font-size:10px; padding:5px; border-radius:8px; border:none; cursor:pointer;
-    background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#fff; font-weight:700;}
+  .cg-daily-claim-btn{width:100%; margin-top:6px; font-size:10px; padding:5px; border-radius:8px; cursor:pointer;
+    background:var(--bg-panel); border:1.5px solid var(--gold-bright); color:var(--gold); font-weight:700;}
 
   /* ---------- Card component ---------- */
   .cg-card{position:relative; width:100%; aspect-ratio:3/4; border-radius:12px; overflow:hidden;
@@ -164,7 +184,7 @@
   .cg-card-stats{display:flex; justify-content:space-between; padding:2px 5px 4px; font-size:10px;}
   .cg-card-stats .atk{color:#95491f; font-weight:800;}
   .cg-card-stats .hp{color:#3f6b30; font-weight:800;}
-  .cg-card-stats .spell{color:var(--purple);}
+  .cg-card-stats .spell{color:var(--gold);}
   .cg-card-stats .spell-val{color:var(--gold-bright);}
   .cg-card-stats .equip{color:var(--text-dim-panel);}
   .cg-card-stats .equip-val{color:var(--gold-bright);}
@@ -182,7 +202,7 @@
   .cg-segment{flex:1; display:flex; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:20px; padding:3px; margin-left:6px;}
   .cg-seg-btn{flex:1; border:none; background:none; color:var(--text-dim-panel); font-family:inherit; font-size:12px;
     padding:8px 4px; border-radius:16px; cursor:pointer;}
-  .cg-seg-btn.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; font-weight:700;}
+  .cg-seg-btn.active{background:var(--bg-panel); border:1.5px solid var(--gold-bright); color:var(--gold); font-weight:700;}
 
   /* ---------- Card list / detail ---------- */
   #cardlist-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:14px; flex:1;}
@@ -193,7 +213,7 @@
   .cg-detail-name{font-size:18px; font-weight:700;}
   .cg-detail-level{font-size:12px; color:var(--text-dim); margin:4px 0 8px;}
   .cg-detail-bar{height:6px; background:var(--hairline); border-radius:4px; overflow:hidden; margin-bottom:10px;}
-  .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--purple),#a98fd6);}
+  .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-detail-desc{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
   .cg-detail-stats{display:flex; justify-content:center; gap:18px; margin:14px 0;}
   .cg-detail-stat{text-align:center; font-size:11px; color:var(--text-dim);}
@@ -204,9 +224,9 @@
     background:var(--bg-panel2); color:var(--text-panel); transition:transform .1s, box-shadow .15s;
     font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
   .cg-btn:active{transform:scale(.96);}
-  .cg-btn-main{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; border-color:var(--gold-bright);
-    box-shadow:0 3px 12px #6D4AB755, 0 0 0 1px #6D4AB722;}
-  .cg-btn-main:active{box-shadow:0 1px 6px #6D4AB799, 0 0 14px #C9B3FF88;}
+  .cg-btn-main{background:var(--bg-panel); color:var(--gold); border:1.5px solid var(--gold-bright);
+    box-shadow:0 3px 10px #8A4FFF26;}
+  .cg-btn-main:active{background:linear-gradient(180deg,var(--bg-panel2),var(--lavender)); box-shadow:0 1px 6px #8A4FFF40;}
   .cg-back-btn{background:none; border:none; color:var(--text); font-size:18px; cursor:pointer; padding:10px 14px;}
   .cg-top-row{display:flex; align-items:center; justify-content:space-between; padding:6px 4px 14px; position:relative; margin-bottom:4px;}
 
@@ -220,7 +240,7 @@
   .cg-timer{font-size:11px; color:var(--true-gold); text-align:center; background:#00000055; padding:3px 12px; border-radius:12px; letter-spacing:1px;}
 
   .cg-battle-board{flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:6px 10px; position:relative;
-    background:radial-gradient(ellipse 300px 200px at 50% 45%, #6D4AB733 0%, transparent 70%);}
+    background:radial-gradient(ellipse 300px 200px at 50% 45%, #8A4FFF33 0%, transparent 70%);}
   #battle-enemy-portrait{position:absolute; top:2px; right:10px; width:50px; height:50px; border-radius:50%;
     background:linear-gradient(145deg,#3a2530,#1c1d24); border:2px solid var(--hp-red); display:flex; align-items:center;
     justify-content:center; font-size:22px; cursor:pointer; z-index:3; box-shadow:0 0 12px #A2334755;}
@@ -255,7 +275,7 @@
   .cg-battle-navbar-costlabel{font-size:10px; color:var(--text-dim-panel); white-space:nowrap; flex-shrink:0;}
   .cg-battle-navbar-end{flex-shrink:0; padding:9px 18px;}
   .cg-cost-track{flex:1; height:10px; background:#e4e6ea; border-radius:6px; overflow:hidden; margin-right:10px; border:1px solid var(--hairline);}
-  .cg-cost-fill{height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan));}
+  .cg-cost-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--cyan));}
   .cg-cost-label{font-size:11px; color:var(--text-dim); margin-right:8px; white-space:nowrap;}
 
   #battle-skill-flash{position:absolute; top:40%; left:50%; transform:translate(-50%,-50%) scale(.7); opacity:0;
@@ -527,7 +547,7 @@
   .cg-card-evolved-badge.lg{font-size:22px; position:absolute; top:6px; left:6px;}
   .cg-evolved-tag{font-size:11px; color:var(--gold-bright); font-weight:700;}
   .cg-evolve-row{margin-top:10px;}
-  .cg-evolve-btn{width:100%; background:linear-gradient(180deg,var(--purple),#6b4fae); color:#fff; border-color:var(--purple);}
+  .cg-evolve-btn{width:100%; background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#fff; border-color:var(--gold-bright);}
   .cg-evolve-btn:disabled{opacity:.4; cursor:default;}
   .cg-evolve-done{font-size:12px; color:var(--gold-bright); text-align:center; padding:10px; background:var(--bg-panel2);
     border:1px solid var(--gold-bright); border-radius:12px;}
@@ -536,14 +556,14 @@
   .cg-rankcard{display:flex; align-items:center; gap:12px; margin:0 16px 18px; background:var(--bg-panel);
     border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; box-shadow:0 3px 10px #00000033;}
   .cg-rankcard-left{display:flex; align-items:center; gap:10px; flex-shrink:0;}
-  .cg-rankcard-avatar{width:42px; height:42px; border-radius:50%; background:linear-gradient(145deg,var(--purple),#5c3a8a);
+  .cg-rankcard-avatar{width:42px; height:42px; border-radius:50%; background:linear-gradient(145deg,var(--gold-bright),var(--gold));
     display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid var(--gold-bright);}
   .cg-rankcard-name{font-size:13px; font-weight:700; color:var(--text-panel);}
   .cg-rankcard-tier{font-size:11px; color:var(--gold-bright); font-weight:700;}
   .cg-rankcard-right{flex:1; min-width:0;}
   .cg-rankcard-label{font-size:10px; color:var(--text-dim-panel); margin-bottom:3px;}
   .cg-rankcard-track{height:6px; background:#e4e6ea; border-radius:4px; overflow:hidden;}
-  .cg-rankcard-fill{height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan));}
+  .cg-rankcard-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--cyan));}
   .cg-rankcard-sub{font-size:10px; color:var(--text-dim-panel); margin-top:3px; text-align:right;}
 
   .cg-quick-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0 16px 18px;}
@@ -560,7 +580,7 @@
   .cg-featured-mission-row{display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .cg-featured-mission-title{font-size:13px; font-weight:700; color:var(--text-panel);}
   .cg-featured-mission-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
-  .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:#FFFFFF; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+  .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:var(--gold); font-weight:700; background:var(--bg-panel); border:1.5px solid var(--gold-bright);
     padding:6px 12px; border-radius:14px; white-space:nowrap;}
 
   /* ---------- ドラゴン育成（ホームの概要カード） ---------- */
@@ -572,7 +592,7 @@
   .cg-dragon-summary-stage{font-size:13px; font-weight:700; color:var(--text-panel); margin:1px 0 4px;}
   .cg-dragon-summary-track{height:5px; background:#e4e6ea; border-radius:3px; overflow:hidden;}
   .cg-dragon-summary-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
-  .cg-dragon-summary-cta{flex-shrink:0; font-size:11px; color:#FFFFFF; font-weight:700; background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+  .cg-dragon-summary-cta{flex-shrink:0; font-size:11px; color:var(--gold); font-weight:700; background:var(--bg-panel); border:1.5px solid var(--gold-bright);
     padding:6px 12px; border-radius:14px; white-space:nowrap;}
 
   /* ---------- ドラゴン育成（専用画面） ---------- */
@@ -631,7 +651,7 @@
   .cg-filter-tabs{display:flex; gap:6px; padding:8px 14px 0; overflow-x:auto;}
   .cg-filter-tab{flex-shrink:0; border:1px solid var(--hairline-panel); background:var(--bg-panel2); color:var(--text-dim-panel);
     font-family:inherit; font-size:11px; padding:6px 12px; border-radius:14px; cursor:pointer;}
-  .cg-filter-tab.active{background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#FFFFFF; border-color:var(--gold-bright); font-weight:700;}
+  .cg-filter-tab.active{background:var(--bg-panel); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   .cg-coll-item{position:relative;}
   .cg-coll-item.in-deck .cg-card{border-color:var(--gold-bright) !important;}
   .cg-coll-item.in-deck::after{content:'✓ 編成中'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -643,6 +663,15 @@
 </head>
 <body>
 <div id="app">
+
+  <!-- ============ 全画面共通の装飾レイヤー（百合シルエット・光の粒子） ============ -->
+  <div id="global-deco" class="cg-global-deco">
+    <svg class="cg-lily cg-lily-1" viewBox="0 0 100 100"><path d="M50 6 C62 28 62 50 50 92 C38 50 38 28 50 6 Z M18 38 C34 44 46 56 50 92 C22 80 12 58 18 38 Z M82 38 C66 44 54 56 50 92 C78 80 88 58 82 38 Z"/></svg>
+    <svg class="cg-lily cg-lily-2" viewBox="0 0 100 100"><path d="M50 6 C62 28 62 50 50 92 C38 50 38 28 50 6 Z M18 38 C34 44 46 56 50 92 C22 80 12 58 18 38 Z M82 38 C66 44 54 56 50 92 C78 80 88 58 82 38 Z"/></svg>
+    <div class="cg-deco-particles">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
 
   <!-- ============ ホーム画面 ============ -->
   <section id="screen-home" class="cg-screen cg-scroll-pad active">
