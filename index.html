@@ -41,6 +41,35 @@
     font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif; overflow:hidden;}
   .cg-brand{font-family:"Zen Antique","Noto Serif JP",serif;}
   .cg-ui-font{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
+
+  /* ---------- 装飾強化：唐草の角飾り ---------- */
+  .cg-ornate{position:relative;}
+  .cg-ornate::before, .cg-ornate::after{content:''; position:absolute; width:22px; height:22px; pointer-events:none; z-index:2;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 30 Q2 2 30 2 M6 30 Q8 10 26 6 M2 22 Q10 20 14 10' stroke='%23D9B15D' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='0.75'/%3E%3Ccircle cx='30' cy='2' r='1.7' fill='%23D9B15D' opacity='0.85'/%3E%3C/svg%3E");
+    background-size:contain; background-repeat:no-repeat;}
+  .cg-ornate::before{top:-2px; left:-2px;}
+  .cg-ornate::after{bottom:-2px; right:-2px; transform:rotate(180deg);}
+
+  /* ---------- 装飾強化：宝石モチーフの区切り線 ---------- */
+  .cg-top-row::before{content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+    background:linear-gradient(90deg, transparent, var(--hairline) 15%, var(--hairline) 85%, transparent);}
+  .cg-top-row::after{content:'✦'; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+    font-size:9px; color:var(--gold); background:var(--bg-deep); padding:0 8px; line-height:1;}
+
+  /* ---------- 装飾強化：ボタンのシマー演出 ---------- */
+  .cg-btn-main{position:relative; overflow:hidden;}
+  .cg-btn-main::after{content:''; position:absolute; top:0; left:-60%; width:35%; height:100%;
+    background:linear-gradient(120deg, transparent, #ffffff8a, transparent);
+    transform:skewX(-20deg); animation:cgBtnShimmer 3.4s ease-in-out infinite; pointer-events:none;}
+  @keyframes cgBtnShimmer{
+    0%{left:-60%;}
+    35%{left:130%;}
+    100%{left:130%;}
+  }
+
+  /* ---------- 装飾強化：二重枠（額縁風） ---------- */
+  .cg-double-frame{outline:1px solid var(--gold-soft); outline-offset:3px;}
+
   #app{position:relative; width:100%; height:100vh; height:100dvh; max-width:640px; margin:0 auto;
     background:
       radial-gradient(circle at 15% 8%, #6D4AB71a 0%, transparent 45%),
@@ -121,6 +150,7 @@
   .cg-card{position:relative; width:100%; aspect-ratio:3/4; border-radius:12px; overflow:hidden;
     background:var(--bg-panel2); border:2px solid var(--rarity-color, #666); cursor:pointer;
     display:flex; flex-direction:column; color:var(--text-panel); box-shadow:0 3px 10px #00000040;
+    outline:1px solid var(--rarity-color, #666); outline-offset:2px; opacity:1;
     touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
   .cg-card-sm{font-size:10px;}
   .cg-card-cost{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%;
@@ -178,7 +208,7 @@
     box-shadow:0 3px 12px #6D4AB755, 0 0 0 1px #6D4AB722;}
   .cg-btn-main:active{box-shadow:0 1px 6px #6D4AB799, 0 0 14px #C9B3FF88;}
   .cg-back-btn{background:none; border:none; color:var(--text); font-size:18px; cursor:pointer; padding:10px 14px;}
-  .cg-top-row{display:flex; align-items:center; justify-content:space-between; padding:6px 4px;}
+  .cg-top-row{display:flex; align-items:center; justify-content:space-between; padding:6px 4px 14px; position:relative; margin-bottom:4px;}
 
   /* ---------- Battle screen ---------- */
   #screen-battle{background:linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-dark2) 55%, var(--bg-dark) 100%);}
@@ -307,7 +337,7 @@
   /* ---------- ショップ ---------- */
   .cg-shop-currency{display:flex; gap:8px; padding:8px 14px 4px;}
   .cg-shop-packs{display:flex; flex-direction:column; gap:12px; padding:10px 14px 20px;}
-  .cg-pack-card{background:var(--bg-panel); border:1px solid var(--hairline-panel);
+  .cg-pack-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); outline:1px solid var(--gold-soft); outline-offset:3px;
     border-radius:14px; padding:12px; color:var(--text-panel);}
   .cg-pack-top{display:flex; align-items:center; gap:12px;}
   .cg-pack-icon{width:56px; height:56px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
@@ -362,7 +392,7 @@
 
   /* ---------- ミッション ---------- */
   .cg-mission-list{display:flex; flex-direction:column; gap:10px; padding:10px 14px 20px;}
-  .cg-mission-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; color:var(--text-panel);}
+  .cg-mission-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; color:var(--text-panel); outline:1px solid var(--gold-soft); outline-offset:3px;}
   .cg-mission-card.done{border-color:var(--gold-bright);}
   .cg-mission-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;}
   .cg-mission-title{font-size:13px; font-weight:700;}
@@ -378,7 +408,7 @@
 
   /* ---------- ステージ選択 ---------- */
   .cg-stage-list{display:flex; flex-direction:column; gap:10px; padding:10px 14px 20px;}
-  .cg-stage-card{display:flex; align-items:center; gap:12px; background:var(--bg-panel); border:1px solid var(--hairline-panel);
+  .cg-stage-card{display:flex; align-items:center; gap:12px; background:var(--bg-panel); border:1px solid var(--hairline-panel); outline:1px solid var(--gold-soft); outline-offset:3px;
     border-radius:14px; padding:12px; color:var(--text-panel); cursor:pointer; box-shadow:0 3px 10px #00000033; transition:transform .1s;}
   .cg-stage-card:active{transform:scale(.98);}
   .cg-stage-card.locked{opacity:.5; cursor:default;}
@@ -629,7 +659,7 @@
       </div>
     </div>
 
-    <div class="cg-hero">
+    <div class="cg-hero cg-ornate">
       <div class="cg-hero-fog"></div>
       <div class="cg-hero-magic-circle"></div>
       <div class="cg-hero-stars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -637,7 +667,7 @@
       <div class="cg-hero-title cg-brand">LIS NOIR ― CARD BATTLE</div>
     </div>
 
-    <div class="cg-rankcard" id="rank-card-btn" style="cursor:pointer;">
+    <div class="cg-rankcard cg-double-frame" id="rank-card-btn" style="cursor:pointer;">
       <div class="cg-rankcard-left">
         <div class="cg-rankcard-avatar">🛡️</div>
         <div>
@@ -660,7 +690,7 @@
       <div class="cg-quick-btn" id="quick-dragon"><span class="ic">🐉</span><span class="lb">ドラゴン</span></div>
     </div>
 
-    <div id="dragon-summary" class="cg-dragon-summary">
+    <div id="dragon-summary" class="cg-dragon-summary cg-double-frame">
       <div id="dragon-summary-emoji" class="cg-dragon-summary-emoji">🥚</div>
       <div class="cg-dragon-summary-info">
         <div class="cg-dragon-summary-label">相棒ドラゴン</div>
@@ -799,7 +829,7 @@
 
     <!-- 遊び方説明 -->
     <div id="battle-help-overlay" class="cg-help-overlay hidden">
-      <div class="cg-help-panel">
+      <div class="cg-help-panel cg-ornate cg-double-frame">
         <div class="cg-help-title">遊び方</div>
         <div class="cg-help-body">
           <div class="cg-help-item"><b>① コスト</b><br>毎ターン最大コストが+1（上限10）。手札のカードをコスト分消費して使用します。</div>
@@ -815,7 +845,7 @@
 
     <!-- カード情報（長押しで表示） -->
     <div id="card-info-overlay" class="cg-help-overlay hidden">
-      <div class="cg-help-panel cg-card-info-panel">
+      <div class="cg-help-panel cg-card-info-panel cg-ornate cg-double-frame">
         <div id="card-info-body"></div>
         <button class="cg-btn cg-btn-main" id="card-info-close">閉じる</button>
       </div>
@@ -868,7 +898,7 @@
 
   <!-- ============ 設定・データ管理 ============ -->
   <div id="settings-overlay" class="cg-help-overlay hidden">
-    <div class="cg-help-panel">
+    <div class="cg-help-panel cg-ornate cg-double-frame">
       <div class="cg-help-title">設定・データ管理</div>
       <div class="cg-help-body">
         <div class="cg-settings-section" style="border-top:none; padding-top:0;">
