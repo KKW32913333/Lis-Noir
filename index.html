@@ -233,7 +233,7 @@
   /* ---------- Battle screen ---------- */
   #screen-battle{background:linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-dark2) 55%, var(--bg-dark) 100%);}
   .cg-battle-header{display:flex; justify-content:space-between; align-items:center; padding:8px 10px; flex-shrink:0;}
-  .cg-battle-header-left{display:flex; align-items:center; gap:6px;}
+  .cg-battle-header-left{display:flex; align-items:center; gap:10px;}
   .cg-battle-back-btn{padding:6px 8px; font-size:16px; flex-shrink:0; color:#EAE6F5;}
   .cg-hp-chip{display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:5px 10px; border-radius:16px; box-shadow:0 2px 6px #00000033;}
   .cg-hp-chip .val{font-weight:700; color:var(--hp-red);}
@@ -441,7 +441,10 @@
   .cg-stage-go{font-size:18px; flex-shrink:0;}
 
   /* ---------- ポートレートHUD / VS演出 ---------- */
-  .cg-mini-portrait{width:26px; height:26px; border-radius:50%; background-image:url('hero-bg.jpg');
+  .cg-player-badge{display:flex; align-items:center; gap:8px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);
+    padding:3px 12px 3px 3px; border-radius:18px; box-shadow:0 2px 6px #00000033;}
+  .cg-player-badge .val{font-weight:800; color:var(--hp-red); font-size:13px;}
+  .cg-mini-portrait{width:36px; height:36px; border-radius:50%; background-image:url('hero-bg.jpg');
     background-size:cover; background-position:center 15%; border:2px solid var(--gold-bright); flex-shrink:0; box-shadow:0 2px 6px #00000044;}
   .cg-vs-intro{position:absolute; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; gap:22px;
     background:#23242be6; opacity:1; transition:opacity .3s ease;}
@@ -808,8 +811,10 @@
     <div class="cg-battle-header">
       <div class="cg-battle-header-left">
         <button class="cg-back-btn cg-battle-back-btn" id="battle-back-btn" title="ホームへ戻る">←</button>
-        <div id="battle-player-portrait" class="cg-mini-portrait"></div>
-        <div class="cg-hp-chip">🛡️ <span class="val" id="battle-player-hp">30</span></div>
+        <div class="cg-player-badge">
+          <div id="battle-player-portrait" class="cg-mini-portrait"></div>
+          <span>🛡️ <span class="val" id="battle-player-hp">30</span></span>
+        </div>
       </div>
       <div class="cg-timer" id="battle-turn-timer">ターン 1</div>
       <div style="display:flex; align-items:center; gap:6px;">
