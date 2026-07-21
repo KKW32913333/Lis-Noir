@@ -737,26 +737,26 @@ const STAGES = [
       { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'ふふ…僕の練習相手になってもらうよ！' },
     ],
     storyVictory: { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'く…まだまだ僕は未熟だったようだ…' } },
-  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20, spellChance: 0.12, bgTheme: 'snow',
-    weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
+  { id: 2, name: '森の狩人', portrait: '🏹', hp: 18, spellChance: 0.08, bgTheme: 'snow',
+    weights: { normal: 80, rare: 17, epic: 3, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '森の狩人', portrait: '🏹', text: 'この森は我が縄張りだ。侵入者には容赦しない。' },
     ],
     storyVictory: { speaker: '森の狩人', portrait: '🏹', text: 'まさか…この森で敗れる日が来るとはな。' } },
-  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20, bgTheme: 'cave',
-    weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 22, spellChance: 0.13, bgTheme: 'cave',
+    weights: { normal: 55, rare: 32, epic: 11, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: '深淵の魔導士', portrait: '🔮', text: 'ほう…なかなかやるようだね。だが、闇の力の前には無力さ。' },
     ],
     storyVictory: { speaker: '深淵の魔導士', portrait: '🔮', text: '……面白い。この程度で終わるとはな。' } },
-  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28, bgTheme: 'volcano',
-    weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
+  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 28, spellChance: 0.19, bgTheme: 'volcano',
+    weights: { normal: 32, rare: 35, epic: 26, legend: 7 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の巫女', portrait: '🐲', text: '我が竜の力、その身に刻んでみせよ。' },
     ],
     storyVictory: { speaker: '竜の巫女', portrait: '🐲', text: '……負けたか。だが、それも巫女としての試練。' } },
-  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35, bgTheme: 'castle',
-    weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 34, spellChance: 0.26, bgTheme: 'castle',
+    weights: { normal: 12, rare: 28, epic: 38, legend: 22 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
     ],
@@ -1064,6 +1064,7 @@ function renderBattle() {
     portraitPreviewEl.classList.remove('show');
   }
   document.getElementById('battle-enemy-portrait').classList.toggle('attackable', directAttackReady);
+  document.getElementById('battle-enemy-hp-chip').classList.toggle('attackable', directAttackReady);
   document.getElementById('battle-direct-attack-label').classList.toggle('show', directAttackReady);
 
   bindBattleEvents();
@@ -1077,6 +1078,7 @@ function renderBattle() {
 function bindBattleEvents() {
   document.querySelectorAll('#battle-hand .cg-hand-card').forEach(node => {
     node.onclick = () => {
+      if (longPressFired) { longPressFired = false; return; }
       const idx = Number(node.dataset.idx);
       const id = battle.playerHand[idx];
       const def = CARD_DEFS[id];
@@ -1094,6 +1096,11 @@ function bindBattleEvents() {
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
       renderBattle();
     };
+    bindLongPress(node, () => {
+      const idx = Number(node.dataset.idx);
+      const id = battle.playerHand[idx];
+      if (id) showHandCardInfo(id);
+    });
   });
   document.querySelectorAll('#battle-player-field .cg-field-slot').forEach(node => {
     node.onclick = () => {
@@ -1140,7 +1147,7 @@ function bindBattleEvents() {
       if (battle.enemyField[idx]) showCardInfo(battle.enemyField[idx]);
     });
   });
-  document.getElementById('battle-enemy-portrait').onclick = () => {
+  const handleDirectAttackTap = () => {
     if (battle.selectedHandIdx !== null) {
       const id = battle.playerHand[battle.selectedHandIdx];
       const def = CARD_DEFS[id];
@@ -1151,6 +1158,8 @@ function bindBattleEvents() {
     }
     if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, null);
   };
+  document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
+  document.getElementById('battle-enemy-hp-chip').onclick = handleDirectAttackTap;
 }
 
 // ---------- 長押し検知（フィールドのモンスターをタップ操作と区別して詳細表示） ----------
@@ -1183,6 +1192,28 @@ function showCardInfo(unit) {
       <div class="cg-detail-stats">
         <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}</b></div>
         <div class="cg-detail-stat"><span>現在HP</span><b>${unit.curHp}</b></div>
+      </div>
+    </div>`;
+  document.getElementById('card-info-overlay').classList.remove('hidden');
+}
+
+function showHandCardInfo(id) {
+  const def = CARD_DEFS[id];
+  if (!def) return;
+  const rarity = RARITY[def.rarity];
+  const el = ELEMENTS[def.element];
+  const owned = state.cards[id];
+  const evolved = !!(owned && owned.evolved);
+  const type = def.type || 'monster';
+  document.getElementById('card-info-body').innerHTML = `
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${def.name}</div>
+      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
+      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
+      <div class="cg-detail-stats">
+        ${detailStatsBlock(def, evolved)}
       </div>
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
