@@ -72,7 +72,7 @@ function defaultState() {
   Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; });
   return {
     playerName: 'プレイヤー',
-    playerLevel: 20,
+    playerLevel: 1,
     gold: 25300,
     gems: 1250,
     trophy: 1250,
@@ -106,6 +106,9 @@ function loadState() {
         saved.cards[id].evolved = false;
       }
     });
+    // 旧仕様の初期値バグ対策: playerLevelは表示のみで実際のレベリング処理が無かったため、
+    // 旧セーブが初期値のまま(Lv.20)残っている場合は正しい初期値(Lv.1)に補正する
+    if (saved.playerLevel === 20) saved.playerLevel = 1;
     return Object.assign(base, saved);
   } catch (e) {
     console.error('load failed', e);
@@ -1691,7 +1694,8 @@ function init() {
   document.querySelectorAll('.cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCollectionFilter(btn.dataset.filter));
   });
-  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.querySelectorAll('.cg-back-btn-detail').forEach(b => b.addEventListener('click', () => openCollectionScreen('list')));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
   document.getElementById('battle-back-btn').addEventListener('click', () => {
     if (battle && !battle.over) {
