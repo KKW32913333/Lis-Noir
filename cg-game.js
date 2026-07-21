@@ -14,10 +14,10 @@ const ELEMENTS = {
 const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
 
 const RARITY = {
-  normal: { name: 'ノーマル', color: '#63646c', glow: 'none' },
+  normal: { name: 'ノーマル', color: '#8a8c96', glow: 'none' },
   rare:   { name: 'レア',    color: '#3d6a91', glow: '0 0 10px #6f93b855' },
-  epic:   { name: 'エピック', color: '#6b4fa0', glow: '0 0 12px #8a5fc966' },
-  legend: { name: 'レジェンド', color: '#a8853a', glow: '0 0 16px #e8c87799' },
+  epic:   { name: 'エピック', color: '#6D4AB7', glow: '0 0 14px #C9B3FFaa' },
+  legend: { name: 'レジェンド', color: '#B8892E', glow: '0 0 18px #D9B15Dcc' },
 };
 
 // ---------- カードマスターデータ ----------
@@ -727,32 +727,32 @@ function evolveCard(id) {
 let battle = null;
 
 const STAGES = [
-  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16, spellChance: 0.05,
+  { id: 1, name: '見習いのモンスター使い', portrait: '🧙', hp: 16, spellChance: 0.05, bgTheme: 'forest',
     weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '霧深い森の入り口。若きモンスター使いが行く手を阻む。' },
       { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'ふふ…僕の練習相手になってもらうよ！' },
     ],
     storyVictory: { speaker: '見習いのモンスター使い', portrait: '🧙', text: 'く…まだまだ僕は未熟だったようだ…' } },
-  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20, spellChance: 0.12,
+  { id: 2, name: '森の狩人', portrait: '🏹', hp: 20, spellChance: 0.12, bgTheme: 'snow',
     weights: { normal: 75, rare: 20, epic: 5, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '森の狩人', portrait: '🏹', text: 'この森は我が縄張りだ。侵入者には容赦しない。' },
     ],
     storyVictory: { speaker: '森の狩人', portrait: '🏹', text: 'まさか…この森で敗れる日が来るとはな。' } },
-  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20,
+  { id: 3, name: '深淵の魔導士', portrait: '🔮', hp: 26, spellChance: 0.20, bgTheme: 'ruins',
     weights: { normal: 45, rare: 35, epic: 18, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: '深淵の魔導士', portrait: '🔮', text: 'ほう…なかなかやるようだね。だが、闇の力の前には無力さ。' },
     ],
     storyVictory: { speaker: '深淵の魔導士', portrait: '🔮', text: '……面白い。この程度で終わるとはな。' } },
-  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28,
+  { id: 4, name: '竜の巫女', portrait: '🐲', hp: 32, spellChance: 0.28, bgTheme: 'shrine',
     weights: { normal: 20, rare: 35, epic: 33, legend: 12 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の巫女', portrait: '🐲', text: '我が竜の力、その身に刻んでみせよ。' },
     ],
     storyVictory: { speaker: '竜の巫女', portrait: '🐲', text: '……負けたか。だが、それも巫女としての試練。' } },
-  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35,
+  { id: 5, name: 'モンスター使いの女王', portrait: '👑', hp: 38, spellChance: 0.35, bgTheme: 'volcano',
     weights: { normal: 5, rare: 20, epic: 40, legend: 35 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
@@ -834,6 +834,20 @@ function buildWeightedMonsterDeck(weights, count, spellChance) {
   return deck;
 }
 
+const BATTLE_BG_THEMES = {
+  forest:  'radial-gradient(ellipse 340px 220px at 50% 45%, #2d6a4444 0%, transparent 70%)',
+  snow:    'radial-gradient(ellipse 340px 220px at 50% 45%, #4a7a9944 0%, transparent 70%)',
+  ruins:   'radial-gradient(ellipse 340px 220px at 50% 45%, #6b573344 0%, transparent 70%)',
+  shrine:  'radial-gradient(ellipse 340px 220px at 50% 45%, #8a6d2e4d 0%, transparent 70%)',
+  volcano: 'radial-gradient(ellipse 340px 220px at 50% 45%, #8a2e2244 0%, transparent 70%)',
+};
+
+function applyBattleBgTheme(theme) {
+  const board = document.querySelector('.cg-battle-board');
+  if (!board) return;
+  board.style.background = BATTLE_BG_THEMES[theme] || BATTLE_BG_THEMES.forest;
+}
+
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
@@ -859,6 +873,7 @@ function startBattle(stage) {
     over: false,
   };
   document.getElementById('battle-enemy-emoji').textContent = stage.portrait;
+  applyBattleBgTheme(stage.bgTheme);
   renderBattle();
   showScreen('battle');
   showVsIntro(stage);
@@ -921,6 +936,14 @@ function impactEffect() {
     flash.classList.add('show');
   }
   sfxAttack();
+}
+
+function summonEffect() {
+  const flash = document.getElementById('battle-impact-flash');
+  if (!flash) return;
+  flash.classList.remove('show-summon');
+  void flash.offsetWidth;
+  flash.classList.add('show-summon');
 }
 
 // ---------- サウンド（合成音） ----------
@@ -1166,6 +1189,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   sfxCardPlay();
+  summonEffect();
   if (def.skill) skillFlash(`${def.name}のスキル！\n${def.skill}`);
   renderBattle();
 }
@@ -1415,10 +1439,21 @@ function showResult(won) {
   document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
 
   if (won && stage.storyVictory) {
-    showStory([stage.storyVictory], () => showScreen('result'));
+    showStory([stage.storyVictory], () => revealResultScreen(won));
   } else {
-    showScreen('result');
+    revealResultScreen(won);
   }
+}
+
+function revealResultScreen(won) {
+  const fx = document.getElementById('result-victory-fx');
+  if (fx) {
+    fx.classList.toggle('hidden', !won);
+    if (won) {
+      fx.querySelectorAll('span').forEach(s => { s.style.animation = 'none'; void s.offsetWidth; s.style.animation = ''; });
+    }
+  }
+  showScreen('result');
 }
 
 // ---------- カード画面（デッキ編成／カード一覧）セグメント切替 ----------
