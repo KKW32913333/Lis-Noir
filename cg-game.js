@@ -132,7 +132,7 @@ function scheduleCloudSync() {
   cloudSyncTimer = setTimeout(() => {
     window.LisNoirCloud.saveCloud(state)
       .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
-      .catch((err) => { console.error('cloud save failed', err); setCloudSyncStatus('⚠️ 同期に失敗しました'); });
+      .catch((err) => { console.error('cloud save failed', err); setCloudSyncStatus('⚠️ 同期に失敗しました：' + (err && err.message ? err.message : '')); });
     window.LisNoirCloud.updateLeaderboard(state.playerName, state.trophy).catch((err) => console.error('leaderboard update failed', err));
   }, 1500);
 }
@@ -1794,7 +1794,7 @@ function init() {
     setCloudSyncStatus('同期中…');
     window.LisNoirCloud.saveCloud(state)
       .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
-      .catch(() => setCloudSyncStatus('⚠️ 同期に失敗しました'));
+      .catch((err) => setCloudSyncStatus('⚠️ 同期に失敗しました：' + (err && err.message ? err.message : '')));
   });
   document.getElementById('daily-claim-btn').addEventListener('click', claimDailyReward);
   document.getElementById('rank-card-btn').addEventListener('click', () => { renderRanking(); showScreen('ranking'); });
@@ -1806,9 +1806,19 @@ function init() {
   }
   showScreen('home');
   setTimeout(() => {
-    const splash = document.getElementById('splash-screen');
-    if (splash) splash.classList.add('hidden');
-  }, 1900);
+    const loader = document.getElementById('splash-loader');
+    const startBtn = document.getElementById('splash-start-btn');
+    if (loader) loader.style.display = 'none';
+    if (startBtn) startBtn.classList.remove('hidden');
+  }, 1300);
+  const startBtn = document.getElementById('splash-start-btn');
+  if (startBtn) {
+    startBtn.addEventListener('click', () => {
+      sfxTap();
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('hidden');
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
