@@ -1805,6 +1805,10 @@ function init() {
     });
   }
   showScreen('home');
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if (splash) splash.classList.add('hidden');
+  }, 1200);
 }
 
 document.addEventListener('DOMContentLoaded', init);

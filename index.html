@@ -72,6 +72,27 @@
 
   /* ---------- 全画面共通装飾：百合シルエット・光の粒子 ---------- */
   .cg-global-deco{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+
+  /* ---------- スプラッシュ画面 ---------- */
+  .cg-splash{position:absolute; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, #FFFFFF 0%, #EDEBFF 30%, #C7B6FF 65%, #5A2D91 100%);
+    transition:opacity .5s ease, visibility .5s; gap:6px;}
+  .cg-splash.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+  .cg-splash-glow{position:absolute; top:50%; left:50%; width:280px; height:280px; margin:-200px 0 0 -140px;
+    background:radial-gradient(circle, #FFFFFF88 0%, transparent 70%); animation:cgSplashPulse 2.2s ease-in-out infinite;}
+  @keyframes cgSplashPulse{0%,100%{opacity:.5; transform:scale(.9);} 50%{opacity:.9; transform:scale(1.05);}}
+  .cg-splash-logo{width:132px; height:132px; border-radius:28px; object-fit:cover; position:relative; z-index:1;
+    box-shadow:0 8px 30px #5A2D9155, 0 0 0 1px #FFFFFF88; animation:cgSplashFloat 2.6s ease-in-out infinite;}
+  @keyframes cgSplashFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);}}
+  .cg-splash-title{margin-top:18px; font-size:26px; letter-spacing:6px; color:var(--gold); position:relative; z-index:1;
+    text-shadow:0 2px 10px #ffffffcc;}
+  .cg-splash-sub{font-size:11px; letter-spacing:4px; color:#7857A8; position:relative; z-index:1;}
+  .cg-splash-loader{display:flex; gap:6px; margin-top:22px; position:relative; z-index:1;}
+  .cg-splash-loader span{width:7px; height:7px; border-radius:50%; background:var(--gold-bright); opacity:.4;
+    animation:cgSplashDot 1.1s ease-in-out infinite;}
+  .cg-splash-loader span:nth-child(2){animation-delay:.15s;}
+  .cg-splash-loader span:nth-child(3){animation-delay:.3s;}
+  @keyframes cgSplashDot{0%,60%,100%{opacity:.3; transform:scale(.8);} 30%{opacity:1; transform:scale(1.2);}}
   .cg-lily{position:absolute; width:220px; height:220px; opacity:.05;}
   .cg-lily-1{top:2%; left:-8%; fill:#FFFFFF; transform:rotate(-15deg);}
   .cg-lily-2{bottom:-4%; right:-10%; width:260px; height:260px; fill:#1A0F2E; opacity:.06; transform:rotate(20deg);}
@@ -678,6 +699,15 @@
 </head>
 <body>
 <div id="app">
+
+  <!-- ============ スプラッシュ画面 ============ -->
+  <div id="splash-screen" class="cg-splash">
+    <div class="cg-splash-glow"></div>
+    <img src="icon-512.png" alt="Lis Noir" class="cg-splash-logo">
+    <div class="cg-splash-title cg-brand">LIS NOIR</div>
+    <div class="cg-splash-sub">— CARD BATTLE —</div>
+    <div class="cg-splash-loader"><span></span><span></span><span></span></div>
+  </div>
 
   <!-- ============ 全画面共通の装飾レイヤー（百合シルエット・光の粒子） ============ -->
   <div id="global-deco" class="cg-global-deco">
