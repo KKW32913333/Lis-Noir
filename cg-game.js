@@ -562,8 +562,10 @@ function feedDragon() {
 }
 
 function renderDragonSummary() {
+  const emojiEl = document.getElementById('dragon-summary-emoji');
+  if (!emojiEl) return; // ホーム画面の相棒ドラゴンカードは非表示中（要素が無ければ何もしない）
   const stage = getDragonStageInfo(state.dragon.level);
-  document.getElementById('dragon-summary-emoji').textContent = stage.emoji;
+  emojiEl.textContent = stage.emoji;
   document.getElementById('dragon-summary-stage').textContent = `${stage.name}・Lv.${state.dragon.level}`;
   document.getElementById('dragon-summary-fill').style.width = Math.min(100, (state.dragon.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
 }
@@ -2219,9 +2221,11 @@ function init() {
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
-  document.getElementById('quick-dragon').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
+  const quickDragonBtn = document.getElementById('quick-dragon');
+  if (quickDragonBtn) quickDragonBtn.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
-  document.getElementById('dragon-summary').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
+  const dragonSummaryEl = document.getElementById('dragon-summary');
+  if (dragonSummaryEl) dragonSummaryEl.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('dragon-feed-btn').addEventListener('click', feedDragon);
   document.getElementById('story-overlay').addEventListener('click', advanceStory);
   document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
