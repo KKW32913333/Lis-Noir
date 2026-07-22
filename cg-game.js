@@ -1419,6 +1419,9 @@ function renderBattle() {
   document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
   document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
+  document.getElementById('battle-hand-count').textContent = battle.playerHand.length;
+  document.getElementById('battle-pp-current').textContent = battle.playerCost;
+  document.getElementById('battle-pp-max').textContent = battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost;
 
   const fieldIndicatorEl = document.getElementById('battle-field-indicator');
   if (battle.fieldCard) {
@@ -1451,16 +1454,18 @@ function renderBattle() {
     } else if (u && previewingSpell) {
       preview = `<div class="cg-preview-badge spell">✨${previewingSpell.effect.value}</div>`;
     }
+    const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
   const playerFieldEl = document.getElementById('battle-player-field');
-  playerFieldEl.innerHTML = battle.playerField.map((u, i) => u
-    ? `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`
-    : `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`
-  ).join('');
+  playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
+    if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
+    const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`;
+  }).join('');
 
   const handEl = document.getElementById('battle-hand');
   handEl.innerHTML = battle.playerHand.map((id, i) => {
