@@ -174,8 +174,11 @@
       linear-gradient(180deg, #FFFFFF 0%, #EDEBFF 30%, #C7B6FF 65%, #5A2D91 100%);
     overflow:hidden; box-shadow:0 0 60px #00000022;}
 
-  .cg-screen{position:absolute; inset:0; z-index:1; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden;}
-  .cg-screen.active{display:flex;}
+  .cg-screen{position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden;
+    opacity:0; transform:translateY(10px) scale(.99); pointer-events:none; visibility:hidden;
+    transition:opacity .24s ease, transform .24s ease, visibility 0s linear .24s;}
+  .cg-screen.active{opacity:1; transform:translateY(0) scale(1); pointer-events:auto; visibility:visible;
+    transition:opacity .24s ease, transform .24s ease, visibility 0s linear 0s; z-index:2;}
 
   /* ---------- Top status bar ---------- */
   .cg-topbar{display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
@@ -256,6 +259,18 @@
     background:#23242bcc; border:1px solid var(--gold-bright); color:#F2EEFF; font-size:11px; font-weight:800;
     display:flex; align-items:center; justify-content:center; z-index:2;}
   .cg-card-art{flex:1; position:relative; overflow:hidden;}
+  .cg-card-foil{position:absolute; inset:0; pointer-events:none; z-index:2; background-size:250% 250%; mix-blend-mode:overlay;}
+  .cg-card-foil.epic{
+    background-image:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.5) 38%, rgba(199,182,255,.6) 44%, rgba(138,79,255,.55) 50%, rgba(255,255,255,.4) 56%, transparent 70%);
+    animation:cgFoilShine 3.6s ease-in-out infinite;}
+  .cg-card-foil.legend{
+    background-image:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55) 33%, rgba(255,205,110,.6) 40%, rgba(255,120,180,.5) 46%, rgba(120,200,255,.5) 52%, rgba(255,255,255,.45) 60%, transparent 75%);
+    animation:cgFoilShine 3s ease-in-out infinite;}
+  @keyframes cgFoilShine{
+    0%{background-position:0% 0%;}
+    50%{background-position:100% 100%;}
+    100%{background-position:0% 0%;}
+  }
   .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:28px;}
   .cg-card-img{width:100%; height:100%; object-fit:cover; -webkit-touch-callout:none; -webkit-user-drag:none; pointer-events:none;}
   .cg-card-name{font-size:10.5px; font-weight:600; text-align:center; padding:3px 3px 0; line-height:1.2;
@@ -299,7 +314,7 @@
     background:var(--bg-panel2); color:var(--text-panel); cursor:pointer; font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
   .cg-detail-nav-btn:active{transform:scale(.94);}
   .cg-detail-nav-btn:disabled{opacity:.3; cursor:default;}
-  .cg-detail-art{width:140px; height:140px; margin:20px auto 10px; border-radius:14px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--gold);}
+  .cg-detail-art{width:140px; height:140px; margin:20px auto 10px; border-radius:14px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--gold); position:relative;}
   .cg-detail-emoji{font-size:56px;}
   .cg-detail-art img{width:100%; height:100%; object-fit:cover;}
   .cg-detail-info{padding:0 20px; text-align:center;}
@@ -364,7 +379,14 @@
   .cg-battle-navbar{display:flex; align-items:center; gap:10px; width:100%; background:var(--bg-panel);
     border:1px solid var(--hairline-panel); border-radius:26px; padding:8px 10px 8px 14px; box-shadow:0 4px 14px #00000044;}
   .cg-battle-navbar-info{flex-shrink:0; font-size:11px; color:var(--text-dim-panel); background:#e8e8ec;
-    padding:6px 10px; border-radius:14px; white-space:nowrap;}
+    padding:6px 10px; border-radius:14px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;}
+  .cg-deck-back-icon{position:relative; width:12px; height:16px; border-radius:2px; flex-shrink:0;
+    background:linear-gradient(160deg,var(--gold-bright),var(--gold)); border:1px solid #ffffffaa;
+    display:inline-flex; align-items:center; justify-content:center; font-size:6px; color:#fff; margin-left:3px;}
+  .cg-deck-back-icon::before, .cg-deck-back-icon::after{content:''; position:absolute; width:100%; height:100%;
+    border-radius:2px; background:inherit; border:1px solid #ffffff66; z-index:-1;}
+  .cg-deck-back-icon::before{top:-2px; left:-2px;}
+  .cg-deck-back-icon::after{top:-4px; left:-4px; opacity:.7;}
   .cg-battle-navbar-cost{flex:1; display:flex; align-items:center; gap:6px; min-width:0;}
   .cg-battle-navbar-costlabel{font-size:10px; color:var(--text-dim-panel); white-space:nowrap; flex-shrink:0;}
   .cg-battle-navbar-end{flex-shrink:0; padding:9px 18px;}
@@ -419,6 +441,20 @@
     10%{opacity:.9;}
     100%{transform:translateY(640px) rotate(320deg); opacity:0;}
   }
+  .cg-victory-fx.rainbow span{width:11px; height:11px;
+    background:conic-gradient(from 0deg, #ff5e5e, #ffce54, #7ed957, #5fd4c9, #7ec8f0, #c9a8f0, #ff5e5e);
+    opacity:.95; box-shadow:0 0 8px 1px currentColor; animation-duration:2.6s;}
+  .cg-victory-fx.rainbow::before{content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 70% 40% at 50% 20%, #ffffff33 0%, transparent 70%);
+    animation:cgRainbowPulse 1.8s ease-in-out infinite;}
+  @keyframes cgRainbowPulse{0%,100%{opacity:.4;} 50%{opacity:.9;}}
+
+  .cg-result-rare-label{font-size:13px; font-weight:800; letter-spacing:2px; margin-bottom:4px;
+    background:linear-gradient(90deg,#ff5e5e,#ffce54,#7ed957,#5fd4c9,#7ec8f0,#c9a8f0);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:200% auto; animation:cgRareLabelShift 2.4s linear infinite;}
+  .cg-result-rare-label.hidden{display:none;}
+  @keyframes cgRareLabelShift{0%{background-position:0% center;} 100%{background-position:200% center;}}
 
   /* ---------- モバイル用セーフエリア／下部固定タブバー ---------- */
   .cg-topbar{padding-top:calc(10px + env(safe-area-inset-top));}
@@ -1129,7 +1165,7 @@
 
     <div class="cg-battle-footer">
       <div class="cg-battle-navbar">
-        <div class="cg-battle-navbar-info" id="battle-deck-count" title="残りデッキ枚数">📚 <span id="battle-deck-remaining">0</span></div>
+        <div class="cg-battle-navbar-info" id="battle-deck-count" title="残りデッキ枚数"><span class="cg-deck-back-icon">✦</span> <span id="battle-deck-remaining">0</span></div>
         <div class="cg-battle-navbar-cost">
           <span class="cg-cost-label">💧</span>
           <div class="cg-cost-track"><div class="cg-cost-fill" id="battle-cost-fill"></div></div>
@@ -1352,6 +1388,7 @@
     </div>
     <div class="cg-result-wrap">
       <div class="cg-result-title win" id="result-title">WIN</div>
+      <div id="result-rare-label" class="cg-result-rare-label hidden">🌈 特別報酬！</div>
       <div id="result-stage-name" class="cg-result-stage"></div>
       <div class="cg-result-trophy">🏆 <span id="result-trophy">0</span> (<span id="result-trophy-delta">+0</span>)</div>
       <div class="cg-reward-row">

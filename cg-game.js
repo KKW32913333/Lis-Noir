@@ -363,10 +363,11 @@ function renderCardFace(id, opts) {
   const roleBadge = isMonster
     ? `<span class="cg-card-role ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : '';
+  const foil = (def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
   return `
-    <div class="cg-card${small}${evolvedClass}" data-id="${id}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+    <div class="cg-card${small}${evolvedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}</div>
+      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
       <div class="cg-card-name">${def.name}</div>
       ${cardStatsLine(def, opts.evolved)}
       <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
@@ -894,7 +895,7 @@ function openCardDetail(id) {
   const rarity = RARITY[def.rarity];
   const isMonster = (def.type || 'monster') === 'monster';
   document.getElementById('detail-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -1609,7 +1610,7 @@ function showCardInfo(unit) {
   const atk = def.atk + (unit.atkBonus || 0) + fieldBonusFor(unit);
   const roleText = def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
@@ -1636,7 +1637,7 @@ function showHandCardInfo(id) {
     ? (def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）')
     : '';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -1973,9 +1974,9 @@ function showResult(won) {
   if (leveledUp) levelupEl.textContent = `⭐ レベルアップ！ Lv.${state.playerLevel}`;
 
   if (won && stage.storyVictory) {
-    showStory([stage.storyVictory], () => revealResultScreen(won));
+    showStory([stage.storyVictory], () => revealResultScreen(won, stage));
   } else {
-    revealResultScreen(won);
+    revealResultScreen(won, stage);
   }
 }
 
@@ -2023,14 +2024,20 @@ function renderBattleHistory() {
   }).join('');
 }
 
-function revealResultScreen(won) {
+function revealResultScreen(won, stage) {
   const fx = document.getElementById('result-victory-fx');
+  const isRareReward = won && stage && (
+    (typeof stage.id === 'number' && stage.id % 5 === 0) || typeof stage.id !== 'number'
+  );
   if (fx) {
     fx.classList.toggle('hidden', !won);
+    fx.classList.toggle('rainbow', !!isRareReward);
     if (won) {
       fx.querySelectorAll('span').forEach(s => { s.style.animation = 'none'; void s.offsetWidth; s.style.animation = ''; });
     }
   }
+  const rareLabel = document.getElementById('result-rare-label');
+  if (rareLabel) rareLabel.classList.toggle('hidden', !isRareReward);
   showScreen('result');
 }
 
