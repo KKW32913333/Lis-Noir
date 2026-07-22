@@ -74,6 +74,9 @@ function defaultState() {
     playerName: 'プレイヤー',
     avatarIcon: '🛡️',
     deckPresets: [],
+    pityCounters: {},
+    compendiumRewardClaimed: false,
+    battleHistory: [],
     playerLevel: 1,
     playerExp: 0,
     gold: 25300,
@@ -801,12 +804,45 @@ function autoBuildDeck() {
 // ---------- カード一覧/詳細画面 ----------
 let selectedCardId = null;
 
+const COMPENDIUM_REWARD = { gold: 2000, gems: 100, trophy: 50 };
+
+function getEvolvedMonsterCount() {
+  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster');
+  const evolvedCount = monsterIds.filter(id => state.cards[id] && state.cards[id].evolved).length;
+  return { evolvedCount, total: monsterIds.length };
+}
+
+function renderCompendiumPanel() {
+  const { evolvedCount, total } = getEvolvedMonsterCount();
+  document.getElementById('compendium-count').textContent = `${evolvedCount}/${total}`;
+  document.getElementById('compendium-fill').style.width = Math.min(100, (evolvedCount / total) * 100) + '%';
+  const claimBtn = document.getElementById('compendium-claim-btn');
+  const complete = evolvedCount >= total;
+  claimBtn.classList.toggle('hidden', !complete || state.compendiumRewardClaimed);
+  claimBtn.textContent = state.compendiumRewardClaimed
+    ? '受取済み'
+    : `🎁 コンプリート報酬を受け取る（💰${COMPENDIUM_REWARD.gold} 💎${COMPENDIUM_REWARD.gems} 🏆+${COMPENDIUM_REWARD.trophy}）`;
+}
+
+function claimCompendiumReward() {
+  const { evolvedCount, total } = getEvolvedMonsterCount();
+  if (evolvedCount < total || state.compendiumRewardClaimed) return;
+  state.gold += COMPENDIUM_REWARD.gold;
+  state.gems += COMPENDIUM_REWARD.gems;
+  state.trophy += COMPENDIUM_REWARD.trophy;
+  state.compendiumRewardClaimed = true;
+  saveState();
+  renderCompendiumPanel();
+  renderHome();
+}
+
 function renderCardList() {
   const listEl = document.getElementById('cardlist-grid');
   listEl.innerHTML = Object.keys(state.cards).map(id => renderCardFace(id, { small: true, evolved: state.cards[id].evolved })).join('');
   listEl.querySelectorAll('.cg-card').forEach(node => {
     node.addEventListener('click', () => openCardDetail(node.dataset.id));
   });
+  renderCompendiumPanel();
 }
 
 function detailStatsBlock(def, evolved) {
@@ -1758,8 +1794,10 @@ function showResult(won) {
   }
   let leveledUp = false;
   if (won) {
-    leveledUp = gainPlayerExp(10 + stage.id * 6);
+    const idNum = typeof stage.id === 'number' ? stage.id : 5;
+    leveledUp = gainPlayerExp(10 + idNum * 6);
   }
+  logBattleHistory(stage, won, delta);
   saveState();
   document.getElementById('result-reward-gold').textContent = (goldReward > 0 ? '+' : '') + goldReward;
   document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
@@ -1772,6 +1810,50 @@ function showResult(won) {
   } else {
     revealResultScreen(won);
   }
+}
+
+const MAX_BATTLE_HISTORY = 50;
+
+function logBattleHistory(stage, won, trophyDelta) {
+  state.battleHistory = state.battleHistory || [];
+  state.battleHistory.unshift({
+    name: stage.name,
+    isEvent: typeof stage.id !== 'number',
+    won,
+    trophyDelta,
+    date: Date.now(),
+  });
+  if (state.battleHistory.length > MAX_BATTLE_HISTORY) {
+    state.battleHistory.length = MAX_BATTLE_HISTORY;
+  }
+}
+
+function renderBattleHistory() {
+  const history = state.battleHistory || [];
+  const wins = history.filter(h => h.won).length;
+  const total = history.length;
+  const winRate = total ? Math.round((wins / total) * 100) : 0;
+  document.getElementById('history-summary').innerHTML = `
+    <div class="cg-history-summary-card"><div class="cg-history-summary-value">${state.totalWins || 0}</div><div class="cg-history-summary-label">通算勝利数</div></div>
+    <div class="cg-history-summary-card"><div class="cg-history-summary-value">${winRate}%</div><div class="cg-history-summary-label">勝率（直近${total}戦）</div></div>`;
+  const listEl = document.getElementById('history-list');
+  if (!history.length) {
+    listEl.innerHTML = '<div class="cg-rank-empty">まだ対戦履歴がありません。<br>バトルに挑戦してみましょう！</div>';
+    return;
+  }
+  listEl.innerHTML = history.map(h => {
+    const d = new Date(h.date);
+    const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    return `
+      <div class="cg-history-item ${h.won ? 'win' : 'lose'}">
+        <div class="cg-history-result">${h.won ? 'WIN' : 'LOSE'}</div>
+        <div class="cg-history-info">
+          <div class="cg-history-stage">${h.isEvent ? '🎉 ' : ''}${h.name}</div>
+          <div class="cg-history-date">${dateStr}</div>
+        </div>
+        <div class="cg-history-trophy ${h.won ? 'win' : 'lose'}">${h.trophyDelta > 0 ? '+' : ''}${h.trophyDelta}</div>
+      </div>`;
+  }).join('');
 }
 
 function revealResultScreen(won) {
@@ -1843,6 +1925,9 @@ function renderShop() {
         : `<span>${def.emoji}</span>`;
       return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}">${img}</div>`;
     }).join('');
+    const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
+    const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
+    const showPity = pack.weights.normal > 0; // ノーマルが出ないパックには天井表示不要
     return `
       <div class="cg-pack-card">
         <div class="cg-pack-top">
@@ -1853,6 +1938,7 @@ function renderShop() {
           </div>
           <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
         </div>
+        ${showPity ? `<div class="cg-pack-pity">🎯 あと${pityRemain}回でレア以上確定</div>` : ''}
         <div class="cg-pack-preview-row">
           <span class="cg-pack-preview-label">収録例</span>
           ${previewHtml}
@@ -1864,6 +1950,26 @@ function renderShop() {
   });
 }
 
+// ---------- ガチャの天井（保証） ----------
+const PITY_LIMIT = 10; // このパックで10回連続ノーマルが出たら、次回はレア以上を確定でプレゼント
+
+function pickCardForPack(pack) {
+  state.pityCounters = state.pityCounters || {};
+  const count = state.pityCounters[pack.id] || 0;
+  let cardId;
+  if (count >= PITY_LIMIT - 1) {
+    const w = pack.weights;
+    const guaranteed = { normal: 0, rare: w.rare || 50, epic: w.epic || 35, legend: w.legend || 15 };
+    cardId = pickWeightedCardId(guaranteed);
+  } else {
+    cardId = pickWeightedCardId(pack.weights);
+  }
+  const rarity = CARD_DEFS[cardId].rarity;
+  state.pityCounters[pack.id] = (rarity === 'normal') ? count + 1 : 0;
+  saveState();
+  return cardId;
+}
+
 function buyPack(packId) {
   const pack = SHOP_PACKS.find(p => p.id === packId);
   if (!pack || state[pack.currency] < pack.cost) return;
@@ -1873,7 +1979,7 @@ function buyPack(packId) {
   renderShop();
   renderHome();
 
-  const cardId = pickWeightedCardId(pack.weights);
+  const cardId = pickCardForPack(pack);
   showOpeningAnimation(pack, cardId);
 }
 
@@ -2005,6 +2111,7 @@ function init() {
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('quick-dragon').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
+  document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
   document.getElementById('dragon-summary').addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('dragon-feed-btn').addEventListener('click', feedDragon);
   document.getElementById('story-overlay').addEventListener('click', advanceStory);
@@ -2013,6 +2120,7 @@ function init() {
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
   document.getElementById('deck-preset-save-btn').addEventListener('click', saveDeckPreset);
+  document.getElementById('compendium-claim-btn').addEventListener('click', claimCompendiumReward);
   document.querySelectorAll('.cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCollectionFilter(btn.dataset.filter));
   });

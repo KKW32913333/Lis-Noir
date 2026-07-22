@@ -284,6 +284,15 @@
   .cg-seg-btn.active{background:var(--bg-panel); border:1.5px solid var(--gold-bright); color:var(--gold); font-weight:700;}
 
   /* ---------- Card list / detail ---------- */
+  .cg-compendium-panel{margin:14px 14px 4px; background:var(--bg-panel); border:1px solid var(--gold); border-radius:14px;
+    padding:12px 14px; box-shadow:0 3px 10px #00000033;}
+  .cg-compendium-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .cg-compendium-label{font-size:12px; font-weight:700; color:var(--text-panel);}
+  .cg-compendium-count{font-size:12px; font-weight:800; color:var(--gold);}
+  .cg-compendium-track{height:8px; background:#e4e6ea; border-radius:5px; overflow:hidden; border:1px solid var(--hairline);}
+  .cg-compendium-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--true-gold));}
+  .cg-compendium-claim-btn{display:block; width:100%; margin-top:10px; font-size:12px; padding:9px;}
+  .cg-compendium-claim-btn.hidden{display:none;}
   #cardlist-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:14px; flex:1;}
   .cg-detail-art{width:140px; height:140px; margin:20px auto 10px; border-radius:14px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--gold);}
   .cg-detail-emoji{font-size:56px;}
@@ -452,6 +461,7 @@
   .cg-pack-desc{font-size:11px; color:var(--text-dim-panel); line-height:1.5;}
   .cg-pack-buy{flex-shrink:0; padding:8px 14px; font-size:12px; white-space:nowrap;}
   .cg-pack-buy:disabled{opacity:.4; cursor:default;}
+  .cg-pack-pity{font-size:10px; color:var(--gold); font-weight:700; margin-top:8px;}
   .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel);}
   .cg-pack-preview-label{font-size:10px; color:var(--text-dim-panel); flex-shrink:0;}
   .cg-pack-preview-thumb{width:34px; height:34px; border-radius:8px; overflow:hidden; border:2px solid #8a8c96; flex-shrink:0;
@@ -664,6 +674,10 @@
 
   .cg-quick-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0 16px 18px;}
   .cg-quick-grid-5{grid-template-columns:repeat(5,minmax(0,1fr));}
+  .cg-quick-grid-6{grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px;}
+  .cg-quick-grid-6 .cg-quick-btn{padding:10px 2px;}
+  .cg-quick-grid-6 .cg-quick-btn .ic{font-size:17px;}
+  .cg-quick-grid-6 .cg-quick-btn .lb{font-size:9px;}
   .cg-quick-btn{background:linear-gradient(180deg,var(--bg-panel2),var(--bg-panel)); border:1px solid var(--hairline-panel);
     border-radius:12px; padding:12px 4px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 2px 8px #00000033;}
   .cg-quick-btn:active{transform:scale(.94);}
@@ -746,6 +760,27 @@
   .cg-profile-avatar-opt.selected{border-color:var(--gold-bright); background:linear-gradient(180deg,var(--gold-soft),var(--bg-panel));
     box-shadow:0 2px 8px var(--gold-soft);}
   .cg-profile-save-btn{display:block; width:calc(100% - 32px); margin:0 16px 8px;}
+
+  /* ---------- 戦績・対戦履歴 ---------- */
+  .cg-history-summary{display:flex; gap:10px; margin:0 16px 16px;}
+  .cg-history-summary-card{flex:1; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px;
+    padding:10px; text-align:center;}
+  .cg-history-summary-value{font-size:18px; font-weight:800; color:var(--gold);}
+  .cg-history-summary-label{font-size:10px; color:var(--text-dim-panel); margin-top:2px;}
+  .cg-history-list{display:flex; flex-direction:column; gap:6px; padding:0 14px 20px;}
+  .cg-history-item{display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px;
+    background:var(--bg-panel); border:1px solid var(--hairline-panel);}
+  .cg-history-item.win{border-left:4px solid #3d9d6f;}
+  .cg-history-item.lose{border-left:4px solid var(--hp-red);}
+  .cg-history-result{font-size:11px; font-weight:800; flex-shrink:0; width:38px; text-align:center; border-radius:8px; padding:3px 0;}
+  .cg-history-item.win .cg-history-result{color:#3d9d6f; background:#3d9d6f22;}
+  .cg-history-item.lose .cg-history-result{color:var(--hp-red); background:#c1495e22;}
+  .cg-history-info{flex:1; min-width:0;}
+  .cg-history-stage{font-size:12px; font-weight:700; color:var(--text-panel); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cg-history-date{font-size:10px; color:var(--text-dim-panel); margin-top:1px;}
+  .cg-history-trophy{font-size:11px; font-weight:700; flex-shrink:0;}
+  .cg-history-trophy.win{color:#3d9d6f;}
+  .cg-history-trophy.lose{color:var(--hp-red);}
   .cg-rank-row{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
     background:var(--bg-panel); border:1px solid var(--hairline-panel);}
   .cg-rank-row.me{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-soft);}
@@ -890,12 +925,13 @@
       </div>
     </div>
 
-    <div class="cg-quick-grid cg-quick-grid-5">
+    <div class="cg-quick-grid cg-quick-grid-6">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">ステージ</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
       <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ショップ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
       <div class="cg-quick-btn" id="quick-dragon"><span class="ic">🐉</span><span class="lb">ドラゴン</span></div>
+      <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
     </div>
 
     <div id="dragon-summary" class="cg-dragon-summary cg-double-frame">
@@ -964,6 +1000,14 @@
     </div>
 
     <div id="collection-list-view" style="display:none;">
+      <div id="compendium-panel" class="cg-compendium-panel">
+        <div class="cg-compendium-row">
+          <span class="cg-compendium-label">📖 図鑑コンプリート（進化済みモンスター数）</span>
+          <span id="compendium-count" class="cg-compendium-count">0/18</span>
+        </div>
+        <div class="cg-compendium-track"><div id="compendium-fill" class="cg-compendium-fill"></div></div>
+        <button class="cg-btn cg-btn-main cg-compendium-claim-btn hidden" id="compendium-claim-btn">🎁 コンプリート報酬を受け取る</button>
+      </div>
       <div class="cg-section-title">所持カード（タップで詳細）</div>
       <div id="cardlist-grid"></div>
     </div>
@@ -1234,6 +1278,16 @@
     </div>
     <button class="cg-btn cg-btn-main cg-profile-save-btn" id="profile-save-btn">保存する</button>
     <div id="profile-save-status" class="cg-backup-status" style="text-align:center;"></div>
+  </section>
+
+  <!-- ============ 戦績・対戦履歴画面 ============ -->
+  <section id="screen-history" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-history">←</button>
+      <span class="cg-section-title" style="padding:0;">戦績・対戦履歴</span>
+    </div>
+    <div id="history-summary" class="cg-history-summary"></div>
+    <div id="history-list" class="cg-history-list"></div>
   </section>
 
   <!-- ============ ランクマッチ結果画面 ============ -->
