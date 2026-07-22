@@ -72,6 +72,8 @@ function defaultState() {
   Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; });
   return {
     playerName: 'プレイヤー',
+    avatarIcon: '🛡️',
+    deckPresets: [],
     playerLevel: 1,
     playerExp: 0,
     gold: 25300,
@@ -435,6 +437,7 @@ function renderHome() {
   document.getElementById('home-level').textContent = 'Lv.' + state.playerLevel;
   document.getElementById('home-exp-fill').style.width = Math.min(100, (state.playerExp / expNeededForLevel(state.playerLevel)) * 100) + '%';
   document.getElementById('home-name').textContent = state.playerName;
+  document.getElementById('home-avatar').textContent = state.avatarIcon || '🛡️';
   document.getElementById('daily-fill').style.width = (state.dailyProgress / state.dailyMax * 100) + '%';
   document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
   const dailyDone = state.dailyProgress >= state.dailyMax;
@@ -465,6 +468,23 @@ function renderHome() {
   // 注目ミッション（未達成のうち一番進捗が近いもの／全達成なら受け取り可能なものを優先）
   renderFeaturedMission();
   renderDragonSummary();
+  renderEventBanner();
+}
+
+function renderEventBanner() {
+  const banner = document.getElementById('event-banner');
+  const active = getActiveEvents();
+  if (!active.length) { banner.classList.add('hidden'); return; }
+  const ev = active[0];
+  banner.classList.remove('hidden');
+  banner.innerHTML = `
+    <span class="ic">${ev.portrait}</span>
+    <div>
+      <div class="cg-event-banner-title">${ev.name}</div>
+      <div class="cg-event-banner-sub">${active.length > 1 ? `他${active.length - 1}件開催中` : ev.desc}</div>
+    </div>
+    <span class="cg-event-banner-badge">残り${daysRemaining(ev)}日</span>`;
+  banner.onclick = () => { renderEventList(); showScreen('events'); };
 }
 
 function renderFeaturedMission() {
@@ -496,7 +516,7 @@ const DRAGON_STAGES = [
   { minLevel: 3,  name: '幼竜',     emoji: '🐣' },
   { minLevel: 7,  name: '若竜',     emoji: '🐲' },
   { minLevel: 13, name: '成竜',     emoji: '🐉' },
-  { minLevel: 20, name: '古代竜',   emoji: '✨🐉' },
+  { minLevel: 20, name: '古代竜',   emoji: '🐉', glow: true },
 ];
 const DRAGON_EXP_PER_LEVEL = 100;
 const DRAGON_FEED_EXP = 25;
@@ -544,7 +564,9 @@ function renderDragonSummary() {
 function renderDragon() {
   const d = state.dragon;
   const stage = getDragonStageInfo(d.level);
-  document.getElementById('dragon-emoji').textContent = stage.emoji;
+  const emojiEl = document.getElementById('dragon-emoji');
+  emojiEl.textContent = stage.emoji;
+  emojiEl.classList.toggle('cg-dragon-emoji-glow', !!stage.glow);
   document.getElementById('dragon-stage-name').textContent = stage.name;
   document.getElementById('dragon-level').textContent = `Lv.${d.level}`;
   document.getElementById('dragon-exp-fill').style.width = Math.min(100, (d.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
@@ -562,6 +584,38 @@ function renderDragon() {
 }
 
 // ---------- ランキング ----------
+// ---------- プレイヤー設定 ----------
+const AVATAR_OPTIONS = ['🛡️', '🧙‍♂️', '🧙‍♀️', '👑', '🐉', '🦊', '🌙', '✨', '💀', '👻', '🔮', '⚔️', '🏹', '🌹', '⭐'];
+
+function renderProfileScreen() {
+  document.getElementById('profile-name-input').value = state.playerName;
+  document.getElementById('profile-avatar-preview').textContent = state.avatarIcon || '🛡️';
+  document.getElementById('profile-save-status').textContent = '';
+  const grid = document.getElementById('profile-avatar-grid');
+  grid.innerHTML = AVATAR_OPTIONS.map(ic =>
+    `<div class="cg-profile-avatar-opt ${ic === state.avatarIcon ? 'selected' : ''}" data-icon="${ic}">${ic}</div>`
+  ).join('');
+  grid.querySelectorAll('.cg-profile-avatar-opt').forEach(node => {
+    node.addEventListener('click', () => {
+      grid.querySelectorAll('.cg-profile-avatar-opt').forEach(n => n.classList.remove('selected'));
+      node.classList.add('selected');
+      document.getElementById('profile-avatar-preview').textContent = node.dataset.icon;
+    });
+  });
+}
+
+function saveProfile() {
+  const name = document.getElementById('profile-name-input').value.trim();
+  const selected = document.querySelector('.cg-profile-avatar-opt.selected');
+  const status = document.getElementById('profile-save-status');
+  if (!name) { status.textContent = 'プレイヤー名を入力してください。'; return; }
+  state.playerName = name.slice(0, 12);
+  if (selected) state.avatarIcon = selected.dataset.icon;
+  saveState();
+  renderHome();
+  status.textContent = '保存しました！';
+}
+
 async function renderRanking() {
   const wrap = document.getElementById('ranking-body');
   const user = window.LisNoirCloud && window.LisNoirCloud.getUser();
@@ -630,6 +684,8 @@ function renderDeck() {
     : '0.0';
   document.getElementById('deck-avgcost').textContent = avgCost;
 
+  renderDeckPresets();
+
   const collEl = document.getElementById('collection-list');
   const owned = Object.keys(state.cards).filter(id => {
     if (collectionFilter === 'all') return true;
@@ -659,6 +715,56 @@ function renderDeck() {
       renderDeck();
     });
   });
+}
+
+// ---------- デッキ保存（プリセット） ----------
+const MAX_DECK_PRESETS = 5;
+
+function renderDeckPresets() {
+  const wrap = document.getElementById('deck-preset-list');
+  const presets = state.deckPresets || [];
+  const saveBtn = document.getElementById('deck-preset-save-btn');
+  if (saveBtn) saveBtn.disabled = presets.length >= MAX_DECK_PRESETS;
+  if (!presets.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = presets.map((p, i) => `
+    <div class="cg-deck-preset-item">
+      <span class="cg-deck-preset-name">📁 ${p.name}</span>
+      <span class="cg-deck-preset-count">${p.cards.length}枚</span>
+      <button class="cg-deck-preset-load-btn" data-index="${i}">読み込む</button>
+      <button class="cg-deck-preset-del-btn" data-index="${i}" aria-label="削除">🗑️</button>
+    </div>`).join('');
+  wrap.querySelectorAll('.cg-deck-preset-load-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.index);
+      const preset = state.deckPresets[i];
+      if (!preset) return;
+      if (!confirm(`「${preset.name}」を読み込みます。現在編成中のデッキは上書きされます。よろしいですか？`)) return;
+      state.deck = preset.cards.slice();
+      saveState();
+      renderDeck();
+    });
+  });
+  wrap.querySelectorAll('.cg-deck-preset-del-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.index);
+      const preset = state.deckPresets[i];
+      if (!preset) return;
+      if (!confirm(`「${preset.name}」を削除します。よろしいですか？`)) return;
+      state.deckPresets.splice(i, 1);
+      saveState();
+      renderDeck();
+    });
+  });
+}
+
+function saveDeckPreset() {
+  if (!state.deck.length) { alert('デッキが空です。カードを編成してから保存してください。'); return; }
+  if (state.deckPresets.length >= MAX_DECK_PRESETS) { alert(`保存できるデッキは最大${MAX_DECK_PRESETS}件までです。`); return; }
+  const name = prompt('デッキの名前を入力してください（例：アグロデッキ）', `デッキ${state.deckPresets.length + 1}`);
+  if (!name) return;
+  state.deckPresets.push({ name: name.slice(0, 16), cards: state.deck.slice() });
+  saveState();
+  renderDeck();
 }
 
 function setCollectionFilter(filter) {
@@ -811,7 +917,108 @@ const STAGES = [
       { speaker: 'モンスター使いの女王', portrait: '👑', text: 'ここまで来たか。ならば、我が真の力を見せてやろう。' },
     ],
     storyVictory: { speaker: 'モンスター使いの女王', portrait: '👑', text: '見事…お前こそ、真のLis Noirの継承者にふさわしい。' } },
+  { id: 6, name: '月影の斥候', portrait: '🌙', hp: 40, spellChance: 0.22, bgTheme: 'moonshadow',
+    weights: { normal: 20, rare: 32, epic: 35, legend: 13 }, rewardGold: 250, rewardGems: 22, trophyDelta: 44,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '女王を退けた先に、見たこともない月光の国が広がっていた。' },
+      { speaker: '月影の斥候', portrait: '🌙', text: '……侵入者か。この先には行かせない。' },
+    ],
+    storyVictory: { speaker: '月影の斥候', portrait: '🌙', text: 'まさか、この霧を抜けてくるとは…油断した。' } },
+  { id: 7, name: '深緑の守護者', portrait: '🍃', hp: 46, spellChance: 0.25, bgTheme: 'emerald',
+    weights: { normal: 14, rare: 30, epic: 38, legend: 18 }, rewardGold: 280, rewardGems: 25, trophyDelta: 48,
+    storyIntro: [
+      { speaker: '深緑の守護者', portrait: '🍃', text: 'この森は月の巫女様の庭。荒らす者は許さぬ。' },
+    ],
+    storyVictory: { speaker: '深緑の守護者', portrait: '🍃', text: '森が…負けを認めている。行くがいい。' } },
+  { id: 8, name: '氷結の魔女', portrait: '❄️', hp: 52, spellChance: 0.28, bgTheme: 'frost',
+    weights: { normal: 8, rare: 26, epic: 40, legend: 26 }, rewardGold: 310, rewardGems: 28, trophyDelta: 52,
+    storyIntro: [
+      { speaker: '氷結の魔女', portrait: '❄️', text: 'ふふ…温かい血の匂い。この氷の宮殿で凍らせてあげよう。' },
+    ],
+    storyVictory: { speaker: '氷結の魔女', portrait: '❄️', text: '私の氷が…溶かされるなんて…。' } },
+  { id: 9, name: '業火の剣士', portrait: '🔥', hp: 58, spellChance: 0.31, bgTheme: 'inferno2',
+    weights: { normal: 5, rare: 22, epic: 40, legend: 33 }, rewardGold: 350, rewardGems: 32, trophyDelta: 58,
+    storyIntro: [
+      { speaker: '業火の剣士', portrait: '🔥', text: '月の女帝の剣として、貴様をここで討つ。' },
+    ],
+    storyVictory: { speaker: '業火の剣士', portrait: '🔥', text: '……我が剣が折れるとはな。女帝様に伝えよ、この者は本物だと。' } },
+  { id: 10, name: '月影の女帝', portrait: '👸', hp: 66, spellChance: 0.34, bgTheme: 'empress',
+    weights: { normal: 2, rare: 16, epic: 38, legend: 44 }, rewardGold: 450, rewardGems: 45, trophyDelta: 70,
+    storyIntro: [
+      { speaker: '月影の女帝', portrait: '👸', text: 'よくぞこの月影の国へ辿り着いた。だが、私を超えた者はまだいない。' },
+    ],
+    storyVictory: { speaker: '月影の女帝', portrait: '👸', text: '……見事。この国もまた、そなたの物語の一部となろう。' } },
 ];
+
+const WORLDS = [
+  { id: 1, name: '見習いの森', stageIds: [1, 2, 3, 4, 5] },
+  { id: 2, name: '月影の国', stageIds: [6, 7, 8, 9, 10] },
+];
+
+// ---------- イベントクエスト（期間限定） ----------
+// 今後、新しいイベントを追加する場合はこの配列に1件追加するだけでOK（startDate/endDateを過ぎると自動的に非表示になる）
+const EVENTS = [
+  {
+    id: 'launch_2026',
+    name: 'オープン記念イベント',
+    desc: '期間限定の特別ステージに挑戦して、豪華報酬を手に入れよう！',
+    startDate: '2026-07-01',
+    endDate: '2026-08-31',
+    portrait: '🎉',
+    bgTheme: 'empress',
+    hp: 30,
+    spellChance: 0.20,
+    weights: { normal: 30, rare: 35, epic: 25, legend: 10 },
+    rewardGold: 500,
+    rewardGems: 50,
+    trophyDelta: 30,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: 'どこからともなく、祝祭の花びらが舞い降りてきた。' },
+      { speaker: '祝祭の精霊', portrait: '🎉', text: 'ようこそ、旅人よ。この記念すべき日を、共に祝おうではないか！' },
+    ],
+    storyVictory: { speaker: '祝祭の精霊', portrait: '🎉', text: '素晴らしい力だ。この特別な報酬を受け取るがいい。' },
+  },
+];
+
+function getActiveEvents() {
+  const now = new Date();
+  return EVENTS.filter(ev => {
+    const start = new Date(ev.startDate + 'T00:00:00');
+    const end = new Date(ev.endDate + 'T23:59:59');
+    return now >= start && now <= end;
+  });
+}
+
+function daysRemaining(event) {
+  const end = new Date(event.endDate + 'T23:59:59');
+  const now = new Date();
+  return Math.max(0, Math.ceil((end - now) / 86400000));
+}
+
+function renderEventList() {
+  const wrap = document.getElementById('event-list');
+  const active = getActiveEvents();
+  if (!active.length) {
+    wrap.innerHTML = '<div class="cg-rank-empty">現在開催中のイベントはありません。<br>また今度チェックしてみてください。</div>';
+    return;
+  }
+  wrap.innerHTML = active.map(ev => `
+    <div class="cg-stage-card cg-event-card" data-event="${ev.id}">
+      <div class="cg-stage-portrait">${ev.portrait}</div>
+      <div class="cg-stage-info">
+        <div class="cg-stage-name">${ev.name}</div>
+        <div class="cg-stage-desc">${ev.desc}</div>
+        <div class="cg-event-reward">🏆+${ev.trophyDelta}　💰${ev.rewardGold}　💎${ev.rewardGems}</div>
+      </div>
+      <div class="cg-event-countdown">残り<br>${daysRemaining(ev)}日</div>
+    </div>`).join('');
+  wrap.querySelectorAll('.cg-event-card').forEach(node => {
+    node.addEventListener('click', () => {
+      const ev = EVENTS.find(e => e.id === node.dataset.event);
+      showStory(ev.storyIntro, () => startBattle(ev));
+    });
+  });
+}
 
 // ---------- ストーリー会話 ----------
 let storyQueue = [];
@@ -841,17 +1048,29 @@ function advanceStory() {
 
 function renderStageSelect() {
   const wrap = document.getElementById('stage-list');
-  wrap.innerHTML = STAGES.map(stage => {
-    const unlocked = stage.id <= state.stageProgress;
-    const cleared = stage.id < state.stageProgress;
+  wrap.innerHTML = WORLDS.map(world => {
+    const worldStages = world.stageIds.map(id => STAGES.find(s => s.id === id));
+    const worldUnlocked = worldStages[0].id <= state.stageProgress;
+    const stagesHtml = worldStages.map(stage => {
+      const unlocked = stage.id <= state.stageProgress;
+      const cleared = stage.id < state.stageProgress;
+      return `
+        <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
+          <div class="cg-stage-portrait">${unlocked ? stage.portrait : '🔒'}</div>
+          <div class="cg-stage-info">
+            <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}</div>
+            <div class="cg-stage-desc">${unlocked ? `敵HP ${stage.hp}　報酬 💰${stage.rewardGold} 💎${stage.rewardGems}` : '前のステージをクリアすると解放'}</div>
+          </div>
+          <div class="cg-stage-go">${unlocked ? '⚔️' : ''}</div>
+        </div>`;
+    }).join('');
     return `
-      <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
-        <div class="cg-stage-portrait">${unlocked ? stage.portrait : '🔒'}</div>
-        <div class="cg-stage-info">
-          <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}</div>
-          <div class="cg-stage-desc">${unlocked ? `敵HP ${stage.hp}　報酬 💰${stage.rewardGold} 💎${stage.rewardGems}` : '前のステージをクリアすると解放'}</div>
+      <div class="cg-world-section">
+        <div class="cg-world-header ${worldUnlocked ? '' : 'locked'}">
+          <span class="cg-world-name">🗺️ ワールド${world.id}：${worldUnlocked ? world.name : '？？？'}</span>
+          ${!worldUnlocked ? '<span class="cg-world-lock">🔒 未解放</span>' : ''}
         </div>
-        <div class="cg-stage-go">${unlocked ? '⚔️' : ''}</div>
+        <div class="cg-world-stages">${stagesHtml}</div>
       </div>`;
   }).join('');
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
@@ -894,10 +1113,24 @@ const BATTLE_BG_THEMES = {
   volcano: 'battle-bg-volcano.jpg',
   castle:  'battle-bg-castle.jpg',
 };
+const BATTLE_BG_GRADIENTS = {
+  moonshadow: 'radial-gradient(ellipse 500px 400px at 50% 30%, #3a3a6644 0%, transparent 70%), linear-gradient(160deg, #14142c 0%, #23234a 55%, #0d0d1e 100%)',
+  emerald:    'radial-gradient(ellipse 500px 400px at 50% 30%, #1f6b4a44 0%, transparent 70%), linear-gradient(160deg, #0d1f16 0%, #163a26 55%, #081109 100%)',
+  frost:      'radial-gradient(ellipse 500px 400px at 50% 30%, #4a7a9944 0%, transparent 70%), linear-gradient(160deg, #0d1e2b 0%, #1c3a52 55%, #081018 100%)',
+  inferno2:   'radial-gradient(ellipse 500px 400px at 50% 30%, #8a2e2244 0%, transparent 70%), linear-gradient(160deg, #260a06 0%, #4a150c 55%, #140402 100%)',
+  empress:    'radial-gradient(ellipse 500px 400px at 50% 30%, #8A4FFF44 0%, transparent 70%), linear-gradient(160deg, #1c0f33 0%, #3a1f63 55%, #0d0619 100%)',
+};
 
 function applyBattleBgTheme(theme) {
   const board = document.querySelector('.cg-battle-board');
   if (!board) return;
+  if (BATTLE_BG_GRADIENTS[theme]) {
+    board.style.backgroundImage = BATTLE_BG_GRADIENTS[theme];
+    board.style.backgroundSize = 'cover';
+    board.style.backgroundPosition = 'center';
+    board.style.backgroundRepeat = 'no-repeat';
+    return;
+  }
   const img = BATTLE_BG_THEMES[theme] || BATTLE_BG_THEMES.forest;
   board.style.backgroundImage =
     `linear-gradient(180deg, #1A1725b8 0%, #1A1725d9 50%, #1A1725b8 100%), url('${img}')`;
@@ -1507,7 +1740,7 @@ function showResult(won) {
   const el = document.getElementById('result-title');
   el.textContent = won ? 'WIN' : 'LOSE';
   el.className = won ? 'cg-result-title win' : 'cg-result-title lose';
-  document.getElementById('result-stage-name').textContent = `ステージ${stage.id}　${stage.name}`;
+  document.getElementById('result-stage-name').textContent = typeof stage.id === 'number' ? `ステージ${stage.id}　${stage.name}` : `🎉 ${stage.name}`;
   const delta = won ? stage.trophyDelta : -20;
   state.trophy = Math.max(0, state.trophy + delta);
   document.getElementById('result-trophy-delta').textContent = (delta > 0 ? '+' : '') + delta;
@@ -1518,7 +1751,7 @@ function showResult(won) {
     state.gold += goldReward; state.gems += gemReward;
     state.totalWins = (state.totalWins || 0) + 1;
     state.winProgress = Math.min(state.winMax, state.winProgress + 1);
-    if (stage.id === state.stageProgress) {
+    if (typeof stage.id === 'number' && stage.id === state.stageProgress) {
       state.stageProgress = Math.min(STAGES.length, state.stageProgress + 1);
     }
     gainDragonExp(15);
@@ -1779,6 +2012,7 @@ function init() {
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
+  document.getElementById('deck-preset-save-btn').addEventListener('click', saveDeckPreset);
   document.querySelectorAll('.cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCollectionFilter(btn.dataset.filter));
   });
@@ -1825,6 +2059,8 @@ function init() {
   });
   document.getElementById('daily-claim-btn').addEventListener('click', claimDailyReward);
   document.getElementById('rank-card-btn').addEventListener('click', () => { renderRanking(); showScreen('ranking'); });
+  document.getElementById('player-info-btn').addEventListener('click', () => { renderProfileScreen(); showScreen('profile'); });
+  document.getElementById('profile-save-btn').addEventListener('click', saveProfile);
   if (window.LisNoirCloud) {
     window.LisNoirCloud.onAuthChange((user) => {
       refreshCloudAuthUI(user);
