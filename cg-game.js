@@ -24,24 +24,24 @@ const RARITY = {
 // image: null の間はプレースホルダー（属性色グラデ+絵文字）を表示。
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
-  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
-  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  skill: '', image: 'card-fire-imp.png', emoji: '👹' },
-  fire_phoenix:   { name: 'フェニックス',     element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  skill: '撃破された時、1/2のHPで復活', image: 'card-fire-phoenix.png', emoji: '🐦' },
-  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  skill: '場に出た時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
-  water_slime:    { name: 'ブルースライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 2,  skill: '', image: 'card-water-slime.png', emoji: '🔵' },
-  water_serpent:  { name: 'シーサーペント',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  skill: '攻撃時、相手カード1体を1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
-  nature_treant:  { name: 'エンシェントツリー', element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
-  nature_wolf:    { name: 'フォレストウルフ', element: 'nature', rarity: 'normal', cost: 2, atk: 3, hp: 2,  skill: '', image: 'card-nature-wolf.png', emoji: '🐺' },
-  nature_panda:   { name: 'ウォーパンダ',     element: 'nature', rarity: 'rare',   cost: 2, atk: 2, hp: 4,  skill: '', image: 'card-nature-panda.png', emoji: '🐼' },
-  light_angel:    { name: 'ガーディアンエンジェル', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 6, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '👼' },
-  light_unicorn:  { name: 'ホーリーユニコーン', element: 'light', rarity: 'rare',  cost: 3, atk: 3, hp: 5,  skill: '', image: 'card-light-unicorn.png', emoji: '🦄' },
-  light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
-  dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
-  dark_reaper:    { name: 'ソウルリーパー',   element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  skill: '撃破時、相手のコストを1消費させる', image: 'card-dark-reaper.png', emoji: '💀' },
-  dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 1, skill: '', image: 'card-dark-ghost.png', emoji: '👻' },
-  rock_giant:     { name: 'ロックジャイアント', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
-  storm_bird:     { name: 'サンダーホーク',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
-  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, skill: '場に出た時、手札を1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
+  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
+  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-imp.png', emoji: '👹' },
+  fire_phoenix:   { name: 'フェニックス',     element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skill: '撃破された時、1/2のHPで復活', image: 'card-fire-phoenix.png', emoji: '🐦' },
+  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skill: '場に出た時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
+  water_slime:    { name: 'ブルースライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 2,  role: 'attacker', skill: '', image: 'card-water-slime.png', emoji: '🔵' },
+  water_serpent:  { name: 'シーサーペント',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skill: '攻撃時、相手カード1体を1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
+  nature_treant:  { name: 'エンシェントツリー', element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  role: 'defender', skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
+  nature_wolf:    { name: 'フォレストウルフ', element: 'nature', rarity: 'normal', cost: 2, atk: 3, hp: 2,  role: 'attacker', skill: '', image: 'card-nature-wolf.png', emoji: '🐺' },
+  nature_panda:   { name: 'ウォーパンダ',     element: 'nature', rarity: 'rare',   cost: 2, atk: 2, hp: 4,  role: 'defender', skill: '', image: 'card-nature-panda.png', emoji: '🐼' },
+  light_angel:    { name: 'ガーディアンエンジェル', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '👼' },
+  light_unicorn:  { name: 'ホーリーユニコーン', element: 'light', rarity: 'rare',  cost: 3, atk: 3, hp: 5,  role: 'attacker', skill: '', image: 'card-light-unicorn.png', emoji: '🦄' },
+  light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
+  dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  role: 'attacker', skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
+  dark_reaper:    { name: 'ソウルリーパー',   element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'attacker', skill: '撃破時、相手のコストを1消費させる', image: 'card-dark-reaper.png', emoji: '💀' },
+  dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 1, role: 'attacker', skill: '', image: 'card-dark-ghost.png', emoji: '👻' },
+  rock_giant:     { name: 'ロックジャイアント', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
+  storm_bird:     { name: 'サンダーホーク',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  role: 'attacker', skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
+  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skill: '場に出た時、手札を1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -356,10 +356,14 @@ function renderCardFace(id, opts) {
   const img = def.image
     ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
+  const isMonster = (def.type || 'monster') === 'monster';
+  const roleBadge = isMonster
+    ? `<span class="cg-card-role ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
+    : '';
   return `
     <div class="cg-card${small}${evolvedClass}" data-id="${id}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}</div>
+      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}</div>
       <div class="cg-card-name">${def.name}</div>
       ${cardStatsLine(def, opts.evolved)}
       <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
@@ -1251,7 +1255,7 @@ function showTurnBanner(text) {
   el.classList.add('show');
 }
 
-function impactEffect() {
+function impactEffect(targetEl, dmg, mult) {
   const app = document.getElementById('app');
   const flash = document.getElementById('battle-impact-flash');
   app.classList.remove('shake');
@@ -1263,6 +1267,50 @@ function impactEffect() {
     flash.classList.add('show');
   }
   sfxAttack();
+  if (targetEl && dmg !== undefined) spawnImpactBurst(targetEl, dmg, mult);
+}
+
+function spawnImpactBurst(targetEl, dmg, mult) {
+  const board = document.querySelector('.cg-battle-board');
+  if (!board || !targetEl) return;
+  const boardRect = board.getBoundingClientRect();
+  const rect = targetEl.getBoundingClientRect();
+  const x = rect.left + rect.width / 2 - boardRect.left;
+  const y = rect.top + rect.height / 2 - boardRect.top;
+
+  const burst = document.createElement('div');
+  burst.className = 'cg-impact-burst';
+  burst.style.left = x + 'px';
+  burst.style.top = y + 'px';
+  board.appendChild(burst);
+  setTimeout(() => burst.remove(), 550);
+
+  const slash = document.createElement('div');
+  slash.className = 'cg-impact-slash';
+  slash.style.left = x + 'px';
+  slash.style.top = y + 'px';
+  board.appendChild(slash);
+  setTimeout(() => slash.remove(), 420);
+
+  for (let i = 0; i < 6; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'cg-impact-spark';
+    spark.style.left = x + 'px';
+    spark.style.top = y + 'px';
+    spark.style.setProperty('--sa', (i * 60) + 'deg');
+    board.appendChild(spark);
+    setTimeout(() => spark.remove(), 500);
+  }
+
+  if (dmg !== undefined) {
+    const dmgEl = document.createElement('div');
+    dmgEl.className = 'cg-impact-dmg' + (mult > 0 ? ' adv' : mult < 0 ? ' dis' : '');
+    dmgEl.textContent = '-' + dmg;
+    dmgEl.style.left = x + 'px';
+    dmgEl.style.top = y + 'px';
+    board.appendChild(dmgEl);
+    setTimeout(() => dmgEl.remove(), 950);
+  }
 }
 
 function summonEffect() {
@@ -1344,18 +1392,24 @@ function renderBattle() {
   const previewingAttack = battle.selectedFieldIdx !== null ? battle.playerField[battle.selectedFieldIdx] : null;
   const selectedSpell = battle.selectedHandIdx !== null ? CARD_DEFS[battle.playerHand[battle.selectedHandIdx]] : null;
   const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && selectedSpell.target === 'enemy' ? selectedSpell : null;
+  const attackValid = previewingAttack ? getValidTargets(previewingAttack, battle.enemyField) : null;
 
   enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => {
     let preview = '';
+    let blockedCls = '';
     if (u && previewingAttack) {
-      const p = previewDamage(previewingAttack, u);
-      const cls = p.mult > 0 ? 'adv' : p.mult < 0 ? 'dis' : '';
-      preview = `<div class="cg-preview-badge ${cls}">⚔${p.dmg}</div>`;
+      if (attackValid.indices.includes(i)) {
+        const p = previewDamage(previewingAttack, u);
+        const cls = p.mult > 0 ? 'adv' : p.mult < 0 ? 'dis' : '';
+        preview = `<div class="cg-preview-badge ${cls}">⚔${p.dmg}</div>`;
+      } else {
+        blockedCls = 'blocked';
+      }
     } else if (u && previewingSpell) {
       preview = `<div class="cg-preview-badge spell">✨${previewingSpell.effect.value}</div>`;
     }
     return u
-      ? `<div class="cg-field-slot filled" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -1372,8 +1426,8 @@ function renderBattle() {
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
-  const directAttackReady = !!(previewingAttack || previewingSpell);
-  if (previewingAttack) {
+  const faceAttackReady = !!(previewingAttack && attackValid.faceAllowed) || !!previewingSpell;
+  if (previewingAttack && attackValid.faceAllowed) {
     portraitPreviewEl.textContent = `⚔${previewDamage(previewingAttack, null).dmg}`;
     portraitPreviewEl.classList.add('show');
   } else if (previewingSpell) {
@@ -1382,9 +1436,11 @@ function renderBattle() {
   } else {
     portraitPreviewEl.classList.remove('show');
   }
-  document.getElementById('battle-enemy-portrait').classList.toggle('attackable', directAttackReady);
-  document.getElementById('battle-enemy-hp-chip').classList.toggle('attackable', directAttackReady);
-  document.getElementById('battle-direct-attack-label').classList.toggle('show', directAttackReady);
+  document.getElementById('battle-enemy-portrait').classList.toggle('attackable', faceAttackReady);
+  document.getElementById('battle-enemy-hp-chip').classList.toggle('attackable', faceAttackReady);
+  document.getElementById('battle-direct-attack-label').classList.toggle('show', faceAttackReady);
+  const guardLabel = previewingAttack && !attackValid.faceAllowed && attackValid.indices.length > 0;
+  document.getElementById('battle-direct-attack-label').textContent = guardLabel ? '🛡️ディフェンダーを先に攻撃' : 'タップで直接攻撃';
 
   bindBattleEvents();
 
@@ -1429,18 +1485,22 @@ function bindBattleEvents() {
         const id = battle.playerHand[battle.selectedHandIdx];
         const def = CARD_DEFS[id];
         const type = def.type || 'monster';
-        if (type === 'monster') {
+        if (type === 'monster' && !battle.playerField[idx]) {
           playCardFromHand(battle.selectedHandIdx, idx);
-        } else if (type === 'equipment' && def.target === 'friendly' && battle.playerField[idx]) {
-          equipCardFromHand(battle.selectedHandIdx, idx);
+          return;
         }
-        return;
+        if (type === 'equipment' && def.target === 'friendly' && battle.playerField[idx]) {
+          equipCardFromHand(battle.selectedHandIdx, idx);
+          return;
+        }
+        // 手札のカードがこのマスに対して使えない場合は、手札の選択を解除して
+        // 通常通り「このマスのモンスターを攻撃選択」の操作に切り替える
+        battle.selectedHandIdx = null;
       }
       if (battle.playerField[idx] && battle.playerField[idx].canAttack) {
-        battle.selectedHandIdx = null;
         battle.selectedFieldIdx = (battle.selectedFieldIdx === idx) ? null : idx;
-        renderBattle();
       }
+      renderBattle();
     };
     bindLongPress(node, () => {
       const idx = Number(node.dataset.idx);
@@ -1456,7 +1516,11 @@ function bindBattleEvents() {
         const def = CARD_DEFS[id];
         if ((def.type || 'monster') === 'spell' && def.target === 'enemy' && battle.enemyField[idx]) {
           castSpell(battle.selectedHandIdx, idx);
+          return;
         }
+        // 手札のカードがこのマスに対して使えない場合は選択を解除
+        battle.selectedHandIdx = null;
+        renderBattle();
         return;
       }
       if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, idx);
@@ -1501,12 +1565,14 @@ function showCardInfo(unit) {
   const rarity = RARITY[def.rarity];
   const el = ELEMENTS[def.element];
   const atk = def.atk + (unit.atkBonus || 0) + fieldBonusFor(unit);
+  const roleText = def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）';
   document.getElementById('card-info-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">${roleText}</div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
         <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}</b></div>
@@ -1524,12 +1590,16 @@ function showHandCardInfo(id) {
   const owned = state.cards[id];
   const evolved = !!(owned && owned.evolved);
   const type = def.type || 'monster';
+  const roleText = type === 'monster'
+    ? (def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）')
+    : '';
   document.getElementById('card-info-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      ${roleText ? `<div class="cg-detail-desc">${roleText}</div>` : ''}
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
         ${detailStatsBlock(def, evolved)}
@@ -1564,7 +1634,10 @@ function castSpell(handIdx, targetIdx) {
   const eff = def.effect || {};
   if (eff.kind === 'damage') {
     const dmg = eff.value || 0;
-    impactEffect();
+    const targetEl = targetIdx === null
+      ? document.getElementById('battle-enemy-portrait')
+      : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
+    impactEffect(targetEl, dmg, 0);
     if (targetIdx === null) {
       battle.enemyHp -= dmg;
     } else {
@@ -1616,12 +1689,39 @@ function equipCardFromHand(handIdx, fieldIdx) {
   renderBattle();
 }
 
+// ---------- アタッカー/ディフェンダーの攻撃対象判定 ----------
+// アタッカー: 相手にディフェンダーがいれば、いずれかのディフェンダーしか攻撃できない（いなければ何でも攻撃可）
+// ディフェンダー: 相手のディフェンダーしか攻撃できない（相手にディフェンダーがいなければ、このターンは攻撃不可）
+function getValidTargets(unit, opponentField) {
+  const oppDefenderIdxs = [];
+  opponentField.forEach((u, i) => { if (u && u.def.role === 'defender') oppDefenderIdxs.push(i); });
+  const role = unit.def.role || 'attacker';
+  if (role === 'defender') {
+    return { indices: oppDefenderIdxs, faceAllowed: false };
+  }
+  if (oppDefenderIdxs.length > 0) {
+    return { indices: oppDefenderIdxs, faceAllowed: false };
+  }
+  const allIdxs = [];
+  opponentField.forEach((u, i) => { if (u) allIdxs.push(i); });
+  return { indices: allIdxs, faceAllowed: true };
+}
+
 function attackTarget(attackerIdx, targetIdx) {
   const attacker = battle.playerField[attackerIdx];
   if (!attacker || !attacker.canAttack) return;
+  const valid = getValidTargets(attacker, battle.enemyField);
+  if (targetIdx === null) {
+    if (!valid.faceAllowed) return;
+  } else {
+    if (!valid.indices.includes(targetIdx)) return;
+  }
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
   const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult);
-  impactEffect();
+  const targetEl = targetIdx === null
+    ? document.getElementById('battle-enemy-portrait')
+    : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
+  impactEffect(targetEl, dmg, mult);
 
   if (targetIdx === null) {
     battle.enemyHp -= dmg;
@@ -1711,8 +1811,11 @@ function enemyTurn() {
           battle.enemyCost -= def.cost;
           battle.enemyHand.splice(i, 1);
           if (eff.kind === 'damage') {
-            impactEffect();
             const targetIdx = battle.playerField.findIndex(u => u !== null);
+            const targetEl = targetIdx !== -1
+              ? document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx]
+              : document.getElementById('battle-player-portrait');
+            impactEffect(targetEl, eff.value, 0);
             if (targetIdx !== -1) {
               battle.playerField[targetIdx].curHp -= eff.value;
               if (battle.playerField[targetIdx].curHp <= 0) battle.playerField[targetIdx] = null;
@@ -1743,18 +1846,24 @@ function enemyTurn() {
   }
   battle.playerField = battle.playerField.map(u => (u && u.curHp <= 0) ? null : u);
 
-  // 攻撃可能な既存ユニットで攻撃
+  // 攻撃可能な既存ユニットで攻撃（アタッカー/ディフェンダーのルールに従う）
   battle.enemyField.forEach((u, i) => {
     if (u && u.canAttack) {
-      const targetIdx = battle.playerField.findIndex(p => p !== null);
-      impactEffect();
-      if (targetIdx !== -1) {
+      const valid = getValidTargets(u, battle.playerField);
+      const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
+      if (valid.indices.length > 0) {
+        const targetIdx = valid.indices[0];
         const target = battle.playerField[targetIdx];
-        target.curHp -= Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
+        const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
+        impactEffect(targetEl, dmg, 0);
+        target.curHp -= dmg;
         if (target.curHp <= 0) battle.playerField[targetIdx] = null;
-      } else {
-        battle.playerHp -= Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
+      } else if (valid.faceAllowed) {
+        const targetEl = document.getElementById('battle-player-portrait');
+        impactEffect(targetEl, dmg, 0);
+        battle.playerHp -= dmg;
       }
+      // ディフェンダーで有効な対象がいない場合は何もせず待機
     }
   });
   battle.enemyField.forEach(u => { if (u) u.canAttack = true; });
