@@ -48,6 +48,7 @@ const CARD_DEFS = {
   spell_iceshard:   { name: 'アイスシャード',   element: 'water', rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 2 }, skill: '敵1体（または敵本体）に2ダメージ', image: 'card-spell-iceshard.png', emoji: '🧊' },
   spell_healing:    { name: 'ヒーリングライト', element: 'light', rarity: 'normal', cost: 2, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'heal', value: 5 }, skill: '自分のHPを5回復', image: 'card-spell-healing.png', emoji: '💫' },
   spell_mindsurge:  { name: 'マインドサージ',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 2 }, skill: 'カードを2枚引く', image: 'card-spell-mindsurge.png', emoji: '📖' },
+  spell_apocalypse: { name: 'アポカリプス',     element: 'dark',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'wipe' }, skill: '相手の場のモンスターを全て撃破する', image: null, emoji: '💥' },
 
   // ---- 装備カード（味方モンスター1体に付与） ----
   equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: 'card-equip-ironsword.png', emoji: '🗡️' },
@@ -66,6 +67,7 @@ const EVOLVE_LEVEL_REQ = 5;
 const EVOLVE_COST = 800;
 const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
+const CARD_MAX_LEVEL = 10;
 
 function defaultState() {
   const owned = {};
@@ -326,6 +328,7 @@ function cardStatsLine(def, evolved) {
     if (eff.kind === 'damage') label = `⚡${eff.value}`;
     else if (eff.kind === 'heal') label = `➕${eff.value}`;
     else if (eff.kind === 'draw') label = `🃏${eff.value}`;
+    else if (eff.kind === 'wipe') label = `💥全体`;
     return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
   }
   if (type === 'equipment') {
@@ -778,7 +781,7 @@ function saveDeckPreset() {
 
 function setCollectionFilter(filter) {
   collectionFilter = filter;
-  document.querySelectorAll('.cg-filter-tab').forEach(btn => {
+  document.querySelectorAll('#collection-filter-tabs .cg-filter-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === filter);
   });
   renderDeck();
@@ -842,9 +845,25 @@ function claimCompendiumReward() {
   renderHome();
 }
 
+let cardListFilter = 'all';
+let cardListOrder = [];
+
+function setCardListFilter(filter) {
+  cardListFilter = filter;
+  document.querySelectorAll('#cardlist-filter-tabs .cg-filter-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderCardList();
+}
+
 function renderCardList() {
   const listEl = document.getElementById('cardlist-grid');
-  listEl.innerHTML = Object.keys(state.cards).map(id => renderCardFace(id, { small: true, evolved: state.cards[id].evolved })).join('');
+  const ids = Object.keys(state.cards).filter(id => {
+    if (cardListFilter === 'all') return true;
+    return (CARD_DEFS[id].type || 'monster') === cardListFilter;
+  });
+  cardListOrder = ids;
+  listEl.innerHTML = ids.map(id => renderCardFace(id, { small: true, evolved: state.cards[id].evolved })).join('');
   listEl.querySelectorAll('.cg-card').forEach(node => {
     node.addEventListener('click', () => openCardDetail(node.dataset.id));
   });
@@ -879,13 +898,15 @@ function openCardDetail(id) {
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
-      <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${Math.min(100, owned.exp)}%"></div></div>
+      <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
         ${detailStatsBlock(def, owned.evolved)}
       </div>
-      <button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>
+      ${owned.level >= CARD_MAX_LEVEL
+        ? `<div class="cg-evolve-done">Lv.${CARD_MAX_LEVEL}（最大レベル）</div>`
+        : `<button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>`}
       ${isMonster ? `
         <div class="cg-evolve-row">
           ${owned.evolved
@@ -895,11 +916,16 @@ function openCardDetail(id) {
                </button>`}
         </div>` : ''}
     </div>`;
-  document.getElementById('detail-upgrade-btn').addEventListener('click', () => {
-    if (state.gold >= 400) {
+  const upgradeBtn = document.getElementById('detail-upgrade-btn');
+  if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
+    if (state.gold >= 400 && state.cards[id].level < CARD_MAX_LEVEL) {
       state.gold -= 400;
       state.cards[id].exp += 20;
-      if (state.cards[id].exp >= 100) { state.cards[id].exp = 0; state.cards[id].level += 1; }
+      if (state.cards[id].exp >= 100 && state.cards[id].level < CARD_MAX_LEVEL) {
+        state.cards[id].exp = 0;
+        state.cards[id].level += 1;
+      }
+      if (state.cards[id].level >= CARD_MAX_LEVEL) state.cards[id].exp = 0;
       state.totalUpgrades = (state.totalUpgrades || 0) + 1;
       saveState();
       openCardDetail(id);
@@ -908,6 +934,15 @@ function openCardDetail(id) {
   });
   const evolveBtn = document.getElementById('detail-evolve-btn');
   if (evolveBtn) evolveBtn.addEventListener('click', () => evolveCard(id));
+
+  const orderIdx = cardListOrder.indexOf(id);
+  const prevBtn = document.getElementById('detail-prev-btn');
+  const nextBtn = document.getElementById('detail-next-btn');
+  prevBtn.disabled = orderIdx <= 0;
+  nextBtn.disabled = orderIdx === -1 || orderIdx >= cardListOrder.length - 1;
+  prevBtn.onclick = () => { if (orderIdx > 0) openCardDetail(cardListOrder[orderIdx - 1]); };
+  nextBtn.onclick = () => { if (orderIdx !== -1 && orderIdx < cardListOrder.length - 1) openCardDetail(cardListOrder[orderIdx + 1]); };
+
   showScreen('card-detail');
 }
 
@@ -1156,6 +1191,11 @@ const BATTLE_BG_THEMES = {
   castle:  'battle-bg-castle.jpg',
 };
 const BATTLE_BG_GRADIENTS = {
+  forest:     'radial-gradient(ellipse 500px 400px at 50% 30%, #2d6a4444 0%, transparent 70%), linear-gradient(160deg, #0c1f14 0%, #1a3323 55%, #081008 100%)',
+  snow:       'radial-gradient(ellipse 500px 400px at 50% 30%, #6fa8c944 0%, transparent 70%), linear-gradient(160deg, #101f2b 0%, #22384d 55%, #0a141c 100%)',
+  cave:       'radial-gradient(ellipse 500px 400px at 50% 30%, #6b573344 0%, transparent 70%), linear-gradient(160deg, #1a1522 0%, #2e2440 55%, #0c0a12 100%)',
+  volcano:    'radial-gradient(ellipse 500px 400px at 50% 30%, #b8451f44 0%, transparent 70%), linear-gradient(160deg, #260a06 0%, #4a1f0c 55%, #140402 100%)',
+  castle:     'radial-gradient(ellipse 500px 400px at 50% 30%, #8a2e6e44 0%, transparent 70%), linear-gradient(160deg, #1c0f1a 0%, #3a1f30 55%, #0d0609 100%)',
   moonshadow: 'radial-gradient(ellipse 500px 400px at 50% 30%, #3a3a6644 0%, transparent 70%), linear-gradient(160deg, #14142c 0%, #23234a 55%, #0d0d1e 100%)',
   emerald:    'radial-gradient(ellipse 500px 400px at 50% 30%, #1f6b4a44 0%, transparent 70%), linear-gradient(160deg, #0d1f16 0%, #163a26 55%, #081109 100%)',
   frost:      'radial-gradient(ellipse 500px 400px at 50% 30%, #4a7a9944 0%, transparent 70%), linear-gradient(160deg, #0d1e2b 0%, #1c3a52 55%, #081018 100%)',
@@ -1655,6 +1695,14 @@ function castSpell(handIdx, targetIdx) {
     for (let i = 0; i < (eff.value || 0); i++) {
       if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
     }
+  } else if (eff.kind === 'wipe') {
+    battle.enemyField.forEach((u, i) => {
+      if (u) {
+        const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
+        impactEffect(targetEl, u.curHp, 0);
+      }
+    });
+    battle.enemyField = [null, null, null, null, null];
   }
   if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
   battle.enemyField = battle.enemyField.map(u => (u && u.curHp <= 0) ? null : u);
@@ -1838,6 +1886,14 @@ function enemyTurn() {
             for (let k = 0; k < (eff.value || 0); k++) {
               if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
             }
+          } else if (eff.kind === 'wipe') {
+            battle.playerField.forEach((u, k) => {
+              if (u) {
+                const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[k];
+                impactEffect(targetEl, u.curHp, 0);
+              }
+            });
+            battle.playerField = [null, null, null, null, null];
           }
           skillFlash(`${def.name}！\n${def.skill}`);
           progressed = true;
@@ -2118,9 +2174,16 @@ function showOpeningAnimation(pack, cardId) {
 function applyPackReward(cardId) {
   const owned = state.cards[cardId];
   owned.count = (owned.count || 1) + 1;
-  owned.exp += 20;
   let leveledUp = false;
-  if (owned.exp >= 100) { owned.exp -= 100; owned.level += 1; leveledUp = true; }
+  if (owned.level < CARD_MAX_LEVEL) {
+    owned.exp += 20;
+    if (owned.exp >= 100) {
+      owned.exp = 0;
+      owned.level += 1;
+      leveledUp = true;
+      if (owned.level >= CARD_MAX_LEVEL) owned.exp = 0;
+    }
+  }
   saveState();
 
   showReveal(cardId, leveledUp);
@@ -2234,8 +2297,11 @@ function init() {
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
   document.getElementById('deck-preset-save-btn').addEventListener('click', saveDeckPreset);
   document.getElementById('compendium-claim-btn').addEventListener('click', claimCompendiumReward);
-  document.querySelectorAll('.cg-filter-tab').forEach(btn => {
+  document.querySelectorAll('#collection-filter-tabs .cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCollectionFilter(btn.dataset.filter));
+  });
+  document.querySelectorAll('#cardlist-filter-tabs .cg-filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => setCardListFilter(btn.dataset.filter));
   });
   document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
   document.querySelectorAll('.cg-back-btn-detail').forEach(b => b.addEventListener('click', () => openCollectionScreen('list')));
