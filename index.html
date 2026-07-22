@@ -174,7 +174,7 @@
     touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
   .cg-card-sm{font-size:10px;}
   .cg-card-cost{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%;
-    background:#23242bcc; border:1px solid var(--gold-bright); color:var(--text-panel); font-size:11px; font-weight:700;
+    background:#23242bcc; border:1px solid var(--gold-bright); color:#F2EEFF; font-size:11px; font-weight:800;
     display:flex; align-items:center; justify-content:center; z-index:2;}
   .cg-card-art{flex:1; position:relative; overflow:hidden;}
   .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:28px;}
@@ -195,8 +195,8 @@
   /* ---------- Deck screen ---------- */
   .cg-section-title{font-size:13px; color:var(--gold); padding:12px 14px 6px; letter-spacing:1px;}
   .cg-deck-header{display:flex; justify-content:space-between; align-items:center; padding:0 14px;}
-  #deck-slots{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; padding:10px 14px;}
-  #collection-list{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:10px 14px 30px; flex:1;}
+  #deck-slots{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; padding:10px 14px;}
+  #collection-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:10px 14px 30px; flex:1;}
   .cg-empty{grid-column:1/-1; text-align:center; color:var(--text-dim); font-size:12px; padding:20px;}
 
   .cg-segment{flex:1; display:flex; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:20px; padding:3px; margin-left:6px;}
@@ -205,7 +205,7 @@
   .cg-seg-btn.active{background:var(--bg-panel); border:1.5px solid var(--gold-bright); color:var(--gold); font-weight:700;}
 
   /* ---------- Card list / detail ---------- */
-  #cardlist-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:14px; flex:1;}
+  #cardlist-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:14px; flex:1;}
   .cg-detail-art{width:140px; height:140px; margin:20px auto 10px; border-radius:14px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--gold);}
   .cg-detail-emoji{font-size:56px;}
   .cg-detail-art img{width:100%; height:100%; object-fit:cover;}
@@ -657,11 +657,23 @@
   .cg-filter-tab.active{background:var(--bg-panel); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   .cg-coll-item{position:relative;}
   .cg-coll-item.in-deck .cg-card{border-color:var(--gold-bright) !important;}
-  .cg-coll-item.in-deck::after{content:'✓ 編成中'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    background:#23242bcc; color:var(--true-gold); font-size:12px; font-weight:700; border-radius:12px; z-index:4;}
-  .cg-deck-slot-item{position:relative; cursor:pointer;}
-  .cg-deck-slot-item::after{content:'✕'; position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%;
-    background:#23242bdd; color:var(--hp-red); font-size:10px; display:flex; align-items:center; justify-content:center; z-index:4;}
+  .cg-coll-item.at-max .cg-card{opacity:.55;}
+  .cg-coll-count{position:absolute; top:2px; right:2px; min-width:20px; height:20px; padding:0 5px; border-radius:10px;
+    background:var(--gold); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; z-index:4;
+    box-shadow:0 2px 4px #00000033;}
+  @keyframes cgShake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-5px);}
+    40%{transform:translateX(5px);}
+    60%{transform:translateX(-4px);}
+    80%{transform:translateX(4px);}
+  }
+  .cg-shake{animation:cgShake .35s ease-in-out;}
+  .cg-deck-slot-item{position:relative;}
+  .cg-deck-remove-btn{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; z-index:5;
+    background:#23242bdd; color:#ff8a95; border:1px solid var(--hp-red); font-size:11px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;}
+  .cg-deck-remove-btn:active{transform:scale(.9);}
 </style>
 </head>
 <body>
@@ -765,7 +777,7 @@
         <span class="cg-section-title" style="padding:0;">デッキ</span>
         <span style="font-size:12px; color:var(--text-dim);">枚数: <span id="deck-count">0/30</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
       </div>
-      <div class="cg-deck-hint">デッキのカードをタップで外せます</div>
+      <div class="cg-deck-hint">右上の✕をタップして外せます</div>
       <div id="deck-slots"></div>
 
       <div class="cg-deck-toolbar">
@@ -779,7 +791,7 @@
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
-      <div class="cg-deck-hint">タップで追加・追加済みは✓表示（もう一度タップで解除）</div>
+      <div class="cg-deck-hint">タップで追加（同カード最大3枚・装備は1枚まで）。外すのはデッキ側の✕から</div>
       <div id="collection-list"></div>
     </div>
 

@@ -576,18 +576,30 @@ async function renderRanking() {
 
 let collectionFilter = 'all';
 
+function maxCopiesFor(id) {
+  const def = CARD_DEFS[id];
+  return (def.type || 'monster') === 'equipment' ? 1 : 3;
+}
+
+function countInDeck(id) {
+  return state.deck.filter(x => x === id).length;
+}
+
 function renderDeck() {
   const deckEl = document.getElementById('deck-slots');
-  deckEl.innerHTML = state.deck.map(id =>
-    `<div class="cg-deck-slot-item" data-id="${id}">${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}</div>`
+  deckEl.innerHTML = state.deck.map((id, i) =>
+    `<div class="cg-deck-slot-item" data-index="${i}">
+       ${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}
+       <button class="cg-deck-remove-btn" data-index="${i}" aria-label="デッキから外す">✕</button>
+     </div>`
   ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/30`;
 
-  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(node => {
-    node.addEventListener('click', () => {
-      const id = node.dataset.id;
-      const idx = state.deck.indexOf(id);
-      if (idx >= 0) state.deck.splice(idx, 1);
+  deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = Number(btn.dataset.index);
+      state.deck.splice(i, 1);
       saveState();
       renderDeck();
     });
@@ -604,16 +616,25 @@ function renderDeck() {
     return (CARD_DEFS[id].type || 'monster') === collectionFilter;
   });
   collEl.innerHTML = owned.map(id => {
-    const inDeck = state.deck.includes(id);
-    return `<div class="cg-coll-item ${inDeck ? 'in-deck' : ''}" data-id="${id}">${renderCardFace(id, { small: true, evolved: state.cards[id].evolved })}</div>`;
+    const count = countInDeck(id);
+    const max = maxCopiesFor(id);
+    const atMax = count >= max;
+    return `<div class="cg-coll-item ${count > 0 ? 'in-deck' : ''} ${atMax ? 'at-max' : ''}" data-id="${id}">
+      ${renderCardFace(id, { small: true, evolved: state.cards[id].evolved })}
+      ${count > 0 ? `<span class="cg-coll-count">×${count}</span>` : ''}
+    </div>`;
   }).join('');
 
   collEl.querySelectorAll('.cg-coll-item').forEach(node => {
     node.addEventListener('click', () => {
       const id = node.dataset.id;
-      const idx = state.deck.indexOf(id);
-      if (idx >= 0) state.deck.splice(idx, 1);
-      else if (state.deck.length < 30) state.deck.push(id);
+      const max = maxCopiesFor(id);
+      if (countInDeck(id) >= max) {
+        node.classList.remove('cg-shake'); void node.offsetWidth; node.classList.add('cg-shake');
+        return;
+      }
+      if (state.deck.length >= 30) return;
+      state.deck.push(id);
       saveState();
       renderDeck();
     });
@@ -636,8 +657,17 @@ function autoBuildDeck() {
   const others = ids.filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster')
     .sort((a, b) => rarityRank[CARD_DEFS[b].rarity] - rarityRank[CARD_DEFS[a].rarity]);
 
-  const deck = monsters.slice(0, 24).concat(others.slice(0, 6)).slice(0, 30);
-  state.deck = deck;
+  const deck = [];
+  const addUpTo = (list, limit) => {
+    for (const id of list) {
+      const max = maxCopiesFor(id);
+      for (let n = 0; n < max && deck.length < limit; n++) deck.push(id);
+      if (deck.length >= limit) break;
+    }
+  };
+  addUpTo(monsters, 24);
+  addUpTo(others, 30);
+  state.deck = deck.slice(0, 30);
   saveState();
   renderDeck();
 }
