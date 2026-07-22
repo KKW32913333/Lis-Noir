@@ -76,23 +76,70 @@
   /* ---------- スプラッシュ画面 ---------- */
   .cg-splash{position:absolute; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
     background:linear-gradient(180deg, #FFFFFF 0%, #EDEBFF 30%, #C7B6FF 65%, #5A2D91 100%);
-    transition:opacity .5s ease, visibility .5s; gap:6px;}
+    transition:opacity .6s ease, visibility .6s; overflow:hidden; animation:cgSplashIn .7s ease-out;}
   .cg-splash.hidden{opacity:0; visibility:hidden; pointer-events:none;}
-  .cg-splash-glow{position:absolute; top:50%; left:50%; width:280px; height:280px; margin:-200px 0 0 -140px;
-    background:radial-gradient(circle, #FFFFFF88 0%, transparent 70%); animation:cgSplashPulse 2.2s ease-in-out infinite;}
-  @keyframes cgSplashPulse{0%,100%{opacity:.5; transform:scale(.9);} 50%{opacity:.9; transform:scale(1.05);}}
-  .cg-splash-logo{width:132px; height:132px; border-radius:28px; object-fit:cover; position:relative; z-index:1;
-    box-shadow:0 8px 30px #5A2D9155, 0 0 0 1px #FFFFFF88; animation:cgSplashFloat 2.6s ease-in-out infinite;}
-  @keyframes cgSplashFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);}}
-  .cg-splash-title{margin-top:18px; font-size:26px; letter-spacing:6px; color:var(--gold); position:relative; z-index:1;
-    text-shadow:0 2px 10px #ffffffcc;}
-  .cg-splash-sub{font-size:11px; letter-spacing:4px; color:#7857A8; position:relative; z-index:1;}
-  .cg-splash-loader{display:flex; gap:6px; margin-top:22px; position:relative; z-index:1;}
+  @keyframes cgSplashIn{0%{opacity:0;} 100%{opacity:1;}}
+
+  .cg-splash-lily{position:absolute; width:260px; height:260px; opacity:.07; pointer-events:none;}
+  .cg-splash-lily-tl{top:-6%; left:-12%; fill:#FFFFFF; transform:rotate(-18deg);}
+  .cg-splash-lily-br{bottom:-8%; right:-12%; width:300px; height:300px; fill:#2A1E4F; opacity:.09; transform:rotate(24deg);}
+
+  .cg-splash-stars{position:absolute; inset:0; pointer-events:none;}
+  .cg-splash-stars span{position:absolute; width:3px; height:3px; background:#fff; border-radius:50%; opacity:.3;
+    box-shadow:0 0 6px 1px #fff; animation:cgSplashTwinkle 2.4s ease-in-out infinite;}
+  .cg-splash-stars span:nth-child(1){top:12%; left:18%; animation-delay:0s;}
+  .cg-splash-stars span:nth-child(2){top:20%; left:78%; animation-delay:.3s;}
+  .cg-splash-stars span:nth-child(3){top:32%; left:10%; animation-delay:.6s;}
+  .cg-splash-stars span:nth-child(4){top:15%; left:52%; animation-delay:.9s;}
+  .cg-splash-stars span:nth-child(5){top:70%; left:15%; animation-delay:1.2s;}
+  .cg-splash-stars span:nth-child(6){top:78%; left:82%; animation-delay:1.5s;}
+  .cg-splash-stars span:nth-child(7){top:60%; left:88%; animation-delay:.4s;}
+  .cg-splash-stars span:nth-child(8){top:85%; left:45%; animation-delay:1.8s;}
+  @keyframes cgSplashTwinkle{0%,100%{opacity:.15; transform:scale(1);} 50%{opacity:1; transform:scale(1.8);}}
+
+  .cg-splash-particles{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+  .cg-splash-particles span{position:absolute; bottom:-6px; width:4px; height:4px; border-radius:50%;
+    background:radial-gradient(circle, var(--true-gold), transparent 70%); opacity:0; animation:cgSplashRise 5s ease-in infinite;}
+  .cg-splash-particles span:nth-child(1){left:15%; animation-delay:0s;}
+  .cg-splash-particles span:nth-child(2){left:35%; animation-delay:1s; background:radial-gradient(circle,#8A4FFF,transparent 70%);}
+  .cg-splash-particles span:nth-child(3){left:55%; animation-delay:2s;}
+  .cg-splash-particles span:nth-child(4){left:72%; animation-delay:2.6s; background:radial-gradient(circle,#8A4FFF,transparent 70%);}
+  .cg-splash-particles span:nth-child(5){left:88%; animation-delay:1.6s;}
+  @keyframes cgSplashRise{
+    0%{opacity:0; transform:translateY(0) scale(.6);}
+    15%{opacity:.85;}
+    88%{opacity:.25;}
+    100%{opacity:0; transform:translateY(-92vh) scale(1.3);}
+  }
+
+  .cg-splash-center{position:relative; width:200px; height:200px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:6px;}
+  .cg-splash-ring{position:absolute; border-radius:50%; border:1px solid #ffffff70;}
+  .cg-splash-ring-outer{width:200px; height:200px; border-style:dashed; border-color:#8A4FFF55; animation:cgSplashSpin 30s linear infinite;}
+  .cg-splash-ring-inner{width:172px; height:172px; border-color:#D9B45B77; animation:cgSplashSpin 22s linear infinite reverse;}
+  @keyframes cgSplashSpin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+  .cg-splash-glow{position:absolute; width:170px; height:170px; border-radius:50%;
+    background:radial-gradient(circle, #FFFFFFaa 0%, transparent 70%); animation:cgSplashPulse 2.2s ease-in-out infinite;}
+  @keyframes cgSplashPulse{0%,100%{opacity:.5; transform:scale(.9);} 50%{opacity:.9; transform:scale(1.08);}}
+  .cg-splash-logo-frame{position:relative; z-index:1; width:140px; height:140px; border-radius:50%; padding:5px;
+    background:linear-gradient(145deg,var(--true-gold),var(--gold-bright),var(--gold)); box-shadow:0 10px 30px #5A2D9155;
+    animation:cgSplashFloat 2.8s ease-in-out infinite;}
+  @keyframes cgSplashFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);}}
+  .cg-splash-logo{width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; border:2px solid #fff;}
+
+  .cg-splash-title{font-size:30px; letter-spacing:8px; color:var(--gold); position:relative; z-index:1;
+    text-shadow:0 2px 14px #ffffffe0; padding-left:8px;}
+  .cg-splash-divider{display:flex; align-items:center; gap:8px; margin:8px 0 4px; width:200px;}
+  .cg-splash-divider span{flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-bright),transparent);}
+  .cg-splash-divider i{font-style:normal; font-size:10px; color:var(--true-gold);}
+  .cg-splash-sub{font-size:11px; letter-spacing:5px; color:#5A2D91; position:relative; z-index:1; padding-left:5px;}
+  .cg-splash-loader{display:flex; gap:6px; margin-top:26px; position:relative; z-index:1;}
   .cg-splash-loader span{width:7px; height:7px; border-radius:50%; background:var(--gold-bright); opacity:.4;
     animation:cgSplashDot 1.1s ease-in-out infinite;}
   .cg-splash-loader span:nth-child(2){animation-delay:.15s;}
   .cg-splash-loader span:nth-child(3){animation-delay:.3s;}
   @keyframes cgSplashDot{0%,60%,100%{opacity:.3; transform:scale(.8);} 30%{opacity:1; transform:scale(1.2);}}
+
   .cg-lily{position:absolute; width:220px; height:220px; opacity:.05;}
   .cg-lily-1{top:2%; left:-8%; fill:#FFFFFF; transform:rotate(-15deg);}
   .cg-lily-2{bottom:-4%; right:-10%; width:260px; height:260px; fill:#1A0F2E; opacity:.06; transform:rotate(20deg);}
@@ -702,10 +749,25 @@
 
   <!-- ============ スプラッシュ画面 ============ -->
   <div id="splash-screen" class="cg-splash">
-    <div class="cg-splash-glow"></div>
-    <img src="icon-512.png" alt="Lis Noir" class="cg-splash-logo">
+    <svg class="cg-splash-lily cg-splash-lily-tl" viewBox="0 0 100 100"><path d="M50 6 C62 28 62 50 50 92 C38 50 38 28 50 6 Z M18 38 C34 44 46 56 50 92 C22 80 12 58 18 38 Z M82 38 C66 44 54 56 50 92 C78 80 88 58 82 38 Z"/></svg>
+    <svg class="cg-splash-lily cg-splash-lily-br" viewBox="0 0 100 100"><path d="M50 6 C62 28 62 50 50 92 C38 50 38 28 50 6 Z M18 38 C34 44 46 56 50 92 C22 80 12 58 18 38 Z M82 38 C66 44 54 56 50 92 C78 80 88 58 82 38 Z"/></svg>
+    <div class="cg-splash-stars">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="cg-splash-particles">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="cg-splash-center">
+      <div class="cg-splash-ring cg-splash-ring-outer"></div>
+      <div class="cg-splash-ring cg-splash-ring-inner"></div>
+      <div class="cg-splash-glow"></div>
+      <div class="cg-splash-logo-frame">
+        <img src="icon-512.png" alt="Lis Noir" class="cg-splash-logo">
+      </div>
+    </div>
     <div class="cg-splash-title cg-brand">LIS NOIR</div>
-    <div class="cg-splash-sub">— CARD BATTLE —</div>
+    <div class="cg-splash-divider"><span></span><i>✦</i><span></span></div>
+    <div class="cg-splash-sub">CARD BATTLE</div>
     <div class="cg-splash-loader"><span></span><span></span><span></span></div>
   </div>
 
