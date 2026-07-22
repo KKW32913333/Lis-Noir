@@ -187,6 +187,8 @@
     box-shadow:0 2px 6px #00000044;}
   .cg-player-name{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .cg-player-level{font-size:11px; color:var(--text-dim-panel);}
+  .cg-player-exp-track{width:64px; height:3px; border-radius:2px; background:var(--hairline-panel); margin-top:3px; overflow:hidden;}
+  .cg-player-exp-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--true-gold));}
   .cg-currency-group{display:flex; gap:6px; font-size:11px; flex-shrink:0;}
   .cg-currency{display:flex; align-items:center; gap:3px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:4px 8px; border-radius:20px; white-space:nowrap; box-shadow:0 1px 4px #00000033;}
 
@@ -374,6 +376,11 @@
   .cg-result-title.lose{color:var(--text-dim);}
   .cg-result-trophy{font-size:14px; color:var(--text-dim);}
   .cg-reward-row{display:flex; gap:20px; margin:10px 0;}
+  .cg-result-levelup{font-size:13px; font-weight:800; color:var(--true-gold); background:var(--bg-panel);
+    border:1.5px solid var(--true-gold); border-radius:20px; padding:8px 18px; margin-top:4px;
+    box-shadow:0 3px 10px #D9B45B44; animation:cgLevelUpPop .5s ease-out;}
+  .cg-result-levelup.hidden{display:none;}
+  @keyframes cgLevelUpPop{0%{transform:scale(.5); opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1); opacity:1;}}
   .cg-reward-item{text-align:center; font-size:12px; color:var(--text-dim);}
   .cg-reward-item .n{display:block; font-size:16px; color:var(--gold-bright); font-weight:700;}
   .cg-result-actions{display:flex; gap:12px; margin-top:10px;}
@@ -404,31 +411,32 @@
 
   .cg-tabbar{position:absolute; left:0; right:0; bottom:0; z-index:20;
     display:flex; align-items:flex-start; justify-content:space-around;
-    background:var(--bg-panel); border-top:1px solid var(--hairline-panel);
+    background:#5A2D91; border-top:1px solid #6f3fae;
     padding:8px 6px calc(8px + env(safe-area-inset-bottom));
     transition:transform .2s ease, opacity .2s ease;}
   .cg-tabbar.hidden{transform:translateY(100%); opacity:0; pointer-events:none;}
   .cg-tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px;
-    color:var(--text-dim-panel); cursor:pointer; min-height:44px; justify-content:center; transition:transform .12s;}
+    color:#C7B6FF; cursor:pointer; min-height:44px; justify-content:center; transition:transform .12s;}
   .cg-tab:active{transform:scale(.92);}
   .cg-tab-icon-wrap{width:42px; height:30px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-    background:var(--bg-panel2); border:1px solid var(--hairline-panel); box-shadow:0 1px 3px #00000022, inset 0 1px 0 #ffffff55;
+    background:#6f3fae; border:1px solid #7c4fc0; box-shadow:0 1px 3px #00000022, inset 0 1px 0 #ffffff22;
     transition:background .15s, box-shadow .15s, border-color .15s;}
   .cg-tab .ic{font-size:20px;}
   .cg-svg-ic{display:inline-flex; align-items:center; justify-content:center;}
   .cg-svg-ic svg{width:18px; height:18px;}
   .cg-tab-main-btn .cg-svg-ic svg{width:24px; height:24px;}
   .cg-tab .lb{font-size:10px; font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
-  .cg-tab.active:not(.cg-tab-main) .cg-tab-icon-wrap{background:linear-gradient(180deg,var(--gold-soft),var(--bg-panel2));
-    border-color:var(--gold-bright); box-shadow:0 2px 8px var(--gold-soft), inset 0 1px 0 #ffffff88;}
-  .cg-tab.active:not(.cg-tab-main){color:var(--gold-bright);}
+  .cg-tab.active:not(.cg-tab-main) .cg-tab-icon-wrap{background:linear-gradient(180deg,var(--true-gold),#c99a3f);
+    border-color:var(--true-gold); box-shadow:0 2px 8px #D9B45B55, inset 0 1px 0 #ffffff55;}
+  .cg-tab.active:not(.cg-tab-main){color:#ffffff;}
+  .cg-tab.active:not(.cg-tab-main) .cg-tab-icon-wrap{color:#3A1F63;}
   .cg-tab.active:not(.cg-tab-main) .lb{font-weight:700;}
   .cg-tab-main{position:relative; margin-top:-26px;}
   .cg-tab-main-btn{width:52px; height:52px; border-radius:50%;
-    background:linear-gradient(180deg,var(--gold-bright),var(--gold)); border:3px solid var(--bg-panel);
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold)); border:3px solid #5A2D91;
     display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px #00000033, 0 0 0 1px var(--gold-soft);
     color:#ffffff;}
-  .cg-tab-main .lb{color:var(--gold-bright); font-weight:700; margin-top:1px;}
+  .cg-tab-main .lb{color:#ffffff; font-weight:700; margin-top:1px;}
   .cg-tab-main .ic{font-size:22px;}
 
   /* ---------- ショップ ---------- */
@@ -797,7 +805,8 @@
         <div class="cg-avatar">🛡️</div>
         <div>
           <div class="cg-player-name" id="home-name">プレイヤー</div>
-          <div class="cg-player-level" id="home-level">Lv.20</div>
+          <div class="cg-player-level" id="home-level">Lv.1</div>
+          <div class="cg-player-exp-track"><div id="home-exp-fill" class="cg-player-exp-fill"></div></div>
         </div>
       </div>
       <div class="cg-currency-group">
@@ -1152,6 +1161,7 @@
         <div class="cg-reward-item">💰 ゴールド<span class="n" id="result-reward-gold">+0</span></div>
         <div class="cg-reward-item">💎 ジェム<span class="n" id="result-reward-gem">+0</span></div>
       </div>
+      <div id="result-levelup" class="cg-result-levelup hidden"></div>
       <div class="cg-result-actions">
         <button class="cg-btn" id="result-rematch">再戦</button>
         <button class="cg-btn cg-btn-main" id="result-home">ホームへ</button>

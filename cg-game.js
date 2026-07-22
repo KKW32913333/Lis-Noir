@@ -73,6 +73,7 @@ function defaultState() {
   return {
     playerName: 'プレイヤー',
     playerLevel: 1,
+    playerExp: 0,
     gold: 25300,
     gems: 1250,
     trophy: 1250,
@@ -114,6 +115,24 @@ function loadState() {
     console.error('load failed', e);
     return defaultState();
   }
+}
+
+// ---------- プレイヤーレベル ----------
+// レベルアップに必要な経験値は序盤は少なく、レベルが上がるほど徐々に増える
+function expNeededForLevel(level) {
+  return 20 + (level - 1) * 12;
+}
+
+function gainPlayerExp(amount) {
+  state.playerExp += amount;
+  let leveledUp = false;
+  while (state.playerExp >= expNeededForLevel(state.playerLevel)) {
+    state.playerExp -= expNeededForLevel(state.playerLevel);
+    state.playerLevel += 1;
+    leveledUp = true;
+  }
+  saveState();
+  return leveledUp;
 }
 
 function saveState() {
@@ -414,6 +433,7 @@ function renderHome() {
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
   document.getElementById('home-level').textContent = 'Lv.' + state.playerLevel;
+  document.getElementById('home-exp-fill').style.width = Math.min(100, (state.playerExp / expNeededForLevel(state.playerLevel)) * 100) + '%';
   document.getElementById('home-name').textContent = state.playerName;
   document.getElementById('daily-fill').style.width = (state.dailyProgress / state.dailyMax * 100) + '%';
   document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
@@ -1503,9 +1523,16 @@ function showResult(won) {
     }
     gainDragonExp(15);
   }
+  let leveledUp = false;
+  if (won) {
+    leveledUp = gainPlayerExp(10 + stage.id * 6);
+  }
   saveState();
   document.getElementById('result-reward-gold').textContent = (goldReward > 0 ? '+' : '') + goldReward;
   document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
+  const levelupEl = document.getElementById('result-levelup');
+  levelupEl.classList.toggle('hidden', !leveledUp);
+  if (leveledUp) levelupEl.textContent = `⭐ レベルアップ！ Lv.${state.playerLevel}`;
 
   if (won && stage.storyVictory) {
     showStory([stage.storyVictory], () => revealResultScreen(won));
