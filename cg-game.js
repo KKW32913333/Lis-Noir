@@ -426,7 +426,11 @@ const SCREEN_TAB_MAP = { home: 'nav-home', collection: 'nav-cards', stage: 'nav-
 function showScreen(name) {
   document.querySelectorAll('.cg-screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + name);
-  if (el) { el.classList.add('active'); el.scrollTop = 0; }
+  if (el) {
+    el.classList.add('active');
+    el.scrollTop = 0;
+    requestAnimationFrame(() => { el.scrollTop = 0; });
+  }
 
   const tabbar = document.getElementById('global-tabbar');
   if (tabbar) tabbar.classList.toggle('hidden', IMMERSIVE_SCREENS.includes(name));
@@ -744,7 +748,7 @@ function renderLeaderSelect(containerId) {
       const lid = node.dataset.leader;
       state.leaderId = lid || null;
       saveState();
-      renderLeaderSelect();
+      renderLeaderSelect(containerId);
       renderHome();
     });
     if (node.dataset.leader) {
