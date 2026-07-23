@@ -64,6 +64,42 @@ const CARD_DEFS = {
 // ---------- 状態管理 ----------
 const SAVE_KEY = 'cardgame_save_v1';
 const EVOLVE_LEVEL_REQ = 5;
+
+// ---------- リーダーカード ----------
+// デッキに1体だけ設定でき、効果はそのデッキの対象属性モンスター全てに反映される
+const LEADERS = {
+  lisnoir_f: {
+    name: 'リス・ノワール',
+    skillName: 'ダークエレガンス',
+    element: 'dark',
+    desc: '闇属性ユニットの攻撃力を25%アップ、HPを15%アップ',
+    effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
+    fullImage: 'leader-lisnoir-f-full.png',
+    icon: 'leader-lisnoir-f-icon.png',
+  },
+  lisnoir_m: {
+    name: 'リス・ノワール',
+    skillName: 'ナイトメアドミニオン',
+    element: 'dark',
+    desc: '闇属性ユニットの攻撃力を25%アップ、敵全体へのダメージを15%アップ',
+    effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
+    fullImage: 'leader-lisnoir-m-full.png',
+    icon: 'leader-lisnoir-m-icon.png',
+  },
+};
+
+function getActiveLeader() {
+  return state.leaderId ? LEADERS[state.leaderId] : null;
+}
+
+// 対象ユニットにリーダー効果が乗るかどうか（自分のカードのみ・対象属性一致のみ）
+function leaderAppliesTo(unit, isPlayerCard) {
+  if (!isPlayerCard) return false;
+  const leader = getActiveLeader();
+  if (!leader) return false;
+  return unit.def.element === leader.element;
+}
+
 const EVOLVE_COST = 800;
 const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
@@ -76,6 +112,7 @@ function defaultState() {
     playerName: 'プレイヤー',
     avatarIcon: '🛡️',
     deckPresets: [],
+    leaderId: null,
     pityCounters: {},
     compendiumRewardClaimed: false,
     battleHistory: [],
@@ -672,7 +709,37 @@ function countInDeck(id) {
   return state.deck.filter(x => x === id).length;
 }
 
+function renderLeaderSelect() {
+  const wrap = document.getElementById('leader-select-row');
+  const noneCard = `
+    <div class="cg-leader-card ${!state.leaderId ? 'selected' : ''}" data-leader="">
+      <div class="cg-leader-none-card">🚫<span>なし</span></div>
+    </div>`;
+  const leaderCards = Object.keys(LEADERS).map(lid => {
+    const l = LEADERS[lid];
+    const selected = state.leaderId === lid;
+    return `
+      <div class="cg-leader-card ${selected ? 'selected' : ''}" data-leader="${lid}">
+        ${selected ? '<span class="cg-leader-card-badge">設定中</span>' : ''}
+        <img src="${l.icon}" alt="${l.name}">
+        <div class="cg-leader-card-name">${l.name}</div>
+        <div class="cg-leader-card-skill">${l.skillName}</div>
+      </div>`;
+  }).join('');
+  wrap.innerHTML = noneCard + leaderCards;
+  wrap.querySelectorAll('.cg-leader-card').forEach(node => {
+    node.addEventListener('click', () => {
+      const lid = node.dataset.leader;
+      state.leaderId = lid || null;
+      saveState();
+      renderLeaderSelect();
+      renderHome();
+    });
+  });
+}
+
 function renderDeck() {
+  renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
   deckEl.innerHTML = state.deck.map((id, i) =>
     `<div class="cg-deck-slot-item" data-index="${i}">
@@ -1263,9 +1330,16 @@ function newBattleUnit(id, isPlayerCard) {
   const def = CARD_DEFS[id];
   const owned = isPlayerCard ? state.cards[id] : null;
   const evolved = !!(owned && owned.evolved);
-  const bonusAtk = evolved ? EVOLVE_BONUS_ATK : 0;
-  const bonusHp = evolved ? EVOLVE_BONUS_HP : 0;
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, canAttack: false, justPlayed: true };
+  let bonusAtk = evolved ? EVOLVE_BONUS_ATK : 0;
+  let bonusHp = evolved ? EVOLVE_BONUS_HP : 0;
+  const leader = isPlayerCard ? getActiveLeader() : null;
+  let leaderBuff = false;
+  if (leader && def.element === leader.element) {
+    leaderBuff = true;
+    bonusAtk += Math.round((def.atk + bonusAtk) * (leader.effect.atkPct || 0));
+    bonusHp += Math.round((def.hp + bonusHp) * (leader.effect.hpPct || 0));
+  }
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: false, justPlayed: true };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
@@ -1323,6 +1397,18 @@ function applyBattleBgTheme(theme) {
   board.style.backgroundRepeat = 'no-repeat';
 }
 
+function applyLeaderPortraits() {
+  const leader = getActiveLeader();
+  const battleImg = leader ? `url('${leader.icon}')` : "url('hero-bg.jpg')";
+  const vsEl = document.getElementById('vs-player-portrait');
+  const battleEl = document.getElementById('battle-player-portrait');
+  if (battleEl) battleEl.style.backgroundImage = battleImg;
+  if (vsEl) {
+    vsEl.style.backgroundImage = battleImg;
+    vsEl.textContent = '';
+  }
+}
+
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
@@ -1349,6 +1435,7 @@ function startBattle(stage) {
   };
   document.getElementById('battle-enemy-emoji').textContent = stage.portrait;
   applyBattleBgTheme(stage.bgTheme);
+  applyLeaderPortraits();
   renderBattle();
   showScreen('battle');
   showVsIntro(stage);
@@ -1782,7 +1869,9 @@ function castSpell(handIdx, targetIdx) {
 
   const eff = def.effect || {};
   if (eff.kind === 'damage') {
-    const dmg = eff.value || 0;
+    const leaderSp = getActiveLeader();
+    const dmgPctSp = leaderSp ? (leaderSp.effect.enemyDmgPct || 0) : 0;
+    const dmg = Math.round((eff.value || 0) * (1 + dmgPctSp));
     const targetEl = targetIdx === null
       ? document.getElementById('battle-enemy-portrait')
       : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
@@ -1874,7 +1963,9 @@ function attackTarget(attackerIdx, targetIdx) {
     if (!valid.indices.includes(targetIdx)) return;
   }
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
-  const dmg = Math.max(1, attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult);
+  const leader = getActiveLeader();
+  const dmgPct = leader ? (leader.effect.enemyDmgPct || 0) : 0;
+  const dmg = Math.max(1, Math.round((attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult) * (1 + dmgPct)));
   const targetEl = targetIdx === null
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
