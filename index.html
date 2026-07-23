@@ -563,6 +563,8 @@
   @keyframes cgGlowBurst{0%{transform:scale(1); opacity:.6;} 100%{transform:scale(3.2); opacity:0;}}
 
   /* ---------- ミッション ---------- */
+  .cg-mission-claimall-btn{display:block; width:calc(100% - 28px); margin:8px 14px 0; font-size:13px; padding:11px;}
+  .cg-mission-claimall-btn.hidden{display:none;}
   .cg-mission-list{display:flex; flex-direction:column; gap:10px; padding:10px 14px 20px;}
   .cg-mission-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; color:var(--text-panel); outline:1px solid var(--gold-soft); outline-offset:3px;}
   .cg-mission-card.done{border-color:var(--gold-bright);}
@@ -1331,6 +1333,7 @@
       <button class="cg-back-btn cg-back-btn-mission">←</button>
       <span class="cg-section-title" style="padding:0;">ミッション</span>
     </div>
+    <button class="cg-btn cg-btn-main cg-mission-claimall-btn hidden" id="mission-claimall-btn">🎁 まとめて受け取る</button>
     <div id="mission-list" class="cg-mission-list"></div>
   </section>
 
