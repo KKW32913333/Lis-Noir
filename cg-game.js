@@ -419,7 +419,7 @@ const SCREEN_TAB_MAP = { home: 'nav-home', collection: 'nav-cards', stage: 'nav-
 function showScreen(name) {
   document.querySelectorAll('.cg-screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + name);
-  if (el) el.classList.add('active');
+  if (el) { el.classList.add('active'); el.scrollTop = 0; }
 
   const tabbar = document.getElementById('global-tabbar');
   if (tabbar) tabbar.classList.toggle('hidden', IMMERSIVE_SCREENS.includes(name));
@@ -527,11 +527,13 @@ function renderEventBanner() {
   banner.classList.remove('hidden');
   banner.innerHTML = `
     <span class="ic">${ev.portrait}</span>
-    <div>
-      <div class="cg-event-banner-title">${ev.name}</div>
+    <div class="cg-event-banner-text">
+      <div class="cg-event-banner-title-row">
+        <span class="cg-event-banner-title">${ev.name}</span>
+        <span class="cg-event-banner-badge">残り${daysRemaining(ev)}日</span>
+      </div>
       <div class="cg-event-banner-sub">${active.length > 1 ? `他${active.length - 1}件開催中` : ev.desc}</div>
-    </div>
-    <span class="cg-event-banner-badge">残り${daysRemaining(ev)}日</span>`;
+    </div>`;
   banner.onclick = () => { renderEventList(); showScreen('events'); };
 }
 
@@ -709,11 +711,13 @@ function countInDeck(id) {
   return state.deck.filter(x => x === id).length;
 }
 
-function renderLeaderSelect() {
-  const wrap = document.getElementById('leader-select-row');
+function renderLeaderSelect(containerId) {
+  containerId = containerId || 'leader-select-row';
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
   const noneCard = `
     <div class="cg-leader-card ${!state.leaderId ? 'selected' : ''}" data-leader="">
-      <div class="cg-leader-none-card">🚫<span>なし</span></div>
+      <div class="cg-leader-none-card"><span>なし</span></div>
     </div>`;
   const leaderCards = Object.keys(LEADERS).map(lid => {
     const l = LEADERS[lid];
@@ -729,13 +733,32 @@ function renderLeaderSelect() {
   wrap.innerHTML = noneCard + leaderCards;
   wrap.querySelectorAll('.cg-leader-card').forEach(node => {
     node.addEventListener('click', () => {
+      if (longPressFired) { longPressFired = false; return; }
       const lid = node.dataset.leader;
       state.leaderId = lid || null;
       saveState();
       renderLeaderSelect();
       renderHome();
     });
+    if (node.dataset.leader) {
+      bindLongPress(node, () => showLeaderInfo(node.dataset.leader));
+    }
   });
+}
+
+function showLeaderInfo(lid) {
+  const l = LEADERS[lid];
+  if (!l) return;
+  const el = ELEMENTS[l.element];
+  document.getElementById('card-info-body').innerHTML = `
+    <div class="cg-detail-art" style="background:linear-gradient(160deg,#3a1f63,#1c0f33);"><img src="${l.icon}"/></div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${l.name}</div>
+      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--true-gold)">LEADER・${l.skillName}</span></div>
+      <div class="cg-detail-desc">対象属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">${l.desc}</div>
+    </div>`;
+  document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
 function renderDeck() {
@@ -925,6 +948,7 @@ function setCardListFilter(filter) {
 }
 
 function renderCardList() {
+  renderLeaderSelect('cardlist-leader-row');
   const listEl = document.getElementById('cardlist-grid');
   const ids = Object.keys(state.cards).filter(id => {
     if (cardListFilter === 'all') return true;

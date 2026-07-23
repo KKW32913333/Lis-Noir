@@ -74,25 +74,33 @@
   .cg-global-deco{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
 
   /* ---------- スプラッシュ画面 ---------- */
-  .cg-splash{position:absolute; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-    background:#1c0f33; transition:opacity .6s ease, visibility .6s; overflow:hidden; animation:cgSplashIn .7s ease-out;}
+  .cg-splash{position:absolute; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    background:#0d0619; transition:opacity .6s ease, visibility .6s; overflow:hidden; animation:cgSplashIn .7s ease-out;}
   .cg-splash.hidden{opacity:0; visibility:hidden; pointer-events:none;}
   @keyframes cgSplashIn{0%{opacity:0;} 100%{opacity:1;}}
 
   .cg-splash-bg-wrap{position:absolute; inset:0; z-index:0; overflow:hidden;}
-  .cg-splash-bg-img{width:100%; height:100%; object-fit:cover; object-position:center 28%; display:block;
-    transform-origin:center 32%; animation:cgSplashKenBurns 15s ease-in-out infinite alternate;}
+  .cg-splash-bg-img{width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block;
+    filter:blur(30px) brightness(.5) saturate(1.15); transform:scale(1.25); transform-origin:center;
+    animation:cgSplashKenBurns 18s ease-in-out infinite alternate;}
   @keyframes cgSplashKenBurns{
-    0%{transform:scale(1.0) translate(0,0);}
-    100%{transform:scale(1.16) translate(-1.8%, -1.2%);}
+    0%{transform:scale(1.25) translate(0,0);}
+    100%{transform:scale(1.38) translate(-1.5%, -1%);}
   }
+
+  .cg-splash-fg-wrap{position:relative; z-index:2; width:82%; max-width:340px; margin-top:9vh; border-radius:20px;
+    overflow:hidden; box-shadow:0 20px 50px #00000088, 0 0 0 1px #ffffff44; animation:cgSplashFgFloat 4s ease-in-out infinite;}
+  @keyframes cgSplashFgFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);}}
+  .cg-splash-fg-img{width:100%; height:100%; object-fit:cover; object-position:center 12%; display:block;
+    animation:cgSplashFgZoom 15s ease-in-out infinite alternate;}
+  @keyframes cgSplashFgZoom{0%{transform:scale(1.0);} 100%{transform:scale(1.06);}}
 
   .cg-splash-shine-sweep{position:absolute; inset:-15% -30%; z-index:1; pointer-events:none;
     background:linear-gradient(100deg, transparent 38%, rgba(255,255,255,.4) 48%, rgba(199,182,255,.55) 50%, rgba(255,255,255,.4) 52%, transparent 62%);
     background-size:220% 220%; mix-blend-mode:overlay; animation:cgSplashShineSweep 4.5s ease-in-out infinite;}
   @keyframes cgSplashShineSweep{0%{background-position:130% 130%;} 55%{background-position:-30% -30%;} 100%{background-position:-30% -30%;}}
 
-  .cg-splash-vignette{position:absolute; inset:0; z-index:2; pointer-events:none;
+  .cg-splash-vignette{position:absolute; inset:0; z-index:1; pointer-events:none;
     background:linear-gradient(180deg, #0a0616aa 0%, transparent 18%, transparent 55%, #150a2666 72%, #0d0619dd 100%);}
 
   .cg-splash-stars{position:absolute; inset:0; z-index:3; pointer-events:none;}
@@ -123,7 +131,7 @@
     100%{opacity:0; transform:translateY(-98vh) scale(1.3);}
   }
 
-  .cg-splash-bottom{position:relative; z-index:4; display:flex; flex-direction:column; align-items:center;
+  .cg-splash-bottom{position:relative; z-index:4; display:flex; flex-direction:column; align-items:center; margin-top:auto;
     padding-bottom:calc(52px + env(safe-area-inset-bottom));}
   .cg-splash-loader{display:flex; gap:6px; position:relative; transition:opacity .3s ease;}
   .cg-splash-loader span{width:7px; height:7px; border-radius:50%; background:var(--true-gold); opacity:.5;
@@ -283,7 +291,8 @@
   .cg-deck-header{display:flex; justify-content:space-between; align-items:center; padding:0 14px;}
   .cg-leader-select-row{display:flex; gap:10px; padding:8px 14px 14px; overflow-x:auto;}
   .cg-leader-card{position:relative; flex-shrink:0; width:96px; border-radius:12px; overflow:hidden; cursor:pointer;
-    border:2px solid var(--hairline-panel); background:var(--bg-panel); box-shadow:0 3px 8px #00000033; transition:transform .1s;}
+    border:2px solid var(--hairline-panel); background:var(--bg-panel); box-shadow:0 3px 8px #00000033; transition:transform .1s;
+    touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
   .cg-leader-card:active{transform:scale(.96);}
   .cg-leader-card.selected{border-color:var(--true-gold); box-shadow:0 0 0 2px var(--true-gold), 0 4px 14px #D9B45B55;}
   .cg-leader-card img{width:100%; height:96px; object-fit:cover; display:block;}
@@ -791,13 +800,15 @@
   /* ---------- イベントクエスト（ホームバナー・カード） ---------- */
   .cg-event-banner{margin:0 16px 18px; padding:12px 14px; border-radius:14px; cursor:pointer;
     background:linear-gradient(135deg,#5A2D91,#8A4FFF); color:#fff; box-shadow:0 4px 14px #5A2D9155;
-    display:flex; align-items:center; gap:10px; position:relative; overflow:hidden;}
+    display:flex; align-items:flex-start; gap:10px; position:relative; overflow:hidden;}
   .cg-event-banner.hidden{display:none;}
-  .cg-event-banner .ic{font-size:26px; flex-shrink:0;}
-  .cg-event-banner-title{font-size:13px; font-weight:800; letter-spacing:1px;}
-  .cg-event-banner-sub{font-size:11px; opacity:.9; margin-top:2px;}
-  .cg-event-banner-badge{margin-left:auto; font-size:10px; background:var(--true-gold); color:#3A1F63; font-weight:800;
-    padding:4px 10px; border-radius:10px; flex-shrink:0; white-space:nowrap;}
+  .cg-event-banner .ic{font-size:26px; flex-shrink:0; line-height:1.4;}
+  .cg-event-banner-text{flex:1; min-width:0;}
+  .cg-event-banner-title-row{display:flex; align-items:center; gap:8px;}
+  .cg-event-banner-title{font-size:13px; font-weight:800; letter-spacing:1px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cg-event-banner-sub{font-size:11px; opacity:.9; margin-top:3px; line-height:1.5;}
+  .cg-event-banner-badge{flex-shrink:0; font-size:10px; background:var(--true-gold); color:#3A1F63; font-weight:800;
+    padding:4px 9px; border-radius:10px; white-space:nowrap;}
   .cg-event-card{border-color:var(--gold-bright) !important;}
   .cg-event-reward{font-size:10px; color:var(--gold); margin-top:4px; font-weight:700;}
   .cg-event-countdown{font-size:10px; color:var(--hp-red); text-align:center; font-weight:800; line-height:1.5; flex-shrink:0;}
@@ -947,15 +958,18 @@
   <!-- ============ スプラッシュ画面 ============ -->
   <div id="splash-screen" class="cg-splash">
     <div class="cg-splash-bg-wrap">
-      <img src="splash-art.jpg" alt="Lis Noir — Card Battle" class="cg-splash-bg-img">
+      <img src="splash-art.jpg" alt="" class="cg-splash-bg-img">
     </div>
-    <div class="cg-splash-shine-sweep"></div>
     <div class="cg-splash-vignette"></div>
     <div class="cg-splash-stars">
       <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
     <div class="cg-splash-particles">
       <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="cg-splash-fg-wrap">
+      <img src="splash-art.jpg" alt="Lis Noir — Card Battle" class="cg-splash-fg-img">
+      <div class="cg-splash-shine-sweep"></div>
     </div>
     <div class="cg-splash-bottom">
       <div class="cg-splash-loader" id="splash-loader"><span></span><span></span><span></span></div>
@@ -1097,6 +1111,9 @@
     </div>
 
     <div id="collection-list-view" style="display:none;">
+      <div class="cg-section-title">リーダー</div>
+      <div id="cardlist-leader-row" class="cg-leader-select-row"></div>
+
       <div id="compendium-panel" class="cg-compendium-panel">
         <div class="cg-compendium-row">
           <span class="cg-compendium-label">📖 図鑑コンプリート（進化済みモンスター数）</span>
