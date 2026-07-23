@@ -24,24 +24,31 @@ const RARITY = {
 // image: null の間はプレースホルダー（属性色グラデ+絵文字）を表示。
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
-  fire_dragon:    { name: 'ファイアドラゴン', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
-  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-imp.png', emoji: '👹' },
-  fire_phoenix:   { name: 'フェニックス',     element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skill: '撃破された時、1/2のHPで復活', image: 'card-fire-phoenix.png', emoji: '🐦' },
-  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skill: '場に出た時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
+  fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
+  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  role: 'attacker', skill: '', image: null, emoji: '👹' },
+  fire_phoenix:   { name: 'サンフェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenix.png', emoji: '🐦' },
+  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healSelf', value: 2 }, skill: '場に出た時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
   water_slime:    { name: 'ブルースライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 2,  role: 'attacker', skill: '', image: 'card-water-slime.png', emoji: '🔵' },
-  water_serpent:  { name: 'シーサーペント',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skill: '攻撃時、相手カード1体を1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
-  nature_treant:  { name: 'エンシェントツリー', element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  role: 'defender', skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
+  water_serpent:  { name: 'リヴァイアサン',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、攻撃した相手モンスターを1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
+  nature_treant:  { name: 'ウッドエント',     element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
   nature_wolf:    { name: 'フォレストウルフ', element: 'nature', rarity: 'normal', cost: 2, atk: 3, hp: 2,  role: 'attacker', skill: '', image: 'card-nature-wolf.png', emoji: '🐺' },
-  nature_panda:   { name: 'ウォーパンダ',     element: 'nature', rarity: 'rare',   cost: 2, atk: 2, hp: 4,  role: 'defender', skill: '', image: 'card-nature-panda.png', emoji: '🐼' },
-  light_angel:    { name: 'ガーディアンエンジェル', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '👼' },
+  nature_panda:   { name: 'テンペストエレメンタル', element: 'nature', rarity: 'rare', cost: 2, atk: 2, hp: 4,  role: 'defender', skill: '', image: 'card-nature-panda.png', emoji: '🌪️' },
+  light_angel:    { name: 'ガーディアンエンジェル', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '👼' },
   light_unicorn:  { name: 'ホーリーユニコーン', element: 'light', rarity: 'rare',  cost: 3, atk: 3, hp: 5,  role: 'attacker', skill: '', image: 'card-light-unicorn.png', emoji: '🦄' },
   light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
   dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  role: 'attacker', skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
-  dark_reaper:    { name: 'ソウルリーパー',   element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'attacker', skill: '撃破時、相手のコストを1消費させる', image: 'card-dark-reaper.png', emoji: '💀' },
+  dark_reaper:    { name: 'ブレイズデーモン', element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-reaper.png', emoji: '👹' },
   dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 1, role: 'attacker', skill: '', image: 'card-dark-ghost.png', emoji: '👻' },
-  rock_giant:     { name: 'ロックジャイアント', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
-  storm_bird:     { name: 'サンダーホーク',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  role: 'attacker', skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
-  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skill: '場に出た時、手札を1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
+  rock_giant:     { name: 'グラウンドゴーレム', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
+  storm_bird:     { name: 'サンダーイーグル', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
+  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
+  water_icewolf:      { name: 'アイスウルフ',     element: 'water', rarity: 'epic',   cost: 4, atk: 5, hp: 4, role: 'attacker', skill: '', image: 'card-water-icewolf.png', emoji: '🐺' },
+  nature_elfunicorn:  { name: 'エルフユニコーン', element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 5, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-nature-elfunicorn.png', emoji: '🦄' },
+  water_crystalgolem: { name: 'クリスタルゴーレム', element: 'water', rarity: 'epic', cost: 4, atk: 3, hp: 7, role: 'defender', skill: '', image: 'card-water-crystalgolem.png', emoji: '💎' },
+  dark_thunderchimera:{ name: 'サンダーキマイラ', element: 'dark', rarity: 'epic',    cost: 4, atk: 6, hp: 4, role: 'attacker', skill: '', image: 'card-dark-thunderchimera.png', emoji: '⚡' },
+  nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'rare',  cost: 2, atk: 2, hp: 3, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
+  dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 6, hp: 7, role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
+  fire_magmacolossus: { name: 'マグマコロッサス', element: 'fire', rarity: 'epic',    cost: 5, atk: 4, hp: 9, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-fire-magmacolossus.png', emoji: '🌋' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -1363,7 +1370,7 @@ function newBattleUnit(id, isPlayerCard) {
     bonusAtk += Math.round((def.atk + bonusAtk) * (leader.effect.atkPct || 0));
     bonusHp += Math.round((def.hp + bonusHp) * (leader.effect.hpPct || 0));
   }
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: false, justPlayed: true };
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: false, justPlayed: true, stunned: false, revived: false };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
@@ -1668,7 +1675,7 @@ function renderBattle() {
     }
     const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -1676,7 +1683,7 @@ function renderBattle() {
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
     if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
     const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
-    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}</div>`;
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}</div>`;
   }).join('');
 
   const handEl = document.getElementById('battle-hand');
@@ -1874,6 +1881,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   if (!def || def.cost > battle.playerCost || battle.playerField[fieldIdx]) return;
   battle.playerCost -= def.cost;
   battle.playerField[fieldIdx] = newBattleUnit(id, true);
+  applySkillTag(battle.playerField[fieldIdx], 'onPlay', true);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   sfxCardPlay();
@@ -1925,7 +1933,7 @@ function castSpell(handIdx, targetIdx) {
     battle.enemyField = [null, null, null, null, null];
   }
   if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
-  battle.enemyField = battle.enemyField.map(u => (u && u.curHp <= 0) ? null : u);
+  battle.enemyField = cleanupField(battle.enemyField);
   renderBattle();
 }
 
@@ -1977,6 +1985,40 @@ function getValidTargets(unit, opponentField) {
   return { indices: allIdxs, faceAllowed: true };
 }
 
+// ---------- モンスター固有スキルの発動処理 ----------
+function applySkillTag(unit, trigger, isPlayerSide) {
+  if (!unit || !unit.def || !unit.def.skillTag) return;
+  const tag = unit.def.skillTag;
+  if (tag.trigger !== trigger) return;
+  const field = isPlayerSide ? battle.playerField : battle.enemyField;
+  const hand = isPlayerSide ? battle.playerHand : battle.enemyHand;
+  const deck = isPlayerSide ? battle.playerDeck : battle.enemyDeck;
+  if (tag.effect === 'healSelf') {
+    const maxHp = unit.def.hp + (unit.hpBonus || 0);
+    unit.curHp = Math.min(maxHp, unit.curHp + tag.value);
+  } else if (tag.effect === 'healAllAllies') {
+    field.forEach(u => { if (u) { const maxHp = u.def.hp + (u.hpBonus || 0); u.curHp = Math.min(maxHp, u.curHp + tag.value); } });
+  } else if (tag.effect === 'drawCard') {
+    for (let i = 0; i < tag.value; i++) { if (deck.length) hand.push(deck.shift()); }
+  }
+}
+
+// 撃破されたユニットを取り除く際、復活スキル(reviveHalfHp)を持つ場合は1度だけ半分のHPで復活させる
+function cleanupField(field) {
+  return field.map(u => {
+    if (!u || u.curHp > 0) return u;
+    const tag = u.def.skillTag;
+    if (tag && tag.effect === 'reviveHalfHp' && !u.revived) {
+      const maxHp = u.def.hp + (u.hpBonus || 0);
+      u.curHp = Math.max(1, Math.floor(maxHp / 2));
+      u.revived = true;
+      skillFlash(`${u.def.name}のスキル！\n1/2のHPで復活`);
+      return u;
+    }
+    return null;
+  });
+}
+
 function attackTarget(attackerIdx, targetIdx) {
   const attacker = battle.playerField[attackerIdx];
   if (!attacker || !attacker.canAttack) return;
@@ -1986,10 +2028,12 @@ function attackTarget(attackerIdx, targetIdx) {
   } else {
     if (!valid.indices.includes(targetIdx)) return;
   }
+  const tag = attacker.def.skillTag;
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
   const leader = getActiveLeader();
   const dmgPct = leader ? (leader.effect.enemyDmgPct || 0) : 0;
-  const dmg = Math.max(1, Math.round((attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult) * (1 + dmgPct)));
+  const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
+  const dmg = Math.max(1, Math.round((attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult) * (1 + dmgPct))) + extraDmg;
   const targetEl = targetIdx === null
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
@@ -2000,22 +2044,35 @@ function attackTarget(attackerIdx, targetIdx) {
   } else {
     const target = battle.enemyField[targetIdx];
     target.curHp -= dmg;
-    if (attacker.def.skill && attacker.def.skill.includes('全体')) {
-      battle.enemyField.forEach(u => { if (u) u.curHp -= 2; });
-      skillFlash(`${attacker.def.name}のスキル！\n全ての敵に2ダメージ`);
+    if ((tag && tag.effect === 'aoeDamage') || (attacker.def.skill && attacker.def.skill.includes('全体'))) {
+      const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
+      battle.enemyField.forEach(u => { if (u) u.curHp -= aoeVal; });
+      skillFlash(`${attacker.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
     }
-    if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+    const killed = target.curHp <= 0;
+    if (tag && tag.effect === 'stunTarget' && !killed) {
+      target.stunned = true;
+      skillFlash(`${attacker.def.name}のスキル！\n相手を1ターン行動不能に`);
+    }
+    if (killed && tag && tag.effect === 'drainEnemyCost') {
+      battle.enemyCost = Math.max(0, battle.enemyCost - tag.value);
+      skillFlash(`${attacker.def.name}のスキル！\n相手のコストを${tag.value}消費`);
+    }
   }
   attacker.canAttack = false;
   battle.selectedFieldIdx = null;
-  battle.enemyField = battle.enemyField.map(u => (u && u.curHp <= 0) ? null : u);
+  battle.enemyField = cleanupField(battle.enemyField);
   renderBattle();
 }
 
 function endTurn() {
   if (!battle || battle.over) return;
-  // 自分の場のユニットは次ターンから攻撃可能に
-  battle.playerField.forEach(u => { if (u) u.canAttack = true; });
+  // 自分の場のユニットは次ターンから攻撃可能に（スタン中は1回だけスキップ）
+  battle.playerField.forEach(u => {
+    if (!u) return;
+    if (u.stunned) { u.stunned = false; u.canAttack = false; }
+    else { u.canAttack = true; }
+  });
   showTurnBanner('ENEMY TURN');
   setTimeout(() => {
     enemyTurn();
@@ -2028,6 +2085,8 @@ function enemyTurn() {
   battle.enemyMaxCost = Math.min(10, battle.enemyMaxCost + 1);
   battle.enemyCost = battle.enemyMaxCost;
   if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
+  battle.enemyField.forEach(u => applySkillTag(u, 'turnStart', false));
+  battle.enemyField = cleanupField(battle.enemyField);
 
   // AI: モンスター配置 → 装備 → フィールド → スペルの優先順で、出せるカードを出し続ける
   let progressed = true;
@@ -2046,6 +2105,7 @@ function enemyTurn() {
         if (emptyIdx === -1) continue;
         battle.enemyCost -= def.cost;
         battle.enemyField[emptyIdx] = newBattleUnit(id);
+        applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
         battle.enemyHand.splice(i, 1);
         progressed = true;
         break;
@@ -2124,20 +2184,31 @@ function enemyTurn() {
       }
     }
   }
-  battle.playerField = battle.playerField.map(u => (u && u.curHp <= 0) ? null : u);
+  battle.playerField = cleanupField(battle.playerField);
 
   // 攻撃可能な既存ユニットで攻撃（アタッカー/ディフェンダーのルールに従う）
   battle.enemyField.forEach((u, i) => {
     if (u && u.canAttack) {
       const valid = getValidTargets(u, battle.playerField);
-      const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u));
+      const tag = u.def.skillTag;
+      const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
+      const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) + extraDmg;
       if (valid.indices.length > 0) {
         const targetIdx = valid.indices[0];
         const target = battle.playerField[targetIdx];
         const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
         impactEffect(targetEl, dmg, 0);
         target.curHp -= dmg;
-        if (target.curHp <= 0) battle.playerField[targetIdx] = null;
+        if ((tag && tag.effect === 'aoeDamage') || (u.def.skill && u.def.skill.includes('全体'))) {
+          const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
+          battle.playerField.forEach(p => { if (p) p.curHp -= aoeVal; });
+          skillFlash(`${u.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
+        }
+        const killed = target.curHp <= 0;
+        if (tag && tag.effect === 'stunTarget' && !killed) target.stunned = true;
+        if (killed && tag && tag.effect === 'drainEnemyCost') {
+          battle.playerCost = Math.max(0, battle.playerCost - tag.value);
+        }
       } else if (valid.faceAllowed) {
         const targetEl = document.getElementById('battle-player-portrait');
         impactEffect(targetEl, dmg, 0);
@@ -2146,8 +2217,12 @@ function enemyTurn() {
       // ディフェンダーで有効な対象がいない場合は何もせず待機
     }
   });
-  battle.enemyField.forEach(u => { if (u) u.canAttack = true; });
-  battle.playerField = battle.playerField.map(u => (u && u.curHp <= 0) ? null : u);
+  battle.enemyField.forEach(u => {
+    if (!u) return;
+    if (u.stunned) { u.stunned = false; u.canAttack = false; }
+    else { u.canAttack = true; }
+  });
+  battle.playerField = cleanupField(battle.playerField);
 
   // 次は自分のターン
   battle.turn += 1;
@@ -2155,6 +2230,8 @@ function enemyTurn() {
   battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
   battle.playerCost = battle.playerMaxCost;
   if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
+  battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
+  battle.playerField = cleanupField(battle.playerField);
   renderBattle();
 }
 
