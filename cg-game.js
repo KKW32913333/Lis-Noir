@@ -113,6 +113,14 @@ function leaderAppliesTo(unit, isPlayerCard) {
   return unit.def.element === leader.element;
 }
 
+// ---------- イベント限定ガチャ(チケット消費・専用プール) ----------
+// ※ defaultState()から参照されるため、state初期化より前に定義する必要がある
+const EVENT_GACHA_PACKS = [
+  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'tickets', cost: 1,
+    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
+    pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
+];
+
 const EVOLVE_COST = 800;
 const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
@@ -2489,13 +2497,6 @@ const SHOP_PACKS = [
   { id: 'premium', name: 'プレミアムパック', icon: '👑', currency: 'gems', cost: 30,
     desc: 'エピック以上が確定で出る豪華パック', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
     preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
-];
-
-// ---------- イベント限定ガチャ(チケット消費・専用プール) ----------
-const EVENT_GACHA_PACKS = [
-  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'tickets', cost: 1,
-    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
-    pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
 ];
 
 function pickWeightedCardId(weights) {
