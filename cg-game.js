@@ -428,17 +428,20 @@ function renderCardFace(id, opts) {
     ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
   const isMonster = (def.type || 'monster') === 'monster';
-  const roleBadge = isMonster
+  const roleBadge = (isMonster && !opts.battleMode)
     ? `<span class="cg-card-role ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : '';
   const foil = (def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
+  // バトル画面では、カード内表示をイラスト・コスト・ATK・HPの4情報のみに絞るため、名称・属性アイコンを省略
+  const nameLine = opts.battleMode ? '' : `<div class="cg-card-name">${def.name}</div>`;
+  const elLine = opts.battleMode ? '' : `<div class="cg-card-el" style="color:${el.color}">${el.icon}</div>`;
   return `
     <div class="cg-card${small}${evolvedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
       <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
-      <div class="cg-card-name">${def.name}</div>
-      ${cardStatsLine(def, opts.evolved, { hideStats: opts.hideStats })}
-      <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
+      ${nameLine}
+      ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
+      ${elLine}
     </div>`;
 }
 
@@ -1259,7 +1262,7 @@ function evolveCard(id) {
 let battle = null;
 
 const STAGES = [
-  { id: 1, name: '森を彷徨う影', portrait: '🐺', hp: 16, spellChance: 0.05, bgTheme: 'forest',
+  { id: 1, name: '森を彷徨う影', portrait: '🐺', hp: 14, spellChance: 0.05, bgTheme: 'forest',
     weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '呪いを喰らう獣＝モンスターが跋扈する時代。人々は結界の内側で身を寄せ合い、外の世界を恐れながら暮らしていた。' },
@@ -1272,7 +1275,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……勝てた。本当に、勝てるんだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '束の間の平穏の中、彼は森の奥へと続く道を見つめた。' },
     ] },
-  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 18, spellChance: 0.08, bgTheme: 'snow',
+  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 16, spellChance: 0.08, bgTheme: 'snow',
     weights: { normal: 80, rare: 17, epic: 3, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '村長', portrait: '👴', text: 'よく戻った。噂には聞いていたが、まさか本当に森の影を退けるとはな。' },
@@ -1285,7 +1288,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'これが……呪いの結晶。なんだか、悲しい色をしている。' },
       { speaker: 'ナレーター', portrait: '📖', text: '村へ戻る足取りは、来た時より少しだけ重かった。' },
     ] },
-  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 22, spellChance: 0.13, bgTheme: 'cave',
+  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 19, spellChance: 0.13, bgTheme: 'cave',
     weights: { normal: 55, rare: 32, epic: 11, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '洞窟の奥から、言葉にならない囁きが聞こえる。呪いに深く蝕まれたモンスターの気配だ。' },
@@ -1296,7 +1299,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '囁きは静まった。だが、これほどの呪いが集まる理由が、どうしても引っかかる。' },
       { speaker: '調教師', portrait: '🧑', text: 'まるで、この森全体が何かに怯えているみたいだ。' },
     ] },
-  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 28, spellChance: 0.19, bgTheme: 'volcano',
+  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 22, spellChance: 0.19, bgTheme: 'volcano',
     weights: { normal: 32, rare: 35, epic: 26, legend: 7 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: 'グルル……我が縄張りに踏み込むとは、良い度胸だ。' },
@@ -1307,7 +1310,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '古き竜の力もまた、呪いに触れれば牙を剥く。それでも、この地に平和が戻った。' },
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: '……ぐ……見事だ、人の子よ。この森には、まだ知らぬ強者がいる。心せよ。' },
     ] },
-  { id: 5, name: '森の女王', portrait: '👑', hp: 34, spellChance: 0.26, bgTheme: 'castle',
+  { id: 5, name: '森の女王', portrait: '👑', hp: 26, spellChance: 0.26, bgTheme: 'castle',
     weights: { normal: 12, rare: 28, epic: 38, legend: 22 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: '森の女王', portrait: '👑', text: 'ここまで来たか、人の子よ。ならば見せてやろう、この森の真の姿を。' },
@@ -1319,7 +1322,7 @@ const STAGES = [
       { speaker: '森の女王', portrait: '👑', text: 'この森を抜けた先に、かつて栄えた月影の国がある。そこで、お前は真実の一端を知るだろう。' },
       { speaker: '調教師', portrait: '🧑', text: '……ありがとうございます。必ず、この呪いの正体を突き止めてみせます。' },
     ] },
-  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 40, spellChance: 0.22, bgTheme: 'moonshadow',
+  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 30, spellChance: 0.22, bgTheme: 'moonshadow',
     weights: { normal: 20, rare: 32, epic: 35, legend: 13 }, rewardGold: 250, rewardGems: 22, trophyDelta: 44,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '森を抜けた先には、かつて栄えたという月影の国の廃墟が広がっていた。' },
@@ -1331,7 +1334,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '廃墟の奥に、まだ息づく者たちがいた。ここから、村と国の復興が始まる。' },
       { speaker: '月下の斥候', portrait: '🌙', text: '……その力、本物のようだな。良かろう、お前の話を聞こう。' },
     ] },
-  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 46, spellChance: 0.25, bgTheme: 'emerald',
+  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 34, spellChance: 0.25, bgTheme: 'emerald',
     weights: { normal: 14, rare: 30, epic: 38, legend: 18 }, rewardGold: 280, rewardGems: 25, trophyDelta: 48,
     storyIntro: [
       { speaker: '荒野の守護者', portrait: '🍃', text: '復興だと？ この荒野に、もう希望などない。' },
@@ -1343,7 +1346,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '一緒に、この国を立て直そう。' },
       { speaker: '荒野の守護者', portrait: '🍃', text: 'フン……悪くない誘いだ。' },
     ] },
-  { id: 8, name: '氷の試練', portrait: '❄️', hp: 52, spellChance: 0.28, bgTheme: 'frost',
+  { id: 8, name: '氷の試練', portrait: '❄️', hp: 38, spellChance: 0.28, bgTheme: 'frost',
     weights: { normal: 8, rare: 26, epic: 40, legend: 26 }, rewardGold: 310, rewardGems: 28, trophyDelta: 52,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '新たな仲間を迎えるには、氷の祠が課す試練を越えねばならないという。' },
@@ -1354,7 +1357,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '試練を越えた証に、祠は静かに光を放ち、新たな絆が芽生えた。' },
       { speaker: '調教師', portrait: '🧑', text: 'これから、よろしく頼む。一緒に、この呪いの謎を解き明かそう。' },
     ] },
-  { id: 9, name: '業火の番人', portrait: '🔥', hp: 58, spellChance: 0.31, bgTheme: 'inferno2',
+  { id: 9, name: '業火の番人', portrait: '🔥', hp: 42, spellChance: 0.31, bgTheme: 'inferno2',
     weights: { normal: 5, rare: 22, epic: 40, legend: 33 }, rewardGold: 350, rewardGems: 32, trophyDelta: 58,
     storyIntro: [
       { speaker: '業火の番人', portrait: '🔥', text: '女帝様の宝を狙う者に、我が炎は容赦せぬ。' },
@@ -1365,7 +1368,7 @@ const STAGES = [
       { speaker: '業火の番人', portrait: '🔥', text: '……我が炎が届かぬとはな。女帝様に伝えよ、危険な者が来ると。' },
       { speaker: '調教師', portrait: '🧑', text: '危険なつもりはない。ただ、この国を救う手立てを探しているだけだ。' },
     ] },
-  { id: 10, name: '月影の女帝', portrait: '👸', hp: 66, spellChance: 0.34, bgTheme: 'empress',
+  { id: 10, name: '月影の女帝', portrait: '👸', hp: 47, spellChance: 0.34, bgTheme: 'empress',
     weights: { normal: 2, rare: 16, epic: 38, legend: 44 }, rewardGold: 450, rewardGems: 45, trophyDelta: 70,
     storyIntro: [
       { speaker: '月影の女帝', portrait: '👸', text: 'よくぞここまで。復興を志す者よ、我が力、見せてやろう。' },
@@ -1377,7 +1380,7 @@ const STAGES = [
       { speaker: '月影の女帝', portrait: '👸', text: 'かつてこの国は、四天王の軍勢に呪いを撒き散らされ、滅びかけた。私が守れたのは、この程度の廃墟だけだ。' },
       { speaker: '調教師', portrait: '🧑', text: '四天王……。分かりました、必ず彼らを止めてみせます。' },
     ] },
-  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 74, spellChance: 0.36, bgTheme: 'cave',
+  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 52, spellChance: 0.36, bgTheme: 'cave',
     weights: { normal: 0, rare: 14, epic: 40, legend: 46 }, rewardGold: 500, rewardGems: 50, trophyDelta: 76,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '月影の国を越えた先、四天王が支配する領域へと足を踏み入れる。' },
@@ -1389,7 +1392,7 @@ const STAGES = [
       { speaker: '爪の将', portrait: '🦅', text: '……我が爪を退けるか。だが、我らは四人。まだ三人残っている。' },
       { speaker: '調教師', portrait: '🧑', text: '一人ずつでも構わない。必ず、全員を退けてみせる。' },
     ] },
-  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 82, spellChance: 0.38, bgTheme: 'frost',
+  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 58, spellChance: 0.38, bgTheme: 'frost',
     weights: { normal: 0, rare: 10, epic: 40, legend: 50 }, rewardGold: 550, rewardGems: 55, trophyDelta: 82,
     storyIntro: [
       { speaker: '鎧の将', portrait: '🐢', text: 'ほう、爪の将を退けたか。だが我が鎧は、何者をも通さぬ。' },
@@ -1400,7 +1403,7 @@ const STAGES = [
       { speaker: '鎧の将', portrait: '🐢', text: '……鎧が、砕けた。人の子よ、お前は本物だ。' },
       { speaker: '鎧の将', portrait: '🐢', text: 'だが油断するな。次に待つ毒の将は、我のような真っ向勝負を好まぬ。' },
     ] },
-  { id: 13, name: '四天王・毒の将', portrait: '🐍', hp: 90, spellChance: 0.40, bgTheme: 'emerald',
+  { id: 13, name: '四天王・毒の将', portrait: '🐍', hp: 64, spellChance: 0.40, bgTheme: 'emerald',
     weights: { normal: 0, rare: 8, epic: 38, legend: 54 }, rewardGold: 600, rewardGems: 60, trophyDelta: 88,
     storyIntro: [
       { speaker: '毒の将', portrait: '🐍', text: 'シュルル……その息、いつまで保つかしらねぇ。' },
@@ -1411,7 +1414,7 @@ const STAGES = [
       { speaker: '毒の将', portrait: '🐍', text: '……毒が効かぬとは。面白い人の子だこと。' },
       { speaker: '毒の将', portrait: '🐍', text: 'ふふ、気に入ったわ。炎の将によろしく伝えて。彼はあなたを歓迎しないでしょうけど。' },
     ] },
-  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 98, spellChance: 0.42, bgTheme: 'inferno2',
+  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 70, spellChance: 0.42, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 6, epic: 36, legend: 58 }, rewardGold: 650, rewardGems: 65, trophyDelta: 94,
     storyIntro: [
       { speaker: '炎の将', portrait: '🐉', text: '三人が敗れたと聞いた。ならば我が炎で、決着をつけよう。' },
@@ -1422,7 +1425,7 @@ const STAGES = [
       { speaker: '炎の将', portrait: '🐉', text: '……我が炎すら凌ぐか。もはや止める者はいない。魔王城へ行くがいい。' },
       { speaker: '炎の将', portrait: '🐉', text: 'だが、最後に待つ者は我らの誰よりも強い。心して行け、人の子よ。' },
     ] },
-  { id: 15, name: '四天王を統べる者', portrait: '⚔️', hp: 112, spellChance: 0.45, bgTheme: 'moonshadow',
+  { id: 15, name: '四天王を統べる者', portrait: '⚔️', hp: 78, spellChance: 0.45, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 4, epic: 34, legend: 62 }, rewardGold: 800, rewardGems: 80, trophyDelta: 110,
     storyIntro: [
       { speaker: '四天王を統べる者', portrait: '⚔️', text: '四天王すべてを退けるとは……。だが我こそが、その頂点だと知れ。' },
@@ -1435,7 +1438,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……どういう意味だ？ 教えてくれ。' },
       { speaker: '四天王を統べる者', portrait: '⚔️', text: '会えば分かる。行くがいい。' },
     ] },
-  { id: 16, name: '魔王城・門番', portrait: '🗿', hp: 122, spellChance: 0.47, bgTheme: 'castle',
+  { id: 16, name: '魔王城・門番', portrait: '🗿', hp: 86, spellChance: 0.47, bgTheme: 'castle',
     weights: { normal: 0, rare: 2, epic: 32, legend: 66 }, rewardGold: 850, rewardGems: 85, trophyDelta: 118,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '聳え立つ魔王城。その門を、巨大な石の番人が塞いでいた。' },
@@ -1446,7 +1449,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '門は開いた。魔王城の内部へ、一歩ずつ近づいていく。' },
       { speaker: '調教師', portrait: '🧑', text: '……不思議と、恐怖より確信の方が強い。俺は、間違っていない。' },
     ] },
-  { id: 17, name: '魔王城・呪術師', portrait: '💀', hp: 132, spellChance: 0.49, bgTheme: 'cave',
+  { id: 17, name: '魔王城・呪術師', portrait: '💀', hp: 94, spellChance: 0.49, bgTheme: 'cave',
     weights: { normal: 0, rare: 2, epic: 30, legend: 68 }, rewardGold: 900, rewardGems: 90, trophyDelta: 126,
     storyIntro: [
       { speaker: '呪術師', portrait: '💀', text: 'クククッ……この城で正気を保てる者など、いはしないよ。' },
@@ -1457,7 +1460,7 @@ const STAGES = [
       { speaker: '呪術師', portrait: '💀', text: '……私の呪詛が届かぬか。お前もまた、何かに選ばれし者か。' },
       { speaker: '呪術師', portrait: '💀', text: 'ならば教えてやろう。この城の呪いの濃さは、玉座に近づくほど増していく。心せよ。' },
     ] },
-  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 142, spellChance: 0.51, bgTheme: 'empress',
+  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 102, spellChance: 0.51, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 30, legend: 70 }, rewardGold: 950, rewardGems: 95, trophyDelta: 134,
     storyIntro: [
       { speaker: '処刑人', portrait: '🪓', text: '魔王様に近づく者は、皆ここで終わる。お前も例外ではない。' },
@@ -1468,7 +1471,7 @@ const STAGES = [
       { speaker: '処刑人', portrait: '🪓', text: '……この斧が、届かぬだと……。魔王様、お気をつけを……。' },
       { speaker: '調教師', portrait: '🧑', text: '……その最後の言葉、まるで魔王を案じているみたいだった。' },
     ] },
-  { id: 19, name: '魔王城・影の宰相', portrait: '🕶️', hp: 152, spellChance: 0.53, bgTheme: 'frost',
+  { id: 19, name: '魔王城・影の宰相', portrait: '🕶️', hp: 110, spellChance: 0.53, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 28, legend: 72 }, rewardGold: 1000, rewardGems: 100, trophyDelta: 142,
     storyIntro: [
       { speaker: '影の宰相', portrait: '🕶️', text: 'ここまで来たか。魔王様の前に立つ最後の壁は、私だ。' },
@@ -1480,7 +1483,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '後悔なんてしない。俺は、真実を知るためにここまで来たんだ。' },
       { speaker: '影の宰相', portrait: '🕶️', text: '……その覚悟、忘れるな。行け。' },
     ] },
-  { id: 20, name: '魔王', portrait: '👹', hp: 170, spellChance: 0.56, bgTheme: 'inferno2',
+  { id: 20, name: '魔王', portrait: '👹', hp: 120, spellChance: 0.56, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 26, legend: 74 }, rewardGold: 1300, rewardGems: 130, trophyDelta: 170,
     storyIntro: [
       { speaker: '魔王', portrait: '👹', text: 'よくぞ辿り着いた、人の子よ。この世界の呪いの元凶……この私を倒しに来たか。' },
@@ -1493,7 +1496,7 @@ const STAGES = [
       { speaker: '魔王', portrait: '👹', text: '……女神に、会いに行け……。全ては、そこから始まった……。' },
       { speaker: 'ナレーター', portrait: '📖', text: '魔王は光の粒となって消えていった。世界中の人々が歓喜する中、調教師の胸には拭えない違和感が残った。' },
     ] },
-  { id: 21, name: '崩れゆく世界', portrait: '🌑', hp: 185, spellChance: 0.58, bgTheme: 'moonshadow',
+  { id: 21, name: '崩れゆく世界', portrait: '🌑', hp: 130, spellChance: 0.58, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 24, legend: 76 }, rewardGold: 1400, rewardGems: 140, trophyDelta: 180,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '魔王を倒したはずなのに、モンスターの呪いは消えるどころか、むしろ濃くなっていく。' },
@@ -1505,7 +1508,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '倒しても倒しても、次々と現れる呪い。何かが、根本から間違っている。' },
       { speaker: '調教師', portrait: '🧑', text: '……行こう。この世界の中心にある神殿へ。全ての答えが、そこにあるはずだ。' },
     ] },
-  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 200, spellChance: 0.60, bgTheme: 'empress',
+  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 140, spellChance: 0.60, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 22, legend: 78 }, rewardGold: 1500, rewardGems: 150, trophyDelta: 190,
     storyIntro: [
       { speaker: '黒百合の巫女', portrait: '🥀', text: 'ふふ……気づいてしまったのね。この世界の呪いの、本当の意味に。' },
@@ -1518,7 +1521,7 @@ const STAGES = [
       { speaker: '黒百合の巫女', portrait: '🥀', text: '神殿の奥、白と黒の百合が咲く場所に、全ての真実が眠っている。' },
       { speaker: '調教師', portrait: '🧑', text: '……分かった。行こう。' },
     ] },
-  { id: 23, name: '記憶の断片', portrait: '🕸️', hp: 215, spellChance: 0.62, bgTheme: 'cave',
+  { id: 23, name: '記憶の断片', portrait: '🕸️', hp: 150, spellChance: 0.62, bgTheme: 'cave',
     weights: { normal: 0, rare: 0, epic: 20, legend: 80 }, rewardGold: 1600, rewardGems: 160, trophyDelta: 200,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '砕け散った記憶の欠片が、モンスターの姿となって襲いかかる。' },
@@ -1530,7 +1533,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……世界を守るために、自分が犠牲になったっていうのか。そんなの、あんまりだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '彼は拳を強く握りしめ、神殿の最奥へと歩みを進めた。' },
     ] },
-  { id: 24, name: '女神の影', portrait: '✨', hp: 230, spellChance: 0.64, bgTheme: 'castle',
+  { id: 24, name: '女神の影', portrait: '✨', hp: 162, spellChance: 0.64, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 18, legend: 82 }, rewardGold: 1700, rewardGems: 170, trophyDelta: 210,
     storyIntro: [
       { speaker: '女神の影', portrait: '✨', text: 'ようこそ、我が最後の使者よ。あなたなら、私を止められるかしら。' },
@@ -1543,7 +1546,7 @@ const STAGES = [
       { speaker: '女神の影', portrait: '✨', text: '奥で待っているのは、もっと深く呪いに沈んだ、本当の女神の姿。覚悟して。' },
       { speaker: '調教師', portrait: '🧑', text: '……大丈夫。ここまで来た仲間たちと一緒なら、何も怖くない。' },
     ] },
-  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 280, spellChance: 0.68, bgTheme: 'purification',
+  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 180, spellChance: 0.68, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 15, legend: 85 }, rewardGold: 2500, rewardGems: 250, trophyDelta: 300,
     storyIntro: [
       { speaker: '黒百合の女神', portrait: '🖤', text: '……よく来たわね、Lis Noirの継承者。私を倒せば、この呪いは終わる。それとも──赦せる？' },
@@ -2016,7 +2019,7 @@ function renderBattle() {
     }
     const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, hideStats: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, battleMode: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -2024,7 +2027,7 @@ function renderBattle() {
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
     if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
     const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
-    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, hideStats: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}</div>`;
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, battleMode: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}</div>`;
   }).join('');
 
   const handEl = document.getElementById('battle-hand');
@@ -2039,7 +2042,7 @@ function renderBattle() {
       const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
       statBadges = `<div class="cg-atk-badge">${atk}</div><div class="cg-hp-badge">${hp}</div>`;
     }
-    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true, evolved, hideStats: true })}${statBadges}</div>`;
+    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true, evolved, battleMode: true })}${statBadges}</div>`;
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
@@ -2135,12 +2138,15 @@ function bindBattleEvents() {
           castSpell(battle.selectedHandIdx, idx);
           return;
         }
-        // 手札のカードがこのマスに対して使えない場合は選択を解除
+        // 手札のカードがこのマスに対して使えない場合は、手札の選択を解除して
+        // 通常通り「この敵モンスターを攻撃対象として選択」の操作に切り替える
         battle.selectedHandIdx = null;
-        renderBattle();
-        return;
       }
-      if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, idx);
+      if (battle.selectedFieldIdx !== null) {
+        attackTarget(battle.selectedFieldIdx, idx);
+      } else {
+        renderBattle();
+      }
     };
     bindLongPress(node, () => {
       const idx = Number(node.dataset.idx);
@@ -2153,10 +2159,17 @@ function bindBattleEvents() {
       const def = CARD_DEFS[id];
       if ((def.type || 'monster') === 'spell' && def.target === 'enemy') {
         castSpell(battle.selectedHandIdx, null);
+        return;
       }
-      return;
+      // 手札のカードが本体攻撃に使えない場合は、手札の選択を解除して
+      // 通常通り「本体を攻撃対象として選択」の操作に切り替える
+      battle.selectedHandIdx = null;
     }
-    if (battle.selectedFieldIdx !== null) attackTarget(battle.selectedFieldIdx, null);
+    if (battle.selectedFieldIdx !== null) {
+      attackTarget(battle.selectedFieldIdx, null);
+    } else {
+      renderBattle();
+    }
   };
   document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
   document.getElementById('battle-enemy-hp-chip').onclick = handleDirectAttackTap;
