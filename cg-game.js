@@ -3022,6 +3022,22 @@ const MISSIONS = [
   { id: 'world5clear', category: 'battle', title: '真実にたどり着く', desc: 'ステージ25をクリアする', target: 26, check: s => s.stageProgress || 1, reward: { gold: 2000, gems: 100 } },
   { id: 'evolve1', category: 'growth', title: '進化の目覚め', desc: 'カードを1体進化させる', target: 1, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 500 } },
   { id: 'evolve9', category: 'growth', title: '進化の達人', desc: 'カードを9体進化させる', target: 9, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 1500, gems: 30 } },
+  // ---- 追加ミッション（87回目の修正） ----
+  { id: 'win75', category: 'battle', title: 'バトルの覇者', desc: 'バトルに75回勝利する', target: 75, check: s => s.totalWins || 0, reward: { gems: 100 } },
+  { id: 'win100', category: 'battle', title: '伝説の挑戦者', desc: 'バトルに100回勝利する', target: 100, check: s => s.totalWins || 0, reward: { gold: 3000, gems: 60 } },
+  { id: 'history50', category: 'battle', title: '戦いの記録者', desc: '対戦履歴を50件残す', target: 50, check: s => (s.battleHistory || []).length, reward: { gold: 600 } },
+  { id: 'trophy4001', category: 'battle', title: 'プラチナランク到達', desc: 'トロフィーを4001以上獲得する', target: 4001, check: s => s.trophy || 0, reward: { gems: 80 } },
+  { id: 'trophy6001', category: 'battle', title: 'ダイヤモンドランク到達', desc: 'トロフィーを6001以上獲得する', target: 6001, check: s => s.trophy || 0, reward: { gold: 5000, gems: 150 } },
+  { id: 'upgrade50', category: 'growth', title: 'カード強化の鬼', desc: 'カードを50回強化する', target: 50, check: s => s.totalUpgrades || 0, reward: { gold: 2500, gems: 25 } },
+  { id: 'level15', category: 'growth', title: '熟練の証', desc: 'プレイヤーレベル15に到達する', target: 15, check: s => s.playerLevel || 1, reward: { gold: 1000, gems: 20 } },
+  { id: 'level20', category: 'growth', title: '頂を目指す者', desc: 'プレイヤーレベル20に到達する', target: 20, check: s => s.playerLevel || 1, reward: { gems: 60 } },
+  { id: 'evolve20', category: 'growth', title: '進化の極致', desc: 'カードを20体進化させる', target: 20, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 2000, gems: 40 } },
+  { id: 'dragonlevel10', category: 'growth', title: 'ドラゴンを育てる', desc: 'ドラゴンをLv.10まで育てる', target: 10, check: s => (s.dragon && s.dragon.level) || 1, reward: { gold: 800 } },
+  { id: 'dragonlevel20', category: 'growth', title: '古代竜の目覚め', desc: 'ドラゴンをLv.20まで育てる', target: 20, check: s => (s.dragon && s.dragon.level) || 1, reward: { gems: 70 } },
+  { id: 'pack50', category: 'collect', title: 'ガチャの達人', desc: 'カードパックを50回開封する', target: 50, check: s => s.totalPacksOpened || 0, reward: { gems: 80 } },
+  { id: 'leaderselect1', category: 'collect', title: 'リーダーを選ぼう', desc: 'デッキにリーダーを設定する', target: 1, check: s => s.leaderId ? 1 : 0, reward: { gold: 300 } },
+  { id: 'presetsave1', category: 'collect', title: 'デッキを保存しよう', desc: 'デッキプリセットを1件保存する', target: 1, check: s => (s.deckPresets || []).length, reward: { gold: 300 } },
+  { id: 'compendium1', category: 'collect', title: '図鑑コンプリート', desc: '図鑑コンプリート報酬を受け取る', target: 1, check: s => s.compendiumRewardClaimed ? 1 : 0, reward: { gems: 50 } },
 ];
 
 const MISSION_CATEGORIES = [
