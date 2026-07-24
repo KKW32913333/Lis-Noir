@@ -49,12 +49,12 @@ const CARD_DEFS = {
   nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
   dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
   fire_magmacolossus: { name: 'マグマコロッサス', element: 'fire', rarity: 'epic',    cost: 5, atk: 4, hp: 9, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-fire-magmacolossus.png', emoji: '🌋' },
-  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'drawCard', value: 1 }, skill: '敵モンスターを撃破した時、カードを1枚引く', image: 'card-dark-voidreaper.png', emoji: '💀' },
-  dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
-  dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-dark-lunaelf.png', emoji: '🦋' },
-  dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 7, atk: 5, hp: 13, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
-  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healSelf', value: 2 }, skill: '場に出た時、自分のHPを2回復', image: 'card-dark-shadowslime.png', emoji: '🟣' },
-  dark_orbitalgrimoire:    { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 5, atk: 4, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
+  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
+  dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
+  dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 2 }, skill: '【固有】場に出た時、自分のコストを2回復する', image: 'card-dark-lunaelf.png', emoji: '🦋' },
+  dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 7, atk: 5, hp: 13, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.5 }, skill: '【固有】受けるダメージを常に半減する', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
+  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'deathBuffAllies', value: 2 }, skill: '【固有】撃破された時、味方全体の攻撃力を永続+2する', image: 'card-dark-shadowslime.png', emoji: '🟣' },
+  spell_orbitalgrimoire:   { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 3 }, skill: '【固有】カードを3枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -120,7 +120,11 @@ const CARD_MAX_LEVEL = 10;
 
 function defaultState() {
   const owned = {};
-  Object.keys(CARD_DEFS).forEach(id => { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; });
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  Object.keys(CARD_DEFS).forEach(id => {
+    if (eventExclusiveIds.has(id)) return; // 期間限定ガチャ専用カードは、実際に引くまで所持しない
+    owned[id] = { level: 1, exp: 0, count: 1, evolved: false };
+  });
   return {
     playerName: 'プレイヤー',
     avatarIcon: '🛡️',
@@ -414,7 +418,7 @@ function renderCardFace(id, opts) {
   const roleBadge = isMonster
     ? `<span class="cg-card-role ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : '';
-  const foil = (def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
+  const foil = (def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
   return `
     <div class="cg-card${small}${evolvedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
@@ -925,8 +929,8 @@ let selectedCardId = null;
 const COMPENDIUM_REWARD = { gold: 2000, gems: 100, trophy: 50 };
 
 function getEvolvedMonsterCount() {
-  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster');
-  const evolvedCount = monsterIds.filter(id => state.cards[id] && state.cards[id].evolved).length;
+  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && state.cards[id]);
+  const evolvedCount = monsterIds.filter(id => state.cards[id].evolved).length;
   return { evolvedCount, total: monsterIds.length };
 }
 
@@ -1004,7 +1008,7 @@ function openCardDetail(id) {
   const rarity = RARITY[def.rarity];
   const isMonster = (def.type || 'monster') === 'monster';
   document.getElementById('detail-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -1385,8 +1389,9 @@ function newBattleUnit(id, isPlayerCard) {
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
-  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster');
-  const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster');
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && !eventExclusiveIds.has(id));
+  const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster' && !eventExclusiveIds.has(id));
   const chance = spellChance || 0;
   const deck = [];
   for (let i = 0; i < count; i++) {
@@ -1453,7 +1458,7 @@ function applyLeaderPortraits() {
 
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
-  const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(CARD_DEFS).slice(0, 10));
+  const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(state.cards).slice(0, 10));
   const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20, stage.spellChance || 0));
   const dragonHpBonus = getDragonBonusHp();
 
@@ -1845,7 +1850,7 @@ function showCardInfo(unit) {
   const atk = def.atk + (unit.atkBonus || 0) + fieldBonusFor(unit);
   const roleText = def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
@@ -1872,7 +1877,7 @@ function showHandCardInfo(id) {
     ? (def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）')
     : '';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend' || def.rarity === 'epic') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -1924,7 +1929,7 @@ function castSpell(handIdx, targetIdx) {
     } else {
       const target = battle.enemyField[targetIdx];
       if (target) {
-        target.curHp -= dmg;
+        target.curHp -= mitigateIncomingDamage(target, dmg);
         if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
       }
     }
@@ -2011,10 +2016,22 @@ function applySkillTag(unit, trigger, isPlayerSide) {
     field.forEach(u => { if (u) { const maxHp = u.def.hp + (u.hpBonus || 0); u.curHp = Math.min(maxHp, u.curHp + tag.value); } });
   } else if (tag.effect === 'drawCard') {
     for (let i = 0; i < tag.value; i++) { if (deck.length) hand.push(deck.shift()); }
+  } else if (tag.effect === 'refundCost') {
+    if (isPlayerSide) battle.playerCost = Math.min(battle.playerMaxCost, battle.playerCost + tag.value);
+    else battle.enemyCost = Math.min(battle.enemyMaxCost, battle.enemyCost + tag.value);
   }
 }
 
 // 撃破されたユニットを取り除く際、復活スキル(reviveHalfHp)を持つ場合は1度だけ半分のHPで復活させる
+// 被ダメージ軽減パッシブ(passiveDamageReduction)を考慮してダメージを補正
+function mitigateIncomingDamage(target, dmg) {
+  const tag = target && target.def && target.def.skillTag;
+  if (tag && tag.trigger === 'passiveDamageReduction') {
+    return Math.max(1, Math.round(dmg * (1 - tag.value)));
+  }
+  return dmg;
+}
+
 function cleanupField(field) {
   return field.map(u => {
     if (!u || u.curHp > 0) return u;
@@ -2025,6 +2042,10 @@ function cleanupField(field) {
       u.revived = true;
       skillFlash(`${u.def.name}のスキル！\n1/2のHPで復活`);
       return u;
+    }
+    if (tag && tag.effect === 'deathBuffAllies') {
+      field.forEach(ally => { if (ally && ally !== u && ally.curHp > 0) ally.atkBonus = (ally.atkBonus || 0) + tag.value; });
+      skillFlash(`${u.def.name}のスキル！\n味方全体の攻撃力が永続+${tag.value}`);
     }
     return null;
   });
@@ -2050,17 +2071,24 @@ function attackTarget(attackerIdx, targetIdx) {
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
   impactEffect(targetEl, dmg, mult);
 
+  let killedSomething = false;
   if (targetIdx === null) {
     battle.enemyHp -= dmg;
+  } else if (tag && tag.effect === 'novaAttack') {
+    // 【固有】自分の攻撃力と同じダメージを敵全体に与える
+    battle.enemyField.forEach(u => { if (u) u.curHp -= mitigateIncomingDamage(u, dmg); });
+    skillFlash(`${attacker.def.name}のスキル！\n攻撃力と同じダメージを敵全体に`);
+    killedSomething = battle.enemyField.some(u => u && u.curHp <= 0);
   } else {
     const target = battle.enemyField[targetIdx];
-    target.curHp -= dmg;
+    target.curHp -= mitigateIncomingDamage(target, dmg);
     if ((tag && tag.effect === 'aoeDamage') || (attacker.def.skill && attacker.def.skill.includes('全体'))) {
       const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
-      battle.enemyField.forEach(u => { if (u) u.curHp -= aoeVal; });
+      battle.enemyField.forEach(u => { if (u) u.curHp -= mitigateIncomingDamage(u, aoeVal); });
       skillFlash(`${attacker.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
     }
     const killed = target.curHp <= 0;
+    killedSomething = killed;
     if (tag && tag.effect === 'stunTarget' && !killed) {
       target.stunned = true;
       skillFlash(`${attacker.def.name}のスキル！\n相手を1ターン行動不能に`);
@@ -2070,7 +2098,12 @@ function attackTarget(attackerIdx, targetIdx) {
       skillFlash(`${attacker.def.name}のスキル！\n相手のコストを${tag.value}消費`);
     }
   }
-  attacker.canAttack = false;
+  if (killedSomething && tag && tag.effect === 'extraAttackOnKill') {
+    attacker.canAttack = true;
+    skillFlash(`${attacker.def.name}のスキル！\n連続攻撃発動！`);
+  } else {
+    attacker.canAttack = false;
+  }
   battle.selectedFieldIdx = null;
   battle.enemyField = cleanupField(battle.enemyField);
   renderBattle();
@@ -2160,7 +2193,7 @@ function enemyTurn() {
               : document.getElementById('battle-player-portrait');
             impactEffect(targetEl, eff.value, 0);
             if (targetIdx !== -1) {
-              battle.playerField[targetIdx].curHp -= eff.value;
+              battle.playerField[targetIdx].curHp -= mitigateIncomingDamage(battle.playerField[targetIdx], eff.value);
               if (battle.playerField[targetIdx].curHp <= 0) battle.playerField[targetIdx] = null;
             } else {
               battle.playerHp -= eff.value;
@@ -2204,15 +2237,18 @@ function enemyTurn() {
       const tag = u.def.skillTag;
       const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
       const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) + extraDmg;
-      if (valid.indices.length > 0) {
+      if (tag && tag.effect === 'novaAttack' && valid.indices.length > 0) {
+        battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, dmg); });
+        skillFlash(`${u.def.name}のスキル！\n攻撃力と同じダメージを敵全体に`);
+      } else if (valid.indices.length > 0) {
         const targetIdx = valid.indices[0];
         const target = battle.playerField[targetIdx];
         const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
         impactEffect(targetEl, dmg, 0);
-        target.curHp -= dmg;
+        target.curHp -= mitigateIncomingDamage(target, dmg);
         if ((tag && tag.effect === 'aoeDamage') || (u.def.skill && u.def.skill.includes('全体'))) {
           const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
-          battle.playerField.forEach(p => { if (p) p.curHp -= aoeVal; });
+          battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, aoeVal); });
           skillFlash(`${u.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
         }
         const killed = target.curHp <= 0;
@@ -2382,7 +2418,7 @@ const SHOP_PACKS = [
 const EVENT_GACHA_PACKS = [
   { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'ticket', cost: 1,
     desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
-    pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'dark_orbitalgrimoire'] },
+    pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
 ];
 
 function pickWeightedCardId(weights) {
@@ -2514,10 +2550,12 @@ function showOpeningAnimation(pack, cardId) {
 }
 
 function applyPackReward(cardId) {
+  const isNew = !state.cards[cardId];
+  if (isNew) state.cards[cardId] = { level: 1, exp: 0, count: 0, evolved: false };
   const owned = state.cards[cardId];
   owned.count = (owned.count || 1) + 1;
   let leveledUp = false;
-  if (owned.level < CARD_MAX_LEVEL) {
+  if (!isNew && owned.level < CARD_MAX_LEVEL) {
     owned.exp += 20;
     if (owned.exp >= 100) {
       owned.exp = 0;
@@ -2528,19 +2566,19 @@ function applyPackReward(cardId) {
   }
   saveState();
 
-  showReveal(cardId, leveledUp);
+  showReveal(cardId, leveledUp, isNew);
   renderShop();
   renderHome();
 }
 
-function showReveal(cardId, leveledUp) {
+function showReveal(cardId, leveledUp, isNew) {
   const def = CARD_DEFS[cardId];
   const rarity = RARITY[def.rarity];
   sfxReveal();
   document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId, { evolved: state.cards[cardId].evolved });
+  const subLine = isNew ? '<br>✨NEW！ カード一覧に追加されました' : (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
   document.getElementById('shop-reveal-caption').innerHTML =
-    `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` +
-    (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
+    `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` + subLine;
   document.getElementById('shop-reveal-overlay').classList.remove('hidden');
 }
 
