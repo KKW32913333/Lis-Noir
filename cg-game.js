@@ -921,18 +921,29 @@ function bindDeckDragReorder(deckEl) {
     item.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.cg-deck-remove-btn')) return; // 削除ボタンは対象外
       const idx = Number(item.dataset.index);
+      const startX = e.clientX, startY = e.clientY;
       const holdTimer = setTimeout(() => {
-        deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer: null, moved: false };
+        deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer: null, moved: false, startX, startY };
         item.classList.add('dragging');
         try { item.setPointerCapture(e.pointerId); } catch (err) {}
         sfxTap();
-      }, 220);
-      deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer, moved: false };
+      }, 260);
+      deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer, moved: false, startX, startY };
     });
 
     item.addEventListener('pointermove', (e) => {
       if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
-      if (deckDragState.holdTimer) return; // まだ長押し確定前
+      if (deckDragState.holdTimer) {
+        // 長押し確定前：指が一定以上動いたらスクロール操作とみなし、ドラッグ待機をキャンセルする
+        // （タップ位置から10px以上動いた時点でスクロール意図と判断）
+        const dx = e.clientX - deckDragState.startX;
+        const dy = e.clientY - deckDragState.startY;
+        if (Math.hypot(dx, dy) > 10) {
+          clearTimeout(deckDragState.holdTimer);
+          deckDragState = null;
+        }
+        return;
+      }
       deckDragState.moved = true;
       deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => s.classList.remove('drop-target'));
       const target = document.elementFromPoint(e.clientX, e.clientY);
@@ -1082,6 +1093,14 @@ function setCollectionFilter(filter) {
   document.querySelectorAll('#collection-filter-tabs .cg-filter-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === filter);
   });
+  renderDeck();
+}
+
+function clearDeck() {
+  if (!state.deck.length) return;
+  if (!confirm('デッキ内のカードをすべて外します。よろしいですか？')) return;
+  state.deck = [];
+  saveState();
   renderDeck();
 }
 
@@ -3171,6 +3190,7 @@ function init() {
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
+  document.getElementById('deck-clear-btn').addEventListener('click', clearDeck);
   document.getElementById('deck-preset-save-btn').addEventListener('click', saveDeckPreset);
   document.getElementById('compendium-claim-btn').addEventListener('click', claimCompendiumReward);
   document.querySelectorAll('#collection-filter-tabs .cg-filter-tab').forEach(btn => {
