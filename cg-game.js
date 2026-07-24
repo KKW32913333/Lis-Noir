@@ -2517,31 +2517,38 @@ function hideReveal() {
 
 // ---------- ミッション ----------
 const MISSIONS = [
-  { id: 'win1', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
-  { id: 'win3', title: '勝利を重ねる', desc: 'バトルに3回勝利する', target: 3, check: s => s.totalWins || 0, reward: { gold: 500 } },
-  { id: 'win10', title: '歴戦の証', desc: 'バトルに10回勝利する', target: 10, check: s => s.totalWins || 0, reward: { gems: 20 } },
-  { id: 'win25', title: 'バトルマスターへの道', desc: 'バトルに25回勝利する', target: 25, check: s => s.totalWins || 0, reward: { gems: 40 } },
-  { id: 'win50', title: '百戦錬磨', desc: 'バトルに50回勝利する', target: 50, check: s => s.totalWins || 0, reward: { gems: 80, gold: 1000 } },
-  { id: 'pack1', title: '初めてのパック', desc: 'カードパックを1回開封する', target: 1, check: s => s.totalPacksOpened || 0, reward: { gems: 5 } },
-  { id: 'pack5', title: 'パックコレクター', desc: 'カードパックを5回開封する', target: 5, check: s => s.totalPacksOpened || 0, reward: { gems: 15 } },
-  { id: 'pack15', title: 'パック愛好家', desc: 'カードパックを15回開封する', target: 15, check: s => s.totalPacksOpened || 0, reward: { gems: 30 } },
-  { id: 'pack30', title: 'ガチャの求道者', desc: 'カードパックを30回開封する', target: 30, check: s => s.totalPacksOpened || 0, reward: { gems: 60 } },
-  { id: 'upgrade3', title: 'カードを鍛える', desc: 'カードを3回強化する', target: 3, check: s => s.totalUpgrades || 0, reward: { gold: 400 } },
-  { id: 'upgrade10', title: '熟練の強化師', desc: 'カードを10回強化する', target: 10, check: s => s.totalUpgrades || 0, reward: { gold: 800 } },
-  { id: 'upgrade25', title: '究極の強化師', desc: 'カードを25回強化する', target: 25, check: s => s.totalUpgrades || 0, reward: { gold: 1500, gems: 20 } },
-  { id: 'deck20', title: 'デッキを整える', desc: 'デッキを20枚以上編成する', target: 20, check: s => s.deck.length, reward: { gold: 300 } },
-  { id: 'deck30', title: '完全なるデッキ', desc: 'デッキを30枚編成する', target: 30, check: s => s.deck.length, reward: { gold: 600, gems: 10 } },
-  { id: 'trophy500', title: 'ランクを上げろ', desc: 'トロフィーを500以上獲得する', target: 500, check: s => s.trophy || 0, reward: { gold: 500 } },
-  { id: 'trophy1500', title: '上位ランカー', desc: 'トロフィーを1500以上獲得する', target: 1500, check: s => s.trophy || 0, reward: { gems: 50 } },
-  { id: 'level5', title: '成長の証', desc: 'プレイヤーレベル5に到達する', target: 5, check: s => s.playerLevel || 1, reward: { gold: 400 } },
-  { id: 'level10', title: 'ベテラン冒険者', desc: 'プレイヤーレベル10に到達する', target: 10, check: s => s.playerLevel || 1, reward: { gems: 30 } },
-  { id: 'world1clear', title: '見習いの森を制覇', desc: 'ステージ5をクリアする', target: 6, check: s => s.stageProgress || 1, reward: { gold: 500, gems: 15 } },
-  { id: 'world2clear', title: '月影の国を制覇', desc: 'ステージ10をクリアする', target: 11, check: s => s.stageProgress || 1, reward: { gold: 700, gems: 20 } },
-  { id: 'world3clear', title: '四天王を打ち破る', desc: 'ステージ15をクリアする', target: 16, check: s => s.stageProgress || 1, reward: { gold: 900, gems: 30 } },
-  { id: 'world4clear', title: '魔王城を攻略', desc: 'ステージ20をクリアする', target: 21, check: s => s.stageProgress || 1, reward: { gold: 1200, gems: 40 } },
-  { id: 'world5clear', title: '真実にたどり着く', desc: 'ステージ25をクリアする', target: 26, check: s => s.stageProgress || 1, reward: { gold: 2000, gems: 100 } },
-  { id: 'evolve1', title: '進化の目覚め', desc: 'カードを1体進化させる', target: 1, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 500 } },
-  { id: 'evolve9', title: '進化の達人', desc: 'カードを9体進化させる', target: 9, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 1500, gems: 30 } },
+  { id: 'win1', category: 'battle', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
+  { id: 'win3', category: 'battle', title: '勝利を重ねる', desc: 'バトルに3回勝利する', target: 3, check: s => s.totalWins || 0, reward: { gold: 500 } },
+  { id: 'win10', category: 'battle', title: '歴戦の証', desc: 'バトルに10回勝利する', target: 10, check: s => s.totalWins || 0, reward: { gems: 20 } },
+  { id: 'win25', category: 'battle', title: 'バトルマスターへの道', desc: 'バトルに25回勝利する', target: 25, check: s => s.totalWins || 0, reward: { gems: 40 } },
+  { id: 'win50', category: 'battle', title: '百戦錬磨', desc: 'バトルに50回勝利する', target: 50, check: s => s.totalWins || 0, reward: { gems: 80, gold: 1000 } },
+  { id: 'pack1', category: 'collect', title: '初めてのパック', desc: 'カードパックを1回開封する', target: 1, check: s => s.totalPacksOpened || 0, reward: { gems: 5 } },
+  { id: 'pack5', category: 'collect', title: 'パックコレクター', desc: 'カードパックを5回開封する', target: 5, check: s => s.totalPacksOpened || 0, reward: { gems: 15 } },
+  { id: 'pack15', category: 'collect', title: 'パック愛好家', desc: 'カードパックを15回開封する', target: 15, check: s => s.totalPacksOpened || 0, reward: { gems: 30 } },
+  { id: 'pack30', category: 'collect', title: 'ガチャの求道者', desc: 'カードパックを30回開封する', target: 30, check: s => s.totalPacksOpened || 0, reward: { gems: 60 } },
+  { id: 'upgrade3', category: 'growth', title: 'カードを鍛える', desc: 'カードを3回強化する', target: 3, check: s => s.totalUpgrades || 0, reward: { gold: 400 } },
+  { id: 'upgrade10', category: 'growth', title: '熟練の強化師', desc: 'カードを10回強化する', target: 10, check: s => s.totalUpgrades || 0, reward: { gold: 800 } },
+  { id: 'upgrade25', category: 'growth', title: '究極の強化師', desc: 'カードを25回強化する', target: 25, check: s => s.totalUpgrades || 0, reward: { gold: 1500, gems: 20 } },
+  { id: 'deck20', category: 'collect', title: 'デッキを整える', desc: 'デッキを20枚以上編成する', target: 20, check: s => s.deck.length, reward: { gold: 300 } },
+  { id: 'deck30', category: 'collect', title: '完全なるデッキ', desc: 'デッキを30枚編成する', target: 30, check: s => s.deck.length, reward: { gold: 600, gems: 10 } },
+  { id: 'trophy500', category: 'growth', title: 'ランクを上げろ', desc: 'トロフィーを500以上獲得する', target: 500, check: s => s.trophy || 0, reward: { gold: 500 } },
+  { id: 'trophy1500', category: 'growth', title: '上位ランカー', desc: 'トロフィーを1500以上獲得する', target: 1500, check: s => s.trophy || 0, reward: { gems: 50 } },
+  { id: 'level5', category: 'growth', title: '成長の証', desc: 'プレイヤーレベル5に到達する', target: 5, check: s => s.playerLevel || 1, reward: { gold: 400 } },
+  { id: 'level10', category: 'growth', title: 'ベテラン冒険者', desc: 'プレイヤーレベル10に到達する', target: 10, check: s => s.playerLevel || 1, reward: { gems: 30 } },
+  { id: 'world1clear', category: 'battle', title: '見習いの森を制覇', desc: 'ステージ5をクリアする', target: 6, check: s => s.stageProgress || 1, reward: { gold: 500, gems: 15 } },
+  { id: 'world2clear', category: 'battle', title: '月影の国を制覇', desc: 'ステージ10をクリアする', target: 11, check: s => s.stageProgress || 1, reward: { gold: 700, gems: 20 } },
+  { id: 'world3clear', category: 'battle', title: '四天王を打ち破る', desc: 'ステージ15をクリアする', target: 16, check: s => s.stageProgress || 1, reward: { gold: 900, gems: 30 } },
+  { id: 'world4clear', category: 'battle', title: '魔王城を攻略', desc: 'ステージ20をクリアする', target: 21, check: s => s.stageProgress || 1, reward: { gold: 1200, gems: 40 } },
+  { id: 'world5clear', category: 'battle', title: '真実にたどり着く', desc: 'ステージ25をクリアする', target: 26, check: s => s.stageProgress || 1, reward: { gold: 2000, gems: 100 } },
+  { id: 'evolve1', category: 'growth', title: '進化の目覚め', desc: 'カードを1体進化させる', target: 1, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 500 } },
+  { id: 'evolve9', category: 'growth', title: '進化の達人', desc: 'カードを9体進化させる', target: 9, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 1500, gems: 30 } },
+];
+
+const MISSION_CATEGORIES = [
+  { id: 'all', label: '全て' },
+  { id: 'battle', label: 'バトル' },
+  { id: 'growth', label: '育成' },
+  { id: 'collect', label: '収集' },
 ];
 
 function formatReward(reward) {
@@ -2551,9 +2558,33 @@ function formatReward(reward) {
   return parts.join(' ');
 }
 
+let missionFilter = 'all';
+
+function setMissionFilter(cat) {
+  missionFilter = cat;
+  document.querySelectorAll('#mission-filter-tabs .cg-filter-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === cat);
+  });
+  renderMissions();
+}
+
+function renderMissionFilterTabs() {
+  const wrap = document.getElementById('mission-filter-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = MISSION_CATEGORIES.map(c => {
+    const count = MISSIONS.filter(m => (c.id === 'all' || m.category === c.id) && !state.missionsClaimed[m.id] && m.check(state) >= m.target).length;
+    return `<button class="cg-filter-tab ${missionFilter === c.id ? 'active' : ''}" data-cat="${c.id}">${c.label}${count > 0 ? `<span class="cg-filter-badge">${count}</span>` : ''}</button>`;
+  }).join('');
+  wrap.querySelectorAll('.cg-filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => setMissionFilter(btn.dataset.cat));
+  });
+}
+
 function renderMissions() {
+  renderMissionFilterTabs();
   const wrap = document.getElementById('mission-list');
-  wrap.innerHTML = MISSIONS.map(m => {
+  const visibleMissions = MISSIONS.filter(m => missionFilter === 'all' || m.category === missionFilter);
+  wrap.innerHTML = visibleMissions.map(m => {
     const progress = Math.min(m.target, m.check(state));
     const done = progress >= m.target;
     const claimed = !!state.missionsClaimed[m.id];
@@ -2578,7 +2609,7 @@ function renderMissions() {
           <button class="${btnClass}" data-mission="${m.id}" ${disabled}>${btnLabel}</button>
         </div>
       </div>`;
-  }).join('');
+  }).join('') + (visibleMissions.length === 0 ? '<div class="cg-empty">該当するミッションがありません</div>' : '');
   wrap.querySelectorAll('.cg-mission-claim:not(.claimed):not(:disabled)').forEach(btn => {
     btn.addEventListener('click', () => claimMission(btn.dataset.mission));
   });
@@ -2709,6 +2740,7 @@ function init() {
     const startBtn = document.getElementById('splash-start-btn');
     if (loader) loader.style.display = 'none';
     if (startBtn) startBtn.classList.remove('hidden');
+    document.querySelectorAll('.cg-splash-start-flourish').forEach(el => el.style.opacity = '1');
   }, 1300);
   const startBtn = document.getElementById('splash-start-btn');
   if (startBtn) {
