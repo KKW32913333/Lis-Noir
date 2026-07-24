@@ -97,14 +97,6 @@
   .cg-splash-vignette{position:absolute; inset:0; z-index:2; pointer-events:none;
     background:linear-gradient(180deg, #0a0616cc 0%, transparent 16%, transparent 52%, #0d0619aa 66%, #0d0619cc 74%, #0d0619ee 100%);}
 
-  .cg-splash-frame{position:absolute; inset:10px; z-index:3; pointer-events:none; border-radius:22px;
-    border:1.5px solid #D9B45B99; box-shadow:inset 0 0 40px #00000055, 0 0 0 1px #ffffff22;}
-  .cg-splash-frame::before, .cg-splash-frame::after{content:''; position:absolute; width:34px; height:34px; pointer-events:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 30 Q2 2 30 2 M6 30 Q8 10 26 6 M2 22 Q10 20 14 10' stroke='%23D9B45B' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='0.9'/%3E%3Ccircle cx='30' cy='2' r='1.7' fill='%23D9B45B' opacity='0.95'/%3E%3C/svg%3E");
-    background-size:contain; background-repeat:no-repeat;}
-  .cg-splash-frame::before{top:-4px; left:-4px;}
-  .cg-splash-frame::after{bottom:-4px; right:-4px; transform:rotate(180deg);}
-
   .cg-splash-stars{position:absolute; inset:0; z-index:3; pointer-events:none;}
   .cg-splash-stars span{position:absolute; width:3px; height:3px; background:#fff; border-radius:50%; opacity:.3;
     box-shadow:0 0 7px 1.5px #fff; animation:cgSplashTwinkle 2.4s ease-in-out infinite;}
@@ -145,13 +137,23 @@
   .cg-splash-loader span:nth-child(3){animation-delay:.3s;}
   @keyframes cgSplashDot{0%,60%,100%{opacity:.35; transform:scale(.8);} 30%{opacity:1; transform:scale(1.25);}}
 
-  .cg-splash-start-btn{position:relative; padding:13px 58px; border-radius:26px; border:1.5px solid #ffffffcc;
-    background:linear-gradient(180deg,var(--true-gold),var(--gold-bright)); color:#fff; font-size:15px; font-weight:800;
-    letter-spacing:5px; font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif; cursor:pointer;
-    box-shadow:0 8px 22px #0000006e, 0 0 0 1px #ffffff55; animation:cgSplashStartPulse 1.7s ease-in-out infinite, cgSplashStartIn .4s ease-out;}
+  .cg-splash-start-btn{position:relative; padding:14px 54px; border-radius:30px;
+    border:1px solid #D9B45B; background:linear-gradient(180deg, #2a1a4ad9, #150a26ee);
+    color:#F3DFA0; font-size:15px; font-weight:700; letter-spacing:7px;
+    font-family:"Zen Antique","Noto Serif JP",serif; cursor:pointer; overflow:hidden;
+    text-shadow:0 0 10px #D9B45B88; box-shadow:0 0 0 1px #8A4FFF33, 0 0 22px #8A4FFF33, inset 0 0 18px #D9B45B22, 0 6px 18px #00000077;
+    animation:cgSplashStartPulse 2.4s ease-in-out infinite, cgSplashStartIn .4s ease-out;}
+  .cg-splash-start-btn::before{content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background:linear-gradient(120deg, transparent, #D9B45B4a, transparent); transform:skewX(-20deg);
+    animation:cgSplashStartShine 3.6s ease-in-out infinite;}
   .cg-splash-start-btn.hidden{display:none;}
-  .cg-splash-start-btn:active{transform:scale(.94); animation:none;}
-  @keyframes cgSplashStartPulse{0%,100%{box-shadow:0 8px 22px #0000006e, 0 0 0 1px #ffffff55;} 50%{box-shadow:0 8px 30px #00000088, 0 0 0 5px #ffffffaa;}}
+  .cg-splash-start-btn:active{transform:scale(.95); animation:none;}
+  @keyframes cgSplashStartPulse{
+    0%,100%{box-shadow:0 0 0 1px #8A4FFF33, 0 0 22px #8A4FFF33, inset 0 0 18px #D9B45B22, 0 6px 18px #00000077;}
+    50%{box-shadow:0 0 0 1px #D9B45B55, 0 0 30px #D9B45B4a, inset 0 0 22px #D9B45B33, 0 6px 18px #00000077;}
+  }
+  @keyframes cgSplashStartShine{0%{left:-60%;} 45%{left:130%;} 100%{left:130%;}}
+  .cg-splash-start-gem{font-size:8px; color:#8A4FFF; margin:0 12px; position:relative; top:-2px; text-shadow:0 0 6px #8A4FFFaa;}
   @keyframes cgSplashStartIn{0%{opacity:0; transform:translateY(8px) scale(.9);} 100%{opacity:1; transform:translateY(0) scale(1);}}
 
   .cg-lily{position:absolute; width:220px; height:220px; opacity:.05;}
@@ -971,7 +973,6 @@
     <div class="cg-splash-glow-pulse"></div>
     <div class="cg-splash-shine-sweep"></div>
     <div class="cg-splash-vignette"></div>
-    <div class="cg-splash-frame"></div>
     <div class="cg-splash-stars">
       <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
@@ -980,7 +981,7 @@
     </div>
     <div class="cg-splash-cta">
       <div class="cg-splash-loader" id="splash-loader"><span></span><span></span><span></span></div>
-      <button class="cg-splash-start-btn hidden" id="splash-start-btn">START</button>
+      <button class="cg-splash-start-btn hidden" id="splash-start-btn"><span class="cg-splash-start-gem">◆</span>START<span class="cg-splash-start-gem">◆</span></button>
     </div>
   </div>
 
