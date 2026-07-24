@@ -465,12 +465,34 @@ function showScreen(name) {
 
 // ---------- ホーム画面 ----------
 const RANK_TIERS = [
-  { name: 'ブロンズ', min: 0 },
-  { name: 'シルバー', min: 1001 },
-  { name: 'ゴールド', min: 2001 },
-  { name: 'プラチナ', min: 4001 },
-  { name: 'ダイヤモンド', min: 6001 },
+  // image: ランクアイコン画像ファイル名（null間は絵文字iconを表示。画像を追加したらファイル名を入れるだけで反映される）
+  { name: 'ブロンズ', min: 0, icon: '🥉', image: 'rank-bronze.jpg' },
+  { name: 'シルバー', min: 1001, icon: '🥈', image: 'rank-silver.jpg' },
+  { name: 'ゴールド', min: 2001, icon: '🥇', image: 'rank-gold.jpg' },
+  { name: 'プラチナ', min: 4001, icon: '💠', image: 'rank-platinum.jpg' },
+  { name: 'ダイヤモンド', min: 6001, icon: '💎', image: 'rank-diamond.jpg' },
 ];
+
+// トロフィー数からランクTierオブジェクトを取得
+function getRankTier(trophy) {
+  let tierIdx = 0;
+  for (let i = 0; i < RANK_TIERS.length; i++) { if (trophy >= RANK_TIERS[i].min) tierIdx = i; }
+  return RANK_TIERS[tierIdx];
+}
+
+// ランクアイコンを要素に描画（image指定があれば画像、無ければ絵文字で表示）
+function renderRankIcon(el, tier) {
+  if (!el || !tier) return;
+  if (tier.image) {
+    el.style.backgroundImage = `url('${tier.image}')`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.textContent = tier.icon || '🛡️';
+  }
+}
 
 const DAILY_REWARD_GOLD = 300;
 const DAILY_REWARD_GEMS = 10;
@@ -535,6 +557,7 @@ function renderHome() {
   const next = RANK_TIERS[tierIdx + 1];
   document.getElementById('rank-name').textContent = state.playerName;
   document.getElementById('rank-tier').textContent = `${tier.name}ランク`;
+  renderRankIcon(document.getElementById('rank-card-avatar'), tier);
   if (next) {
     const pct = Math.min(100, Math.round((state.trophy - tier.min) / (next.min - tier.min) * 100));
     document.getElementById('rank-fill').style.width = pct + '%';
@@ -794,12 +817,18 @@ async function renderRanking() {
   try {
     const list = await window.LisNoirCloud.getLeaderboard(50);
     if (!list.length) { wrap.innerHTML = '<div class="cg-rank-empty">まだランキングデータがありません。</div>'; return; }
-    wrap.innerHTML = `<div class="cg-rank-list">${list.map((entry, i) => `
+    wrap.innerHTML = `<div class="cg-rank-list">${list.map((entry, i) => {
+      const entryTier = getRankTier(entry.trophy || 0);
+      const iconStyle = entryTier.image ? ` style="background-image:url('${entryTier.image}');background-size:cover;background-position:center;"` : '';
+      const iconContent = entryTier.image ? '' : (entryTier.icon || '🛡️');
+      return `
       <div class="cg-rank-row ${entry.uid === user.uid ? 'me' : ''}">
         <div class="cg-rank-pos">${i + 1}</div>
+        <div class="cg-rank-tier-icon"${iconStyle}>${iconContent}</div>
         <div class="cg-rank-name">${entry.displayName || 'プレイヤー'}${entry.uid === user.uid ? '（あなた）' : ''}</div>
         <div class="cg-rank-trophy">🏆 ${(entry.trophy || 0).toLocaleString()}</div>
-      </div>`).join('')}</div>`;
+      </div>`;
+    }).join('')}</div>`;
   } catch (e) {
     console.error('leaderboard fetch failed', e);
     wrap.innerHTML = '<div class="cg-rank-empty">ランキングの取得に失敗しました。時間をおいて再度お試しください。</div>';

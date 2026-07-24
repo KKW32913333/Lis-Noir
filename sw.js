@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v75';
+const CACHE_NAME = 'lisnoir-cache-v77';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -69,6 +69,11 @@ const CACHE_ASSETS = [
   'icon-1024.png',
   'favicon-32.png',
   'favicon-64.png',
+  'rank-bronze.jpg',
+  'rank-silver.jpg',
+  'rank-gold.jpg',
+  'rank-platinum.jpg',
+  'rank-diamond.jpg',
 ];
 
 self.addEventListener('install', (event) => {
