@@ -62,6 +62,7 @@ const CARD_DEFS = {
   spell_healing:    { name: 'ヒーリングライト', element: 'light', rarity: 'normal', cost: 2, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'heal', value: 5 }, skill: '自分のHPを5回復', image: 'card-spell-healing.png', emoji: '💫' },
   spell_mindsurge:  { name: 'マインドサージ',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 2 }, skill: 'カードを2枚引く', image: 'card-spell-mindsurge.png', emoji: '📖' },
   spell_apocalypse: { name: 'アポカリプス',     element: 'dark',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'wipe' }, skill: '相手の場のモンスターを全て撃破する', image: 'card-spell-apocalypse.png', emoji: '💥' },
+  spell_soulbind:   { name: '封印の呪符',       element: 'dark',  rarity: 'epic',   cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'destroy' }, skill: '敵モンスター1体を選択して撃破する（HPに関わらず必ず撃破）', image: null, emoji: '⛓️' },
 
   // ---- 装備カード（味方モンスター1体に付与） ----
   equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: 'card-equip-ironsword.png', emoji: '🗡️' },
@@ -384,7 +385,8 @@ function cardArtStyle(def) {
   return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
 }
 
-function cardStatsLine(def, evolved) {
+function cardStatsLine(def, evolved, opts) {
+  opts = opts || {};
   const type = def.type || 'monster';
   if (type === 'spell') {
     const eff = def.effect || {};
@@ -393,13 +395,14 @@ function cardStatsLine(def, evolved) {
     else if (eff.kind === 'heal') label = `➕${eff.value}`;
     else if (eff.kind === 'draw') label = `🃏${eff.value}`;
     else if (eff.kind === 'wipe') label = `💥全体`;
+    else if (eff.kind === 'destroy') label = `💀撃破`;
     return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
   }
   if (type === 'equipment') {
     const eff = def.effect || {};
     const parts = [];
-    if (eff.atk) parts.push(`⚔+${eff.atk}`);
-    if (eff.hp) parts.push(`❤+${eff.hp}`);
+    if (eff.atk) parts.push(`ATK+${eff.atk}`);
+    if (eff.hp) parts.push(`HP+${eff.hp}`);
     return `<div class="cg-card-stats"><span class="cg-stat equip">装備</span><span class="cg-stat equip-val">${parts.join(' ')}</span></div>`;
   }
   if (type === 'field') {
@@ -407,9 +410,10 @@ function cardStatsLine(def, evolved) {
     const elIcon = ELEMENTS[eff.boostElement] ? ELEMENTS[eff.boostElement].icon : '🌐';
     return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}+${eff.atk}</span></div>`;
   }
+  if (opts.hideStats) return ''; // バトル画面では別途バッジで表示するため、重複を避けて非表示にする
   const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
   const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
-  return `<div class="cg-card-stats"><span class="cg-stat atk">⚔ ${atk}</span><span class="cg-stat hp">❤ ${hp}</span></div>`;
+  return `<div class="cg-card-stats"><span class="cg-stat atk">ATK ${atk}</span><span class="cg-stat hp">HP ${hp}</span></div>`;
 }
 
 function renderCardFace(id, opts) {
@@ -433,7 +437,7 @@ function renderCardFace(id, opts) {
       <div class="cg-card-cost">${def.cost}</div>
       <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
       <div class="cg-card-name">${def.name}</div>
-      ${cardStatsLine(def, opts.evolved)}
+      ${cardStatsLine(def, opts.evolved, { hideStats: opts.hideStats })}
       <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
     </div>`;
 }
@@ -635,6 +639,14 @@ function getDragonBonusHp() {
   return Math.floor((state.dragon.level || 1) / 2);
 }
 
+// プレイヤーの最大HP：レベルに応じて成長する（レベルが上がらないとステージが進むにつれ敵HPとの差が開きすぎるため、
+// プレイヤーレベル1につき+8。ドラゴン育成ボーナスは従来通り別枠で加算）
+const PLAYER_HP_BASE = 30;
+const PLAYER_HP_PER_LEVEL = 8;
+function getPlayerMaxHp() {
+  return PLAYER_HP_BASE + (state.playerLevel - 1) * PLAYER_HP_PER_LEVEL + getDragonBonusHp();
+}
+
 function dragonFeedCost() {
   return 100 + (state.dragon.level - 1) * 20;
 }
@@ -677,7 +689,7 @@ function renderDragon() {
   document.getElementById('dragon-level').textContent = `Lv.${d.level}`;
   document.getElementById('dragon-exp-fill').style.width = Math.min(100, (d.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
   document.getElementById('dragon-exp-label').textContent = `${d.exp}/${DRAGON_EXP_PER_LEVEL}`;
-  document.getElementById('dragon-bonus-desc').textContent = `バトル開始時の自分のHPが +${getDragonBonusHp()}（現在 ${30 + getDragonBonusHp()}）`;
+  document.getElementById('dragon-bonus-desc').textContent = `バトル開始時の自分のHPが +${getDragonBonusHp()}（現在の最大HP ${getPlayerMaxHp()}）`;
   document.getElementById('dragon-feed-btn').textContent = `🍖 エサをあげる（💰${dragonFeedCost()}）`;
 
   const listEl = document.getElementById('dragon-stages-list');
@@ -1194,7 +1206,7 @@ function openCardDetail(id) {
       ${isMonster ? `
         <div class="cg-evolve-row">
           ${owned.evolved
-            ? `<div class="cg-evolve-done">★ 進化済み（⚔+${EVOLVE_BONUS_ATK} ❤+${EVOLVE_BONUS_HP} 適用中）</div>`
+            ? `<div class="cg-evolve-done">★ 進化済み（ATK+${EVOLVE_BONUS_ATK} HP+${EVOLVE_BONUS_HP} 適用中）</div>`
             : `<button class="cg-btn cg-evolve-btn" id="detail-evolve-btn" ${owned.level < EVOLVE_LEVEL_REQ ? 'disabled' : ''}>
                  ${owned.level < EVOLVE_LEVEL_REQ ? `進化はLv.${EVOLVE_LEVEL_REQ}で解放` : `進化 (💰${EVOLVE_COST})`}
                </button>`}
@@ -1771,13 +1783,13 @@ function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(state.cards).slice(0, 10));
   const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20, stage.spellChance || 0));
-  const dragonHpBonus = getDragonBonusHp();
+  const playerMaxHp = getPlayerMaxHp();
 
   battle = {
     stage,
     turn: 1,
     activeSide: 'player',
-    playerHp: 30 + dragonHpBonus, playerMaxHp: 30 + dragonHpBonus, enemyHp: stage.hp,
+    playerHp: playerMaxHp, playerMaxHp: playerMaxHp, enemyHp: stage.hp,
     playerMaxCost: 1, enemyMaxCost: 1,
     playerCost: 1, enemyCost: 1,
     playerDeck, enemyDeck,
@@ -1983,7 +1995,7 @@ function renderBattle() {
   const enemyFieldEl = document.getElementById('battle-enemy-field');
   const previewingAttack = battle.selectedFieldIdx !== null ? battle.playerField[battle.selectedFieldIdx] : null;
   const selectedSpell = battle.selectedHandIdx !== null ? CARD_DEFS[battle.playerHand[battle.selectedHandIdx]] : null;
-  const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && selectedSpell.target === 'enemy' ? selectedSpell : null;
+  const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && (selectedSpell.target === 'enemy' || selectedSpell.target === 'enemy_monster') ? selectedSpell : null;
   const attackValid = previewingAttack ? getValidTargets(previewingAttack, battle.enemyField) : null;
 
   enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => {
@@ -1998,11 +2010,13 @@ function renderBattle() {
         blockedCls = 'blocked';
       }
     } else if (u && previewingSpell) {
-      preview = `<div class="cg-preview-badge spell">✨${previewingSpell.effect.value}</div>`;
+      preview = previewingSpell.effect.kind === 'destroy'
+        ? `<div class="cg-preview-badge destroy">💀撃破</div>`
+        : `<div class="cg-preview-badge spell">✨${previewingSpell.effect.value}</div>`;
     }
     const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, hideStats: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -2010,13 +2024,22 @@ function renderBattle() {
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
     if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
     const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
-    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}</div>`;
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, hideStats: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}</div>`;
   }).join('');
 
   const handEl = document.getElementById('battle-hand');
   handEl.innerHTML = battle.playerHand.map((id, i) => {
-    const affordable = CARD_DEFS[id].cost <= battle.playerCost;
-    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}</div>`;
+    const def = CARD_DEFS[id];
+    const affordable = def.cost <= battle.playerCost;
+    const evolved = state.cards[id] && state.cards[id].evolved;
+    const isMonster = (def.type || 'monster') === 'monster';
+    let statBadges = '';
+    if (isMonster) {
+      const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
+      const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
+      statBadges = `<div class="cg-atk-badge">${atk}</div><div class="cg-hp-badge">${hp}</div>`;
+    }
+    return `<div class="cg-hand-card ${affordable ? '' : 'disabled'} ${battle.selectedHandIdx === i ? 'selected' : ''}" data-idx="${i}">${renderCardFace(id, { small: true, evolved, hideStats: true })}${statBadges}</div>`;
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
@@ -2108,7 +2131,7 @@ function bindBattleEvents() {
       if (battle.selectedHandIdx !== null) {
         const id = battle.playerHand[battle.selectedHandIdx];
         const def = CARD_DEFS[id];
-        if ((def.type || 'monster') === 'spell' && def.target === 'enemy' && battle.enemyField[idx]) {
+        if ((def.type || 'monster') === 'spell' && (def.target === 'enemy' || def.target === 'enemy_monster') && battle.enemyField[idx]) {
           castSpell(battle.selectedHandIdx, idx);
           return;
         }
@@ -2258,6 +2281,15 @@ function castSpell(handIdx, targetIdx) {
       }
     });
     battle.enemyField = [null, null, null, null, null];
+  } else if (eff.kind === 'destroy') {
+    if (targetIdx !== null) {
+      const target = battle.enemyField[targetIdx];
+      if (target) {
+        const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
+        impactEffect(targetEl, target.curHp, 0);
+        battle.enemyField[targetIdx] = null;
+      }
+    }
   }
   if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
   battle.enemyField = cleanupField(battle.enemyField);
@@ -2493,7 +2525,9 @@ function enemyTurn() {
 
       if (type === 'spell') {
         const eff = def.effect || {};
-        if (def.target === 'enemy') {
+        if (def.target === 'enemy' || def.target === 'enemy_monster') {
+          // 'enemy_monster'：破壊対象のモンスターが場に無ければこのカードは使わない（他のカードを試す）
+          if (def.target === 'enemy_monster' && !battle.playerField.some(u => u !== null)) continue;
           // AI視点の「敵」＝プレイヤー側
           battle.enemyCost -= def.cost;
           battle.enemyHand.splice(i, 1);
@@ -2508,6 +2542,13 @@ function enemyTurn() {
               if (battle.playerField[targetIdx].curHp <= 0) battle.playerField[targetIdx] = null;
             } else {
               battle.playerHp -= eff.value;
+            }
+          } else if (eff.kind === 'destroy') {
+            const targetIdx = battle.playerField.findIndex(u => u !== null);
+            if (targetIdx !== -1) {
+              const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
+              impactEffect(targetEl, battle.playerField[targetIdx].curHp, 0);
+              battle.playerField[targetIdx] = null;
             }
           }
           skillFlash(`${def.name}！\n${def.skill}`);
