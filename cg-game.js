@@ -49,6 +49,12 @@ const CARD_DEFS = {
   nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
   dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
   fire_magmacolossus: { name: 'マグマコロッサス', element: 'fire', rarity: 'epic',    cost: 5, atk: 4, hp: 9, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-fire-magmacolossus.png', emoji: '🌋' },
+  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 7,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'drawCard', value: 1 }, skill: '敵モンスターを撃破した時、カードを1枚引く', image: 'card-dark-voidreaper.png', emoji: '💀' },
+  dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 9,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
+  dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-dark-lunaelf.png', emoji: '🦋' },
+  dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 5, atk: 4, hp: 10, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
+  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 3, atk: 2, hp: 8,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healSelf', value: 2 }, skill: '場に出た時、自分のHPを2回復', image: 'card-dark-shadowslime.png', emoji: '🟣' },
+  dark_orbitalgrimoire:    { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -120,6 +126,7 @@ function defaultState() {
     avatarIcon: '🛡️',
     deckPresets: [],
     leaderId: null,
+    tickets: 1,
     pityCounters: {},
     compendiumRewardClaimed: false,
     battleHistory: [],
@@ -2371,12 +2378,20 @@ const SHOP_PACKS = [
     preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
 ];
 
+// ---------- イベント限定ガチャ(チケット消費・専用プール) ----------
+const EVENT_GACHA_PACKS = [
+  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'ticket', cost: 1,
+    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
+    pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'dark_orbitalgrimoire'] },
+];
+
 function pickWeightedCardId(weights) {
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const pool = [];
   Object.keys(weights).forEach(rarity => {
     const w = weights[rarity];
     if (w <= 0) return;
-    Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity).forEach(id => pool.push({ id, w }));
+    Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id)).forEach(id => pool.push({ id, w }));
   });
   if (!pool.length) return Object.keys(CARD_DEFS)[0];
   const total = pool.reduce((s, p) => s + p.w, 0);
@@ -2385,26 +2400,23 @@ function pickWeightedCardId(weights) {
   return pool[pool.length - 1].id;
 }
 
-function renderShop() {
-  document.getElementById('shop-gold').textContent = state.gold.toLocaleString();
-  document.getElementById('shop-gems').textContent = state.gems.toLocaleString();
-  const wrap = document.getElementById('shop-packs');
-  wrap.innerHTML = SHOP_PACKS.map(pack => {
-    const currencyIcon = pack.currency === 'gold' ? '💰' : '💎';
-    const affordable = state[pack.currency] >= pack.cost;
-    const previewHtml = (pack.preview || []).map(id => {
-      const def = CARD_DEFS[id];
-      if (!def) return '';
-      const rarity = RARITY[def.rarity];
-      const img = def.image
-        ? `<img src="${def.image}" alt="${def.name}"/>`
-        : `<span>${def.emoji}</span>`;
-      return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}">${img}</div>`;
-    }).join('');
-    const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
-    const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
-    const showPity = pack.weights.normal > 0; // ノーマルが出ないパックには天井表示不要
-    return `
+function renderPackCard(pack) {
+  const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : '🎫';
+  const affordable = state[pack.currency] >= pack.cost;
+  const previewIds = pack.pool || pack.preview || [];
+  const previewHtml = previewIds.map(id => {
+    const def = CARD_DEFS[id];
+    if (!def) return '';
+    const rarity = RARITY[def.rarity];
+    const img = def.image
+      ? `<img src="${def.image}" alt="${def.name}"/>`
+      : `<span>${def.emoji}</span>`;
+    return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}">${img}</div>`;
+  }).join('');
+  const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
+  const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
+  const showPity = !pack.pool && pack.weights.normal > 0; // 固定プールのガチャ・ノーマルが出ないパックには天井表示不要
+  return `
       <div class="cg-pack-card">
         <div class="cg-pack-top">
           <div class="cg-pack-icon">${pack.icon}</div>
@@ -2416,11 +2428,28 @@ function renderShop() {
         </div>
         ${showPity ? `<div class="cg-pack-pity">🎯 あと${pityRemain}回でレア以上確定</div>` : ''}
         <div class="cg-pack-preview-row">
-          <span class="cg-pack-preview-label">収録例</span>
+          <span class="cg-pack-preview-label">${pack.pool ? '収録カード' : '収録例'}</span>
           ${previewHtml}
         </div>
       </div>`;
-  }).join('');
+}
+
+function renderShop() {
+  document.getElementById('shop-gold').textContent = state.gold.toLocaleString();
+  document.getElementById('shop-gems').textContent = state.gems.toLocaleString();
+  const ticketEl = document.getElementById('shop-tickets');
+  if (ticketEl) ticketEl.textContent = (state.tickets || 0).toLocaleString();
+
+  const eventWrap = document.getElementById('shop-event-packs');
+  if (eventWrap) {
+    eventWrap.innerHTML = EVENT_GACHA_PACKS.map(renderPackCard).join('');
+    eventWrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
+      btn.addEventListener('click', () => buyPack(btn.dataset.pack));
+    });
+  }
+
+  const wrap = document.getElementById('shop-packs');
+  wrap.innerHTML = SHOP_PACKS.map(renderPackCard).join('');
   wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
     btn.addEventListener('click', () => buyPack(btn.dataset.pack));
   });
@@ -2430,6 +2459,10 @@ function renderShop() {
 const PITY_LIMIT = 10; // このパックで10回連続ノーマルが出たら、次回はレア以上を確定でプレゼント
 
 function pickCardForPack(pack) {
+  // 固定プールから均等な確率で1枚選ぶ専用ガチャ(天井システム対象外)
+  if (pack.pool) {
+    return pack.pool[Math.floor(Math.random() * pack.pool.length)];
+  }
   state.pityCounters = state.pityCounters || {};
   const count = state.pityCounters[pack.id] || 0;
   let cardId;
@@ -2447,7 +2480,7 @@ function pickCardForPack(pack) {
 }
 
 function buyPack(packId) {
-  const pack = SHOP_PACKS.find(p => p.id === packId);
+  const pack = SHOP_PACKS.find(p => p.id === packId) || EVENT_GACHA_PACKS.find(p => p.id === packId);
   if (!pack || state[pack.currency] < pack.cost) return;
   state[pack.currency] -= pack.cost;
   state.totalPacksOpened = (state.totalPacksOpened || 0) + 1;

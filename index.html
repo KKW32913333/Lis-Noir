@@ -531,6 +531,10 @@
 
   /* ---------- ショップ ---------- */
   .cg-shop-currency{display:flex; gap:8px; padding:8px 14px 4px;}
+  #shop-event-gacha-panel{margin:6px 14px 4px; padding:10px; border-radius:16px;
+    background:linear-gradient(160deg,#241344,#150a26); border:1.5px solid var(--true-gold);
+    box-shadow:0 4px 16px #8A4FFF33;}
+  #shop-event-gacha-panel .cg-section-title{color:var(--true-gold); padding:2px 4px 8px;}
   .cg-shop-packs{display:flex; flex-direction:column; gap:12px; padding:10px 14px 20px;}
   .cg-pack-card{background:var(--bg-panel); border:1px solid var(--hairline-panel); outline:1px solid var(--gold-soft); outline-offset:3px;
     border-radius:14px; padding:12px; color:var(--text-panel);}
@@ -543,7 +547,7 @@
   .cg-pack-buy{flex-shrink:0; padding:8px 14px; font-size:12px; white-space:nowrap;}
   .cg-pack-buy:disabled{opacity:.4; cursor:default;}
   .cg-pack-pity{font-size:10px; color:var(--gold); font-weight:700; margin-top:8px;}
-  .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel);}
+  .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel); flex-wrap:wrap;}
   .cg-pack-preview-label{font-size:10px; color:var(--text-dim-panel); flex-shrink:0;}
   .cg-pack-preview-thumb{width:34px; height:34px; border-radius:8px; overflow:hidden; border:2px solid #8a8c96; flex-shrink:0;
     background:#14141d; display:flex; align-items:center; justify-content:center; font-size:16px;}
@@ -1283,7 +1287,13 @@
     <div class="cg-shop-currency">
       <span class="cg-currency">💰 <span id="shop-gold">0</span></span>
       <span class="cg-currency">💎 <span id="shop-gems">0</span></span>
+      <span class="cg-currency">🎫 <span id="shop-tickets">0</span></span>
     </div>
+    <div id="shop-event-gacha-panel">
+      <div class="cg-section-title">🌙 期間限定ガチャ</div>
+      <div id="shop-event-packs" class="cg-shop-packs"></div>
+    </div>
+    <div class="cg-section-title">通常パック</div>
     <div id="shop-packs" class="cg-shop-packs"></div>
   </section>
 
