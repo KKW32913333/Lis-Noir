@@ -129,8 +129,12 @@
     100%{opacity:0; transform:translateY(-98vh) scale(1.3);}
   }
 
-  .cg-splash-cta{position:absolute; left:0; right:0; top:68%; z-index:4; display:flex; flex-direction:column; align-items:center;}
-  .cg-splash-start-wrap{display:flex; align-items:center; gap:2px;}
+  .cg-splash-cta{position:absolute; left:0; right:0; bottom:calc(28px + env(safe-area-inset-bottom)); z-index:4; display:flex; flex-direction:column; align-items:center;}
+  .cg-splash-start-wrap{position:relative; display:flex; align-items:center; gap:2px;}
+  .cg-splash-start-halo{position:absolute; top:50%; left:50%; width:220px; height:90px; z-index:-1;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    background:radial-gradient(ellipse, #8A4FFF3a 0%, transparent 70%); animation:cgSplashHaloPulse 2.4s ease-in-out infinite;}
+  @keyframes cgSplashHaloPulse{0%,100%{opacity:.5; transform:translate(-50%,-50%) scale(.92);} 50%{opacity:1; transform:translate(-50%,-50%) scale(1.08);}}
   .cg-splash-start-flourish{width:22px; height:34px; flex-shrink:0; opacity:0; transition:opacity .3s ease;}
   .cg-splash-loader{display:flex; gap:6px; position:relative; transition:opacity .3s ease;}
   .cg-splash-loader span{width:7px; height:7px; border-radius:50%; background:var(--true-gold); opacity:.5;
@@ -986,6 +990,7 @@
     <div class="cg-splash-cta">
       <div class="cg-splash-loader" id="splash-loader"><span></span><span></span><span></span></div>
       <div class="cg-splash-start-wrap">
+        <div class="cg-splash-start-halo"></div>
         <svg class="cg-splash-start-flourish left" viewBox="0 0 40 60"><path d="M36 6 C20 6 8 18 8 30 C8 42 20 54 36 54 M8 30 C16 30 22 26 22 20 M8 30 C16 30 22 34 22 40" stroke="#D9B45B" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.85"/></svg>
         <button class="cg-splash-start-btn hidden" id="splash-start-btn"><span class="cg-splash-start-gem">◆</span>START<span class="cg-splash-start-gem">◆</span></button>
         <svg class="cg-splash-start-flourish right" viewBox="0 0 40 60"><path d="M4 6 C20 6 32 18 32 30 C32 42 20 54 4 54 M32 30 C24 30 18 26 18 20 M32 30 C24 30 18 34 18 40" stroke="#D9B45B" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.85"/></svg>
