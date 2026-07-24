@@ -753,6 +753,7 @@
 
   /* ---------- 設定・バックアップ ---------- */
   .cg-settings-section{border-top:1px solid var(--hairline-panel); padding-top:10px;}
+  .cg-settings-section.hidden{display:none;}
   .cg-settings-label{font-size:12px; font-weight:700; color:var(--text-panel); margin-bottom:6px;}
   .cg-backup-textarea{width:100%; height:64px; resize:none; font-size:10px; font-family:monospace;
     background:var(--bg-panel2); color:var(--text-panel); border:1px solid var(--hairline-panel); border-radius:8px;
@@ -1346,7 +1347,7 @@
         </div>
         <div class="cg-help-item">
           <b>⚠️ 保存の注意点</b><br>
-          セーブデータはこの端末のブラウザ内にのみ保存されています。アプリを消しても残りますが、Safariで「履歴とWebサイトデータを消去」を行うと消えてしまいます。機種変更・バックアップの際は、下記の「バックアップコード」を必ず保存してください。
+          セーブデータはこの端末のブラウザ内にのみ保存されています。アプリを消しても残りますが、Safariで「履歴とWebサイトデータを消去」を行うと消えてしまいます。機種変更・データ引き継ぎの際は、下記の「クラウド保存」のご利用をおすすめします。
         </div>
         <div class="cg-settings-section" id="cloud-section-loggedout">
           <div class="cg-settings-label">☁️ クラウド保存（推奨）</div>
@@ -1366,14 +1367,13 @@
           <button class="cg-btn cg-settings-action-btn" id="cloud-sync-now-btn">今すぐ同期する</button>
           <button class="cg-btn" id="cloud-logout-btn">ログアウト</button>
         </div>
-        <div class="cg-settings-section">
+        <!-- 手動バックアップ：現在は非表示（機能は維持、内部で使用するボタン・要素はそのまま存在） -->
+        <div class="cg-settings-section hidden" id="manual-backup-section">
           <div class="cg-settings-label">手動バックアップコード（クラウド未使用の方向け）</div>
           <textarea id="backup-code-out" class="cg-backup-textarea" readonly></textarea>
           <button class="cg-btn cg-settings-action-btn" id="backup-copy-btn">コードをコピー</button>
           <div id="backup-copy-status" class="cg-backup-status"></div>
-        </div>
-        <div class="cg-settings-section">
-          <div class="cg-settings-label">コードから復元する</div>
+          <div class="cg-settings-label" style="margin-top:10px;">コードから復元する</div>
           <textarea id="backup-code-in" class="cg-backup-textarea" placeholder="コピーしたバックアップコードをここに貼り付け"></textarea>
           <button class="cg-btn cg-settings-action-btn" id="backup-restore-btn">このコードで復元する</button>
           <div id="backup-restore-status" class="cg-backup-status"></div>
@@ -1382,6 +1382,7 @@
       <button class="cg-btn cg-btn-main" id="settings-close">閉じる</button>
     </div>
   </div>
+
 
   <!-- ============ ミッション画面 ============ -->
   <section id="screen-mission" class="cg-screen cg-scroll-pad">

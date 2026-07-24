@@ -781,6 +781,7 @@ function saveProfile() {
   const selected = document.querySelector('.cg-profile-avatar-opt.selected');
   const status = document.getElementById('profile-save-status');
   if (!name) { status.textContent = 'プレイヤー名を入力してください。'; return; }
+  if (!confirm('保存してよいですか？')) return;
   state.playerName = name.slice(0, 12);
   if (pendingAvatarImage === null) {
     // 絵文字に戻す選択がされた場合
