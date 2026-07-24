@@ -2797,6 +2797,8 @@ function pickWeightedCardId(weights) {
 function renderPackCard(pack) {
   const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : '🎫';
   const affordable = state[pack.currency] >= pack.cost;
+  const affordable10 = state[pack.currency] >= pack.cost * 10;
+  const show10 = !pack.pool; // 固定プールの期間限定ガチャ（チケット制）は10連非対応
   const previewIds = pack.pool || pack.preview || [];
   const previewHtml = previewIds.map(id => {
     const def = CARD_DEFS[id];
@@ -2818,9 +2820,12 @@ function renderPackCard(pack) {
             <div class="cg-pack-name">${pack.name}</div>
             <div class="cg-pack-desc">${pack.desc}</div>
           </div>
-          <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
         </div>
         ${showPity ? `<div class="cg-pack-pity">🎯 あと${pityRemain}回でレア以上確定</div>` : ''}
+        <div class="cg-pack-buy-row">
+          <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" data-times="1" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
+          ${show10 ? `<button class="cg-btn cg-pack-buy cg-pack-buy10" data-pack="${pack.id}" data-times="10" ${affordable10 ? '' : 'disabled'}>10連　${currencyIcon} ${pack.cost * 10}</button>` : ''}
+        </div>
         <div class="cg-pack-preview-row">
           <span class="cg-pack-preview-label">${pack.pool ? '収録カード' : '収録例'}</span>
           ${previewHtml}
@@ -2838,14 +2843,14 @@ function renderShop() {
   if (eventWrap) {
     eventWrap.innerHTML = EVENT_GACHA_PACKS.map(renderPackCard).join('');
     eventWrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
-      btn.addEventListener('click', () => buyPack(btn.dataset.pack));
+      btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
     });
   }
 
   const wrap = document.getElementById('shop-packs');
   wrap.innerHTML = SHOP_PACKS.map(renderPackCard).join('');
   wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
-    btn.addEventListener('click', () => buyPack(btn.dataset.pack));
+    btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
   });
 }
 
@@ -2873,58 +2878,81 @@ function pickCardForPack(pack) {
   return cardId;
 }
 
-function buyPack(packId) {
+function buyPack(packId, times) {
+  times = times || 1;
   const pack = SHOP_PACKS.find(p => p.id === packId) || EVENT_GACHA_PACKS.find(p => p.id === packId);
-  if (!pack || state[pack.currency] < pack.cost) return;
-  state[pack.currency] -= pack.cost;
-  state.totalPacksOpened = (state.totalPacksOpened || 0) + 1;
+  if (!pack) return;
+  const totalCost = pack.cost * times;
+  if (state[pack.currency] < totalCost) return;
+  state[pack.currency] -= totalCost;
+  state.totalPacksOpened = (state.totalPacksOpened || 0) + times;
   saveState();
   renderShop();
   renderHome();
 
-  const cardId = pickCardForPack(pack);
-  showOpeningAnimation(pack, cardId);
+  const cardIds = [];
+  for (let i = 0; i < times; i++) cardIds.push(pickCardForPack(pack));
+  showOpeningAnimation(pack, cardIds);
 }
 
-function showOpeningAnimation(pack, cardId) {
+function showOpeningAnimation(pack, cardIds) {
   const overlay = document.getElementById('shop-opening-overlay');
   const inner = document.getElementById('opening-tap-zone');
   const iconEl = document.getElementById('opening-pack-icon');
   inner.classList.remove('bursting');
   iconEl.textContent = pack.icon;
+
+  // 獲得カードの中で最も高いレアリティに応じて、演出のグレード（発光色・激しさ）を変える
+  const rarityOrder = ['normal', 'rare', 'epic', 'legend'];
+  const bestRarity = cardIds.reduce((best, id) => {
+    const r = CARD_DEFS[id].rarity;
+    return rarityOrder.indexOf(r) > rarityOrder.indexOf(best) ? r : best;
+  }, 'normal');
+  inner.dataset.rarity = bestRarity;
+  document.getElementById('opening-hint-text').textContent = cardIds.length > 1 ? 'タップして10連開封！' : 'タップして開封！';
+
   overlay.classList.remove('hidden');
   sfxTap();
 
   const openNow = () => {
     inner.removeEventListener('click', openNow);
     inner.classList.add('bursting');
+    document.getElementById('opening-flash').classList.add('flash');
     sfxReveal();
     setTimeout(() => {
       overlay.classList.add('hidden');
-      applyPackReward(cardId);
+      document.getElementById('opening-flash').classList.remove('flash');
+      applyPackRewards(cardIds);
     }, 480);
   };
   inner.addEventListener('click', openNow);
 }
 
-function applyPackReward(cardId) {
-  const isNew = !state.cards[cardId];
-  if (isNew) state.cards[cardId] = { level: 1, exp: 0, count: 0, evolved: false };
-  const owned = state.cards[cardId];
-  owned.count = (owned.count || 1) + 1;
-  let leveledUp = false;
-  if (!isNew && owned.level < CARD_MAX_LEVEL) {
-    owned.exp += 20;
-    if (owned.exp >= 100) {
-      owned.exp = 0;
-      owned.level += 1;
-      leveledUp = true;
-      if (owned.level >= CARD_MAX_LEVEL) owned.exp = 0;
+function applyPackRewards(cardIds) {
+  const results = cardIds.map(cardId => {
+    const isNew = !state.cards[cardId];
+    if (isNew) state.cards[cardId] = { level: 1, exp: 0, count: 0, evolved: false };
+    const owned = state.cards[cardId];
+    owned.count = (owned.count || 1) + 1;
+    let leveledUp = false;
+    if (!isNew && owned.level < CARD_MAX_LEVEL) {
+      owned.exp += 20;
+      if (owned.exp >= 100) {
+        owned.exp = 0;
+        owned.level += 1;
+        leveledUp = true;
+        if (owned.level >= CARD_MAX_LEVEL) owned.exp = 0;
+      }
     }
-  }
+    return { cardId, isNew, leveledUp };
+  });
   saveState();
 
-  showReveal(cardId, leveledUp, isNew);
+  if (results.length === 1) {
+    showReveal(results[0].cardId, results[0].leveledUp, results[0].isNew);
+  } else {
+    showRevealMulti(results);
+  }
   renderShop();
   renderHome();
 }
@@ -2933,10 +2961,33 @@ function showReveal(cardId, leveledUp, isNew) {
   const def = CARD_DEFS[cardId];
   const rarity = RARITY[def.rarity];
   sfxReveal();
+  document.getElementById('shop-reveal-label').textContent = '獲得！';
+  document.getElementById('shop-reveal-single').classList.remove('hidden');
+  document.getElementById('shop-reveal-grid').classList.add('hidden');
   document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId, { evolved: state.cards[cardId].evolved });
   const subLine = isNew ? '<br>✨NEW！ カード一覧に追加されました' : (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
   document.getElementById('shop-reveal-caption').innerHTML =
-    `<span style="color:${rarity.color}; font-weight:700;">${rarity.name}</span> ${def.name} を獲得！` + subLine;
+    `<span style="color:${rarity.color}; font-weight:800;">${rarity.name}</span> ${def.name} を獲得！` + subLine;
+  document.getElementById('shop-reveal-overlay').classList.remove('hidden');
+}
+
+function showRevealMulti(results) {
+  sfxReveal();
+  document.getElementById('shop-reveal-label').textContent = `${results.length}連ガチャ結果`;
+  document.getElementById('shop-reveal-single').classList.add('hidden');
+  const gridEl = document.getElementById('shop-reveal-grid');
+  gridEl.classList.remove('hidden');
+  const rarityRank = { legend: 4, epic: 3, rare: 2, normal: 1 };
+  const sorted = results.slice().sort((a, b) => rarityRank[CARD_DEFS[b.cardId].rarity] - rarityRank[CARD_DEFS[a.cardId].rarity]);
+  gridEl.innerHTML = sorted.map((r, i) => {
+    const def = CARD_DEFS[r.cardId];
+    const rarity = RARITY[def.rarity];
+    const badge = r.isNew ? '<div class="cg-reveal-grid-badge">NEW</div>' : '';
+    const legendGlow = def.rarity === 'legend' ? ' legend-glow' : '';
+    return `<div class="cg-reveal-grid-item${legendGlow}" style="animation-delay:${(i * 0.07).toFixed(2)}s; --rarity-color:${rarity.color};">
+      ${renderCardFace(r.cardId, { small: true, evolved: state.cards[r.cardId].evolved })}${badge}
+    </div>`;
+  }).join('');
   document.getElementById('shop-reveal-overlay').classList.remove('hidden');
 }
 

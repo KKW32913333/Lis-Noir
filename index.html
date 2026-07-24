@@ -544,7 +544,9 @@
   .cg-pack-info{flex:1; min-width:0;}
   .cg-pack-name{font-size:14px; font-weight:700; margin-bottom:2px;}
   .cg-pack-desc{font-size:11px; color:var(--text-dim-panel); line-height:1.5;}
-  .cg-pack-buy{flex-shrink:0; padding:8px 14px; font-size:12px; white-space:nowrap;}
+  .cg-pack-buy-row{display:flex; gap:8px; margin-top:10px;}
+  .cg-pack-buy{flex:1; padding:9px 8px; font-size:12px; white-space:nowrap;}
+  .cg-pack-buy10{background:var(--bg-panel2); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   .cg-pack-buy:disabled{opacity:.4; cursor:default;}
   .cg-pack-pity{font-size:10px; color:var(--gold); font-weight:700; margin-top:8px;}
   .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel); flex-wrap:wrap;}
@@ -553,26 +555,57 @@
     background:#14141d; display:flex; align-items:center; justify-content:center; font-size:16px;}
   .cg-pack-preview-thumb img{width:100%; height:100%; object-fit:cover;}
 
-  /* ---------- パック開封演出 ---------- */
+  /* ---------- パック開封演出（結果画面） ---------- */
   .cg-reveal-overlay{position:absolute; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
-    flex-direction:column; background:#23242be6; opacity:1; transition:opacity .2s ease;}
+    flex-direction:column; background:radial-gradient(circle at 50% 36%, #3a2166f5, #0d0619fa 78%);
+    opacity:1; transition:opacity .2s ease; padding:24px 16px; overflow-y:auto;}
   .cg-reveal-overlay.hidden{opacity:0; pointer-events:none;}
-  .cg-reveal-inner{display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px;}
-  .cg-reveal-label{color:var(--true-gold); font-size:13px; letter-spacing:4px;}
-  .cg-reveal-card{width:150px; animation:revealPop .5s ease-out;}
-  .cg-reveal-caption{color:var(--text-panel); font-size:13px; text-align:center;}
+  .cg-reveal-inner{display:flex; flex-direction:column; align-items:center; gap:18px; width:100%; max-width:520px; margin:auto;}
+  .cg-reveal-label{color:var(--true-gold); font-size:16px; font-weight:800; letter-spacing:6px; text-shadow:0 0 14px #d9b45bcc;}
+  .cg-reveal-single{display:flex; flex-direction:column; align-items:center; gap:18px;}
+  .cg-reveal-single.hidden{display:none;}
+  .cg-reveal-card{width:min(62vw,240px); animation:revealPop .55s ease-out; filter:drop-shadow(0 10px 34px #00000090);}
+  .cg-reveal-caption{color:#F5EFFF; font-size:15px; font-weight:500; text-align:center; line-height:1.7; text-shadow:0 1px 6px #00000090;}
+  .cg-reveal-close-btn{min-width:180px; margin-top:4px;}
   @keyframes revealPop{
     0%{transform:scale(.4) rotateY(90deg); opacity:0;}
     60%{transform:scale(1.08) rotateY(0deg); opacity:1;}
     100%{transform:scale(1) rotateY(0deg);}
   }
+  .cg-reveal-grid{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px 8px; width:100%;}
+  .cg-reveal-grid.hidden{display:none;}
+  .cg-reveal-grid-item{position:relative; animation:revealPop .45s ease-out backwards;}
+  .cg-reveal-grid-item.legend-glow{filter:drop-shadow(0 0 12px var(--true-gold));}
+  .cg-reveal-grid-badge{position:absolute; top:-5px; right:-5px; background:var(--wine); color:#fff; font-size:9px; font-weight:800;
+    padding:2px 6px; border-radius:8px; z-index:3; box-shadow:0 1px 4px #00000080; letter-spacing:.5px;}
 
   /* ---------- ガチャ開封（タップ演出） ---------- */
+  .cg-opening-flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:5;}
+  .cg-opening-flash.flash{animation:cgFlashPop .5s ease-out forwards;}
+  @keyframes cgFlashPop{0%{opacity:0;} 35%{opacity:.9;} 100%{opacity:0;}}
   .cg-opening-inner{position:relative; display:flex; flex-direction:column; align-items:center; gap:18px; padding:20px; cursor:pointer;}
-  .cg-opening-glow{position:absolute; top:38%; left:50%; width:180px; height:180px; margin:-90px 0 0 -90px; border-radius:50%;
+  .cg-opening-rays{position:absolute; top:38%; left:50%; width:280px; height:280px; margin:-140px 0 0 -140px; z-index:0;
+    background:conic-gradient(from 0deg, transparent 0deg, #ffffff22 8deg, transparent 16deg, transparent 40deg, #ffffff22 48deg, transparent 56deg,
+      transparent 80deg, #ffffff22 88deg, transparent 96deg, transparent 120deg, #ffffff22 128deg, transparent 136deg,
+      transparent 160deg, #ffffff22 168deg, transparent 176deg, transparent 200deg, #ffffff22 208deg, transparent 216deg,
+      transparent 240deg, #ffffff22 248deg, transparent 256deg, transparent 280deg, #ffffff22 288deg, transparent 296deg,
+      transparent 320deg, #ffffff22 328deg, transparent 336deg, transparent 360deg);
+    animation:cgRaysSpin 6s linear infinite; opacity:.7;}
+  @keyframes cgRaysSpin{0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);}}
+  .cg-opening-glow{position:absolute; top:38%; left:50%; width:180px; height:180px; margin:-90px 0 0 -90px; border-radius:50%; z-index:0;
     background:radial-gradient(circle, var(--lavender) 0%, var(--gold) 45%, transparent 72%);
     opacity:.55; animation:cgOpeningPulse 1.4s ease-in-out infinite; filter:blur(2px);}
   @keyframes cgOpeningPulse{0%,100%{transform:scale(.85); opacity:.4;} 50%{transform:scale(1.08); opacity:.75;}}
+  .cg-opening-sparkles{position:absolute; top:38%; left:50%; width:260px; height:260px; margin:-130px 0 0 -130px; z-index:0; pointer-events:none;}
+  .cg-opening-sparkles span{position:absolute; width:5px; height:5px; border-radius:50%; background:#fff;
+    box-shadow:0 0 8px 2px #fff9; animation:cgSparkleTwinkle 1.8s ease-in-out infinite;}
+  .cg-opening-sparkles span:nth-child(1){top:8%; left:50%; animation-delay:0s;}
+  .cg-opening-sparkles span:nth-child(2){top:28%; left:88%; animation-delay:.3s;}
+  .cg-opening-sparkles span:nth-child(3){top:70%; left:92%; animation-delay:.6s;}
+  .cg-opening-sparkles span:nth-child(4){top:92%; left:46%; animation-delay:.9s;}
+  .cg-opening-sparkles span:nth-child(5){top:66%; left:6%; animation-delay:1.2s;}
+  .cg-opening-sparkles span:nth-child(6){top:22%; left:10%; animation-delay:1.5s;}
+  @keyframes cgSparkleTwinkle{0%,100%{opacity:0; transform:scale(.4);} 50%{opacity:1; transform:scale(1.2);}}
   .cg-opening-pack{position:relative; font-size:72px; z-index:1; animation:cgOpeningShake 1.4s ease-in-out infinite;
     filter:drop-shadow(0 0 18px var(--lavender));}
   @keyframes cgOpeningShake{
@@ -586,9 +619,22 @@
   @keyframes cgHintBlink{0%,100%{opacity:.6;} 50%{opacity:1;}}
   .cg-opening-inner.bursting .cg-opening-pack{animation:cgOpeningBurst .5s ease-out forwards;}
   .cg-opening-inner.bursting .cg-opening-glow{animation:cgGlowBurst .5s ease-out forwards;}
+  .cg-opening-inner.bursting .cg-opening-rays{animation:cgRaysBurst .5s ease-out forwards;}
   .cg-opening-inner.bursting .cg-opening-hint{opacity:0; transition:opacity .15s;}
   @keyframes cgOpeningBurst{0%{transform:scale(1);} 40%{transform:scale(1.4); filter:drop-shadow(0 0 30px #fff);} 100%{transform:scale(2.4); opacity:0;}}
   @keyframes cgGlowBurst{0%{transform:scale(1); opacity:.6;} 100%{transform:scale(3.2); opacity:0;}}
+  @keyframes cgRaysBurst{0%{transform:rotate(0deg) scale(1); opacity:.7;} 100%{transform:rotate(120deg) scale(2.6); opacity:0;}}
+  /* レアリティに応じた発光テーマ（レア以上ほど華やかに） */
+  .cg-opening-inner[data-rarity="rare"] .cg-opening-glow{background:radial-gradient(circle, var(--cyan) 0%, var(--lavender) 45%, transparent 72%);}
+  .cg-opening-inner[data-rarity="rare"] .cg-opening-pack{filter:drop-shadow(0 0 20px var(--cyan));}
+  .cg-opening-inner[data-rarity="epic"] .cg-opening-glow{background:radial-gradient(circle, #b06bff 0%, var(--gold-bright) 45%, transparent 72%); opacity:.7;}
+  .cg-opening-inner[data-rarity="epic"] .cg-opening-pack{filter:drop-shadow(0 0 26px #b06bff); animation-duration:1.1s;}
+  .cg-opening-inner[data-rarity="epic"] .cg-opening-sparkles span{background:#e6cfff; box-shadow:0 0 10px 3px #b06bffaa;}
+  .cg-opening-inner[data-rarity="legend"] .cg-opening-glow{background:radial-gradient(circle, var(--true-gold) 0%, #fff59d 40%, transparent 75%);
+    opacity:.85; animation-duration:.9s;}
+  .cg-opening-inner[data-rarity="legend"] .cg-opening-pack{filter:drop-shadow(0 0 36px var(--true-gold)); animation-duration:.8s;}
+  .cg-opening-inner[data-rarity="legend"] .cg-opening-sparkles span{background:#fff3b0; box-shadow:0 0 12px 4px var(--true-gold); width:6px; height:6px;}
+  .cg-opening-inner[data-rarity="legend"] .cg-opening-rays{animation-duration:3s; opacity:.9;}
 
   /* ---------- ミッション ---------- */
   .cg-mission-claimall-btn{display:block; width:calc(100% - 28px); margin:14px 14px 0; font-size:12px; padding:12px 10px;
@@ -1316,20 +1362,26 @@
 
   <!-- ============ ガチャ開封演出（タップで開封） ============ -->
   <div id="shop-opening-overlay" class="cg-reveal-overlay hidden">
+    <div id="opening-flash" class="cg-opening-flash"></div>
     <div class="cg-opening-inner" id="opening-tap-zone">
+      <div class="cg-opening-rays"></div>
       <div class="cg-opening-glow"></div>
+      <div class="cg-opening-sparkles"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="cg-opening-pack" id="opening-pack-icon">📦</div>
-      <div class="cg-opening-hint">タップして開封！</div>
+      <div class="cg-opening-hint" id="opening-hint-text">タップして開封！</div>
     </div>
   </div>
 
   <!-- ============ パック開封演出 ============ -->
   <div id="shop-reveal-overlay" class="cg-reveal-overlay hidden">
     <div class="cg-reveal-inner">
-      <div class="cg-reveal-label">獲得！</div>
-      <div id="shop-reveal-card" class="cg-reveal-card"></div>
-      <div id="shop-reveal-caption" class="cg-reveal-caption"></div>
-      <button class="cg-btn cg-btn-main" id="shop-reveal-close">閉じる</button>
+      <div class="cg-reveal-label" id="shop-reveal-label">獲得！</div>
+      <div id="shop-reveal-single" class="cg-reveal-single">
+        <div id="shop-reveal-card" class="cg-reveal-card"></div>
+        <div id="shop-reveal-caption" class="cg-reveal-caption"></div>
+      </div>
+      <div id="shop-reveal-grid" class="cg-reveal-grid hidden"></div>
+      <button class="cg-btn cg-btn-main cg-reveal-close-btn" id="shop-reveal-close">閉じる</button>
     </div>
   </div>
 
