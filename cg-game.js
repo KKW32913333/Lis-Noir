@@ -101,6 +101,51 @@ const LEADERS = {
     fullImage: 'leader-lisnoir-m-full.png',
     icon: 'leader-lisnoir-m-icon.png',
   },
+  lisblanc_f: {
+    name: 'Lis.Blanc',
+    skillName: 'ホーリーグロウ',
+    element: 'light',
+    desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
+    effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
+    fullImage: 'leader-lisblanc-f-full.png',
+    icon: 'leader-lisblanc-f-icon.png',
+  },
+  luxblanc_m: {
+    name: 'Lux.Blanc',
+    skillName: 'ホーリーセイント',
+    element: 'light',
+    desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
+    effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
+    fullImage: 'leader-luxblanc-m-full.png',
+    icon: 'leader-luxblanc-m-icon.png',
+  },
+  liramaline: {
+    name: 'Lira Maline',
+    skillName: 'アクアエンパイア',
+    element: 'water',
+    desc: '水属性ユニットの攻撃力を25%アップ、HPを15%アップ',
+    effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
+    fullImage: 'leader-liramaline-full.png',
+    icon: 'leader-liramaline-icon.png',
+  },
+  kaien: {
+    name: 'Kaien',
+    skillName: 'フレイムブンリト',
+    element: 'dark',
+    desc: '闇属性ユニットの攻撃力を25%アップ、敵全体の防御力を15%ダウン',
+    effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
+    fullImage: 'leader-kaien-full.png',
+    icon: 'leader-kaien-icon.png',
+  },
+  mornabane: {
+    name: 'Morna.Bane',
+    skillName: 'ネスコスポーズル',
+    element: 'dark',
+    desc: '闇属性ユニットの攻撃力を30%アップ、敵の回復効果を無効化',
+    effect: { atkPct: 0.30, hpPct: 0, enemyDmgPct: 0, nullifyEnemyHeal: true },
+    fullImage: 'leader-mornabane-full.png',
+    icon: 'leader-mornabane-icon.png',
+  },
 };
 
 function getActiveLeader() {
@@ -2478,6 +2523,12 @@ function getValidTargets(unit, opponentField) {
 }
 
 // ---------- モンスター固有スキルの発動処理 ----------
+// プレイヤーのリーダーが「敵の回復無効化」を持っているかどうか
+function isEnemyHealNullified() {
+  const leader = getActiveLeader();
+  return !!(leader && leader.effect && leader.effect.nullifyEnemyHeal);
+}
+
 function applySkillTag(unit, trigger, isPlayerSide) {
   if (!unit || !unit.def || !unit.def.skillTag) return;
   const tag = unit.def.skillTag;
@@ -2485,10 +2536,13 @@ function applySkillTag(unit, trigger, isPlayerSide) {
   const field = isPlayerSide ? battle.playerField : battle.enemyField;
   const hand = isPlayerSide ? battle.playerHand : battle.enemyHand;
   const deck = isPlayerSide ? battle.playerDeck : battle.enemyDeck;
+  const healBlocked = !isPlayerSide && isEnemyHealNullified();
   if (tag.effect === 'healSelf') {
+    if (healBlocked) return;
     const maxHp = unit.def.hp + (unit.hpBonus || 0);
     unit.curHp = Math.min(maxHp, unit.curHp + tag.value);
   } else if (tag.effect === 'healAllAllies') {
+    if (healBlocked) return;
     field.forEach(u => { if (u) { const maxHp = u.def.hp + (u.hpBonus || 0); u.curHp = Math.min(maxHp, u.curHp + tag.value); } });
   } else if (tag.effect === 'drawCard') {
     for (let i = 0; i < tag.value; i++) { if (deck.length) hand.push(deck.shift()); }
@@ -2692,7 +2746,9 @@ function enemyTurn() {
           battle.enemyCost -= def.cost;
           battle.enemyHand.splice(i, 1);
           if (eff.kind === 'heal') {
-            battle.enemyHp = Math.min(battle.stage.hp, battle.enemyHp + (eff.value || 0));
+            if (!isEnemyHealNullified()) {
+              battle.enemyHp = Math.min(battle.stage.hp, battle.enemyHp + (eff.value || 0));
+            }
           } else if (eff.kind === 'draw') {
             for (let k = 0; k < (eff.value || 0); k++) {
               if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
