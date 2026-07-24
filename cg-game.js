@@ -1027,6 +1027,7 @@ function renderDeck() {
 
   collEl.querySelectorAll('.cg-coll-item').forEach(node => {
     node.addEventListener('click', () => {
+      if (longPressFired) { longPressFired = false; return; }
       const id = node.dataset.id;
       const max = maxCopiesFor(id);
       if (countInDeck(id) >= max) {
@@ -1038,6 +1039,7 @@ function renderDeck() {
       saveState();
       renderDeck();
     });
+    bindLongPress(node, () => showHandCardInfo(node.dataset.id));
   });
 }
 
@@ -1055,7 +1057,8 @@ function renderDeckPresets() {
       <span class="cg-deck-preset-name">📁 ${p.name}</span>
       <span class="cg-deck-preset-count">${p.cards.length}枚</span>
       <button class="cg-deck-preset-load-btn" data-index="${i}">読み込む</button>
-      <button class="cg-deck-preset-del-btn" data-index="${i}" aria-label="削除">🗑️</button>
+      <button class="cg-deck-preset-edit-btn" data-index="${i}">編集</button>
+      <button class="cg-deck-preset-del-btn" data-index="${i}" aria-label="削除">削除</button>
     </div>`).join('');
   wrap.querySelectorAll('.cg-deck-preset-load-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1064,6 +1067,20 @@ function renderDeckPresets() {
       if (!preset) return;
       if (!confirm(`「${preset.name}」を読み込みます。現在編成中のデッキは上書きされます。よろしいですか？`)) return;
       state.deck = preset.cards.slice();
+      saveState();
+      renderDeck();
+    });
+  });
+  wrap.querySelectorAll('.cg-deck-preset-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.index);
+      const preset = state.deckPresets[i];
+      if (!preset) return;
+      const newName = prompt('デッキ名を編集できます（「OK」を押すと、内容も現在編成中のデッキで上書きされます）', preset.name);
+      if (newName === null) return; // キャンセル
+      if (!confirm(`「${newName || preset.name}」として、名前と内容（現在編成中のデッキ）を上書き保存します。よろしいですか？`)) return;
+      preset.name = (newName || preset.name).slice(0, 16);
+      preset.cards = state.deck.slice();
       saveState();
       renderDeck();
     });
