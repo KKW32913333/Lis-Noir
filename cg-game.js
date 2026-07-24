@@ -147,7 +147,7 @@ function defaultState() {
     playerExp: 0,
     gold: 25300,
     gems: 1250,
-    trophy: 1250,
+    trophy: 0,
     dailyDate: '', dailyProgress: 0, dailyMax: 5, dailyClaimed: false,
     winProgress: 1, winMax: 3,
     totalWins: 0,
@@ -466,10 +466,10 @@ function showScreen(name) {
 // ---------- ホーム画面 ----------
 const RANK_TIERS = [
   { name: 'ブロンズ', min: 0 },
-  { name: 'シルバー', min: 500 },
-  { name: 'ゴールド', min: 1000 },
-  { name: 'プラチナ', min: 2000 },
-  { name: 'ダイヤモンド', min: 3500 },
+  { name: 'シルバー', min: 1001 },
+  { name: 'ゴールド', min: 2001 },
+  { name: 'プラチナ', min: 4001 },
+  { name: 'ダイヤモンド', min: 6001 },
 ];
 
 const DAILY_REWARD_GOLD = 300;
@@ -868,6 +868,60 @@ function showLeaderInfo(lid) {
   document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
+// ---------- デッキ内カードの並び替え(長押し→ドラッグ) ----------
+let deckDragState = null; // { fromIndex, pointerId, holdTimer, moved }
+
+function bindDeckDragReorder(deckEl) {
+  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
+    item.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.cg-deck-remove-btn')) return; // 削除ボタンは対象外
+      const idx = Number(item.dataset.index);
+      const holdTimer = setTimeout(() => {
+        deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer: null, moved: false };
+        item.classList.add('dragging');
+        try { item.setPointerCapture(e.pointerId); } catch (err) {}
+        sfxTap();
+      }, 220);
+      deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer, moved: false };
+    });
+
+    item.addEventListener('pointermove', (e) => {
+      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
+      if (deckDragState.holdTimer) return; // まだ長押し確定前
+      deckDragState.moved = true;
+      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => s.classList.remove('drop-target'));
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      const slot = target && target.closest('.cg-deck-slot-item');
+      if (slot && Number(slot.dataset.index) !== deckDragState.fromIndex) slot.classList.add('drop-target');
+    });
+
+    const finishDrag = (e) => {
+      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
+      if (deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
+      if (deckDragState.moved) {
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const slot = target && target.closest('.cg-deck-slot-item');
+        if (slot) {
+          const toIndex = Number(slot.dataset.index);
+          if (toIndex !== deckDragState.fromIndex) {
+            const [moved] = state.deck.splice(deckDragState.fromIndex, 1);
+            state.deck.splice(toIndex, 0, moved);
+            saveState();
+          }
+        }
+      }
+      deckDragState = null;
+      renderDeck();
+    };
+    item.addEventListener('pointerup', finishDrag);
+    item.addEventListener('pointercancel', () => {
+      if (deckDragState && deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
+      deckDragState = null;
+      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => { s.classList.remove('dragging'); s.classList.remove('drop-target'); });
+    });
+  });
+}
+
 function renderDeck() {
   renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
@@ -888,6 +942,7 @@ function renderDeck() {
       renderDeck();
     });
   });
+  bindDeckDragReorder(deckEl);
 
   const avgCost = state.deck.length
     ? (state.deck.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / state.deck.length).toFixed(1)
