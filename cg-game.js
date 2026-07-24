@@ -817,11 +817,42 @@ function saveProfile() {
   status.textContent = '保存しました！';
 }
 
+// 各ランクの範囲を「min 〜 (次のmin-1)」の形式で返す（最上位ランクは「min 〜」）
+function rankTierRangeLabel(tierIdx) {
+  const tier = RANK_TIERS[tierIdx];
+  const next = RANK_TIERS[tierIdx + 1];
+  return next ? `${tier.min.toLocaleString()} 〜 ${(next.min - 1).toLocaleString()}` : `${tier.min.toLocaleString()} 〜`;
+}
+
+function rankTierIconHtml(tier, extraClass) {
+  const iconStyle = tier.image ? ` style="background-image:url('${tier.image}');background-size:cover;background-position:center;"` : '';
+  const iconContent = tier.image ? '' : (tier.icon || '🛡️');
+  return `<div class="cg-rank-tier-icon${extraClass ? ' ' + extraClass : ''}"${iconStyle}>${iconContent}</div>`;
+}
+
+// ランクの早見表（どこからどこまでが何ランクか）。自分の現在のランクをハイライト表示
+function renderRankLegend() {
+  const currentTier = getRankTier(state.trophy || 0);
+  return `<div class="cg-rank-legend">
+    <div class="cg-rank-legend-title">🏆 ランク早見表</div>
+    ${RANK_TIERS.map((tier, idx) => `
+      <div class="cg-rank-legend-item ${tier.name === currentTier.name ? 'current' : ''}">
+        ${rankTierIconHtml(tier, 'sm')}
+        <div class="cg-rank-legend-text">
+          <b>${tier.name}</b>
+          <span>🏆 ${rankTierRangeLabel(idx)}</span>
+        </div>
+        ${tier.name === currentTier.name ? '<span class="cg-rank-legend-you">今ここ</span>' : ''}
+      </div>`).join('')}
+  </div>`;
+}
+
 async function renderRanking() {
   const wrap = document.getElementById('ranking-body');
+  const legendHtml = renderRankLegend();
   const user = window.LisNoirCloud && window.LisNoirCloud.getUser();
   if (!user) {
-    wrap.innerHTML = `
+    wrap.innerHTML = legendHtml + `
       <div class="cg-rank-empty">
         ランキングを見るには、ログインが必要です。<br>ログインすると、あなたのトロフィー数も他のプレイヤーと比較されるようになります。
       </div>
@@ -832,25 +863,35 @@ async function renderRanking() {
     });
     return;
   }
-  wrap.innerHTML = '<div class="cg-rank-empty">読み込み中…</div>';
+  wrap.innerHTML = legendHtml + '<div class="cg-rank-empty">読み込み中…</div>';
   try {
     const list = await window.LisNoirCloud.getLeaderboard(50);
-    if (!list.length) { wrap.innerHTML = '<div class="cg-rank-empty">まだランキングデータがありません。</div>'; return; }
-    wrap.innerHTML = `<div class="cg-rank-list">${list.map((entry, i) => {
+    if (!list.length) { wrap.innerHTML = legendHtml + '<div class="cg-rank-empty">まだランキングデータがありません。</div>'; return; }
+    let lastTierName = null;
+    const rowsHtml = list.map((entry, i) => {
       const entryTier = getRankTier(entry.trophy || 0);
-      const iconStyle = entryTier.image ? ` style="background-image:url('${entryTier.image}');background-size:cover;background-position:center;"` : '';
-      const iconContent = entryTier.image ? '' : (entryTier.icon || '🛡️');
-      return `
+      let divider = '';
+      // ランキングの並びの中で、ランクの境目に来たら区切り線を挿入（どこまでが何ランクか一目で分かるように）
+      if (entryTier.name !== lastTierName) {
+        const tierIdx = RANK_TIERS.indexOf(entryTier);
+        divider = `<div class="cg-rank-tier-divider">
+          ${rankTierIconHtml(entryTier, 'xs')}
+          <span>ここから${entryTier.name}（🏆 ${rankTierRangeLabel(tierIdx)}）</span>
+        </div>`;
+        lastTierName = entryTier.name;
+      }
+      return divider + `
       <div class="cg-rank-row ${entry.uid === user.uid ? 'me' : ''}">
-        <div class="cg-rank-pos">${i + 1}</div>
-        <div class="cg-rank-tier-icon"${iconStyle}>${iconContent}</div>
+        <div class="cg-rank-pos ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">${i + 1}</div>
+        ${rankTierIconHtml(entryTier)}
         <div class="cg-rank-name">${entry.displayName || 'プレイヤー'}${entry.uid === user.uid ? '（あなた）' : ''}</div>
         <div class="cg-rank-trophy">🏆 ${(entry.trophy || 0).toLocaleString()}</div>
       </div>`;
-    }).join('')}</div>`;
+    }).join('');
+    wrap.innerHTML = legendHtml + `<div class="cg-rank-list">${rowsHtml}</div>`;
   } catch (e) {
     console.error('leaderboard fetch failed', e);
-    wrap.innerHTML = '<div class="cg-rank-empty">ランキングの取得に失敗しました。時間をおいて再度お試しください。</div>';
+    wrap.innerHTML = legendHtml + '<div class="cg-rank-empty">ランキングの取得に失敗しました。時間をおいて再度お試しください。</div>';
   }
 }
 
