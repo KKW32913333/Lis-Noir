@@ -47,6 +47,7 @@ const CARD_DEFS = {
   water_crystalgolem: { name: 'クリスタルゴーレム', element: 'water', rarity: 'epic', cost: 4, atk: 3, hp: 7, role: 'defender', skill: '', image: 'card-water-crystalgolem.png', emoji: '💎' },
   dark_thunderchimera:{ name: 'サンダーキマイラ', element: 'dark', rarity: 'epic',    cost: 4, atk: 6, hp: 4, role: 'attacker', skill: '', image: 'card-dark-thunderchimera.png', emoji: '⚡' },
   nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
+  nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: null, emoji: '🐇' },
   dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
   fire_magmacolossus: { name: 'マグマコロッサス', element: 'fire', rarity: 'epic',    cost: 5, atk: 4, hp: 9, role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-fire-magmacolossus.png', emoji: '🌋' },
   dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
@@ -424,6 +425,7 @@ function renderCardFace(id, opts) {
   const el = ELEMENTS[def.element];
   const small = opts.small ? ' cg-card-sm' : '';
   const evolvedClass = opts.evolved ? ' evolved-glow' : '';
+  const lockedClass = opts.locked ? ' cg-card-locked' : '';
   const img = def.image
     ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
@@ -431,14 +433,15 @@ function renderCardFace(id, opts) {
   const roleBadge = (isMonster && !opts.battleMode)
     ? `<span class="cg-card-role ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : '';
-  const foil = (def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
+  const foil = (def.rarity === 'legend' && !opts.locked) ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
+  const lockIcon = opts.locked ? '<div class="cg-card-lock-icon">🔒</div>' : '';
   // バトル画面では、カード内表示をイラスト・コスト・ATK・HPの4情報のみに絞るため、名称・属性アイコンを省略
   const nameLine = opts.battleMode ? '' : `<div class="cg-card-name">${def.name}</div>`;
   const elLine = opts.battleMode ? '' : `<div class="cg-card-el" style="color:${el.color}">${el.icon}</div>`;
   return `
-    <div class="cg-card${small}${evolvedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+    <div class="cg-card${small}${evolvedClass}${lockedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
+      <div class="cg-card-art">${img}${lockIcon}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
       ${nameLine}
       ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
       ${elLine}
@@ -1138,12 +1141,21 @@ function getEvolvedMonsterCount() {
   return { evolvedCount, total: monsterIds.length };
 }
 
+// 図鑑：モンスター・スペル・装備・フィールドの全カード種を対象にした所持数（進化状況は問わない）
+// 期間限定ガチャ専用カードは、他の画面と同様に入手するまで図鑑の対象外（引くまで存在自体を明かさない仕様のため）
+function getCompendiumProgress() {
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const allIds = Object.keys(CARD_DEFS).filter(id => !eventExclusiveIds.has(id));
+  const ownedCount = allIds.filter(id => !!state.cards[id]).length;
+  return { ownedCount, total: allIds.length };
+}
+
 function renderCompendiumPanel() {
-  const { evolvedCount, total } = getEvolvedMonsterCount();
-  document.getElementById('compendium-count').textContent = `${evolvedCount}/${total}`;
-  document.getElementById('compendium-fill').style.width = Math.min(100, (evolvedCount / total) * 100) + '%';
+  const { ownedCount, total } = getCompendiumProgress();
+  document.getElementById('compendium-count').textContent = `${ownedCount}/${total}`;
+  document.getElementById('compendium-fill').style.width = Math.min(100, (ownedCount / total) * 100) + '%';
   const claimBtn = document.getElementById('compendium-claim-btn');
-  const complete = evolvedCount >= total;
+  const complete = ownedCount >= total;
   claimBtn.classList.toggle('hidden', !complete || state.compendiumRewardClaimed);
   claimBtn.textContent = state.compendiumRewardClaimed
     ? '受取済み'
@@ -1151,8 +1163,8 @@ function renderCompendiumPanel() {
 }
 
 function claimCompendiumReward() {
-  const { evolvedCount, total } = getEvolvedMonsterCount();
-  if (evolvedCount < total || state.compendiumRewardClaimed) return;
+  const { ownedCount, total } = getCompendiumProgress();
+  if (ownedCount < total || state.compendiumRewardClaimed) return;
   state.gold += COMPENDIUM_REWARD.gold;
   state.gems += COMPENDIUM_REWARD.gems;
   state.trophy += COMPENDIUM_REWARD.trophy;
@@ -1176,16 +1188,47 @@ function setCardListFilter(filter) {
 function renderCardList() {
   renderLeaderSelect('cardlist-leader-row');
   const listEl = document.getElementById('cardlist-grid');
-  const ids = Object.keys(state.cards).filter(id => {
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const ids = Object.keys(CARD_DEFS).filter(id => {
+    if (eventExclusiveIds.has(id) && !state.cards[id]) return false; // 期間限定カードは入手するまで図鑑にも表示しない
     if (cardListFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === cardListFilter;
   });
-  cardListOrder = ids;
-  listEl.innerHTML = ids.map(id => renderCardFace(id, { small: true, evolved: state.cards[id].evolved })).join('');
+  cardListOrder = ids.filter(id => !!state.cards[id]); // 前へ/次へナビゲーションの対象は所持カードのみ
+  listEl.innerHTML = ids.map(id => {
+    const owned = state.cards[id];
+    return owned
+      ? renderCardFace(id, { small: true, evolved: owned.evolved })
+      : renderCardFace(id, { small: true, locked: true });
+  }).join('') + (ids.length === 0 ? '<div class="cg-empty">該当するカードがありません</div>' : '');
   listEl.querySelectorAll('.cg-card').forEach(node => {
-    node.addEventListener('click', () => openCardDetail(node.dataset.id));
+    const id = node.dataset.id;
+    if (state.cards[id]) {
+      node.addEventListener('click', () => openCardDetail(id));
+    } else {
+      node.addEventListener('click', () => showLockedCardInfo(id));
+    }
   });
   renderCompendiumPanel();
+}
+
+// 未所持カードをタップした時の簡易情報表示（長押しカード情報ポップアップを流用）
+function showLockedCardInfo(id) {
+  const def = CARD_DEFS[id];
+  if (!def) return;
+  const el = ELEMENTS[def.element];
+  const type = def.type || 'monster';
+  const typeLabel = type === 'monster' ? 'モンスター' : type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
+  document.getElementById('card-info-body').innerHTML = `
+    <div class="cg-detail-art cg-card-locked" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${def.name}</div>
+      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--text-dim-panel)">🔒 未所持</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">種別: ${typeLabel}　コスト: ${def.cost}</div>
+      <div class="cg-detail-desc">パックやガチャで入手すると、図鑑に登録されます</div>
+    </div>`;
+  document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
 function detailStatsBlock(def, evolved) {
@@ -1730,7 +1773,7 @@ function newBattleUnit(id, isPlayerCard) {
     bonusAtk += Math.round((def.atk + bonusAtk) * (leader.effect.atkPct || 0));
     bonusHp += Math.round((def.hp + bonusHp) * (leader.effect.hpPct || 0));
   }
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: false, justPlayed: true, stunned: false, revived: false };
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
