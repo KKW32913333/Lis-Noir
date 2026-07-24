@@ -128,6 +128,7 @@ function defaultState() {
   return {
     playerName: 'プレイヤー',
     avatarIcon: '🛡️',
+    avatarImage: null,
     deckPresets: [],
     leaderId: null,
     tickets: 1,
@@ -507,7 +508,7 @@ function renderHome() {
   document.getElementById('home-level').textContent = 'Lv.' + state.playerLevel;
   document.getElementById('home-exp-fill').style.width = Math.min(100, (state.playerExp / expNeededForLevel(state.playerLevel)) * 100) + '%';
   document.getElementById('home-name').textContent = state.playerName;
-  document.getElementById('home-avatar').textContent = state.avatarIcon || '🛡️';
+  renderAvatarInto(document.getElementById('home-avatar'));
   document.getElementById('daily-fill').style.width = (state.dailyProgress / state.dailyMax * 100) + '%';
   document.getElementById('daily-label').textContent = `${state.dailyProgress}/${state.dailyMax}`;
   const dailyDone = state.dailyProgress >= state.dailyMax;
@@ -661,21 +662,87 @@ function renderDragon() {
 // ---------- プレイヤー設定 ----------
 const AVATAR_OPTIONS = ['🛡️', '🧙‍♂️', '🧙‍♀️', '👑', '🐉', '🦊', '🌙', '✨', '💀', '👻', '🔮', '⚔️', '🏹', '🌹', '⭐'];
 
+// アバター表示を共通化：カスタム画像があればそれを、無ければ絵文字を表示
+function renderAvatarInto(el) {
+  if (!el) return;
+  if (state.avatarImage) {
+    el.style.backgroundImage = `url('${state.avatarImage}')`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.textContent = state.avatarIcon || '🛡️';
+  }
+}
+
+// アップロードされた画像をリサイズ・圧縮してDataURLとして返す(保存容量対策)
+function resizeImageFile(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } }
+        else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+let pendingAvatarImage = undefined; // undefined=未変更, null=絵文字に戻す, string=新しい画像
+
 function renderProfileScreen() {
+  pendingAvatarImage = undefined;
   document.getElementById('profile-name-input').value = state.playerName;
-  document.getElementById('profile-avatar-preview').textContent = state.avatarIcon || '🛡️';
+  renderAvatarInto(document.getElementById('profile-avatar-preview'));
   document.getElementById('profile-save-status').textContent = '';
   const grid = document.getElementById('profile-avatar-grid');
   grid.innerHTML = AVATAR_OPTIONS.map(ic =>
-    `<div class="cg-profile-avatar-opt ${ic === state.avatarIcon ? 'selected' : ''}" data-icon="${ic}">${ic}</div>`
+    `<div class="cg-profile-avatar-opt ${(!state.avatarImage && ic === state.avatarIcon) ? 'selected' : ''}" data-icon="${ic}">${ic}</div>`
   ).join('');
   grid.querySelectorAll('.cg-profile-avatar-opt').forEach(node => {
     node.addEventListener('click', () => {
       grid.querySelectorAll('.cg-profile-avatar-opt').forEach(n => n.classList.remove('selected'));
       node.classList.add('selected');
-      document.getElementById('profile-avatar-preview').textContent = node.dataset.icon;
+      pendingAvatarImage = null; // 絵文字を選んだので画像はクリア
+      const preview = document.getElementById('profile-avatar-preview');
+      preview.style.backgroundImage = '';
+      preview.textContent = node.dataset.icon;
     });
   });
+}
+
+async function handleAvatarUpload(fileInput) {
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('画像ファイルを選択してください。'); return; }
+  const status = document.getElementById('profile-save-status');
+  status.textContent = '画像を読み込み中…';
+  try {
+    const dataUrl = await resizeImageFile(file, 300);
+    pendingAvatarImage = dataUrl;
+    document.querySelectorAll('.cg-profile-avatar-opt').forEach(n => n.classList.remove('selected'));
+    const preview = document.getElementById('profile-avatar-preview');
+    preview.style.backgroundImage = `url('${dataUrl}')`;
+    preview.style.backgroundSize = 'cover';
+    preview.style.backgroundPosition = 'center';
+    preview.textContent = '';
+    status.textContent = '画像を選択しました。「保存」を押して確定してください。';
+  } catch (e) {
+    status.textContent = '画像の読み込みに失敗しました。';
+  }
+  fileInput.value = '';
 }
 
 function saveProfile() {
@@ -684,7 +751,17 @@ function saveProfile() {
   const status = document.getElementById('profile-save-status');
   if (!name) { status.textContent = 'プレイヤー名を入力してください。'; return; }
   state.playerName = name.slice(0, 12);
-  if (selected) state.avatarIcon = selected.dataset.icon;
+  if (pendingAvatarImage === null) {
+    // 絵文字に戻す選択がされた場合
+    state.avatarImage = null;
+    if (selected) state.avatarIcon = selected.dataset.icon;
+  } else if (typeof pendingAvatarImage === 'string') {
+    // 新しい画像がアップロードされた場合
+    state.avatarImage = pendingAvatarImage;
+  } else if (selected) {
+    // 画像操作なし・絵文字を選び直しただけの場合(保険)
+    state.avatarIcon = selected.dataset.icon;
+  }
   saveState();
   renderHome();
   status.textContent = '保存しました！';
@@ -2416,7 +2493,7 @@ const SHOP_PACKS = [
 
 // ---------- イベント限定ガチャ(チケット消費・専用プール) ----------
 const EVENT_GACHA_PACKS = [
-  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'ticket', cost: 1,
+  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'tickets', cost: 1,
     desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
     pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
 ];
@@ -2799,6 +2876,7 @@ function init() {
   document.getElementById('rank-card-btn').addEventListener('click', () => { renderRanking(); showScreen('ranking'); });
   document.getElementById('player-info-btn').addEventListener('click', () => { renderProfileScreen(); showScreen('profile'); });
   document.getElementById('profile-save-btn').addEventListener('click', saveProfile);
+  document.getElementById('profile-avatar-file').addEventListener('change', (e) => handleAvatarUpload(e.target));
   if (window.LisNoirCloud) {
     window.LisNoirCloud.onAuthChange((user) => {
       refreshCloudAuthUI(user);
