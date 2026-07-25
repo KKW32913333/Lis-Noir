@@ -2010,6 +2010,7 @@ function startBattle(stage) {
     selectedFieldIdx: null,
     log: '',
     over: false,
+    deckOutSide: null,
   };
   document.getElementById('battle-enemy-emoji').textContent = stage.portrait;
   applyBattleBgTheme(stage.bgTheme);
@@ -2271,8 +2272,23 @@ function renderBattle() {
 
   if (battle.playerHp <= 0 || battle.enemyHp <= 0) {
     battle.over = true;
-    setTimeout(() => showResult(battle.playerHp > 0), 600);
+    if (battle.deckOutSide) {
+      showDeckOutPopup(battle.deckOutSide);
+    } else {
+      setTimeout(() => showResult(battle.playerHp > 0), 600);
+    }
   }
+}
+
+// 山札切れによる決着の場合、いきなり結果画面へ進まず、理由を説明するポップアップを挟む
+function showDeckOutPopup(side) {
+  const won = side === 'enemy'; // 相手の山札切れ＝自分の勝利
+  document.getElementById('deckout-icon').textContent = won ? '🎉' : '💀';
+  document.getElementById('deckout-title').textContent = won ? '勝利！' : '敗北…';
+  document.getElementById('deckout-message').textContent = won
+    ? '相手の山札が0になり、勝利しました！'
+    : '自分の山札が0になり、敗北しました。';
+  document.getElementById('deckout-overlay').classList.remove('hidden');
 }
 
 function bindBattleEvents() {
@@ -2722,6 +2738,7 @@ function enemyTurn() {
     battle.enemyHand.push(battle.enemyDeck.shift());
   } else {
     battle.enemyHp = 0; // 山札切れで敗北
+    battle.deckOutSide = 'enemy';
     renderBattle();
     return;
   }
@@ -2899,6 +2916,7 @@ function enemyTurn() {
     battle.playerHand.push(battle.playerDeck.shift());
   } else {
     battle.playerHp = 0; // 山札切れで敗北
+    battle.deckOutSide = 'player';
   }
   battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
   battle.playerField = cleanupField(battle.playerField);
@@ -3510,6 +3528,10 @@ function init() {
     renderHome();
   });
   document.getElementById('result-stageselect').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
+  document.getElementById('deckout-confirm-btn').addEventListener('click', () => {
+    document.getElementById('deckout-overlay').classList.add('hidden');
+    showResult(battle.playerHp > 0);
+  });
   document.getElementById('battle-help-btn').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.remove('hidden');
   });
