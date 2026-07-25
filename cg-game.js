@@ -1015,6 +1015,7 @@ let collectionFilter = 'all';
 
 function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
+  if (!def) return 0;
   return (def.type || 'monster') === 'equipment' ? 1 : 3;
 }
 

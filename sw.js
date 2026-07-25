@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v101';
+const CACHE_NAME = 'lisnoir-cache-v102';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -91,7 +91,20 @@ const CACHE_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(CACHE_ASSETS))
+      .then((cache) => {
+        // cache.addAll()は既定でブラウザのHTTPキャッシュを経由してしまうことがあり、
+        // 修正版を配布したはずなのに古いファイルのままキャッシュされてしまう原因になる。
+        // そのため、1件ずつ「必ずネットワークから最新を取得する」形で明示的にキャッシュする。
+        return Promise.all(
+          CACHE_ASSETS.map((url) =>
+            fetch(url, { cache: 'reload' })
+              .then((response) => {
+                if (response && response.ok) return cache.put(url, response);
+              })
+              .catch(() => {}) // 1件の取得失敗でインストール全体が失敗しないようにする
+          )
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
