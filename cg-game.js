@@ -1999,7 +1999,9 @@ function applyLeaderPortraits() {
 
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
-  const playerDeck = shuffle(state.deck.length ? state.deck.slice() : Object.keys(state.cards).slice(0, 10));
+  // 削除済みカード等、CARD_DEFSに存在しないIDが万一デッキに残っていた場合に備え、安全のため除外してから使用
+  const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
+  const playerDeck = shuffle(validDeck.length ? validDeck.slice() : Object.keys(state.cards).slice(0, 10));
   const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20, stage.spellChance || 0));
   const playerMaxHp = getPlayerMaxHp();
 
@@ -2249,6 +2251,7 @@ function renderBattle() {
   const handEl = document.getElementById('battle-hand');
   handEl.innerHTML = battle.playerHand.map((id, i) => {
     const def = CARD_DEFS[id];
+    if (!def) return ''; // 削除済み等で存在しないカードIDが紛れていた場合、バトル画面全体がクラッシュしないよう安全にスキップ
     const affordable = def.cost <= battle.playerCost;
     const evolved = state.cards[id] && state.cards[id].evolved;
     const isMonster = (def.type || 'monster') === 'monster';
@@ -2335,6 +2338,8 @@ function bindBattleEvents() {
       if (battle.selectedHandIdx !== null) {
         const id = battle.playerHand[battle.selectedHandIdx];
         const def = CARD_DEFS[id];
+        if (!def) { battle.selectedHandIdx = null; }
+        else {
         const type = def.type || 'monster';
         if (type === 'monster' && !battle.playerField[idx]) {
           playCardFromHand(battle.selectedHandIdx, idx);
@@ -2347,6 +2352,7 @@ function bindBattleEvents() {
         // 手札のカードがこのマスに対して使えない場合は、手札の選択を解除して
         // 通常通り「このマスのモンスターを攻撃選択」の操作に切り替える
         battle.selectedHandIdx = null;
+        }
       }
       if (battle.playerField[idx] && battle.playerField[idx].canAttack) {
         battle.selectedFieldIdx = (battle.selectedFieldIdx === idx) ? null : idx;
@@ -2365,7 +2371,7 @@ function bindBattleEvents() {
       if (battle.selectedHandIdx !== null) {
         const id = battle.playerHand[battle.selectedHandIdx];
         const def = CARD_DEFS[id];
-        if ((def.type || 'monster') === 'spell' && (def.target === 'enemy' || def.target === 'enemy_monster') && battle.enemyField[idx]) {
+        if (def && (def.type || 'monster') === 'spell' && (def.target === 'enemy' || def.target === 'enemy_monster') && battle.enemyField[idx]) {
           castSpell(battle.selectedHandIdx, idx);
           return;
         }
@@ -2388,7 +2394,7 @@ function bindBattleEvents() {
     if (battle.selectedHandIdx !== null) {
       const id = battle.playerHand[battle.selectedHandIdx];
       const def = CARD_DEFS[id];
-      if ((def.type || 'monster') === 'spell' && def.target === 'enemy') {
+      if (def && (def.type || 'monster') === 'spell' && def.target === 'enemy') {
         castSpell(battle.selectedHandIdx, null);
         return;
       }
