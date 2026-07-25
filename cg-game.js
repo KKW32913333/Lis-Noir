@@ -2942,7 +2942,6 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   summonEffect();
-  if (def.skill) skillFlash(`${def.name}のスキル！\n${def.skill}`);
   renderBattle();
 }
 
