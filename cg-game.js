@@ -202,6 +202,7 @@ function defaultState() {
     totalUpgrades: 0,
     stageProgress: 1,
     hasSeenBattleHelp: false,
+    hasSeenOnboarding: false,
     sfxMuted: false,
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
@@ -228,6 +229,9 @@ function loadState() {
     // 旧仕様の初期値バグ対策: playerLevelは表示のみで実際のレベリング処理が無かったため、
     // 旧セーブが初期値のまま(Lv.20)残っている場合は正しい初期値(Lv.1)に補正する
     if (saved.playerLevel === 20) saved.playerLevel = 1;
+    // 既存プレイヤーへの後方互換対応: 旧セーブにhasSeenOnboardingが無い場合、
+    // 新規プレイヤー向けチュートリアルが誤って表示されないよう「見た事にする」
+    if (saved.hasSeenOnboarding === undefined) saved.hasSeenOnboarding = true;
     return Object.assign(base, saved);
   } catch (e) {
     console.error('load failed', e);
@@ -3321,6 +3325,54 @@ function claimAllMissions() {
 }
 
 // ---------- 初期化 ----------
+// ---------- 初回オンボーディング ----------
+const ONBOARDING_STEPS = [
+  { emoji: '🏰', title: 'ようこそ、Lis Noirへ',
+    desc: 'ここはホーム画面です。トロフィー・ランクや、デイリー報酬、ステージ挑戦などがまとまっています。まずは全体の流れを簡単にご案内します。' },
+  { emoji: '🎴', title: '「カード」でデッキを編成',
+    desc: '下のタブの「カード」から、バトルで使うデッキを編成できます。カードをタップして追加、✕で外せます。カードを長押しすると詳細も確認できます。' },
+  { emoji: '⚔️', title: '「バトル」でステージに挑戦',
+    desc: '「バトル」からステージを選んで挑戦しましょう。手札のカードをコストの範囲で使い、相手のHPを0にすれば勝利です。' },
+  { emoji: '✨', title: 'さあ、冒険の始まりです',
+    desc: 'パックでカードを集めたり、ミッションを達成したりと、やり込み要素も盛りだくさん。あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
+];
+let onboardingStepIdx = 0;
+
+function renderOnboardingStep() {
+  const step = ONBOARDING_STEPS[onboardingStepIdx];
+  document.getElementById('onboarding-emoji').textContent = step.emoji;
+  document.getElementById('onboarding-title').textContent = step.title;
+  document.getElementById('onboarding-desc').textContent = step.desc;
+  document.getElementById('onboarding-dots').innerHTML = ONBOARDING_STEPS.map((_, i) =>
+    `<span class="${i === onboardingStepIdx ? 'active' : ''}"></span>`).join('');
+  const isLast = onboardingStepIdx === ONBOARDING_STEPS.length - 1;
+  document.getElementById('onboarding-next').textContent = isLast ? 'はじめる' : '次へ';
+}
+
+function startOnboarding() {
+  onboardingStepIdx = 0;
+  renderOnboardingStep();
+  document.getElementById('onboarding-overlay').classList.remove('hidden');
+}
+
+function finishOnboarding() {
+  document.getElementById('onboarding-overlay').classList.add('hidden');
+  if (!state.hasSeenOnboarding) {
+    state.hasSeenOnboarding = true;
+    saveState();
+  }
+}
+
+function onboardingNext() {
+  sfxTap();
+  if (onboardingStepIdx < ONBOARDING_STEPS.length - 1) {
+    onboardingStepIdx += 1;
+    renderOnboardingStep();
+  } else {
+    finishOnboarding();
+  }
+}
+
 function init() {
   renderHome();
   document.addEventListener('click', (e) => {
@@ -3402,6 +3454,8 @@ function init() {
   document.getElementById('player-info-btn').addEventListener('click', () => { renderProfileScreen(); showScreen('profile'); });
   document.getElementById('profile-save-btn').addEventListener('click', saveProfile);
   document.getElementById('profile-avatar-file').addEventListener('change', (e) => handleAvatarUpload(e.target));
+  document.getElementById('onboarding-next').addEventListener('click', onboardingNext);
+  document.getElementById('onboarding-skip').addEventListener('click', finishOnboarding);
   if (window.LisNoirCloud) {
     window.LisNoirCloud.onAuthChange((user) => {
       refreshCloudAuthUI(user);
@@ -3422,6 +3476,9 @@ function init() {
       sfxTap();
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('hidden');
+      if (!state.hasSeenOnboarding) {
+        setTimeout(startOnboarding, 500); // スプラッシュのフェードアウト後に表示
+      }
     });
   }
 }

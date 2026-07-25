@@ -811,6 +811,19 @@
   .cg-card-info-panel .cg-btn-main{background:linear-gradient(145deg,var(--gold-bright),var(--gold)); color:#fff;}
   #card-info-body{width:100%; margin-bottom:14px;}
 
+  /* ---------- 初回オンボーディング ---------- */
+  .cg-onboarding-panel{display:flex; flex-direction:column; align-items:center; text-align:center; position:relative;
+    background:linear-gradient(165deg,#2c1854,#150a2b); border-color:var(--gold-bright); max-width:340px; padding-top:30px;}
+  .cg-onboarding-skip{position:absolute; top:12px; right:14px; background:none; border:none; color:#C7B6FFbb;
+    font-size:11px; cursor:pointer; padding:4px 6px; text-decoration:underline;}
+  .cg-onboarding-emoji{font-size:52px; margin-bottom:10px; filter:drop-shadow(0 0 14px var(--gold-soft));}
+  .cg-onboarding-title{font-size:16px; font-weight:800; color:#F5EFFF; margin-bottom:10px;}
+  .cg-onboarding-desc{font-size:13px; line-height:1.7; color:#C7B6FFdd; margin-bottom:18px;}
+  .cg-onboarding-dots{display:flex; gap:6px; margin-bottom:16px;}
+  .cg-onboarding-dots span{width:7px; height:7px; border-radius:50%; background:#ffffff33; transition:background .2s, transform .2s;}
+  .cg-onboarding-dots span.active{background:var(--gold-bright); transform:scale(1.3);}
+  #onboarding-next{min-width:180px;}
+
   /* ---------- 設定・バックアップ ---------- */
   .cg-settings-section{border-top:1px solid var(--hairline-panel); padding-top:10px;}
   .cg-settings-section.hidden{display:none;}
@@ -1107,6 +1120,18 @@
     <div class="cg-help-panel cg-card-info-panel cg-ornate cg-double-frame">
       <div id="card-info-body"></div>
       <button class="cg-btn cg-btn-main" id="card-info-close">閉じる</button>
+    </div>
+  </div>
+
+  <!-- 初回オンボーディング（ホーム→カード→バトルの簡易チュートリアル） -->
+  <div id="onboarding-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-onboarding-panel cg-ornate cg-double-frame">
+      <button class="cg-onboarding-skip" id="onboarding-skip">スキップ</button>
+      <div id="onboarding-emoji" class="cg-onboarding-emoji">🏰</div>
+      <div id="onboarding-title" class="cg-onboarding-title"></div>
+      <div id="onboarding-desc" class="cg-onboarding-desc"></div>
+      <div id="onboarding-dots" class="cg-onboarding-dots"></div>
+      <button class="cg-btn cg-btn-main" id="onboarding-next">次へ</button>
     </div>
   </div>
 
