@@ -1886,6 +1886,108 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'ああ。これからは、一緒に生きよう。' },
       { speaker: 'ナレーター', portrait: '📖', text: '数年後。世界には再び、人と共存できる小さく穏やかなモンスターたちが現れるようになった。神殿の前には、黒百合と白百合が寄り添って咲いている。' },
     ] },
+  { id: 26, name: '静寂を破る足音', portrait: '👣', hp: 200, bossCard: 'dark_demonlord', spellChance: 0.69, bgTheme: 'cave',
+    weights: { normal: 0, rare: 0, epic: 14, legend: 86 }, rewardGold: 2720, rewardGems: 272, trophyDelta: 325,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '数年の時が流れた。世界には平和が戻り、人とモンスターが共に生きる村々が各地に生まれていた。' },
+      { speaker: 'ナレーター', portrait: '📖', text: 'だがある夜、古い神殿の地下から、封じられていたはずの「深淵」の扉がひとりでに開いた。' },
+      { speaker: '調教師', portrait: '🧑', text: '……この気配、まさか。眠っていたはずの闇が、また動き出している。' },
+      { speaker: '女神', portrait: '🌸', text: 'お願い。もう一度だけ、力を貸して。まだ何かが、この世界の底に残っている。' },
+    ] },
+  { id: 27, name: '地底湖の哨戒者', portrait: '🌊', hp: 227, bossCard: 'crystal_fox', spellChance: 0.7, bgTheme: 'cave',
+    weights: { normal: 0, rare: 0, epic: 13, legend: 87 }, rewardGold: 2940, rewardGems: 294, trophyDelta: 350  },
+  { id: 28, name: '忘れられた祭壇', portrait: '🕯️', hp: 254, bossCard: 'dark_reaper', spellChance: 0.71, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 12, legend: 88 }, rewardGold: 3160, rewardGems: 316, trophyDelta: 375  },
+  { id: 29, name: '狭間の番人', portrait: '🚪', hp: 281, bossCard: 'light_arcguardian', spellChance: 0.72, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 11, legend: 89 }, rewardGold: 3380, rewardGems: 338, trophyDelta: 400  },
+  { id: 30, name: '深淵より来たりし者', portrait: '🕳️', hp: 308, bossCard: 'nature_emeraldgaia', spellChance: 0.73, bgTheme: 'empress',
+    weights: { normal: 0, rare: 0, epic: 10, legend: 90 }, rewardGold: 3600, rewardGems: 360, trophyDelta: 425,
+    storyVictory: [
+      { speaker: 'ナレーター', portrait: '📖', text: '深淵の最奥で、封じられていた古き者を打ち破った。' },
+      { speaker: '調教師', portrait: '🧑', text: 'これで終わり……いや、まだ何か違う気配がする。もっと大きな影が。' },
+      { speaker: '女神', portrait: '🌸', text: '気をつけて。深淵の奥には、さらに古い時代の「亡国」が眠っているという伝説がある。' },
+    ] },
+  { id: 31, name: '灰と炎の遺跡', portrait: '🏚️', hp: 335, bossCard: 'water_seiren', spellChance: 0.73, bgTheme: 'volcano',
+    weights: { normal: 0, rare: 0, epic: 9, legend: 91 }, rewardGold: 3820, rewardGems: 382, trophyDelta: 450,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '深淵を抜けた先には、かつて栄えたという亡国の遺跡が、灰と炎に包まれて広がっていた。' },
+      { speaker: '調教師', portrait: '🧑', text: 'ここが……亡国。何百年も燃え続けているって、本当だったんだな。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '崩れた玉座の奥から、炎をまとう衛兵たちの気配が近づいてくる。' },
+    ] },
+  { id: 32, name: '亡国の衛兵', portrait: '💂', hp: 362, bossCard: 'fire_bahamut', spellChance: 0.74, bgTheme: 'inferno2',
+    weights: { normal: 0, rare: 0, epic: 8, legend: 92 }, rewardGold: 4040, rewardGems: 404, trophyDelta: 475  },
+  { id: 33, name: '灼熱の玉座跡', portrait: '👑', hp: 389, bossCard: 'fire_dragon', spellChance: 0.75, bgTheme: 'inferno2',
+    weights: { normal: 0, rare: 0, epic: 7, legend: 93 }, rewardGold: 4260, rewardGems: 426, trophyDelta: 500  },
+  { id: 34, name: '業火の残滓', portrait: '🔥', hp: 416, bossCard: 'dark_demonlord', spellChance: 0.76, bgTheme: 'volcano',
+    weights: { normal: 0, rare: 0, epic: 6, legend: 94 }, rewardGold: 4480, rewardGems: 448, trophyDelta: 525  },
+  { id: 35, name: '亡国を統べる火竜', portrait: '🐲', hp: 443, bossCard: 'fire_dragon', spellChance: 0.77, bgTheme: 'inferno2',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4700, rewardGems: 470, trophyDelta: 550,
+    storyVictory: [
+      { speaker: 'ナレーター', portrait: '📖', text: '亡国を統べていた火竜を退け、燃え続けていた炎がついに静まった。' },
+      { speaker: '調教師', portrait: '🧑', text: 'ようやく……ここも、終わったか。' },
+      { speaker: 'ナレーター', portrait: '📖', text: 'だが灰の下から、凍りついた大地へと続く道が姿を現した。' },
+    ] },
+  { id: 36, name: '凍てつく回廊', portrait: '❄️', hp: 470, bossCard: 'crystal_fox', spellChance: 0.78, bgTheme: 'frost',
+    weights: { normal: 0, rare: 0, epic: 4, legend: 96 }, rewardGold: 4920, rewardGems: 492, trophyDelta: 575,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '灰の道の先は、一転して凍てつく墓所へと続いていた。吐く息すら、瞬く間に凍りつく。' },
+      { speaker: '調教師', portrait: '🧑', text: '火の次は、氷か……。この世界には、本当にいろんな「終わり方」が眠っているんだな。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '氷結の回廊の奥から、静かな足音が響いてくる。' },
+    ] },
+  { id: 37, name: '氷結の見張り', portrait: '🧊', hp: 497, bossCard: 'water_seiren', spellChance: 0.79, bgTheme: 'snow',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5140, rewardGems: 514, trophyDelta: 600  },
+  { id: 38, name: '蒼氷の祭司', portrait: '⛄', hp: 524, bossCard: 'dark_reaper', spellChance: 0.8, bgTheme: 'frost',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5360, rewardGems: 536, trophyDelta: 625  },
+  { id: 39, name: '永久凍土の主', portrait: '🥶', hp: 551, bossCard: 'nature_emeraldgaia', spellChance: 0.81, bgTheme: 'frost',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5580, rewardGems: 558, trophyDelta: 650  },
+  { id: 40, name: '氷海に眠りし女王', portrait: '🌌', hp: 578, bossCard: 'water_seiren', spellChance: 0.82, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5800, rewardGems: 580, trophyDelta: 675,
+    storyVictory: [
+      { speaker: 'ナレーター', portrait: '📖', text: '氷海に眠っていた女王を解き放ち、凍りついた大地に、久方ぶりの陽光が差し込んだ。' },
+      { speaker: '氷の女王', portrait: '👑', text: '……ありがとう。長い眠りの果てに、また誰かの温もりを感じられるなんて。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '空を見上げると、はるか高くに、光を放つ塔がそびえていた。' },
+    ] },
+  { id: 41, name: '天へと続く階', portrait: '🪜', hp: 605, bossCard: 'light_arcguardian', spellChance: 0.82, bgTheme: 'empress',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6020, rewardGems: 602, trophyDelta: 700,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: '氷海の先、雲を突き抜けるように、白く輝く聖塔が浮かんでいた。' },
+      { speaker: '調教師', portrait: '🧑', text: 'あの塔……まるで、天まで続いているみたいだ。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '塔へと続く階段の下で、門衛たちが静かに待ち構えていた。' },
+    ] },
+  { id: 42, name: '聖塔の門衛', portrait: '⛩️', hp: 632, bossCard: 'fire_bahamut', spellChance: 0.83, bgTheme: 'castle',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6240, rewardGems: 624, trophyDelta: 725  },
+  { id: 43, name: '雲上の詠唱者', portrait: '☁️', hp: 659, bossCard: 'dark_demonlord', spellChance: 0.84, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6460, rewardGems: 646, trophyDelta: 750  },
+  { id: 44, name: '天空を統べる者', portrait: '🌠', hp: 686, bossCard: 'crystal_fox', spellChance: 0.85, bgTheme: 'purification',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6680, rewardGems: 668, trophyDelta: 775  },
+  { id: 45, name: '堕ちた聖騎士', portrait: '🗡️', hp: 713, bossCard: 'light_arcguardian', spellChance: 0.86, bgTheme: 'castle',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6900, rewardGems: 690, trophyDelta: 800,
+    storyVictory: [
+      { speaker: 'ナレーター', portrait: '📖', text: '塔の頂で待っていたのは、かつて光を司っていたはずの、堕ちた聖騎士だった。' },
+      { speaker: '調教師', portrait: '🧑', text: 'あなたも、何かを守ろうとして、道を間違えただけなんだな。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '聖騎士の鎧から、静かに光が漏れ出し、天空に小さな祈りが響いた。' },
+    ] },
+  { id: 46, name: '終焉の兆し', portrait: '⏳', hp: 740, bossCard: 'dark_reaper', spellChance: 0.87, bgTheme: 'purification',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7120, rewardGems: 712, trophyDelta: 825,
+    storyIntro: [
+      { speaker: 'ナレーター', portrait: '📖', text: 'すべての戦いの果てに、時間そのものが歪んだ空間へとたどり着いた。ここが、最後の場所らしい。' },
+      { speaker: '女神', portrait: '🌸', text: 'ここから先は、私にも見えない。あなたが初めて、本当の意味で「未知」に足を踏み入れる。' },
+      { speaker: '調教師', portrait: '🧑', text: '……構わない。ここまで来た以上、最後まで見届ける。' },
+    ] },
+  { id: 47, name: '回帰の狭間', portrait: '🌀', hp: 767, bossCard: 'nature_emeraldgaia', spellChance: 0.88, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7340, rewardGems: 734, trophyDelta: 850  },
+  { id: 48, name: '時を喰らう者', portrait: '🕰️', hp: 794, bossCard: 'water_seiren', spellChance: 0.89, bgTheme: 'empress',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7560, rewardGems: 756, trophyDelta: 875  },
+  { id: 49, name: '永劫の番人', portrait: '👁️', hp: 821, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7780, rewardGems: 778, trophyDelta: 900  },
+  { id: 50, name: 'すべての始まりの座', portrait: '🖤', hp: 1650, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
+    weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 8000, rewardGems: 800, trophyDelta: 925,
+    storyVictory: [
+      { speaker: 'ナレーター', portrait: '📖', text: '永劫回帰の座で、すべての始まりであり終わりでもある者を打ち破った。世界に、静かな朝が訪れる。' },
+      { speaker: '調教師', portrait: '🧑', text: '終わった……いや、これは新しい「始まり」なんだろうな。' },
+      { speaker: '女神', portrait: '🌸', text: 'ありがとう、Lis Noirの継承者。あなたの物語は、これからも続いていく。' },
+      { speaker: 'ナレーター', portrait: '📖', text: '白と黒の百合が咲き誇る丘の上で、長い旅はひとまずの終わりを迎えた。' },
+    ] },
 ];
 
 const WORLDS = [
@@ -1894,6 +1996,11 @@ const WORLDS = [
   { id: 3, name: '四天王の領域', stageIds: [11, 12, 13, 14, 15] },
   { id: 4, name: '魔王城', stageIds: [16, 17, 18, 19, 20] },
   { id: 5, name: '黒百合の真実', stageIds: [21, 22, 23, 24, 25] },
+  { id: 6, name: '深淵の狭間', stageIds: [26, 27, 28, 29, 30] },
+  { id: 7, name: '灼熱の亡国', stageIds: [31, 32, 33, 34, 35] },
+  { id: 8, name: '蒼氷の墓所', stageIds: [36, 37, 38, 39, 40] },
+  { id: 9, name: '天空の聖塔', stageIds: [41, 42, 43, 44, 45] },
+  { id: 10, name: '永劫回帰の座', stageIds: [46, 47, 48, 49, 50] },
 ];
 
 // ---------- イベントクエスト（期間限定） ----------
@@ -1965,6 +2072,18 @@ function renderEventList() {
 let storyQueue = [];
 let storyOnDone = null;
 
+// ストーリーは「ステージ単位」ではなく「ワールド単位」（各ワールドの最初と最後のステージ）でのみ発生させる
+function isWorldFirstStage(stage) {
+  if (!stage || typeof stage.id !== 'number') return false;
+  const world = WORLDS.find(w => w.stageIds.includes(stage.id));
+  return !!world && world.stageIds[0] === stage.id;
+}
+function isWorldLastStage(stage) {
+  if (!stage || typeof stage.id !== 'number') return false;
+  const world = WORLDS.find(w => w.stageIds.includes(stage.id));
+  return !!world && world.stageIds[world.stageIds.length - 1] === stage.id;
+}
+
 function showStory(lines, onDone) {
   if (!lines || !lines.length) { if (onDone) onDone(); return; }
   storyQueue = lines.slice();
@@ -2017,7 +2136,8 @@ function renderStageSelect() {
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
     node.addEventListener('click', () => {
       const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
-      showStory(stage.storyIntro, () => startBattle(stage));
+      const intro = isWorldFirstStage(stage) ? stage.storyIntro : null;
+      showStory(intro, () => startBattle(stage));
     });
   });
 }
@@ -3386,7 +3506,7 @@ function showResult(won) {
   levelupEl.classList.toggle('hidden', !leveledUp);
   if (leveledUp) levelupEl.textContent = `⭐ レベルアップ！ Lv.${state.playerLevel}`;
 
-  if (won && stage.storyVictory) {
+  if (won && stage.storyVictory && isWorldLastStage(stage)) {
     showStory(stage.storyVictory, () => revealResultScreen(won, stage));
   } else {
     revealResultScreen(won, stage);
@@ -3482,24 +3602,32 @@ function openCollectionScreen(seg) {
 
 // ---------- ガチャ ----------
 const SHOP_PACKS = [
-  { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gold', cost: 300,
-    desc: 'ノーマル〜レアが出やすい基本ガチャ', weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
+  { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
+    desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },
     preview: ['water_slime', 'nature_wolf', 'water_golem'] },
-  { id: 'rare', name: 'レアガチャ', icon: '🎁', currency: 'gems', cost: 10,
-    desc: 'レア以上が確定で出るガチャ', weights: { normal: 0, rare: 65, epic: 28, legend: 7 },
-    preview: ['nature_elfarcher', 'dark_wolf', 'light_angel'] },
-  { id: 'premium', name: 'プレミアムガチャ', icon: '👑', currency: 'gems', cost: 30,
-    desc: 'エピック以上が確定で出る豪華ガチャ', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
-    preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
+  { id: 'premium1', name: 'プレミアムガチャ第1弾', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
+    desc: '「冒険の始まり」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
+    weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
+    legendPityLimit: 50,
+    rarityPool: {
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian'],
+    },
+    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian',
+              'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
 ];
 
-function pickWeightedCardId(weights) {
+function pickWeightedCardId(weights, rarityPool) {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const pool = [];
   Object.keys(weights).forEach(rarity => {
     const w = weights[rarity];
     if (w <= 0) return;
-    Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id)).forEach(id => pool.push({ id, w }));
+    const restricted = rarityPool && rarityPool[rarity];
+    const candidates = restricted
+      ? restricted.filter(id => CARD_DEFS[id])
+      : Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id));
+    candidates.forEach(id => pool.push({ id, w }));
   });
   if (!pool.length) return Object.keys(CARD_DEFS)[0];
   const total = pool.reduce((s, p) => s + p.w, 0);
@@ -3526,16 +3654,19 @@ function renderPackCard(pack) {
   const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
   const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
   const showPity = !pack.pool && pack.weights.normal > 0; // 固定プールのガチャ・ノーマルが出ないガチャには天井表示不要
+  const legendPityCount = (state.legendPityCounters && state.legendPityCounters[pack.id]) || 0;
+  const legendPityRemain = pack.legendPityLimit ? Math.max(0, pack.legendPityLimit - legendPityCount) : 0;
   return `
       <div class="cg-pack-card">
         <div class="cg-pack-top">
           <div class="cg-pack-icon">${pack.icon}</div>
           <div class="cg-pack-info">
-            <div class="cg-pack-name">${pack.name}</div>
+            <div class="cg-pack-name">${pack.name}${pack.flavor ? `<span class="cg-pack-flavor">〜${pack.flavor}〜</span>` : ''}</div>
             <div class="cg-pack-desc">${pack.desc}</div>
           </div>
         </div>
         ${showPity ? `<div class="cg-pack-pity">🎯 あと${pityRemain}回でレア以上確定</div>` : ''}
+        ${pack.legendPityLimit ? `<div class="cg-pack-pity cg-pack-pity-legend">👑 あと${legendPityRemain}回でレジェンド確定</div>` : ''}
         <div class="cg-pack-buy-row">
           <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" data-times="1" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
           ${show10 ? `<button class="cg-btn cg-pack-buy cg-pack-buy10" data-pack="${pack.id}" data-times="10" ${affordable10 ? '' : 'disabled'}>10連　${currencyIcon} ${pack.cost * 10}</button>` : ''}
@@ -3584,16 +3715,25 @@ function pickCardForPack(pack) {
   }
   state.pityCounters = state.pityCounters || {};
   const count = state.pityCounters[pack.id] || 0;
+  state.legendPityCounters = state.legendPityCounters || {};
+  const legendCount = state.legendPityCounters[pack.id] || 0;
+
   let cardId;
-  if (count >= PITY_LIMIT - 1) {
+  if (pack.legendPityLimit && legendCount >= pack.legendPityLimit - 1) {
+    // 指定回数以内にレジェンドが出ていない場合、次回は確定でレジェンド
+    cardId = pickWeightedCardId({ legend: 1 }, pack.rarityPool);
+  } else if (count >= PITY_LIMIT - 1) {
     const w = pack.weights;
     const guaranteed = { normal: 0, rare: w.rare || 50, epic: w.epic || 35, legend: w.legend || 15 };
-    cardId = pickWeightedCardId(guaranteed);
+    cardId = pickWeightedCardId(guaranteed, pack.rarityPool);
   } else {
-    cardId = pickWeightedCardId(pack.weights);
+    cardId = pickWeightedCardId(pack.weights, pack.rarityPool);
   }
   const rarity = CARD_DEFS[cardId].rarity;
   state.pityCounters[pack.id] = (rarity === 'normal') ? count + 1 : 0;
+  if (pack.legendPityLimit) {
+    state.legendPityCounters[pack.id] = (rarity === 'legend') ? 0 : legendCount + 1;
+  }
   saveState();
   return cardId;
 }
@@ -3708,6 +3848,9 @@ function showRevealMulti(results) {
       ${renderCardFace(r.cardId, { small: true, evolved: state.cards[r.cardId].evolved })}${badge}
     </div>`;
   }).join('');
+  gridEl.querySelectorAll('.cg-card').forEach(node => {
+    node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
+  });
   document.getElementById('shop-reveal-overlay').classList.remove('hidden');
 }
 
