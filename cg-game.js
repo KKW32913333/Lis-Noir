@@ -1106,8 +1106,9 @@ function renderDeck() {
   });
   bindDeckDragReorder(deckEl);
 
-  const avgCost = state.deck.length
-    ? (state.deck.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / state.deck.length).toFixed(1)
+  const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
+  const avgCost = validDeckIds.length
+    ? (validDeckIds.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / validDeckIds.length).toFixed(1)
     : '0.0';
   document.getElementById('deck-avgcost').textContent = avgCost;
 
