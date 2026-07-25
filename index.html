@@ -395,6 +395,7 @@
   .cg-battle-substat-row{display:flex; justify-content:flex-end; gap:8px; padding:0 12px 6px;}
   .cg-substat-chip{display:flex; align-items:center; gap:3px; font-size:10px; color:#EAE6F5; background:#00000044;
     border:1px solid #ffffff33; border-radius:10px; padding:3px 8px;}
+  .cg-graveyard-chip{cursor:pointer;}
   .cg-battle-back-btn{padding:6px 8px; font-size:16px; flex-shrink:0; color:#EAE6F5;}
   .cg-hp-chip{display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:5px 10px; border-radius:16px; box-shadow:0 2px 6px #00000033;}
   .cg-hp-chip .val{font-weight:700; color:var(--hp-red);}
@@ -598,6 +599,9 @@
     100%{transform:scale(1) rotateY(0deg);}
   }
   .cg-reveal-grid{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px 8px; width:100%;}
+  .cg-graveyard-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%;
+    max-height:50vh; overflow-y:auto; margin-bottom:14px; padding:2px;}
+  .cg-graveyard-empty{grid-column:1/-1; text-align:center; color:#C7B6FFbb; font-size:12px; padding:20px 0;}
   .cg-reveal-grid.hidden{display:none;}
   .cg-reveal-grid-item{position:relative; animation:revealPop .45s ease-out backwards;}
   .cg-reveal-grid-item.legend-glow{filter:drop-shadow(0 0 12px var(--true-gold));}
@@ -1187,6 +1191,16 @@
     </div>
   </div>
 
+  <!-- シーズン切り替わり（トロフィーリセット）の通知 -->
+  <div id="season-reset-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-onboarding-panel cg-ornate cg-double-frame">
+      <div class="cg-onboarding-emoji">🏆</div>
+      <div class="cg-onboarding-title">シーズン開始！</div>
+      <div id="season-reset-message" class="cg-onboarding-desc"></div>
+      <button class="cg-btn cg-btn-main" id="season-reset-close">OK</button>
+    </div>
+  </div>
+
   <!-- ============ ホーム画面 ============ -->
   <section id="screen-home" class="cg-screen cg-scroll-pad active">
     <div class="cg-topbar">
@@ -1416,6 +1430,7 @@
     <div class="cg-battle-substat-row">
       <div class="cg-substat-chip" title="残り手札">🎴×<span id="battle-hand-count">0</span></div>
       <div class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-deck-remaining">0</span></div>
+      <div class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></div>
     </div>
 
     <div class="cg-battle-board">
@@ -1471,6 +1486,7 @@
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
           <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🛡シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
+          <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。撃破されたモンスターや使用したスペル・装備なども墓地に入ります。🪦アイコンをタップすると墓地の中身を確認できます。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>
@@ -1483,6 +1499,15 @@
         <div id="deckout-title" class="cg-onboarding-title">敗北…</div>
         <div id="deckout-message" class="cg-onboarding-desc">山札が0になり、敗北しました。</div>
         <button class="cg-btn cg-btn-main" id="deckout-confirm-btn">結果を見る</button>
+      </div>
+    </div>
+
+    <!-- 墓地の確認ポップアップ -->
+    <div id="graveyard-overlay" class="cg-help-overlay hidden">
+      <div class="cg-help-panel cg-card-info-panel cg-ornate cg-double-frame">
+        <div class="cg-help-title">🪦 墓地</div>
+        <div id="graveyard-grid" class="cg-graveyard-grid"></div>
+        <button class="cg-btn cg-btn-main" id="graveyard-close">閉じる</button>
       </div>
     </div>
 

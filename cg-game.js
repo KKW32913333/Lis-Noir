@@ -203,6 +203,7 @@ function defaultState() {
     gold: 25300,
     gems: 1250,
     trophy: 0,
+    seasonId: null,
     dailyDate: '', dailyProgress: 0, dailyMax: 5, dailyClaimed: false,
     winProgress: 1, winMax: 3,
     totalWins: 0,
@@ -243,13 +244,21 @@ function loadState() {
     // 新規プレイヤー向けチュートリアルが誤って表示されないよう「見た事にする」
     if (saved.hasSeenOnboarding === undefined) saved.hasSeenOnboarding = true;
     // カード完全削除時の後方互換対応: 廃止したカードIDが旧セーブに残っていると、
-    // デッキ内で参照切れを起こしうるため、所持カード・デッキの両方から取り除く
-    const removedCardIds = ['nature_treant', 'water_crystalgolem', 'dark_thunderchimera'];
-    removedCardIds.forEach(id => {
-      if (saved.cards) delete saved.cards[id];
-    });
+    // カード一覧の空白セルや、デッキ内での参照切れの原因になるため、
+    // 「現在のCARD_DEFSに存在しないIDすべて」を所持カード・デッキ・デッキプリセットから自動的に取り除く
+    // （個別のカードIDをここに書き足す必要はなく、今後カードを削除しても自動的に対応される）
+    if (saved.cards) {
+      Object.keys(saved.cards).forEach(id => {
+        if (!CARD_DEFS[id]) delete saved.cards[id];
+      });
+    }
     if (Array.isArray(saved.deck)) {
-      saved.deck = saved.deck.filter(id => !removedCardIds.includes(id));
+      saved.deck = saved.deck.filter(id => !!CARD_DEFS[id]);
+    }
+    if (Array.isArray(saved.deckPresets)) {
+      saved.deckPresets.forEach(preset => {
+        if (Array.isArray(preset.cards)) preset.cards = preset.cards.filter(id => !!CARD_DEFS[id]);
+      });
     }
     return Object.assign(base, saved);
   } catch (e) {
@@ -609,6 +618,44 @@ function getRankTier(trophy) {
   let tierIdx = 0;
   for (let i = 0; i < RANK_TIERS.length; i++) { if (trophy >= RANK_TIERS[i].min) tierIdx = i; }
   return RANK_TIERS[tierIdx];
+}
+
+// ---------- シーズン制トロフィーリセット ----------
+// 「年-月」を約1ヶ月ごとのシーズンIDとして扱う（例: '2026-07'）
+function getCurrentSeasonId() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// シーズンが切り替わっていたら、トロフィーを「現在のランクの1つ下のランクの開始値」までリセットする
+// （0には戻さない。例: ゴールド帯で終えたら次シーズンはシルバーの開始値1001から再開）
+// 最下位ランク(ブロンズ)の場合はそのままブロンズの開始値(0)になる
+function checkSeasonReset() {
+  const currentSeason = getCurrentSeasonId();
+  if (!state.seasonId) {
+    state.seasonId = currentSeason; // 初回起動時は「今シーズン」として記録するのみ
+    return;
+  }
+  if (state.seasonId === currentSeason) return;
+
+  const tier = getRankTier(state.trophy || 0);
+  const tierIdx = RANK_TIERS.indexOf(tier);
+  const newTrophy = tierIdx > 0 ? RANK_TIERS[tierIdx - 1].min : RANK_TIERS[0].min;
+  const previousTrophy = state.trophy || 0;
+  state.trophy = newTrophy;
+  state.seasonId = currentSeason;
+  saveState();
+  showSeasonResetNotice(previousTrophy, newTrophy);
+}
+
+function showSeasonResetNotice(previousTrophy, newTrophy) {
+  const newTier = getRankTier(newTrophy);
+  const overlay = document.getElementById('season-reset-overlay');
+  if (!overlay) return;
+  document.getElementById('season-reset-message').textContent =
+    `シーズンが切り替わりました。前シーズンのトロフィー（${previousTrophy.toLocaleString()}）に応じて、` +
+    `今シーズンは${newTier.name}ランクの開始値（🏆${newTrophy.toLocaleString()}）からスタートします。`;
+  overlay.classList.remove('hidden');
 }
 
 // ランクアイコンを要素に描画（image指定があれば画像、無ければ絵文字で表示）
@@ -1153,7 +1200,7 @@ function renderDeck() {
        <button class="cg-deck-remove-btn" data-index="${i}" aria-label="デッキから外す">✕</button>
      </div>`
   ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
-  document.getElementById('deck-count').textContent = `${state.deck.length}/30`;
+  document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
 
   deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1176,6 +1223,7 @@ function renderDeck() {
 
   const collEl = document.getElementById('collection-list');
   const owned = Object.keys(state.cards).filter(id => {
+    if (!CARD_DEFS[id]) return false; // 削除済みカードが紛れていた場合、空白セルにならないよう除外
     if (collectionFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === collectionFilter;
   });
@@ -1198,7 +1246,7 @@ function renderDeck() {
         node.classList.remove('cg-shake'); void node.offsetWidth; node.classList.add('cg-shake');
         return;
       }
-      if (state.deck.length >= 30) return;
+      if (state.deck.length >= 40) return;
       state.deck.push(id);
       saveState();
       renderDeck();
@@ -1304,9 +1352,9 @@ function autoBuildDeck() {
       if (deck.length >= limit) break;
     }
   };
-  addUpTo(monsters, 24);
-  addUpTo(others, 30);
-  state.deck = deck.slice(0, 30);
+  addUpTo(monsters, 32);
+  addUpTo(others, 40);
+  state.deck = deck.slice(0, 40);
   saveState();
   renderDeck();
 }
@@ -1450,7 +1498,7 @@ function openCardDetail(id) {
     <div class="cg-detail-deck-row ${deckCount > 0 ? 'in-deck' : ''}">
       <span class="cg-detail-deck-count">${deckCount > 0 ? '🃏 デッキ内: ' + deckCount + '/' + maxCopies + '枚' : 'デッキ未編成'}</span>
       <button class="cg-btn cg-detail-deck-btn" id="detail-deck-remove-btn" ${deckCount <= 0 ? 'disabled' : ''}>− 外す</button>
-      <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 30) ? 'disabled' : ''}>＋ 追加</button>
+      <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 40) ? 'disabled' : ''}>＋ 追加</button>
     </div>`;
   document.getElementById('detail-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
@@ -1478,7 +1526,7 @@ function openCardDetail(id) {
     </div>`;
   const deckAddBtn = document.getElementById('detail-deck-add-btn');
   if (deckAddBtn) deckAddBtn.addEventListener('click', () => {
-    if (state.deck.length >= 30 || countInDeck(id) >= maxCopiesFor(id)) return;
+    if (state.deck.length >= 40 || countInDeck(id) >= maxCopiesFor(id)) return;
     state.deck.push(id);
     saveState();
     openCardDetail(id);
@@ -2084,6 +2132,8 @@ function startBattle(stage) {
     log: '',
     over: false,
     deckOutSide: null,
+    playerGraveyard: [],
+    enemyGraveyard: [],
   };
   document.getElementById('battle-enemy-emoji').textContent = stage.portrait;
   applyBattleBgTheme(stage.bgTheme);
@@ -2105,6 +2155,40 @@ function showVsIntro(stage) {
       document.getElementById('battle-help-overlay').classList.remove('hidden');
     }
   }, 1450);
+}
+
+const MAX_HAND_SIZE = 5;
+// 山札から1枚引いて手札に加える。手札が上限（5枚）に達している場合は、引いたカードをそのまま墓地へ送る
+function drawCardToHand(deck, hand, graveyard) {
+  if (!deck.length) return null;
+  const id = deck.shift();
+  if (hand.length >= MAX_HAND_SIZE) {
+    if (graveyard) graveyard.push(id);
+    skillFlash('手札がいっぱいのため、引いたカードが墓地へ送られた');
+    return null;
+  }
+  hand.push(id);
+  return id;
+}
+
+// 墓地（自分側）の中身を確認するポップアップを表示
+function openGraveyard() {
+  const grid = document.getElementById('graveyard-grid');
+  const cards = (battle && battle.playerGraveyard) || [];
+  if (!cards.length) {
+    grid.innerHTML = '<div class="cg-graveyard-empty">墓地にはまだ何もありません</div>';
+  } else {
+    // 直近に送られたカードが先頭に来るよう逆順で表示
+    grid.innerHTML = cards.slice().reverse().map(id => renderCardFace(id, { small: true })).join('');
+    grid.querySelectorAll('.cg-card').forEach(node => {
+      bindLongPress(node, () => showHandCardInfo(node.dataset.id));
+      node.addEventListener('click', () => {
+        if (longPressFired) { longPressFired = false; return; }
+        showHandCardInfo(node.dataset.id);
+      });
+    });
+  }
+  document.getElementById('graveyard-overlay').classList.remove('hidden');
 }
 
 function shuffle(arr) {
@@ -2260,6 +2344,7 @@ function renderBattle() {
   document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
   document.getElementById('battle-hand-count').textContent = battle.playerHand.length;
+  document.getElementById('battle-graveyard-count').textContent = battle.playerGraveyard.length;
   document.getElementById('battle-pp-current').textContent = battle.playerCost;
   document.getElementById('battle-pp-max').textContent = battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost;
 
@@ -2517,12 +2602,13 @@ function showCardInfo(unit, playerFieldIdx) {
   }
 }
 
-// 自分の場のモンスターを墓地に送る（除外する）。手札やコストは戻らないことを確認の上で実行
+// 自分の場のモンスターを墓地に送る（除外する）
 function discardFieldUnit(idx) {
   const unit = battle && battle.playerField && battle.playerField[idx];
   if (!unit) return;
-  if (!confirm(`「${unit.def.name}」を墓地に送ります。場から除外され、二度と戻せません。よろしいですか？`)) return;
+  if (!confirm(`「${unit.def.name}」を墓地に送ります。場から除外されます。よろしいですか？`)) return;
   battle.playerField[idx] = null;
+  battle.playerGraveyard.push(unit.defId);
   document.getElementById('card-info-overlay').classList.add('hidden');
   skillFlash(`${unit.def.name}を墓地に送った`);
   renderBattle();
@@ -2600,7 +2686,7 @@ function castSpell(handIdx, targetIdx) {
     battle.playerHp = Math.min(battle.playerMaxHp || 30, battle.playerHp + (eff.value || 0));
   } else if (eff.kind === 'draw') {
     for (let i = 0; i < (eff.value || 0); i++) {
-      if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
+      drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
     }
   } else if (eff.kind === 'wipe') {
     battle.enemyField.forEach((u, i) => {
@@ -2621,7 +2707,8 @@ function castSpell(handIdx, targetIdx) {
     }
   }
   if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
-  battle.enemyField = cleanupField(battle.enemyField);
+  battle.playerGraveyard.push(id); // 使用したスペルは墓地へ
+  battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
   renderBattle();
 }
 
@@ -2632,6 +2719,7 @@ function playFieldCard(handIdx) {
   battle.playerCost -= def.cost;
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
+  if (battle.fieldCard) battle.playerGraveyard.push(battle.fieldCard); // 上書きされる前のフィールドカードは墓地へ
   battle.fieldCard = id;
   sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}発動！\n${def.skill}`);
@@ -2650,6 +2738,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   unit.curHp += (eff.hp || 0);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
+  battle.playerGraveyard.push(id); // 使用した装備カードは墓地へ
   sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}を装備！\n${def.skill}`);
   renderBattle();
@@ -2696,7 +2785,8 @@ function applySkillTag(unit, trigger, isPlayerSide) {
     if (healBlocked) return;
     field.forEach(u => { if (u) { const maxHp = u.def.hp + (u.hpBonus || 0); u.curHp = Math.min(maxHp, u.curHp + tag.value); } });
   } else if (tag.effect === 'drawCard') {
-    for (let i = 0; i < tag.value; i++) { if (deck.length) hand.push(deck.shift()); }
+    const graveyard = isPlayerSide ? battle.playerGraveyard : battle.enemyGraveyard;
+    for (let i = 0; i < tag.value; i++) { drawCardToHand(deck, hand, graveyard); }
   } else if (tag.effect === 'refundCost') {
     if (isPlayerSide) battle.playerCost = Math.min(battle.playerMaxCost, battle.playerCost + tag.value);
     else battle.enemyCost = Math.min(battle.enemyMaxCost, battle.enemyCost + tag.value);
@@ -2719,8 +2809,8 @@ function applySkillTag(unit, trigger, isPlayerSide) {
       battle.playerHp -= tag.value;
       impactEffect(document.getElementById('battle-player-portrait'), tag.value, 0);
     }
-    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField);
-    else battle.playerField = cleanupField(battle.playerField);
+    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+    else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   } else if (tag.effect === 'healLowestAllyCleanse') {
     // 【ホーリーエンジェル】場に出た時、最もHPが減っている味方1体を回復し、状態異常を解除（他に味方がいなければ自分が対象）
     const allies = field.filter(u => u && u !== unit);
@@ -2765,8 +2855,8 @@ function applySkillTag(unit, trigger, isPlayerSide) {
       if (targetEl) impactEffect(targetEl, dmg, 0);
       if (u.curHp > 0) u.ailment = { turns: tag.poisonTurns || 2, dmg: tag.poisonDmg || 1, kind: 'poison' };
     });
-    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField);
-    else battle.playerField = cleanupField(battle.playerField);
+    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+    else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
     field.forEach(u => { if (u) u.shield = (u.shield || 0) + (tag.shieldValue || 0); });
   } else if (tag.effect === 'aoeDamageBurnAtkDownAll') {
     // 【煉獄の焔竜バハムート】場に出た時、敵全体にダメージ＋火傷＋攻撃力ダウン（永続）
@@ -2783,8 +2873,8 @@ function applySkillTag(unit, trigger, isPlayerSide) {
         u.atkBonus = (u.atkBonus || 0) - (tag.atkDownValue || 1);
       }
     });
-    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField);
-    else battle.playerField = cleanupField(battle.playerField);
+    if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+    else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   } else if (tag.effect === 'healShieldAlliesAtkDownEnemies') {
     // 【水奏の女王セイレーン】場に出た時、味方全体を回復＋シールド付与、敵全体の攻撃力ダウン（永続）
     field.forEach(u => {
@@ -2827,7 +2917,7 @@ function tickAilment(field) {
   });
 }
 
-function cleanupField(field) {
+function cleanupField(field, graveyard) {
   return field.map(u => {
     if (!u || u.curHp > 0) return u;
     const tag = u.def.skillTag;
@@ -2842,6 +2932,7 @@ function cleanupField(field) {
       field.forEach(ally => { if (ally && ally !== u && ally.curHp > 0) ally.atkBonus = (ally.atkBonus || 0) + tag.value; });
       skillFlash(`${u.def.name}のスキル！\n味方全体の攻撃力が永続+${tag.value}`);
     }
+    if (graveyard) graveyard.push(u.defId); // 撃破されたモンスターを墓地へ
     return null;
   });
 }
@@ -2970,7 +3061,7 @@ function attackTarget(attackerIdx, targetIdx) {
     attacker.usedExtraAttack = false; // ターン終了後、次に攻撃可能になった時点でまた使えるようにリセット
   }
   battle.selectedFieldIdx = null;
-  battle.enemyField = cleanupField(battle.enemyField);
+  battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
   renderBattle();
 }
 
@@ -2994,7 +3085,7 @@ function enemyTurn() {
   battle.enemyMaxCost = Math.min(10, battle.enemyMaxCost + 1);
   battle.enemyCost = battle.enemyMaxCost;
   if (battle.enemyDeck.length) {
-    battle.enemyHand.push(battle.enemyDeck.shift());
+    drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
   } else {
     battle.enemyHp = 0; // 山札切れで敗北
     battle.deckOutSide = 'enemy';
@@ -3003,7 +3094,7 @@ function enemyTurn() {
   }
   battle.enemyField.forEach(u => applySkillTag(u, 'turnStart', false));
   tickAilment(battle.enemyField);
-  battle.enemyField = cleanupField(battle.enemyField);
+  battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
 
   // AI: モンスター配置 → 装備 → フィールド → スペルの優先順で、出せるカードを出し続ける
   let progressed = true;
@@ -3094,7 +3185,7 @@ function enemyTurn() {
             }
           } else if (eff.kind === 'draw') {
             for (let k = 0; k < (eff.value || 0); k++) {
-              if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
+              drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
             }
           } else if (eff.kind === 'wipe') {
             battle.playerField.forEach((u, k) => {
@@ -3112,7 +3203,7 @@ function enemyTurn() {
       }
     }
   }
-  battle.playerField = cleanupField(battle.playerField);
+  battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
 
   // 攻撃可能な既存ユニットで攻撃（アタッカー/ディフェンダーのルールに従う）
   battle.enemyField.forEach((u, i) => {
@@ -3213,12 +3304,12 @@ function enemyTurn() {
       return killed;
     };
     const killedFirst = performOneAttack();
-    battle.playerField = cleanupField(battle.playerField);
+    battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
     // 【ヴォイドリーパー等】撃破した場合のみ、1回だけ追加攻撃（無限連鎖はしない）
     if (killedFirst && tag && tag.effect === 'extraAttackOnKill') {
       skillFlash(`${u.def.name}のスキル！\n連続攻撃発動！`);
       performOneAttack();
-      battle.playerField = cleanupField(battle.playerField);
+      battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
     }
   });
   battle.enemyField.forEach(u => {
@@ -3226,7 +3317,7 @@ function enemyTurn() {
     if (u.stunned) { u.stunned = false; u.canAttack = false; }
     else { u.canAttack = true; }
   });
-  battle.playerField = cleanupField(battle.playerField);
+  battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
 
   // 次は自分のターン
   battle.turn += 1;
@@ -3234,14 +3325,14 @@ function enemyTurn() {
   battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
   battle.playerCost = battle.playerMaxCost;
   if (battle.playerDeck.length) {
-    battle.playerHand.push(battle.playerDeck.shift());
+    drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
   } else {
     battle.playerHp = 0; // 山札切れで敗北
     battle.deckOutSide = 'player';
   }
   battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
   tickAilment(battle.playerField);
-  battle.playerField = cleanupField(battle.playerField);
+  battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   renderBattle();
 }
 
@@ -3626,6 +3717,7 @@ const MISSIONS = [
   { id: 'upgrade25', category: 'growth', title: '究極の強化師', desc: 'カードを25回強化する', target: 25, check: s => s.totalUpgrades || 0, reward: { gold: 1500, gems: 20 } },
   { id: 'deck20', category: 'collect', title: 'デッキを整える', desc: 'デッキを20枚以上編成する', target: 20, check: s => s.deck.length, reward: { gold: 300 } },
   { id: 'deck30', category: 'collect', title: '完全なるデッキ', desc: 'デッキを30枚編成する', target: 30, check: s => s.deck.length, reward: { gold: 600, gems: 10 } },
+  { id: 'deck40', category: 'collect', title: '極めしデッキ', desc: 'デッキを40枚編成する', target: 40, check: s => s.deck.length, reward: { gold: 1200, gems: 20 } },
   { id: 'trophy500', category: 'growth', title: 'ランクを上げろ', desc: 'トロフィーを500以上獲得する', target: 500, check: s => s.trophy || 0, reward: { gold: 500 } },
   { id: 'trophy1500', category: 'growth', title: '上位ランカー', desc: 'トロフィーを1500以上獲得する', target: 1500, check: s => s.trophy || 0, reward: { gems: 50 } },
   { id: 'level5', category: 'growth', title: '成長の証', desc: 'プレイヤーレベル5に到達する', target: 5, check: s => s.playerLevel || 1, reward: { gold: 400 } },
@@ -3908,6 +4000,7 @@ function openScreenHelp(key) {
 }
 
 function init() {
+  checkSeasonReset();
   renderHome();
   document.addEventListener('click', (e) => {
     if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-btn, .cg-stage-card, .cg-help-btn')) sfxTap();
@@ -3958,6 +4051,13 @@ function init() {
   document.getElementById('deckout-confirm-btn').addEventListener('click', () => {
     document.getElementById('deckout-overlay').classList.add('hidden');
     showResult(battle.playerHp > 0);
+  });
+  document.getElementById('battle-graveyard-btn').addEventListener('click', openGraveyard);
+  document.getElementById('graveyard-close').addEventListener('click', () => {
+    document.getElementById('graveyard-overlay').classList.add('hidden');
+  });
+  document.getElementById('season-reset-close').addEventListener('click', () => {
+    document.getElementById('season-reset-overlay').classList.add('hidden');
   });
   document.getElementById('battle-help-btn').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.remove('hidden');
