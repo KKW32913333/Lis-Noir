@@ -387,25 +387,30 @@
   /* ---------- Battle screen ---------- */
   #screen-battle{background:linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-dark2) 55%, var(--bg-dark) 100%);}
   .cg-battle-header{display:flex; justify-content:space-between; align-items:center; padding:8px 10px; flex-shrink:0;}
-  .cg-battle-header-left{display:flex; align-items:center; gap:10px;}
-  .cg-battle-header-right{display:flex; align-items:center; gap:6px;}
-  .cg-pp-badge{display:flex; align-items:center; gap:2px; font-size:12px; font-weight:800; color:#fff;
+  .cg-pp-badge{display:flex; align-items:center; gap:3px; font-size:11px; font-weight:800; color:#fff;
     background:linear-gradient(180deg,#4fa8e0,#1c5a8f); border:1.5px solid #ffffffaa; border-radius:14px; padding:4px 9px;
-    box-shadow:0 2px 6px #1c5a8f66;}
-  .cg-battle-substat-row{display:flex; justify-content:flex-end; gap:8px; padding:0 12px 6px;}
+    box-shadow:0 2px 6px #1c5a8f66; white-space:nowrap;}
   .cg-substat-chip{display:flex; align-items:center; gap:3px; font-size:10px; color:#EAE6F5; background:#00000044;
     border:1px solid #ffffff33; border-radius:10px; padding:3px 8px;}
   .cg-graveyard-chip{cursor:pointer;}
   .cg-battle-back-btn{padding:6px 8px; font-size:16px; flex-shrink:0; color:#EAE6F5;}
-  .cg-hp-chip{display:flex; align-items:center; gap:6px; font-size:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:5px 10px; border-radius:16px; box-shadow:0 2px 6px #00000033;}
-  .cg-hp-chip .val{font-weight:700; color:var(--hp-red);}
+  .cg-hp-chip{display:flex; align-items:center; gap:6px; font-size:13px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:5px 10px; border-radius:16px; box-shadow:0 2px 6px #00000033;}
+  .cg-hp-chip .val{font-weight:800; color:var(--hp-red);}
+  .cg-hp-chip-self .val{color:#7ec8f0;}
   .cg-timer{font-size:11px; color:var(--true-gold); text-align:center; background:#00000055; padding:3px 12px; border-radius:12px; letter-spacing:1px;}
 
-  .cg-battle-board{flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:58px 10px 6px 10px; position:relative;
+  .cg-battle-board{flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:6px 10px; position:relative;
     background:radial-gradient(ellipse 300px 200px at 50% 45%, #8A4FFF33 0%, transparent 70%);}
-  #battle-enemy-portrait{position:absolute; top:2px; left:50%; transform:translateX(-50%); width:52px; height:52px; border-radius:50%;
+  .cg-side-info-row{display:flex; align-items:center; gap:10px; padding:4px 2px;}
+  .cg-side-info-enemy{justify-content:flex-start;}
+  .cg-side-info-player{justify-content:flex-start;}
+  .cg-side-portrait{width:52px; height:52px; border-radius:50%; flex-shrink:0;
     background:linear-gradient(145deg,#3a2530,#1c1d24); border:2px solid var(--hp-red); display:flex; align-items:center;
-    justify-content:center; font-size:22px; cursor:pointer; z-index:3; box-shadow:0 0 12px #A2334755, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;}
+    justify-content:center; font-size:22px; cursor:pointer; z-index:3; box-shadow:0 0 12px #A2334755, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;
+    background-size:cover; background-position:center; position:relative;}
+  #battle-player-portrait.cg-side-portrait{border-color:#4fa8e0; box-shadow:0 0 12px #1c5a8f55, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;}
+  .cg-side-info-main{display:flex; flex-direction:column; gap:5px;}
+  .cg-side-sub-row{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
 
   .cg-field-row{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; padding:4px 0;}
   .cg-field-slot{aspect-ratio:3/4; border:1px dashed #4d4560; border-radius:10px; position:relative; background:#ffffff08;
@@ -429,8 +434,7 @@
   .cg-shield-icon{position:absolute; top:16px; right:2px; font-size:9px; font-weight:800; color:#fff; z-index:4;
     background:#2f5f8fdd; border-radius:6px; padding:1px 4px; filter:drop-shadow(0 1px 2px #000);}
 
-  .cg-battle-mid{display:flex; align-items:center; justify-content:center; padding:6px 0; color:#a89fc4; font-size:10px;}
-  .cg-battle-mid-row{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .cg-battle-mid-row{display:flex; flex-direction:column; align-items:center; gap:4px; min-height:4px;}
   .cg-field-indicator{font-size:10px; color:var(--text-panel); background:var(--bg-panel2); border:1px solid var(--hairline-panel);
     padding:4px 10px; border-radius:12px; box-shadow:0 2px 6px #00000033;}
 
@@ -707,11 +711,6 @@
   .cg-world-stages{display:flex; flex-direction:column; gap:10px;}
 
   /* ---------- ポートレートHUD / VS演出 ---------- */
-  .cg-player-badge{display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--bg-panel2),var(--bg-panel));
-    border:1px solid var(--true-gold); padding:3px 12px 3px 3px; border-radius:18px; box-shadow:0 2px 8px #00000044, 0 0 0 1px #D9B45B33;}
-  .cg-player-badge .val{font-weight:800; color:var(--hp-red); font-size:13px;}
-  .cg-mini-portrait{width:36px; height:36px; border-radius:50%; background-image:url('hero-bg.jpg');
-    background-size:cover; background-position:center 15%; border:2px solid var(--true-gold); flex-shrink:0; box-shadow:0 2px 8px #D9B45B55, 0 0 0 1px #ffffff55;}
   .cg-vs-intro{position:absolute; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; gap:22px;
     background:#23242be6; opacity:1; transition:opacity .3s ease;}
   .cg-vs-intro.hidden{opacity:0; pointer-events:none;}
@@ -825,7 +824,7 @@
   .cg-help-item{font-size:12px; line-height:1.6; color:var(--text-dim-panel);}
   .cg-help-item b{color:var(--text-panel);}
   /* ---------- 属性相性ストリップ（バトル画面に常時表示） ---------- */
-  .cg-element-strip{display:flex; align-items:center; justify-content:center; gap:10px; padding:2px 12px 4px; opacity:.92;}
+  .cg-element-strip{display:flex; align-items:center; justify-content:flex-start; gap:10px; padding:2px 12px 4px; opacity:.92;}
   .cg-element-circle{width:60px; height:52px; flex-shrink:0;}
   .cg-element-arc{stroke:var(--gold-bright); stroke-width:2.5; fill:none;}
   .cg-element-node2 circle{stroke:#00000040; stroke-width:1.5;}
@@ -1389,19 +1388,9 @@
   <!-- ============ バトル画面 ============ -->
   <section id="screen-battle" class="cg-screen">
     <div class="cg-battle-header">
-      <div class="cg-battle-header-left">
-        <button class="cg-back-btn cg-battle-back-btn" id="battle-back-btn" title="ホームへ戻る">←</button>
-        <div class="cg-player-badge">
-          <div id="battle-player-portrait" class="cg-mini-portrait"></div>
-          <span>🛡️ <span class="val" id="battle-player-hp">30</span></span>
-        </div>
-        <div class="cg-pp-badge" id="battle-pp-badge" title="コスト（PP）">💧<span id="battle-pp-current">1</span>/<span id="battle-pp-max">1</span></div>
-      </div>
+      <button class="cg-back-btn cg-battle-back-btn" id="battle-back-btn" title="ホームへ戻る">←</button>
       <div class="cg-timer" id="battle-turn-timer">ターン 1</div>
-      <div class="cg-battle-header-right">
-        <div class="cg-hp-chip" id="battle-enemy-hp-chip">👹 <span class="val" id="battle-enemy-hp">30</span></div>
-        <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
-      </div>
+      <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
     </div>
 
     <div class="cg-element-strip" title="属性相性：矢印の先が弱点。光と闇はお互いが弱点">
@@ -1427,24 +1416,41 @@
       </div>
     </div>
 
-    <div class="cg-battle-substat-row">
-      <div class="cg-substat-chip" title="残り手札">🎴×<span id="battle-hand-count">0</span></div>
-      <div class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-deck-remaining">0</span></div>
-      <div class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></div>
-    </div>
-
     <div class="cg-battle-board">
       <div id="battle-impact-flash"></div>
       <div id="turn-banner"></div>
-      <div id="battle-enemy-portrait"><span id="battle-enemy-emoji">👹</span><span id="battle-portrait-preview" class="cg-preview-badge"></span></div>
-      <div id="battle-direct-attack-label" class="cg-direct-attack-label">タップで直接攻撃</div>
       <div id="battle-skill-flash"></div>
+
+      <div class="cg-side-info-row cg-side-info-enemy">
+        <div id="battle-enemy-portrait" class="cg-side-portrait"><span id="battle-enemy-emoji">👹</span><span id="battle-portrait-preview" class="cg-preview-badge"></span></div>
+        <div class="cg-side-info-main">
+          <div class="cg-hp-chip" id="battle-enemy-hp-chip">👹 <span class="val" id="battle-enemy-hp">30</span></div>
+          <div class="cg-side-sub-row">
+            <span class="cg-pp-badge" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
+            <span class="cg-substat-chip" title="敵の残り山札枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-enemy-deck-remaining">0</span></span>
+          </div>
+        </div>
+      </div>
+      <div id="battle-direct-attack-label" class="cg-direct-attack-label">タップで直接攻撃</div>
+
       <div class="cg-field-row" id="battle-enemy-field"></div>
       <div class="cg-battle-mid-row">
         <div id="battle-field-indicator" class="cg-field-indicator" style="display:none;"></div>
-        <div class="cg-battle-mid">カードをタップ→対象をタップ（攻撃／スペル／装備／フィールド）</div>
       </div>
       <div class="cg-field-row" id="battle-player-field"></div>
+
+      <div class="cg-side-info-row cg-side-info-player">
+        <div id="battle-player-portrait" class="cg-side-portrait"></div>
+        <div class="cg-side-info-main">
+          <div class="cg-hp-chip cg-hp-chip-self">🛡️ <span class="val" id="battle-player-hp">30</span></div>
+          <div class="cg-side-sub-row">
+            <span class="cg-pp-badge" id="battle-pp-badge" title="自分のマナ">マナ <span id="battle-pp-current">1</span>/<span id="battle-pp-max">1</span></span>
+            <span class="cg-substat-chip" title="残り手札">🎴×<span id="battle-hand-count">0</span></span>
+            <span class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-deck-remaining">0</span></span>
+            <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="cg-hand-row" id="battle-hand"></div>
@@ -1452,7 +1458,7 @@
     <div class="cg-battle-footer">
       <div class="cg-battle-navbar">
         <div class="cg-battle-navbar-cost">
-          <span class="cg-cost-label">💧</span>
+          <span class="cg-cost-label">マナ</span>
           <div class="cg-cost-track"><div class="cg-cost-fill" id="battle-cost-fill"></div></div>
           <span id="battle-cost-label" class="cg-battle-navbar-costlabel"></span>
         </div>
