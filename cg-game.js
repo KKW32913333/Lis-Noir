@@ -2472,7 +2472,6 @@ function renderBattle() {
   document.getElementById('battle-player-hp').textContent = battle.playerHp;
   document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
   document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
-  document.getElementById('battle-cost-label').textContent = `${battle.playerCost} / ${battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost}`;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
   document.getElementById('battle-hand-count').textContent = battle.playerHand.length;
   document.getElementById('battle-graveyard-count').textContent = battle.playerGraveyard.length;
@@ -2545,7 +2544,9 @@ function renderBattle() {
   }).join('');
 
   const portraitPreviewEl = document.getElementById('battle-portrait-preview');
-  const faceAttackReady = !!(previewingAttack && attackValid.faceAllowed) || !!previewingSpell;
+  const quickAttackReady = battle.selectedFieldIdx === null && !previewingSpell &&
+    battle.playerField.some(u => u && u.canAttack && getValidTargets(u, battle.enemyField).faceAllowed);
+  const faceAttackReady = !!(previewingAttack && attackValid.faceAllowed) || !!previewingSpell || quickAttackReady;
   if (previewingAttack && attackValid.faceAllowed) {
     portraitPreviewEl.textContent = `⚔${previewDamage(previewingAttack, null).dmg}`;
     portraitPreviewEl.classList.add('show');
@@ -2685,7 +2686,14 @@ function bindBattleEvents() {
     if (battle.selectedFieldIdx !== null) {
       attackTarget(battle.selectedFieldIdx, null);
     } else {
-      renderBattle();
+      // モンスター未選択の状態で敵をタップした場合、攻撃可能な自分のモンスターを自動で選んで
+      // そのまま直接攻撃する（毎回「モンスターをタップ→敵をタップ」としなくて済むようにするため）
+      const readyIdx = battle.playerField.findIndex(u => u && u.canAttack && getValidTargets(u, battle.enemyField).faceAllowed);
+      if (readyIdx !== -1) {
+        attackTarget(readyIdx, null);
+      } else {
+        renderBattle();
+      }
     }
   };
   document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
@@ -3780,12 +3788,47 @@ function showOpeningAnimation(pack, cardIds) {
     document.getElementById('opening-flash').classList.add('flash');
     sfxReveal();
     setTimeout(() => {
-      overlay.classList.add('hidden');
       document.getElementById('opening-flash').classList.remove('flash');
-      applyPackRewards(cardIds);
+      inner.style.visibility = 'hidden'; // 演出の土台(オーバーレイ)は表示したまま、バースト部分だけ隠す
+      // 最も良いレアリティのカードを、実際のイラストとともに大きくお披露目してから結果画面へ
+      showOpeningTeaser(cardIds, bestRarity, () => {
+        overlay.classList.add('hidden');
+        inner.style.visibility = '';
+        applyPackRewards(cardIds);
+      });
     }, 480);
   };
   inner.addEventListener('click', openNow);
+}
+
+// 獲得カードの中で最もレアリティが高い1枚を、実際のイラストとともに大きく表示する「お披露目」演出。
+// ワクワク感を出すため、通常より長めに（約1.3秒）表示してから結果画面に進む
+function showOpeningTeaser(cardIds, bestRarity, onDone) {
+  const rarityOrder = ['normal', 'rare', 'epic', 'legend'];
+  const bestId = cardIds.reduce((best, id) => {
+    return rarityOrder.indexOf(CARD_DEFS[id].rarity) > rarityOrder.indexOf(CARD_DEFS[best].rarity) ? id : best;
+  }, cardIds[0]);
+  const def = CARD_DEFS[bestId];
+  const rarity = RARITY[def.rarity];
+  const teaser = document.getElementById('opening-teaser');
+  const cardEl = document.getElementById('opening-teaser-card');
+  cardEl.style.backgroundImage = def.image ? `url('${def.image}')` : `linear-gradient(145deg, ${rarity.color}, #1c1d24)`;
+  cardEl.textContent = def.image ? '' : def.emoji;
+  cardEl.style.display = 'flex';
+  cardEl.style.alignItems = 'center';
+  cardEl.style.justifyContent = 'center';
+  cardEl.style.fontSize = '56px';
+  document.getElementById('opening-teaser-name').textContent = def.name;
+  document.getElementById('opening-teaser-rarity').textContent = rarity.name;
+  teaser.dataset.rarity = def.rarity;
+  void teaser.offsetWidth; // reflow でアニメ再トリガー
+  teaser.classList.add('show');
+  sfxReveal();
+  const holdTime = def.rarity === 'legend' ? 1500 : (def.rarity === 'epic' ? 1300 : 1100);
+  setTimeout(() => {
+    teaser.classList.remove('show');
+    onDone();
+  }, holdTime);
 }
 
 function applyPackRewards(cardIds) {
