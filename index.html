@@ -425,6 +425,8 @@
     filter:drop-shadow(0 1px 2px #000);}
   .cg-poison-icon{position:absolute; top:2px; right:2px; font-size:12px; z-index:4;
     filter:drop-shadow(0 1px 2px #000);}
+  .cg-shield-icon{position:absolute; top:16px; right:2px; font-size:9px; font-weight:800; color:#fff; z-index:4;
+    background:#2f5f8fdd; border-radius:6px; padding:1px 4px; filter:drop-shadow(0 1px 2px #000);}
 
   .cg-battle-mid{display:flex; align-items:center; justify-content:center; padding:6px 0; color:#a89fc4; font-size:10px;}
   .cg-battle-mid-row{display:flex; flex-direction:column; align-items:center; gap:4px;}
@@ -1449,6 +1451,7 @@
           <div class="cg-help-item"><b>⑤ カード情報</b><br>場のモンスターを長押しすると、詳細（能力・ステータス）を確認できます。自分の場のモンスターは、そこから墓地に送る（除外する）こともできます。</div>
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
+          <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🛡シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>
