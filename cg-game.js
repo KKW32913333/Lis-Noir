@@ -77,6 +77,17 @@ const CARD_DEFS = {
   equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: 'card-equip-ironsword.png', emoji: '🗡️' },
   equip_shield:     { name: 'ガーディアンシールド', element: 'light', rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 0, hp: 4 }, skill: '味方1体のHP+4', image: 'card-equip-shield.png', emoji: '🛡️' },
   equip_dragonmail: { name: 'ドラゴンアーマー',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 3 }, skill: '味方1体の攻撃力+2・HP+3', image: 'card-equip-dragonmail.png', emoji: '🎽' },
+  // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬。画像は今後差し替え予定（image:nullの間は絵文字で表示） ----
+  dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: null, emoji: '🔮' },
+  dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: null, emoji: '💍' },
+  dungeon_equip_30:  { name: '亡国の紋章',     element: 'fire',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 4 }, skill: '味方1体の攻撃力+5・HP+4', image: null, emoji: '🏵️' },
+  dungeon_equip_40:  { name: '氷結の秘宝',     element: 'water',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 5 }, skill: '味方1体の攻撃力+5・HP+5', image: null, emoji: '❄️' },
+  dungeon_equip_50:  { name: '天空の羽衣',     element: 'light',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 5 }, skill: '味方1体の攻撃力+6・HP+5', image: null, emoji: '🪽' },
+  dungeon_equip_60:  { name: '終焉の書',       element: 'dark',   rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 6 }, skill: '味方1体の攻撃力+6・HP+6', image: null, emoji: '📕' },
+  dungeon_equip_70:  { name: '虚無の指輪',     element: 'dark',   rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 6 }, skill: '味方1体の攻撃力+7・HP+6', image: null, emoji: '⚫' },
+  dungeon_equip_80:  { name: '永劫の鎧',       element: 'nature', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 7 }, skill: '味方1体の攻撃力+7・HP+7', image: null, emoji: '🛡️' },
+  dungeon_equip_90:  { name: '創世の宝珠',     element: 'light',  rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 8, hp: 7 }, skill: '味方1体の攻撃力+8・HP+7', image: null, emoji: '🔆' },
+  dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: null, emoji: '👑' },
 
   // ---- フィールドカード（場に出ている間、対応属性のモンスター全体（両陣営）に継続効果） ----
   field_inferno:   { name: 'インフェルノフィールド', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'fire', atk: 1 }, skill: '場に出ている間、火属性モンスターの攻撃力+1（両陣営）', image: 'card-field-inferno.png', emoji: '🌋' },
@@ -210,6 +221,8 @@ function defaultState() {
     totalPacksOpened: 0,
     totalUpgrades: 0,
     stageProgress: 1,
+    dungeonFloor: 1,
+    dungeonEquipClaimed: [],
     hasSeenBattleHelp: false,
     hasSeenOnboarding: false,
     sfxMuted: false,
@@ -259,6 +272,11 @@ function loadState() {
       saved.deckPresets.forEach(preset => {
         if (Array.isArray(preset.cards)) preset.cards = preset.cards.filter(id => !!CARD_DEFS[id]);
       });
+    }
+    // 「夜天の英雄」ガチャ用チケットを1枚追加配布（既存プレイヤーへ1回限り）
+    if (!saved.grantedBonusTicket_20260724) {
+      saved.tickets = (saved.tickets || 0) + 1;
+      saved.grantedBonusTicket_20260724 = true;
     }
     return Object.assign(base, saved);
   } catch (e) {
@@ -2003,6 +2021,69 @@ const WORLDS = [
   { id: 10, name: '永劫回帰の座', stageIds: [46, 47, 48, 49, 50] },
 ];
 
+// ---------- ダンジョン（地下1階〜100階） ----------
+const DUNGEON_MAX_FLOOR = 100;
+// フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
+const DUNGEON_BOSS_CARDS = ['fire_dragon', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcguardian', 'dark_reaper', 'crystal_fox', 'dark_demonlord'];
+// 10階ごとの装備報酬（フロアボスを撃破した時に手に入るレジェンド装備。floor/10 - 1 が配列インデックスに対応）
+const DUNGEON_EQUIPMENT_REWARDS = [
+  'dungeon_equip_10', 'dungeon_equip_20', 'dungeon_equip_30', 'dungeon_equip_40', 'dungeon_equip_50',
+  'dungeon_equip_60', 'dungeon_equip_70', 'dungeon_equip_80', 'dungeon_equip_90', 'dungeon_equip_100',
+];
+const DUNGEON_BG_THEMES = ['cave', 'moonshadow', 'purification', 'frost', 'empress', 'inferno2', 'volcano', 'castle'];
+
+function isDungeonBossFloor(floor) {
+  return floor % 10 === 0;
+}
+
+// フロアの敵HP。通常階も含めてじわじわ強くなり、ボス階はさらに大きく強化される
+function getDungeonFloorHp(floor) {
+  const base = 40 + Math.round(Math.pow(floor, 1.42) * 4.2);
+  return isDungeonBossFloor(floor) ? Math.round(base * 1.7) : base;
+}
+
+// フロアが深くなるほど、敵デッキのレアリティ構成をどんどんエピック・レジェンド寄りにする
+function getDungeonFloorWeights(floor) {
+  const t = Math.min(1, floor / DUNGEON_MAX_FLOOR);
+  const legend = Math.round(10 + t * 85);
+  const epic = Math.round(Math.max(3, 40 - t * 32));
+  const rare = Math.max(0, 100 - legend - epic);
+  return { normal: 0, rare, epic, legend };
+}
+
+function getDungeonFloorBossCard(floor) {
+  const idx = Math.floor((floor - 1) / 10) % DUNGEON_BOSS_CARDS.length;
+  return DUNGEON_BOSS_CARDS[idx];
+}
+
+function getDungeonEquipmentReward(floor) {
+  const idx = Math.floor(floor / 10) - 1;
+  return DUNGEON_EQUIPMENT_REWARDS[idx] || null;
+}
+
+// STAGESと同じ形（startBattleがそのまま扱える形）で、指定フロアの疑似ステージオブジェクトを生成する
+function getDungeonFloorStage(floor) {
+  floor = Math.max(1, Math.min(DUNGEON_MAX_FLOOR, floor));
+  const boss = isDungeonBossFloor(floor);
+  const idx = Math.floor((floor - 1) / 10);
+  return {
+    id: 5000 + floor, // 既存のSTAGES(1〜50)と衝突しない専用の番号帯
+    isDungeon: true,
+    dungeonFloor: floor,
+    name: boss ? `地下${floor}階・フロアボス` : `地下${floor}階`,
+    portrait: boss ? '👑' : '🗝️',
+    hp: getDungeonFloorHp(floor),
+    bossCard: getDungeonFloorBossCard(floor),
+    spellChance: Math.min(0.85, 0.25 + floor * 0.006),
+    bgTheme: DUNGEON_BG_THEMES[idx % DUNGEON_BG_THEMES.length],
+    weights: getDungeonFloorWeights(floor),
+    rewardGold: 300 + floor * 45,
+    rewardGems: 20 + floor * 4,
+    trophyDelta: 0, // ダンジョンはトロフィーに影響しない（通常のランク戦とは別モード）
+    dungeonEquipReward: boss ? getDungeonEquipmentReward(floor) : null,
+  };
+}
+
 // ---------- イベントクエスト（期間限定） ----------
 // 今後、新しいイベントを追加する場合はこの配列に1件追加するだけでOK（startDate/endDateを過ぎると自動的に非表示になる）
 const EVENTS = [
@@ -2142,6 +2223,50 @@ function renderStageSelect() {
   });
 }
 
+function renderDungeonSelect() {
+  document.getElementById('dungeon-current-floor').textContent = state.dungeonFloor;
+  const wrap = document.getElementById('dungeon-list');
+  const groups = [];
+  for (let g = 0; g < DUNGEON_MAX_FLOOR / 10; g++) groups.push({ start: g * 10 + 1, end: g * 10 + 10 });
+
+  wrap.innerHTML = groups.map(group => {
+    const groupUnlocked = group.start <= state.dungeonFloor;
+    const floorsHtml = [];
+    for (let floor = group.start; floor <= group.end; floor++) {
+      const stageInfo = getDungeonFloorStage(floor);
+      const unlocked = floor <= state.dungeonFloor;
+      const cleared = floor < state.dungeonFloor;
+      const boss = isDungeonBossFloor(floor);
+      floorsHtml.push(`
+        <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''} ${boss ? 'cg-dungeon-boss-card' : ''}" data-floor="${floor}">
+          <div class="cg-stage-portrait">${unlocked ? stageInfo.portrait : '🔒'}</div>
+          <div class="cg-stage-info">
+            <div class="cg-stage-name">地下${floor}階${boss ? '（フロアボス）' : ''}</div>
+            <div class="cg-stage-desc">${unlocked
+              ? `敵HP ${stageInfo.hp}　報酬 💰${stageInfo.rewardGold} 💎${stageInfo.rewardGems}${stageInfo.dungeonEquipReward ? ' <span class="cg-dungeon-equip-tag">👑レジェンド装備</span>' : ''}`
+              : '前の階層をクリアすると解放'}</div>
+          </div>
+          <div class="cg-stage-go">${unlocked ? (boss ? '👑' : '⚔️') : ''}</div>
+        </div>`);
+    }
+    return `
+      <div class="cg-world-section">
+        <div class="cg-world-header ${groupUnlocked ? '' : 'locked'}">
+          <span class="cg-world-name">🕳️ 地下${group.start}〜${group.end}階</span>
+          ${!groupUnlocked ? '<span class="cg-world-lock">🔒 未解放</span>' : ''}
+        </div>
+        <div class="cg-world-stages">${floorsHtml.join('')}</div>
+      </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
+    node.addEventListener('click', () => {
+      const floor = Number(node.dataset.floor);
+      startBattle(getDungeonFloorStage(floor));
+    });
+  });
+}
+
 function newBattleUnit(id, isPlayerCard) {
   const def = CARD_DEFS[id];
   const owned = isPlayerCard ? state.cards[id] : null;
@@ -2231,7 +2356,7 @@ function startBattle(stage) {
   // 削除済みカード等、CARD_DEFSに存在しないIDが万一デッキに残っていた場合に備え、安全のため除外してから使用
   const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
   const playerDeck = shuffle(validDeck.length ? validDeck.slice() : Object.keys(state.cards).slice(0, 10));
-  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 20, stage.spellChance || 0));
+  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 40, stage.spellChance || 0));
   const playerMaxHp = getPlayerMaxHp();
 
   battle = {
@@ -3485,25 +3610,44 @@ function showResult(won) {
   const el = document.getElementById('result-title');
   el.textContent = won ? 'WIN' : 'LOSE';
   el.className = won ? 'cg-result-title win' : 'cg-result-title lose';
-  document.getElementById('result-stage-name').textContent = typeof stage.id === 'number' ? `ステージ${stage.id}　${stage.name}` : `🎉 ${stage.name}`;
-  const delta = won ? stage.trophyDelta : -20;
+  document.getElementById('result-stage-name').textContent = stage.isDungeon
+    ? stage.name
+    : (typeof stage.id === 'number' ? `ステージ${stage.id}　${stage.name}` : `🎉 ${stage.name}`);
+  // ダンジョンはランク戦とは別モードのため、トロフィーには影響させない
+  const delta = stage.isDungeon ? 0 : (won ? stage.trophyDelta : -20);
   state.trophy = Math.max(0, state.trophy + delta);
   document.getElementById('result-trophy-delta').textContent = (delta > 0 ? '+' : '') + delta;
   document.getElementById('result-trophy').textContent = state.trophy.toLocaleString();
   const goldReward = won ? stage.rewardGold : 0;
   const gemReward = won ? stage.rewardGems : 0;
+  let dungeonEquipGained = null;
   if (won) {
     state.gold += goldReward; state.gems += gemReward;
     state.totalWins = (state.totalWins || 0) + 1;
     state.winProgress = Math.min(state.winMax, state.winProgress + 1);
-    if (typeof stage.id === 'number' && stage.id === state.stageProgress) {
+    if (stage.isDungeon) {
+      // このフロアが現在の到達フロアだった場合のみ、次のフロアを解放する
+      if (stage.dungeonFloor === state.dungeonFloor) {
+        state.dungeonFloor = Math.min(DUNGEON_MAX_FLOOR, state.dungeonFloor + 1);
+      }
+      if (stage.dungeonEquipReward) {
+        state.dungeonEquipClaimed = state.dungeonEquipClaimed || [];
+        if (!state.dungeonEquipClaimed.includes(stage.dungeonFloor)) {
+          state.dungeonEquipClaimed.push(stage.dungeonFloor);
+          const eid = stage.dungeonEquipReward;
+          if (!state.cards[eid]) state.cards[eid] = { level: 1, exp: 0, count: 1, evolved: false };
+          else state.cards[eid].count = (state.cards[eid].count || 1) + 1;
+          dungeonEquipGained = eid;
+        }
+      }
+    } else if (typeof stage.id === 'number' && stage.id === state.stageProgress) {
       state.stageProgress = Math.min(STAGES.length, state.stageProgress + 1);
     }
     gainDragonExp(15);
   }
   let leveledUp = false;
   if (won) {
-    const idNum = typeof stage.id === 'number' ? stage.id : 5;
+    const idNum = stage.isDungeon ? stage.dungeonFloor : (typeof stage.id === 'number' ? stage.id : 5);
     leveledUp = gainPlayerExp(10 + idNum * 6);
   }
   logBattleHistory(stage, won, delta);
@@ -3513,6 +3657,14 @@ function showResult(won) {
   const levelupEl = document.getElementById('result-levelup');
   levelupEl.classList.toggle('hidden', !leveledUp);
   if (leveledUp) levelupEl.textContent = `⭐ レベルアップ！ Lv.${state.playerLevel}`;
+  const equipEl = document.getElementById('result-dungeon-equip');
+  if (equipEl) {
+    equipEl.classList.toggle('hidden', !dungeonEquipGained);
+    if (dungeonEquipGained) {
+      const def = CARD_DEFS[dungeonEquipGained];
+      equipEl.textContent = `👑 レジェンド装備獲得！「${def.name}」`;
+    }
+  }
 
   if (won && stage.storyVictory && isWorldLastStage(stage)) {
     showStory(stage.storyVictory, () => revealResultScreen(won, stage));
@@ -4142,6 +4294,15 @@ const SCREEN_HELP = {
       '<b>① 期間限定ステージ</b><br>開催期間中のみ挑戦できる、期間限定のステージ一覧です。',
     ],
   },
+  dungeonSelect: {
+    title: 'ダンジョン画面のヘルプ',
+    items: [
+      '<b>① ダンジョンとは</b><br>通常のステージとは別の、地下1階〜100階の長期やり込みコンテンツです。トロフィーには影響しません。',
+      '<b>② 難易度</b><br>階層が深くなるほど敵が強くなり、敵の手持ちカードのレアリティもエピック・レジェンド中心に変化していきます。',
+      '<b>③ フロアボス</b><br>10階ごとにフロアボスが出現します。撃破すると、その階層限定のレジェンド装備カードが手に入ります（100階に近いほど強力）。',
+      '<b>④ 進行</b><br>現在の到達階層より先には進めません。1つ下の階層をクリアすると、次の階層が解放されます。',
+    ],
+  },
   shop: {
     title: 'ガチャ画面のヘルプ',
     items: [
@@ -4211,6 +4372,7 @@ function init() {
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('nav-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('quick-stage').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
+  document.getElementById('quick-dungeon').addEventListener('click', () => { renderDungeonSelect(); showScreen('dungeon-select'); });
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
