@@ -2390,6 +2390,7 @@ function startBattle(stage) {
     deckOutSide: null,
     playerGraveyard: [],
     enemyGraveyard: [],
+    lastPlayedInfo: null,
   };
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const enemyPortraitEl = document.getElementById('battle-enemy-portrait');
@@ -2636,12 +2637,16 @@ function renderBattle() {
   const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && (selectedSpell.target === 'enemy' || selectedSpell.target === 'enemy_monster') ? selectedSpell : null;
   const attackValid = previewingAttack ? getValidTargets(previewingAttack, battle.enemyField) : null;
 
-  // 選択中のカードのスキル効果を、手札の下の余白部分に表示する
+  // 選択中のカードのスキル効果を、手札の上の余白部分に表示する（未選択時は、直近に場に出した/使用したカードのスキルを表示）
   const skillInfoEl = document.getElementById('battle-selected-skill-info');
   const skillInfoDef = previewingAttack ? previewingAttack.def : selectedSpell;
   if (skillInfoDef) {
     document.getElementById('selected-skill-name').textContent = skillInfoDef.name;
     document.getElementById('selected-skill-text').textContent = skillInfoDef.skill || '固有スキルなし';
+    skillInfoEl.classList.remove('hidden');
+  } else if (battle.lastPlayedInfo) {
+    document.getElementById('selected-skill-name').textContent = battle.lastPlayedInfo.name;
+    document.getElementById('selected-skill-text').textContent = battle.lastPlayedInfo.skill;
     skillInfoEl.classList.remove('hidden');
   } else {
     skillInfoEl.classList.add('hidden');
@@ -2942,6 +2947,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   summonEffect();
+  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
   renderBattle();
 }
 
@@ -2996,7 +3002,7 @@ function castSpell(handIdx, targetIdx) {
       }
     }
   }
-  if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
+  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
   renderBattle();
 }
@@ -3010,7 +3016,7 @@ function playFieldCard(handIdx) {
   battle.selectedHandIdx = null;
   battle.fieldCard = id;
   sfxCardPlay();
-  if (def.skill) skillFlash(`${def.name}発動！\n${def.skill}`);
+  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
   renderBattle();
 }
 
@@ -3027,7 +3033,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   sfxCardPlay();
-  if (def.skill) skillFlash(`${def.name}を装備！\n${def.skill}`);
+  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
   renderBattle();
 }
 
