@@ -612,6 +612,7 @@
   .cg-graveyard-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%;
     max-height:50vh; overflow-y:auto; margin-bottom:14px; padding:2px;}
   .cg-graveyard-empty{grid-column:1/-1; text-align:center; color:#C7B6FFbb; font-size:12px; padding:20px 0;}
+  .cg-graveyard-slot{cursor:pointer; touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
   .cg-reveal-grid.hidden{display:none;}
   .cg-reveal-grid-item{position:relative; animation:revealPop .45s ease-out backwards;}
   .cg-reveal-grid-item.legend-glow{filter:drop-shadow(0 0 12px var(--true-gold));}
@@ -1565,8 +1566,9 @@
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
           <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🛡シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
-          <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
-          <div class="cg-help-item"><b>⑩ スキル効果の確認</b><br>手札の上の欄に、カードのスキル効果が表示されます。カードやモンスターを選択中はそのカードの効果を、何も選択していない時は直近に場に出した／使用したカードの効果を表示します。</div>
+          <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターや手札のカードを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
+          <div class="cg-help-item"><b>⑩ 墓地から手札に戻す</b><br>🪦アイコンから墓地を開き、カードをタップすると、マナ1を消費して手札に戻せます（手札に空きが必要です）。長押しするとカードの詳細を確認できます。</div>
+          <div class="cg-help-item"><b>⑪ スキル効果の確認</b><br>手札の上の欄に、カードのスキル効果が表示されます。カードやモンスターを選択中はそのカードの効果を、何も選択していない時は直近に場に出した／使用したカードの効果を表示します。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>

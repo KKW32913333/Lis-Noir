@@ -2093,17 +2093,34 @@ function isDungeonBossFloor(floor) {
 
 // フロアの敵HP。通常階も含めてじわじわ強くなり、ボス階はさらに大きく強化される
 function getDungeonFloorHp(floor) {
-  const base = 40 + Math.round(Math.pow(floor, 1.42) * 4.2);
+  const base = 15 + Math.round(Math.pow(floor, 1.5) * 2.0);
   return isDungeonBossFloor(floor) ? Math.round(base * 1.3) : base;
 }
 
-// フロアが深くなるほど、敵デッキのレアリティ構成をどんどんエピック・レジェンド寄りにする
+// フロアが深くなるほど、敵デッキのレアリティ構成を徐々に強くする。
+// 序盤（1〜10階）はレジェンドはおろかエピックも出さず、ノーマル・レアのみの易しい構成にする
 function getDungeonFloorWeights(floor) {
-  const t = Math.min(1, floor / DUNGEON_MAX_FLOOR);
-  const legend = Math.round(10 + t * 85);
-  const epic = Math.round(Math.max(3, 40 - t * 32));
-  const rare = Math.max(0, 100 - legend - epic);
-  return { normal: 0, rare, epic, legend };
+  if (floor <= 10) {
+    const rare = Math.min(60, floor * 6);
+    return { normal: 100 - rare, rare, epic: 0, legend: 0 };
+  }
+  if (floor <= 30) {
+    const t = (floor - 10) / 20;
+    const epic = Math.round(10 + t * 30);
+    const legend = Math.round(Math.max(0, floor - 20) * 2);
+    const rare = Math.max(0, 100 - epic - legend);
+    return { normal: 0, rare, epic, legend };
+  }
+  if (floor <= 60) {
+    const t = (floor - 30) / 30;
+    const legend = Math.round(20 + t * 50);
+    const epic = Math.max(5, 100 - legend);
+    return { normal: 0, rare: 0, epic, legend };
+  }
+  const t = (floor - 60) / 40;
+  const legend = Math.round(Math.min(97, 70 + t * 27));
+  const epic = Math.max(3, 100 - legend);
+  return { normal: 0, rare: 0, epic, legend };
 }
 
 function getDungeonFloorBossCard(floor) {
@@ -2129,7 +2146,7 @@ function getDungeonFloorStage(floor) {
     portrait: boss ? '👑' : '🗝️',
     hp: getDungeonFloorHp(floor),
     bossCard: getDungeonFloorBossCard(floor),
-    spellChance: Math.min(0.85, 0.25 + floor * 0.006),
+    spellChance: Math.min(0.85, 0.05 + floor * 0.008),
     bgTheme: DUNGEON_BG_THEMES[idx % DUNGEON_BG_THEMES.length],
     weights: getDungeonFloorWeights(floor),
     rewardGold: 300 + floor * 45,
@@ -2546,17 +2563,62 @@ function openGraveyard() {
   if (!cards.length) {
     grid.innerHTML = '<div class="cg-graveyard-empty">墓地にはまだ何もありません</div>';
   } else {
-    // 直近に送られたカードが先頭に来るよう逆順で表示
-    grid.innerHTML = cards.slice().reverse().map(id => renderCardFace(id, { small: true })).join('');
-    grid.querySelectorAll('.cg-card').forEach(node => {
-      bindLongPress(node, () => showHandCardInfo(node.dataset.id));
-      node.addEventListener('click', () => {
+    // 直近に送られたカードが先頭に来るよう逆順で表示。元の配列インデックスをスロットのdata属性に保持する
+    const reversed = cards.map((id, i) => ({ id, originalIndex: i })).reverse();
+    grid.innerHTML = reversed.map(entry =>
+      `<div class="cg-graveyard-slot" data-gy-index="${entry.originalIndex}">${renderCardFace(entry.id, { small: true })}</div>`
+    ).join('');
+    grid.querySelectorAll('.cg-graveyard-slot').forEach(slot => {
+      const cardNode = slot.querySelector('.cg-card');
+      bindLongPress(slot, () => showHandCardInfo(cardNode.dataset.id));
+      slot.addEventListener('click', () => {
         if (longPressFired) { longPressFired = false; return; }
-        showHandCardInfo(node.dataset.id);
+        returnCardFromGraveyard(Number(slot.dataset.gyIndex));
       });
     });
   }
   document.getElementById('graveyard-overlay').classList.remove('hidden');
+}
+
+const GRAVEYARD_RECLAIM_COST = 1;
+
+// 墓地のカードをマナを消費して手札に戻す（長押しでカード情報の確認、タップでこの動作）
+function returnCardFromGraveyard(gyIndex) {
+  if (!battle || battle.over) return;
+  const id = battle.playerGraveyard[gyIndex];
+  const def = CARD_DEFS[id];
+  if (!def) return;
+  if (battle.playerHand.length >= MAX_HAND_SIZE) {
+    skillFlash('手札がいっぱいで、墓地から戻せません');
+    return;
+  }
+  if (battle.playerCost < GRAVEYARD_RECLAIM_COST) {
+    skillFlash(`マナが足りず、墓地から戻せません（消費マナ${GRAVEYARD_RECLAIM_COST}）`);
+    return;
+  }
+  if (!confirm(`「${def.name}」をマナ${GRAVEYARD_RECLAIM_COST}消費して手札に戻します。よろしいですか？`)) return;
+  battle.playerCost -= GRAVEYARD_RECLAIM_COST;
+  battle.playerGraveyard.splice(gyIndex, 1);
+  battle.playerHand.push(id);
+  sfxCardPlay();
+  skillFlash(`「${def.name}」を手札に戻した`);
+  renderBattle();
+  openGraveyard(); // 一覧を最新状態で再描画
+}
+
+// 手札のカードを、確認の上で墓地に手動で送る（数合わせや後で「墓地から戻す」を使うための布石として）
+function discardHandCardToGraveyard(handIdx) {
+  if (!battle || battle.over) return;
+  const id = battle.playerHand[handIdx];
+  const def = CARD_DEFS[id];
+  if (!def) return;
+  if (!confirm(`「${def.name}」を手札から墓地に送ります。よろしいですか？`)) return;
+  battle.playerHand.splice(handIdx, 1);
+  battle.selectedHandIdx = null;
+  battle.playerGraveyard.push(id);
+  document.getElementById('card-info-overlay').classList.add('hidden');
+  skillFlash(`「${def.name}」を墓地に送った`);
+  renderBattle();
 }
 
 function shuffle(arr) {
@@ -2863,7 +2925,7 @@ function bindBattleEvents() {
     bindLongPress(node, () => {
       const idx = Number(node.dataset.idx);
       const id = battle.playerHand[idx];
-      if (id) showHandCardInfo(id);
+      if (id) showHandCardInfo(id, idx);
     });
   });
   document.querySelectorAll('#battle-player-field .cg-field-slot').forEach(node => {
@@ -3010,7 +3072,7 @@ function discardFieldUnit(idx) {
   renderBattle();
 }
 
-function showHandCardInfo(id) {
+function showHandCardInfo(id, handIdx) {
   const def = CARD_DEFS[id];
   if (!def) return;
   const rarity = RARITY[def.rarity];
@@ -3020,6 +3082,9 @@ function showHandCardInfo(id) {
   const type = def.type || 'monster';
   const roleText = type === 'monster'
     ? (def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）')
+    : '';
+  const discardBtn = (typeof handIdx === 'number')
+    ? `<button class="cg-btn cg-detail-discard-btn" id="card-info-hand-discard-btn" data-hand-idx="${handIdx}">🪦 墓地に送る（手札から除外）</button>`
     : '';
   document.getElementById('card-info-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
@@ -3032,8 +3097,12 @@ function showHandCardInfo(id) {
       <div class="cg-detail-stats">
         ${detailStatsBlock(def, evolved)}
       </div>
+      ${discardBtn}
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
+  if (typeof handIdx === 'number') {
+    document.getElementById('card-info-hand-discard-btn').addEventListener('click', () => discardHandCardToGraveyard(handIdx));
+  }
 }
 
 function playCardFromHand(handIdx, fieldIdx) {
