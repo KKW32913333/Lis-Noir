@@ -32,12 +32,11 @@ const CARD_DEFS = {
   water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 2 }, skill: '毎ターン開始時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-water-aquaslime.png', emoji: '🔵' },
   water_serpent:  { name: 'リヴァイアサン',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、攻撃した相手モンスターを1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
-  nature_treant:  { name: 'ウッドエント',     element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
   nature_elfarcher: { name: 'エルフアーチャー', element: 'nature', rarity: 'rare', cost: 3, atk: 3, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で相手に毒を付与（2ターンの間、毎ターン開始時に1ダメージ）', image: 'card-nature-elfarcher.png', emoji: '🏹' },
   nature_wolf:    { name: 'シャドウアサシン', element: 'dark', rarity: 'normal', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-shadowassassin.png', emoji: '🗡️' },
-  nature_panda:   { name: '世界樹の守護者', element: 'nature', rarity: 'rare', cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 1, shieldValue: 1 }, skill: '場に出た時、味方全体のHPを1回復し、シールド1を付与する', image: 'card-nature-worldtreeguardian.png', emoji: '🌪️' },
+  nature_panda:   { name: '世界樹の守護者', element: 'nature', rarity: 'epic', cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 1, shieldValue: 1 }, skill: '場に出た時、味方全体のHPを1回復し、シールド1を付与する', image: 'card-nature-worldtreeguardian.png', emoji: '🌪️' },
   light_angel:    { name: 'ヴァルキリー', element: 'light', rarity: 'epic', cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '⚔️' },
-  light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healLowestAllyCleanse', value: 3 }, skill: '場に出た時、最もHPが減っている味方1体のHPを3回復し、状態異常を解除する', image: 'card-light-holyangel.png', emoji: '👼' },
+  light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 3, atk: 2, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healLowestAllyCleanse', value: 3 }, skill: '場に出た時、最もHPが減っている味方1体のHPを3回復し、状態異常を解除する', image: 'card-light-holyangel.png', emoji: '👼' },
   light_unicorn:  { name: 'セラフィムナイト', element: 'light', rarity: 'normal',  cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 1 }, skill: '場に出た時、味方全体にシールド1を付与する', image: 'card-light-seraphimknight.png', emoji: '🛡️' },
   light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
   dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  role: 'attacker', skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
@@ -48,12 +47,10 @@ const CARD_DEFS = {
   crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'epic',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
   nature_elfunicorn:  { name: 'エルフユニコーン', element: 'nature', rarity: 'rare',  cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-nature-elfunicorn.png', emoji: '🦄' },
-  water_crystalgolem: { name: 'クリスタルゴーレム', element: 'water', rarity: 'epic', cost: 4, atk: 3, hp: 7, role: 'defender', skill: '', image: 'card-water-crystalgolem.png', emoji: '💎' },
-  dark_thunderchimera:{ name: 'サンダーキマイラ', element: 'dark', rarity: 'epic',    cost: 4, atk: 6, hp: 4, role: 'attacker', skill: '', image: 'card-dark-thunderchimera.png', emoji: '⚡' },
   nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: null, emoji: '🐇' },
   dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
-  fire_magmacolossus: { name: 'イフリート', element: 'fire', rarity: 'legend',    cost: 5, atk: 5, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与え、2ターンの間、火傷（毎ターン開始時に1ダメージ）を付与する', image: 'card-fire-ifrit.png', emoji: '👹' },
+  fire_magmacolossus: { name: 'イフリート', element: 'fire', rarity: 'epic',    cost: 5, atk: 5, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与え、2ターンの間、火傷（毎ターン開始時に1ダメージ）を付与する', image: 'card-fire-ifrit.png', emoji: '👹' },
   dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
   dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 2 }, skill: '【固有】場に出た時、自分のコストを2回復する', image: 'card-dark-lunaelf.png', emoji: '🦋' },
@@ -236,6 +233,15 @@ function loadState() {
     // 既存プレイヤーへの後方互換対応: 旧セーブにhasSeenOnboardingが無い場合、
     // 新規プレイヤー向けチュートリアルが誤って表示されないよう「見た事にする」
     if (saved.hasSeenOnboarding === undefined) saved.hasSeenOnboarding = true;
+    // カード完全削除時の後方互換対応: 廃止したカードIDが旧セーブに残っていると、
+    // デッキ内で参照切れを起こしうるため、所持カード・デッキの両方から取り除く
+    const removedCardIds = ['nature_treant', 'water_crystalgolem', 'dark_thunderchimera'];
+    removedCardIds.forEach(id => {
+      if (saved.cards) delete saved.cards[id];
+    });
+    if (Array.isArray(saved.deck)) {
+      saved.deck = saved.deck.filter(id => !removedCardIds.includes(id));
+    }
     return Object.assign(base, saved);
   } catch (e) {
     console.error('load failed', e);
@@ -3160,7 +3166,7 @@ const SHOP_PACKS = [
     preview: ['water_slime', 'nature_wolf', 'water_golem'] },
   { id: 'rare', name: 'レアガチャ', icon: '🎁', currency: 'gems', cost: 10,
     desc: 'レア以上が確定で出るガチャ', weights: { normal: 0, rare: 65, epic: 28, legend: 7 },
-    preview: ['nature_treant', 'dark_wolf', 'light_angel'] },
+    preview: ['nature_elfarcher', 'dark_wolf', 'light_angel'] },
   { id: 'premium', name: 'プレミアムガチャ', icon: '👑', currency: 'gems', cost: 30,
     desc: 'エピック以上が確定で出る豪華ガチャ', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
     preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
