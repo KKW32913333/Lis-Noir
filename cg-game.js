@@ -231,8 +231,28 @@ function defaultState() {
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
     cards: owned,
-    deck: Object.keys(CARD_DEFS).slice(0, 12),
+    deck: buildStarterDeck(),
   };
+}
+
+// 新規プレイヤー用の初期デッキを、コストの低いノーマル・レアのモンスターを中心に自動で組む。
+// （CARD_DEFSの定義順に依存する「最初の12枚」方式だと、コストの重いレジェンドカードが混ざって
+// 　序盤で身動きが取れなくなる不具合があったため、コストで並べ替えて選ぶ方式に変更）
+function buildStarterDeck() {
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const candidates = Object.keys(CARD_DEFS).filter(id => {
+    const def = CARD_DEFS[id];
+    if (eventExclusiveIds.has(id)) return false;
+    if ((def.type || 'monster') !== 'monster') return false;
+    return def.rarity === 'normal' || def.rarity === 'rare';
+  }).sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
+
+  const deck = [];
+  candidates.forEach(id => {
+    const count = deck.filter(d => d === id).length;
+    if (count < 3 && deck.length < 20) deck.push(id);
+  });
+  return deck;
 }
 
 function loadState() {
@@ -1604,7 +1624,7 @@ function evolveCard(id) {
 let battle = null;
 
 const STAGES = [
-  { id: 1, name: '森を彷徨う影', portrait: '🐺', hp: 14, bossCard: 'nature_wolf', spellChance: 0.05, bgTheme: 'forest',
+  { id: 1, name: '森を彷徨う影', portrait: '🐺', hp: 11, bossCard: 'nature_wolf', spellChance: 0.02, bgTheme: 'forest',
     weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '呪いを喰らう獣＝モンスターが跋扈する時代。人々は結界の内側で身を寄せ合い、外の世界を恐れながら暮らしていた。' },
@@ -1617,7 +1637,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……勝てた。本当に、勝てるんだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '束の間の平穏の中、彼は森の奥へと続く道を見つめた。' },
     ] },
-  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 16, bossCard: 'fire_imp', spellChance: 0.08, bgTheme: 'snow',
+  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 12, bossCard: 'fire_imp', spellChance: 0.04, bgTheme: 'snow',
     weights: { normal: 80, rare: 17, epic: 3, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '村長', portrait: '👴', text: 'よく戻った。噂には聞いていたが、まさか本当に森の影を退けるとはな。' },
@@ -1630,7 +1650,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'これが……呪いの結晶。なんだか、悲しい色をしている。' },
       { speaker: 'ナレーター', portrait: '📖', text: '村へ戻る足取りは、来た時より少しだけ重かった。' },
     ] },
-  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 19, bossCard: 'dark_ghost', spellChance: 0.13, bgTheme: 'cave',
+  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 14, bossCard: 'dark_ghost', spellChance: 0.06, bgTheme: 'cave',
     weights: { normal: 55, rare: 32, epic: 11, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '洞窟の奥から、言葉にならない囁きが聞こえる。呪いに深く蝕まれたモンスターの気配だ。' },
@@ -1641,7 +1661,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '囁きは静まった。だが、これほどの呪いが集まる理由が、どうしても引っかかる。' },
       { speaker: '調教師', portrait: '🧑', text: 'まるで、この森全体が何かに怯えているみたいだ。' },
     ] },
-  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 22, bossCard: 'fire_flameslime', spellChance: 0.19, bgTheme: 'volcano',
+  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 17, bossCard: 'fire_flameslime', spellChance: 0.1, bgTheme: 'volcano',
     weights: { normal: 32, rare: 35, epic: 26, legend: 7 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: 'グルル……我が縄張りに踏み込むとは、良い度胸だ。' },
@@ -1652,7 +1672,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '古き竜の力もまた、呪いに触れれば牙を剥く。それでも、この地に平和が戻った。' },
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: '……ぐ……見事だ、人の子よ。この森には、まだ知らぬ強者がいる。心せよ。' },
     ] },
-  { id: 5, name: '森の女王', portrait: '👑', hp: 26, bossCard: 'nature_elfunicorn', spellChance: 0.26, bgTheme: 'castle',
+  { id: 5, name: '森の女王', portrait: '👑', hp: 20, bossCard: 'nature_elfunicorn', spellChance: 0.13, bgTheme: 'castle',
     weights: { normal: 12, rare: 28, epic: 38, legend: 22 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: '森の女王', portrait: '👑', text: 'ここまで来たか、人の子よ。ならば見せてやろう、この森の真の姿を。' },
@@ -1664,7 +1684,7 @@ const STAGES = [
       { speaker: '森の女王', portrait: '👑', text: 'この森を抜けた先に、かつて栄えた月影の国がある。そこで、お前は真実の一端を知るだろう。' },
       { speaker: '調教師', portrait: '🧑', text: '……ありがとうございます。必ず、この呪いの正体を突き止めてみせます。' },
     ] },
-  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 30, bossCard: 'dark_wolf', spellChance: 0.22, bgTheme: 'moonshadow',
+  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 26, bossCard: 'dark_wolf', spellChance: 0.18, bgTheme: 'moonshadow',
     weights: { normal: 20, rare: 32, epic: 35, legend: 13 }, rewardGold: 250, rewardGems: 22, trophyDelta: 44,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '森を抜けた先には、かつて栄えたという月影の国の廃墟が広がっていた。' },
@@ -1676,7 +1696,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '廃墟の奥に、まだ息づく者たちがいた。ここから、村と国の復興が始まる。' },
       { speaker: '月下の斥候', portrait: '🌙', text: '……その力、本物のようだな。良かろう、お前の話を聞こう。' },
     ] },
-  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 34, bossCard: 'nature_elfarcher', spellChance: 0.25, bgTheme: 'emerald',
+  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 30, bossCard: 'nature_elfarcher', spellChance: 0.2, bgTheme: 'emerald',
     weights: { normal: 14, rare: 30, epic: 38, legend: 18 }, rewardGold: 280, rewardGems: 25, trophyDelta: 48,
     storyIntro: [
       { speaker: '荒野の守護者', portrait: '🍃', text: '復興だと？ この荒野に、もう希望などない。' },
@@ -1688,7 +1708,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '一緒に、この国を立て直そう。' },
       { speaker: '荒野の守護者', portrait: '🍃', text: 'フン……悪くない誘いだ。' },
     ] },
-  { id: 8, name: '氷の試練', portrait: '❄️', hp: 38, bossCard: 'water_golem', spellChance: 0.28, bgTheme: 'frost',
+  { id: 8, name: '氷の試練', portrait: '❄️', hp: 33, bossCard: 'water_golem', spellChance: 0.23, bgTheme: 'frost',
     weights: { normal: 8, rare: 26, epic: 40, legend: 26 }, rewardGold: 310, rewardGems: 28, trophyDelta: 52,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '新たな仲間を迎えるには、氷の祠が課す試練を越えねばならないという。' },
@@ -1699,7 +1719,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '試練を越えた証に、祠は静かに光を放ち、新たな絆が芽生えた。' },
       { speaker: '調教師', portrait: '🧑', text: 'これから、よろしく頼む。一緒に、この呪いの謎を解き明かそう。' },
     ] },
-  { id: 9, name: '業火の番人', portrait: '🔥', hp: 42, bossCard: 'dark_shadowbat', spellChance: 0.31, bgTheme: 'inferno2',
+  { id: 9, name: '業火の番人', portrait: '🔥', hp: 37, bossCard: 'dark_shadowbat', spellChance: 0.25, bgTheme: 'inferno2',
     weights: { normal: 5, rare: 22, epic: 40, legend: 33 }, rewardGold: 350, rewardGems: 32, trophyDelta: 58,
     storyIntro: [
       { speaker: '業火の番人', portrait: '🔥', text: '女帝様の宝を狙う者に、我が炎は容赦せぬ。' },
@@ -1710,7 +1730,7 @@ const STAGES = [
       { speaker: '業火の番人', portrait: '🔥', text: '……我が炎が届かぬとはな。女帝様に伝えよ、危険な者が来ると。' },
       { speaker: '調教師', portrait: '🧑', text: '危険なつもりはない。ただ、この国を救う手立てを探しているだけだ。' },
     ] },
-  { id: 10, name: '月影の女帝', portrait: '👸', hp: 47, bossCard: 'water_icewolf', spellChance: 0.34, bgTheme: 'empress',
+  { id: 10, name: '月影の女帝', portrait: '👸', hp: 41, bossCard: 'water_icewolf', spellChance: 0.27, bgTheme: 'empress',
     weights: { normal: 2, rare: 16, epic: 38, legend: 44 }, rewardGold: 450, rewardGems: 45, trophyDelta: 70,
     storyIntro: [
       { speaker: '月影の女帝', portrait: '👸', text: 'よくぞここまで。復興を志す者よ、我が力、見せてやろう。' },
@@ -2021,6 +2041,41 @@ const WORLDS = [
   { id: 10, name: '永劫回帰の座', stageIds: [46, 47, 48, 49, 50] },
 ];
 
+// ---------- 高難易度クエスト（属性ごとの試練。ストーリーとは別枠の腕試しコンテンツ） ----------
+const HARD_QUESTS = [
+  { qid: 'hard_fire', id: 'hard_fire', name: '灼熱の悪夢', portrait: '🔥', hp: 2400, bossCard: 'fire_bahamut', spellChance: 0.75, bgTheme: 'inferno2',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
+    desc: '火属性の強敵が立ちはだかる、上級者向けの試練。' },
+  { qid: 'hard_water', id: 'hard_water', name: '深海の悪夢', portrait: '🌊', hp: 2400, bossCard: 'water_seiren', spellChance: 0.75, bgTheme: 'frost',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
+    desc: '水属性の強敵が立ちはだかる、上級者向けの試練。' },
+  { qid: 'hard_nature', id: 'hard_nature', name: '森羅の悪夢', portrait: '🌿', hp: 2400, bossCard: 'nature_emeraldgaia', spellChance: 0.75, bgTheme: 'emerald',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
+    desc: '自然属性の強敵が立ちはだかる、上級者向けの試練。' },
+  { qid: 'hard_light', id: 'hard_light', name: '光輝の試練', portrait: '✨', hp: 2400, bossCard: 'light_arcguardian', spellChance: 0.75, bgTheme: 'purification',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
+    desc: '光属性の強敵が立ちはだかる、上級者向けの試練。' },
+  { qid: 'hard_dark', id: 'hard_dark', name: '漆黒の試練', portrait: '🌙', hp: 2400, bossCard: 'dark_reaper', spellChance: 0.75, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
+    desc: '闇属性の強敵が立ちはだかる、上級者向けの試練。' },
+  { qid: 'hard_final', id: 'hard_final', name: '五属性の覇者', portrait: '💠', hp: 3600, bossCard: 'dark_demonlord', spellChance: 0.85, bgTheme: 'castle',
+    weights: { normal: 0, rare: 0, epic: 0, legend: 100 }, rewardGold: 6000, rewardGems: 500, trophyDelta: 250,
+    desc: 'すべての属性を極めた、高難易度クエスト最強格の相手。' },
+];
+
+// ---------- 特別クエスト（期間限定ではない、いつでも遊べる特殊ルールの一戦） ----------
+const SPECIAL_QUESTS = [
+  { qid: 'special_vampirelord', id: 'special_vampirelord', name: '決戦：ヴァンパイアロード', portrait: '🧛', hp: 1800, bossCard: 'dark_demonlord', spellChance: 0.6, bgTheme: 'castle',
+    weights: { normal: 0, rare: 10, epic: 30, legend: 60 }, rewardGold: 3000, rewardGems: 200, trophyDelta: 120,
+    desc: '吸血で自己回復し続ける、ヴァンパイアロードとの一騎打ち。長期戦を覚悟せよ。' },
+  { qid: 'special_nocturia', id: 'special_nocturia', name: '決戦：虚無の女王', portrait: '😈', hp: 1800, bossCard: 'dark_reaper', spellChance: 0.6, bgTheme: 'moonshadow',
+    weights: { normal: 0, rare: 10, epic: 30, legend: 60 }, rewardGold: 3000, rewardGems: 200, trophyDelta: 120,
+    desc: '行動不能とコスト消費で妨害してくる、虚無の女王との一戦。' },
+  { qid: 'special_twindragons', id: 'special_twindragons', name: '双竜戦', portrait: '🐉', hp: 2000, bossCard: 'fire_dragon', spellChance: 0.55, bgTheme: 'inferno2',
+    weights: { normal: 0, rare: 5, epic: 25, legend: 70 }, rewardGold: 3200, rewardGems: 220, trophyDelta: 130,
+    desc: '伝説の竜が束になって襲いかかる、高火力デッキとの戦い。' },
+];
+
 // ---------- ダンジョン（地下1階〜100階） ----------
 const DUNGEON_MAX_FLOOR = 100;
 // フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
@@ -2198,7 +2253,15 @@ function stagePortraitHtml(stage, unlocked) {
   return stage.portrait;
 }
 
+let stageSelectMode = 'story';
+
 function renderStageSelect() {
+  if (stageSelectMode === 'story') { renderStoryStages(); return; }
+  if (stageSelectMode === 'hard') { renderQuestList(HARD_QUESTS, '高難易度クエスト', 26); return; }
+  renderQuestList(SPECIAL_QUESTS, '特別クエスト', 26);
+}
+
+function renderStoryStages() {
   const wrap = document.getElementById('stage-list');
   wrap.innerHTML = WORLDS.map(world => {
     const worldStages = world.stageIds.map(id => STAGES.find(s => s.id === id));
@@ -2230,6 +2293,43 @@ function renderStageSelect() {
       const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
       const intro = isWorldFirstStage(stage) ? stage.storyIntro : null;
       showStory(intro, () => startBattle(stage));
+    });
+  });
+}
+
+// 高難易度・特別クエスト共通のリスト表示（ワールド分けはせず、フラットな一覧）
+function renderQuestList(quests, sectionLabel, unlockStageProgress) {
+  const wrap = document.getElementById('stage-list');
+  const unlocked = state.stageProgress > unlockStageProgress;
+  if (!unlocked) {
+    wrap.innerHTML = `<div class="cg-world-section">
+      <div class="cg-world-header locked">
+        <span class="cg-world-name">🔒 ${sectionLabel}</span>
+        <span class="cg-world-lock">ステージ${unlockStageProgress}をクリアすると解放</span>
+      </div>
+    </div>`;
+    return;
+  }
+  const cardsHtml = quests.map(q => `
+    <div class="cg-stage-card cg-dungeon-boss-card" data-quest="${q.id}">
+      <div class="cg-stage-portrait">${stagePortraitHtml(q, true)}</div>
+      <div class="cg-stage-info">
+        <div class="cg-stage-name">${q.name}</div>
+        <div class="cg-stage-desc">${q.desc}<br>敵HP ${q.hp}　報酬 💰${q.rewardGold} 💎${q.rewardGems}</div>
+      </div>
+      <div class="cg-stage-go">⚔️</div>
+    </div>`).join('');
+  wrap.innerHTML = `
+    <div class="cg-world-section">
+      <div class="cg-world-header">
+        <span class="cg-world-name">⚔️ ${sectionLabel}</span>
+      </div>
+      <div class="cg-world-stages">${cardsHtml}</div>
+    </div>`;
+  wrap.querySelectorAll('.cg-stage-card').forEach(node => {
+    node.addEventListener('click', () => {
+      const quest = quests.find(q => q.id === node.dataset.quest);
+      startBattle(quest);
     });
   });
 }
@@ -4311,6 +4411,7 @@ const SCREEN_HELP = {
     items: [
       '<b>① ステージ挑戦</b><br>ステージをタップして挑戦します。上から順に難易度が上がっていきます。',
       '<b>② ステージ解放</b><br>ステージをクリアすると、次のステージが解放されます。',
+      '<b>③ 高難易度・特別クエスト</b><br>画面上部のタブから切り替えられる、ストーリーとは別枠の強敵クエストです。ステージ26以降を解放すると挑戦できるようになります。',
     ],
   },
   events: {
@@ -4397,6 +4498,13 @@ function init() {
   document.getElementById('nav-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('nav-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('quick-stage').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
+  document.querySelectorAll('#stage-mode-tabs .cg-filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      stageSelectMode = tab.dataset.mode;
+      document.querySelectorAll('#stage-mode-tabs .cg-filter-tab').forEach(t => t.classList.toggle('active', t === tab));
+      renderStageSelect();
+    });
+  });
   document.getElementById('quick-dungeon').addEventListener('click', () => { renderDungeonSelect(); showScreen('dungeon-select'); });
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
