@@ -2293,7 +2293,7 @@ function bindBattleEvents() {
     };
     bindLongPress(node, () => {
       const idx = Number(node.dataset.idx);
-      if (battle.playerField[idx]) showCardInfo(battle.playerField[idx]);
+      if (battle.playerField[idx]) showCardInfo(battle.playerField[idx], idx);
     });
   });
   document.querySelectorAll('#battle-enemy-field .cg-field-slot').forEach(node => {
@@ -2359,12 +2359,15 @@ function bindLongPress(node, onLongPress) {
   node.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
-function showCardInfo(unit) {
+function showCardInfo(unit, playerFieldIdx) {
   const def = unit.def;
   const rarity = RARITY[def.rarity];
   const el = ELEMENTS[def.element];
   const atk = def.atk + (unit.atkBonus || 0) + fieldBonusFor(unit);
   const roleText = def.role === 'defender' ? '🛡 ディフェンダー（相手のディフェンダーしか攻撃できない）' : '⚔ アタッカー（相手にディフェンダーがいれば、それを優先攻撃）';
+  const discardBtn = (typeof playerFieldIdx === 'number')
+    ? `<button class="cg-btn cg-detail-discard-btn" id="card-info-discard-btn" data-idx="${playerFieldIdx}">🪦 墓地に送る（場から除外）</button>`
+    : '';
   document.getElementById('card-info-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
@@ -2377,8 +2380,23 @@ function showCardInfo(unit) {
         <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}</b></div>
         <div class="cg-detail-stat"><span>現在HP</span><b>${unit.curHp}</b></div>
       </div>
+      ${discardBtn}
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
+  if (typeof playerFieldIdx === 'number') {
+    document.getElementById('card-info-discard-btn').addEventListener('click', () => discardFieldUnit(playerFieldIdx));
+  }
+}
+
+// 自分の場のモンスターを墓地に送る（除外する）。手札やコストは戻らないことを確認の上で実行
+function discardFieldUnit(idx) {
+  const unit = battle && battle.playerField && battle.playerField[idx];
+  if (!unit) return;
+  if (!confirm(`「${unit.def.name}」を墓地に送ります。場から除外され、二度と戻せません。よろしいですか？`)) return;
+  battle.playerField[idx] = null;
+  document.getElementById('card-info-overlay').classList.add('hidden');
+  skillFlash(`${unit.def.name}を墓地に送った`);
+  renderBattle();
 }
 
 function showHandCardInfo(id) {
@@ -2662,7 +2680,13 @@ function enemyTurn() {
   battle.activeSide = 'enemy';
   battle.enemyMaxCost = Math.min(10, battle.enemyMaxCost + 1);
   battle.enemyCost = battle.enemyMaxCost;
-  if (battle.enemyDeck.length) battle.enemyHand.push(battle.enemyDeck.shift());
+  if (battle.enemyDeck.length) {
+    battle.enemyHand.push(battle.enemyDeck.shift());
+  } else {
+    battle.enemyHp = 0; // 山札切れで敗北
+    renderBattle();
+    return;
+  }
   battle.enemyField.forEach(u => applySkillTag(u, 'turnStart', false));
   battle.enemyField = cleanupField(battle.enemyField);
 
@@ -2821,7 +2845,11 @@ function enemyTurn() {
   battle.activeSide = 'player';
   battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
   battle.playerCost = battle.playerMaxCost;
-  if (battle.playerDeck.length) battle.playerHand.push(battle.playerDeck.shift());
+  if (battle.playerDeck.length) {
+    battle.playerHand.push(battle.playerDeck.shift());
+  } else {
+    battle.playerHp = 0; // 山札切れで敗北
+  }
   battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
   battle.playerField = cleanupField(battle.playerField);
   renderBattle();
@@ -2928,6 +2956,17 @@ function revealResultScreen(won, stage) {
   }
   const rareLabel = document.getElementById('result-rare-label');
   if (rareLabel) rareLabel.classList.toggle('hidden', !isRareReward);
+
+  // 「次へ」ボタン：勝利かつ次のステージが存在する場合は次のステージへ、それ以外は同じステージに再挑戦
+  const primaryBtn = document.getElementById('result-primary');
+  const nextStage = (won && typeof stage.id === 'number') ? STAGES.find(s => s.id === stage.id + 1) : null;
+  if (nextStage) {
+    primaryBtn.textContent = '次のステージへ';
+    primaryBtn.onclick = () => startBattle(nextStage);
+  } else {
+    primaryBtn.textContent = 'もう一度挑戦する';
+    primaryBtn.onclick = () => startBattle(stage);
+  }
   showScreen('result');
 }
 
@@ -3419,8 +3458,7 @@ function init() {
     showScreen('home');
     renderHome();
   });
-  document.getElementById('result-rematch').addEventListener('click', () => startBattle(battle.stage));
-  document.getElementById('result-home').addEventListener('click', () => { renderHome(); showScreen('home'); });
+  document.getElementById('result-stageselect').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
   document.getElementById('battle-help-btn').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.remove('hidden');
   });
@@ -3428,6 +3466,12 @@ function init() {
     document.getElementById('battle-help-overlay').classList.add('hidden');
     state.hasSeenBattleHelp = true;
     saveState();
+  });
+  document.getElementById('battle-element-btn').addEventListener('click', () => {
+    document.getElementById('battle-element-overlay').classList.remove('hidden');
+  });
+  document.getElementById('battle-element-close').addEventListener('click', () => {
+    document.getElementById('battle-element-overlay').classList.add('hidden');
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
