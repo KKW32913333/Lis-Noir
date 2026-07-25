@@ -95,6 +95,18 @@ const CARD_DEFS = {
   field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'dark', atk: 2 }, skill: '場に出ている間、闇属性モンスターの攻撃力+2（両陣営）', image: null, emoji: '🕳️' },
 };
 
+
+// ---------- ダンジョン（地下1階〜100階） ----------
+const DUNGEON_MAX_FLOOR = 100;
+// フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
+const DUNGEON_BOSS_CARDS = ['fire_dragon', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcguardian', 'dark_reaper', 'crystal_fox', 'dark_demonlord'];
+// 10階ごとの装備報酬（フロアボスを撃破した時に手に入るレジェンド装備。floor/10 - 1 が配列インデックスに対応）
+const DUNGEON_EQUIPMENT_REWARDS = [
+  'dungeon_equip_10', 'dungeon_equip_20', 'dungeon_equip_30', 'dungeon_equip_40', 'dungeon_equip_50',
+  'dungeon_equip_60', 'dungeon_equip_70', 'dungeon_equip_80', 'dungeon_equip_90', 'dungeon_equip_100',
+];
+const DUNGEON_BG_THEMES = ['cave', 'moonshadow', 'purification', 'frost', 'empress', 'inferno2', 'volcano', 'castle'];
+
 // ---------- 状態管理 ----------
 const SAVE_KEY = 'cardgame_save_v1';
 const EVOLVE_LEVEL_REQ = 5;
@@ -195,8 +207,10 @@ const CARD_MAX_LEVEL = 10;
 function defaultState() {
   const owned = {};
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const dungeonExclusiveIds = new Set(DUNGEON_EQUIPMENT_REWARDS);
   Object.keys(CARD_DEFS).forEach(id => {
     if (eventExclusiveIds.has(id)) return; // 期間限定ガチャ専用カードは、実際に引くまで所持しない
+    if (dungeonExclusiveIds.has(id)) return; // ダンジョン限定装備は、フロアボスを撃破するまで所持しない
     owned[id] = { level: 1, exp: 0, count: 1, evolved: false };
   });
   return {
@@ -297,6 +311,30 @@ function loadState() {
     if (!saved.grantedBonusTicket_20260724) {
       saved.tickets = (saved.tickets || 0) + 1;
       saved.grantedBonusTicket_20260724 = true;
+    }
+    // 不具合修正: ダンジョン限定装備が最初から所持できてしまっていたため、
+    // 実際にそのフロアのボスを撃破済み（dungeonEquipClaimedに記録済み）のもの以外は取り除く（既存プレイヤーへ1回限り）
+    if (!saved.fixedDungeonEquipOwnership_20260724) {
+      const claimedFloors = new Set(saved.dungeonEquipClaimed || []);
+      const removedEquipIds = [];
+      DUNGEON_EQUIPMENT_REWARDS.forEach((eid, i) => {
+        const floor = (i + 1) * 10;
+        if (!claimedFloors.has(floor)) {
+          if (saved.cards) delete saved.cards[eid];
+          removedEquipIds.push(eid);
+        }
+      });
+      if (removedEquipIds.length) {
+        if (Array.isArray(saved.deck)) {
+          saved.deck = saved.deck.filter(id => !removedEquipIds.includes(id));
+        }
+        if (Array.isArray(saved.deckPresets)) {
+          saved.deckPresets.forEach(preset => {
+            if (Array.isArray(preset.cards)) preset.cards = preset.cards.filter(id => !removedEquipIds.includes(id));
+          });
+        }
+      }
+      saved.fixedDungeonEquipOwnership_20260724 = true;
     }
     return Object.assign(base, saved);
   } catch (e) {
@@ -2076,17 +2114,6 @@ const SPECIAL_QUESTS = [
     desc: '伝説の竜が束になって襲いかかる、高火力デッキとの戦い。' },
 ];
 
-// ---------- ダンジョン（地下1階〜100階） ----------
-const DUNGEON_MAX_FLOOR = 100;
-// フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
-const DUNGEON_BOSS_CARDS = ['fire_dragon', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcguardian', 'dark_reaper', 'crystal_fox', 'dark_demonlord'];
-// 10階ごとの装備報酬（フロアボスを撃破した時に手に入るレジェンド装備。floor/10 - 1 が配列インデックスに対応）
-const DUNGEON_EQUIPMENT_REWARDS = [
-  'dungeon_equip_10', 'dungeon_equip_20', 'dungeon_equip_30', 'dungeon_equip_40', 'dungeon_equip_50',
-  'dungeon_equip_60', 'dungeon_equip_70', 'dungeon_equip_80', 'dungeon_equip_90', 'dungeon_equip_100',
-];
-const DUNGEON_BG_THEMES = ['cave', 'moonshadow', 'purification', 'frost', 'empress', 'inferno2', 'volcano', 'castle'];
-
 function isDungeonBossFloor(floor) {
   return floor % 10 === 0;
 }
@@ -2413,8 +2440,9 @@ function newBattleUnit(id, isPlayerCard) {
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const dungeonExclusiveIds = new Set(DUNGEON_EQUIPMENT_REWARDS);
   const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && !eventExclusiveIds.has(id));
-  const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster' && !eventExclusiveIds.has(id));
+  const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster' && !eventExclusiveIds.has(id) && !dungeonExclusiveIds.has(id));
   const chance = spellChance || 0;
   const deck = [];
   for (let i = 0; i < count; i++) {
@@ -2636,11 +2664,9 @@ function elementMultiplier(atkEl, defEl) {
 }
 
 function skillFlash(text) {
-  const flash = document.getElementById('battle-skill-flash');
-  flash.textContent = text;
-  flash.classList.remove('show');
-  void flash.offsetWidth; // reflow でアニメ再トリガー
-  flash.classList.add('show');
+  // ご要望により、画面中央には「ENEMY TURN」「YOUR TURN」（showTurnBanner）以外のメッセージを
+  // 表示しないようにしたため、このポップアップ自体は無効化している（呼び出し箇所は多いため、
+  // 個別に削除するのではなく、ここで一括して無効化する形にしている）
 }
 
 function showTurnBanner(text) {
@@ -2912,11 +2938,23 @@ function bindBattleEvents() {
       const type = def.type || 'monster';
       battle.selectedFieldIdx = null;
       if (type === 'spell' && (def.target || 'none') === 'none') {
-        castSpell(idx, null);
+        // 誤操作防止のため即発動はせず、1回目のタップで選択（確認）、同じカードをもう一度タップで発動する
+        if (battle.selectedHandIdx === idx) {
+          castSpell(idx, null);
+        } else {
+          battle.selectedHandIdx = idx;
+          renderBattle();
+        }
         return;
       }
       if (type === 'field') {
-        playFieldCard(idx);
+        // フィールドカードも同様に、1回目のタップで選択、もう一度タップで発動する
+        if (battle.selectedHandIdx === idx) {
+          playFieldCard(idx);
+        } else {
+          battle.selectedHandIdx = idx;
+          renderBattle();
+        }
         return;
       }
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
