@@ -803,17 +803,19 @@
   .cg-help-body{display:flex; flex-direction:column; gap:10px; margin-bottom:14px;}
   .cg-help-item{font-size:12px; line-height:1.6; color:var(--text-dim-panel);}
   .cg-help-item b{color:var(--text-panel);}
-  /* ---------- 属性相性表 ---------- */
-  .cg-element-chart{width:100%; max-width:240px; margin:4px auto 12px; display:block;}
-  .cg-element-arrow{stroke:var(--gold-bright); stroke-width:2.5; fill:none;}
-  .cg-element-node circle{stroke:#00000040; stroke-width:2;}
-  .cg-element-node text{text-anchor:middle; font-size:15px;}
-  .cg-element-node-label{font-size:11px; font-weight:800; fill:#fff;}
-  .cg-element-node[data-el="fire"] circle{fill:#a8532a;}
-  .cg-element-node[data-el="water"] circle{fill:#3f6f8f;}
-  .cg-element-node[data-el="nature"] circle{fill:#5f7a3f;}
-  .cg-element-node[data-el="light"] circle{fill:#a9822f;}
-  .cg-element-node[data-el="dark"] circle{fill:#5A2D91;}
+  /* ---------- 属性相性ストリップ（バトル画面に常時表示） ---------- */
+  .cg-element-strip{display:flex; align-items:center; justify-content:center; gap:3px; padding:3px 12px 5px;
+    font-size:9px; opacity:.88;}
+  .cg-el-chip{width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:10px; flex-shrink:0; box-shadow:0 1px 3px #00000055;}
+  .cg-el-chip.fire{background:#a8532a55;}
+  .cg-el-chip.nature{background:#5f7a3f55;}
+  .cg-el-chip.water{background:#3f6f8f55;}
+  .cg-el-chip.light{background:#a9822f55;}
+  .cg-el-chip.dark{background:#5A2D9155;}
+  .cg-el-arrow{color:var(--gold-bright); font-size:10px; font-weight:800;}
+  .cg-el-arrow.both{color:#ff8a95;}
+  .cg-element-strip-divider{width:1px; height:14px; background:#ffffff33; margin:0 6px;}
   .cg-card-info-panel{display:flex; flex-direction:column; align-items:center;
     background:linear-gradient(165deg,#2c1854,#150a2b); border-color:var(--gold-bright);}
   .cg-card-info-panel .cg-detail-name{color:#F5EFFF;}
@@ -1342,9 +1344,17 @@
       <div class="cg-timer" id="battle-turn-timer">ターン 1</div>
       <div class="cg-battle-header-right">
         <div class="cg-hp-chip" id="battle-enemy-hp-chip">👹 <span class="val" id="battle-enemy-hp">30</span></div>
-        <button class="cg-help-btn" id="battle-element-btn" title="属性相性表">🔄</button>
         <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
       </div>
+    </div>
+
+    <div class="cg-element-strip" title="属性相性：矢印の先が弱点。光と闇はお互いが弱点">
+      <span class="cg-el-chip fire">🔥</span><span class="cg-el-arrow">→</span>
+      <span class="cg-el-chip nature">🌿</span><span class="cg-el-arrow">→</span>
+      <span class="cg-el-chip water">💧</span><span class="cg-el-arrow">→</span>
+      <span class="cg-el-chip fire">🔥</span>
+      <span class="cg-element-strip-divider"></span>
+      <span class="cg-el-chip light">✨</span><span class="cg-el-arrow both">⇄</span><span class="cg-el-chip dark">🌙</span>
     </div>
 
     <div class="cg-battle-substat-row">
@@ -1403,36 +1413,9 @@
           <div class="cg-help-item"><b>④ スペル・装備・フィールド</b><br>スペルは敵や自分に効果を発動、装備は味方に付けて強化、フィールドは場全体に継続効果を与えます。手札からタップして使用。</div>
           <div class="cg-help-item"><b>⑤ カード情報</b><br>場のモンスターを長押しすると、詳細（能力・ステータス）を確認できます。自分の場のモンスターは、そこから墓地に送る（除外する）こともできます。</div>
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
+          <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、🔥は🌿に、🌿は💧に、💧は🔥に強い（3すくみ）。✨と🌙はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
-      </div>
-    </div>
-
-    <!-- 属性相性表（火→自然→闇→光→水→火の順で有利、逆順は不利） -->
-    <div id="battle-element-overlay" class="cg-help-overlay hidden">
-      <div class="cg-help-panel cg-ornate cg-double-frame">
-        <div class="cg-help-title">属性相性表</div>
-        <svg viewBox="0 0 220 220" class="cg-element-chart">
-          <defs>
-            <marker id="elArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-              <path d="M0,0 L8,4 L0,8 Z" fill="var(--gold-bright)"/>
-            </marker>
-          </defs>
-          <path d="M129.4,46.1 L158.3,67.1" class="cg-element-arrow" marker-end="url(#elArrow)"/>
-          <path d="M176.8,108.7 L165.7,142.7" class="cg-element-arrow" marker-end="url(#elArrow)"/>
-          <path d="M131.8,173.1 L96.2,173.1" class="cg-element-arrow" marker-end="url(#elArrow)"/>
-          <path d="M56.7,150.3 L45.7,116.3" class="cg-element-arrow" marker-end="url(#elArrow)"/>
-          <path d="M55.2,71.8 L84.1,50.8" class="cg-element-arrow" marker-end="url(#elArrow)"/>
-          <g class="cg-element-node" data-el="fire"><circle cx="110" cy="32" r="24"/><text x="110" y="27">🔥</text><text x="110" y="42" class="cg-element-node-label">火</text></g>
-          <g class="cg-element-node" data-el="nature"><circle cx="184.2" cy="85.9" r="24"/><text x="184.2" y="80.9">🌿</text><text x="184.2" y="95.9" class="cg-element-node-label">自然</text></g>
-          <g class="cg-element-node" data-el="dark"><circle cx="155.8" cy="173.1" r="24"/><text x="155.8" y="168.1">🌙</text><text x="155.8" y="183.1" class="cg-element-node-label">闇</text></g>
-          <g class="cg-element-node" data-el="light"><circle cx="64.2" cy="173.1" r="24"/><text x="64.2" y="168.1">✨</text><text x="64.2" y="183.1" class="cg-element-node-label">光</text></g>
-          <g class="cg-element-node" data-el="water"><circle cx="35.8" cy="85.9" r="24"/><text x="35.8" y="80.9">💧</text><text x="35.8" y="95.9" class="cg-element-node-label">水</text></g>
-        </svg>
-        <div class="cg-help-body">
-          <div class="cg-help-item">矢印の向き（火→自然→闇→光→水→火）の順に有利属性です。<br>攻撃側が有利な属性なら与ダメージ+2、不利な属性なら-1されます（同属性・無関係な属性同士は変化なし）。</div>
-        </div>
-        <button class="cg-btn cg-btn-main" id="battle-element-close">閉じる</button>
       </div>
     </div>
 

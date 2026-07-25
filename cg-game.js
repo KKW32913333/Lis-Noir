@@ -10,8 +10,9 @@ const ELEMENTS = {
   light:  { name: '光',  color: '#a9822f', icon: '✨' },
   dark:   { name: '闇',  color: '#5A2D91', icon: '🌙' },
 };
-// 相性サイクル: 火→自然→闇→光→水→火 (攻撃側が有利なら+2、不利なら-1)
-const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'dark', dark: 'light', light: 'water', water: 'fire' };
+// 相性: 火→自然→水→火 の3すくみ（攻撃側が有利なら+2、不利なら-1）
+// 光と闇はお互いが弱点の関係（どちらから攻撃しても+2）
+const ELEMENT_ADVANTAGE = { fire: 'nature', nature: 'water', water: 'fire', light: 'dark', dark: 'light' };
 
 const RARITY = {
   normal: { name: 'ノーマル', color: '#8a8c96', glow: 'none' },
@@ -3466,12 +3467,6 @@ function init() {
     document.getElementById('battle-help-overlay').classList.add('hidden');
     state.hasSeenBattleHelp = true;
     saveState();
-  });
-  document.getElementById('battle-element-btn').addEventListener('click', () => {
-    document.getElementById('battle-element-overlay').classList.remove('hidden');
-  });
-  document.getElementById('battle-element-close').addEventListener('click', () => {
-    document.getElementById('battle-element-overlay').classList.add('hidden');
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
