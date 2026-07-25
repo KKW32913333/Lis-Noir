@@ -1998,7 +1998,7 @@ const STAGES = [
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7560, rewardGems: 756, trophyDelta: 875  },
   { id: 49, name: '永劫の番人', portrait: '👁️', hp: 821, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7780, rewardGems: 778, trophyDelta: 900  },
-  { id: 50, name: 'すべての始まりの座', portrait: '🖤', hp: 1650, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
+  { id: 50, name: 'すべての始まりの座', portrait: '🖤', hp: 1230, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 8000, rewardGems: 800, trophyDelta: 925,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '永劫回帰の座で、すべての始まりであり終わりでもある者を打ち破った。世界に、静かな朝が訪れる。' },
@@ -2039,7 +2039,7 @@ function isDungeonBossFloor(floor) {
 // フロアの敵HP。通常階も含めてじわじわ強くなり、ボス階はさらに大きく強化される
 function getDungeonFloorHp(floor) {
   const base = 40 + Math.round(Math.pow(floor, 1.42) * 4.2);
-  return isDungeonBossFloor(floor) ? Math.round(base * 1.7) : base;
+  return isDungeonBossFloor(floor) ? Math.round(base * 1.3) : base;
 }
 
 // フロアが深くなるほど、敵デッキのレアリティ構成をどんどんエピック・レジェンド寄りにする
@@ -2187,6 +2187,17 @@ function advanceStory() {
   document.getElementById('story-text').textContent = line.text || '';
 }
 
+// ステージ選択・ダンジョン選択画面のアイコンを、バトル画面と同じボスカードのイラストで表示する
+// （bossCardの画像が無い場合は、従来通り絵文字にフォールバック）
+function stagePortraitHtml(stage, unlocked) {
+  if (!unlocked) return '🔒';
+  const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
+  if (bossDef && bossDef.image) {
+    return `<div class="cg-stage-portrait-img" style="background-image:url('${bossDef.image}')"></div>`;
+  }
+  return stage.portrait;
+}
+
 function renderStageSelect() {
   const wrap = document.getElementById('stage-list');
   wrap.innerHTML = WORLDS.map(world => {
@@ -2197,7 +2208,7 @@ function renderStageSelect() {
       const cleared = stage.id < state.stageProgress;
       return `
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
-          <div class="cg-stage-portrait">${unlocked ? stage.portrait : '🔒'}</div>
+          <div class="cg-stage-portrait">${stagePortraitHtml(stage, unlocked)}</div>
           <div class="cg-stage-info">
             <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}</div>
             <div class="cg-stage-desc">${unlocked ? `敵HP ${stage.hp}　報酬 💰${stage.rewardGold} 💎${stage.rewardGems}` : '前のステージをクリアすると解放'}</div>
@@ -2239,7 +2250,7 @@ function renderDungeonSelect() {
       const boss = isDungeonBossFloor(floor);
       floorsHtml.push(`
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''} ${boss ? 'cg-dungeon-boss-card' : ''}" data-floor="${floor}">
-          <div class="cg-stage-portrait">${unlocked ? stageInfo.portrait : '🔒'}</div>
+          <div class="cg-stage-portrait">${stagePortraitHtml(stageInfo, unlocked)}</div>
           <div class="cg-stage-info">
             <div class="cg-stage-name">地下${floor}階${boss ? '（フロアボス）' : ''}</div>
             <div class="cg-stage-desc">${unlocked
@@ -2605,6 +2616,8 @@ function renderBattle() {
   document.getElementById('battle-enemy-pp-current').textContent = battle.enemyCost;
   document.getElementById('battle-enemy-pp-max').textContent = battle.enemyMaxCost > 10 ? 10 : battle.enemyMaxCost;
   document.getElementById('battle-enemy-deck-remaining').textContent = battle.enemyDeck.length;
+  document.getElementById('battle-enemy-hand-count').textContent = battle.enemyHand.length;
+  document.getElementById('battle-enemy-graveyard-count').textContent = battle.enemyGraveyard.length;
 
   const fieldIndicatorEl = document.getElementById('battle-field-indicator');
   if (battle.fieldCard) {
@@ -2622,6 +2635,17 @@ function renderBattle() {
   const selectedSpell = battle.selectedHandIdx !== null ? CARD_DEFS[battle.playerHand[battle.selectedHandIdx]] : null;
   const previewingSpell = selectedSpell && (selectedSpell.type || 'monster') === 'spell' && (selectedSpell.target === 'enemy' || selectedSpell.target === 'enemy_monster') ? selectedSpell : null;
   const attackValid = previewingAttack ? getValidTargets(previewingAttack, battle.enemyField) : null;
+
+  // 選択中のカードのスキル効果を、手札の下の余白部分に表示する
+  const skillInfoEl = document.getElementById('battle-selected-skill-info');
+  const skillInfoDef = previewingAttack ? previewingAttack.def : selectedSpell;
+  if (skillInfoDef) {
+    document.getElementById('selected-skill-name').textContent = skillInfoDef.name;
+    document.getElementById('selected-skill-text').textContent = skillInfoDef.skill || '固有スキルなし';
+    skillInfoEl.classList.remove('hidden');
+  } else {
+    skillInfoEl.classList.add('hidden');
+  }
 
   enemyFieldEl.innerHTML = battle.enemyField.map((u, i) => {
     let preview = '';
@@ -2974,7 +2998,6 @@ function castSpell(handIdx, targetIdx) {
     }
   }
   if (def.skill) skillFlash(`${def.name}！\n${def.skill}`);
-  battle.playerGraveyard.push(id); // 使用したスペルは墓地へ
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
   renderBattle();
 }
@@ -2986,7 +3009,6 @@ function playFieldCard(handIdx) {
   battle.playerCost -= def.cost;
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
-  if (battle.fieldCard) battle.playerGraveyard.push(battle.fieldCard); // 上書きされる前のフィールドカードは墓地へ
   battle.fieldCard = id;
   sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}発動！\n${def.skill}`);
@@ -3005,7 +3027,6 @@ function equipCardFromHand(handIdx, fieldIdx) {
   unit.curHp += (eff.hp || 0);
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
-  battle.playerGraveyard.push(id); // 使用した装備カードは墓地へ
   sfxCardPlay();
   if (def.skill) skillFlash(`${def.name}を装備！\n${def.skill}`);
   renderBattle();
@@ -3199,7 +3220,6 @@ function cleanupField(field, graveyard) {
       field.forEach(ally => { if (ally && ally !== u && ally.curHp > 0) ally.atkBonus = (ally.atkBonus || 0) + tag.value; });
       skillFlash(`${u.def.name}のスキル！\n味方全体の攻撃力が永続+${tag.value}`);
     }
-    if (graveyard) graveyard.push(u.defId); // 撃破されたモンスターを墓地へ
     return null;
   });
 }

@@ -404,6 +404,12 @@
   .cg-side-info-row{display:flex; align-items:center; gap:10px; padding:4px 2px;}
   .cg-side-info-enemy{justify-content:flex-start;}
   .cg-side-info-player{justify-content:flex-start;}
+  .cg-selected-skill-info{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    margin:4px 6px 0; padding:10px 16px; border-radius:14px; background:#00000033; border:1px solid #ffffff22;
+    text-align:center; min-height:36px;}
+  .cg-selected-skill-info.hidden{display:none;}
+  .cg-selected-skill-name{font-size:12px; font-weight:800; color:var(--gold-bright);}
+  .cg-selected-skill-text{font-size:11px; color:#EAE6F5cc; line-height:1.4;}
   .cg-side-portrait{width:52px; height:52px; border-radius:50%; flex-shrink:0;
     background:linear-gradient(145deg,#3a2530,#1c1d24); border:2px solid var(--hp-red); display:flex; align-items:center;
     justify-content:center; font-size:22px; cursor:pointer; z-index:3; box-shadow:0 0 12px #A2334755, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;
@@ -729,7 +735,8 @@
   .cg-stage-card.locked{opacity:.5; cursor:default;}
   .cg-stage-card.cleared{border-color:var(--gold);}
   .cg-stage-portrait{width:52px; height:52px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    font-size:24px; background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); border:2px solid var(--gold-bright);}
+    font-size:24px; background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); border:2px solid var(--gold-bright); overflow:hidden;}
+  .cg-stage-portrait-img{width:100%; height:100%; background-size:cover; background-position:center;}
   .cg-stage-info{flex:1; min-width:0;}
   .cg-stage-name{font-size:13px; font-weight:700;}
   .cg-stage-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
@@ -1480,10 +1487,12 @@
       <div class="cg-side-info-row cg-side-info-enemy">
         <div id="battle-enemy-portrait" class="cg-side-portrait"><span id="battle-enemy-emoji">👹</span><span id="battle-portrait-preview" class="cg-preview-badge"></span></div>
         <div class="cg-side-info-main">
-          <div class="cg-hp-chip" id="battle-enemy-hp-chip">👹 <span class="val" id="battle-enemy-hp">30</span></div>
+          <div class="cg-hp-chip" id="battle-enemy-hp-chip">HP <span class="val" id="battle-enemy-hp">30</span></div>
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
+            <span class="cg-substat-chip" title="敵の残り手札枚数">🎴×<span id="battle-enemy-hand-count">0</span></span>
             <span class="cg-substat-chip" title="敵の残り山札枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-enemy-deck-remaining">0</span></span>
+            <span class="cg-substat-chip" title="敵の墓地枚数">🪦×<span id="battle-enemy-graveyard-count">0</span></span>
           </div>
         </div>
       </div>
@@ -1498,7 +1507,7 @@
       <div class="cg-side-info-row cg-side-info-player">
         <div id="battle-player-portrait" class="cg-side-portrait"></div>
         <div class="cg-side-info-main">
-          <div class="cg-hp-chip cg-hp-chip-self">🛡️ <span class="val" id="battle-player-hp">30</span></div>
+          <div class="cg-hp-chip cg-hp-chip-self">HP <span class="val" id="battle-player-hp">30</span></div>
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" id="battle-pp-badge" title="自分のマナ">マナ <span id="battle-pp-current">1</span>/<span id="battle-pp-max">1</span></span>
             <span class="cg-substat-chip" title="残り手札">🎴×<span id="battle-hand-count">0</span></span>
@@ -1506,6 +1515,11 @@
             <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></span>
           </div>
         </div>
+      </div>
+
+      <div id="battle-selected-skill-info" class="cg-selected-skill-info hidden">
+        <div class="cg-selected-skill-name" id="selected-skill-name"></div>
+        <div class="cg-selected-skill-text" id="selected-skill-text"></div>
       </div>
     </div>
 
@@ -1546,7 +1560,7 @@
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
           <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🛡シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
-          <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。撃破されたモンスターや使用したスペル・装備なども墓地に入ります。🪦アイコンをタップすると墓地の中身を確認できます。</div>
+          <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>
