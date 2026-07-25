@@ -340,6 +340,12 @@
   .cg-compendium-claim-btn{display:block; width:100%; margin-top:10px; font-size:12px; padding:9px;}
   .cg-compendium-claim-btn.hidden{display:none;}
   #cardlist-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:14px; flex:1;}
+  .cg-deck-only-toggle{display:block; margin:8px 14px 0; padding:8px 12px; font-size:11px; font-weight:700;
+    border-radius:12px; border:1.5px solid var(--hairline-panel); background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
+  .cg-deck-only-toggle.active{border-color:var(--gold-bright); background:var(--gold-soft); color:var(--gold);}
+  .cg-card.in-deck{border-color:var(--gold-bright) !important; box-shadow:0 0 0 2px var(--gold-soft), 0 3px 10px #00000040 !important;}
+  .cg-card-indeck-badge{position:absolute; top:3px; left:3px; z-index:3; background:var(--gold-bright); color:#fff;
+    font-size:8px; font-weight:800; padding:2px 5px; border-radius:6px; box-shadow:0 1px 3px #00000066;}
   .cg-detail-nav{display:flex; gap:6px;}
   .cg-detail-nav-btn{font-size:11px; padding:8px 12px; border-radius:14px; border:1px solid var(--hairline-panel);
     background:var(--bg-panel2); color:var(--text-panel); cursor:pointer; font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
@@ -351,6 +357,13 @@
   .cg-detail-info{padding:0 20px; text-align:center;}
   .cg-detail-name{font-size:18px; font-weight:700;}
   .cg-detail-level{font-size:12px; color:var(--text-dim); margin:4px 0 8px;}
+  .cg-detail-deck-row{display:flex; align-items:center; gap:6px; margin-bottom:12px; padding:8px 10px; border-radius:12px;
+    background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
+  .cg-detail-deck-row.in-deck{border-color:var(--gold-bright); background:var(--gold-soft);}
+  .cg-detail-deck-count{flex:1; font-size:11px; font-weight:700; color:var(--text-dim);}
+  .cg-detail-deck-row.in-deck .cg-detail-deck-count{color:var(--gold);}
+  .cg-detail-deck-btn{flex-shrink:0; font-size:11px; padding:6px 10px;}
+  .cg-detail-deck-btn:disabled{opacity:.35; cursor:default;}
   .cg-detail-bar{height:6px; background:var(--hairline); border-radius:4px; overflow:hidden; margin-bottom:10px;}
   .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-detail-desc{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
@@ -1296,6 +1309,7 @@
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
+      <button class="cg-deck-only-toggle" id="cardlist-deckonly-toggle">🃏 デッキ内のカードのみ表示</button>
       <div id="cardlist-grid"></div>
     </div>
   </section>

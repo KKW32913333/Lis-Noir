@@ -28,7 +28,7 @@ const CARD_DEFS = {
   fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
   fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-imp.png', emoji: '👹' },
   fire_phoenix:   { name: 'サンフェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenix.png', emoji: '🔥' },
-  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healSelf', value: 2 }, skill: '場に出た時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
+  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 2 }, skill: '毎ターン開始時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
   water_slime:    { name: 'ブルースライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-water-slime.png', emoji: '🔵' },
   water_serpent:  { name: 'リヴァイアサン',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、攻撃した相手モンスターを1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
   nature_treant:  { name: 'ウッドエント',     element: 'nature', rarity: 'rare',  cost: 3, atk: 2, hp: 8,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 1 }, skill: '毎ターン開始時、HPを1回復', image: 'card-nature-treant.png', emoji: '🌳' },
@@ -476,6 +476,8 @@ function renderCardFace(id, opts) {
   const small = opts.small ? ' cg-card-sm' : '';
   const evolvedClass = opts.evolved ? ' evolved-glow' : '';
   const lockedClass = opts.locked ? ' cg-card-locked' : '';
+  const inDeckClass = opts.inDeck ? ' in-deck' : '';
+  const inDeckBadge = opts.inDeck ? '<div class="cg-card-indeck-badge">デッキ内</div>' : '';
   const img = def.image
     ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
@@ -489,9 +491,9 @@ function renderCardFace(id, opts) {
   const nameLine = opts.battleMode ? '' : `<div class="cg-card-name">${def.name}</div>`;
   const elLine = opts.battleMode ? '' : `<div class="cg-card-el" style="color:${el.color}">${el.icon}</div>`;
   return `
-    <div class="cg-card${small}${evolvedClass}${lockedClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+    <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}${lockIcon}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
+      <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
       ${nameLine}
       ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
       ${elLine}
@@ -1283,6 +1285,7 @@ function claimCompendiumReward() {
 }
 
 let cardListFilter = 'all';
+let cardListDeckOnly = false;
 let cardListOrder = [];
 
 function setCardListFilter(filter) {
@@ -1293,12 +1296,20 @@ function setCardListFilter(filter) {
   renderCardList();
 }
 
+function toggleCardListDeckOnly() {
+  cardListDeckOnly = !cardListDeckOnly;
+  document.getElementById('cardlist-deckonly-toggle').classList.toggle('active', cardListDeckOnly);
+  renderCardList();
+}
+
 function renderCardList() {
   renderLeaderSelect('cardlist-leader-row');
   const listEl = document.getElementById('cardlist-grid');
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  const deckIdSet = new Set(state.deck);
   const ids = Object.keys(CARD_DEFS).filter(id => {
     if (eventExclusiveIds.has(id) && !state.cards[id]) return false; // 期間限定カードは入手するまで図鑑にも表示しない
+    if (cardListDeckOnly && !deckIdSet.has(id)) return false; // デッキ内のみ表示
     if (cardListFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === cardListFilter;
   });
@@ -1306,9 +1317,9 @@ function renderCardList() {
   listEl.innerHTML = ids.map(id => {
     const owned = state.cards[id];
     return owned
-      ? renderCardFace(id, { small: true, evolved: owned.evolved })
+      ? renderCardFace(id, { small: true, evolved: owned.evolved, inDeck: deckIdSet.has(id) })
       : renderCardFace(id, { small: true, locked: true });
-  }).join('') + (ids.length === 0 ? '<div class="cg-empty">該当するカードがありません</div>' : '');
+  }).join('') + (ids.length === 0 ? `<div class="cg-empty">${cardListDeckOnly ? 'デッキにカードが入っていません' : '該当するカードがありません'}</div>` : '');
   listEl.querySelectorAll('.cg-card').forEach(node => {
     const id = node.dataset.id;
     if (state.cards[id]) {
@@ -1362,11 +1373,20 @@ function openCardDetail(id) {
   const el = ELEMENTS[def.element];
   const rarity = RARITY[def.rarity];
   const isMonster = (def.type || 'monster') === 'monster';
+  const deckCount = countInDeck(id);
+  const maxCopies = maxCopiesFor(id);
+  const deckControlHtml = `
+    <div class="cg-detail-deck-row ${deckCount > 0 ? 'in-deck' : ''}">
+      <span class="cg-detail-deck-count">${deckCount > 0 ? '🃏 デッキ内: ' + deckCount + '/' + maxCopies + '枚' : 'デッキ未編成'}</span>
+      <button class="cg-btn cg-detail-deck-btn" id="detail-deck-remove-btn" ${deckCount <= 0 ? 'disabled' : ''}>− 外す</button>
+      <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 30) ? 'disabled' : ''}>＋ 追加</button>
+    </div>`;
   document.getElementById('detail-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
+      ${deckControlHtml}
       <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
@@ -1385,6 +1405,21 @@ function openCardDetail(id) {
                </button>`}
         </div>` : ''}
     </div>`;
+  const deckAddBtn = document.getElementById('detail-deck-add-btn');
+  if (deckAddBtn) deckAddBtn.addEventListener('click', () => {
+    if (state.deck.length >= 30 || countInDeck(id) >= maxCopiesFor(id)) return;
+    state.deck.push(id);
+    saveState();
+    openCardDetail(id);
+  });
+  const deckRemoveBtn = document.getElementById('detail-deck-remove-btn');
+  if (deckRemoveBtn) deckRemoveBtn.addEventListener('click', () => {
+    const idx = state.deck.indexOf(id);
+    if (idx === -1) return;
+    state.deck.splice(idx, 1);
+    saveState();
+    openCardDetail(id);
+  });
   const upgradeBtn = document.getElementById('detail-upgrade-btn');
   if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
     if (state.gold >= 400 && state.cards[id].level < CARD_MAX_LEVEL) {
@@ -1881,7 +1916,7 @@ function newBattleUnit(id, isPlayerCard) {
     bonusAtk += Math.round((def.atk + bonusAtk) * (leader.effect.atkPct || 0));
     bonusHp += Math.round((def.hp + bonusHp) * (leader.effect.hpPct || 0));
   }
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false };
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance) {
@@ -2635,7 +2670,7 @@ function attackTarget(attackerIdx, targetIdx) {
   } else {
     const target = battle.enemyField[targetIdx];
     target.curHp -= mitigateIncomingDamage(target, dmg);
-    if ((tag && tag.effect === 'aoeDamage') || (attacker.def.skill && attacker.def.skill.includes('全体'))) {
+    if (tag && tag.effect === 'aoeDamage') {
       const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
       battle.enemyField.forEach(u => { if (u) u.curHp -= mitigateIncomingDamage(u, aoeVal); });
       skillFlash(`${attacker.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
@@ -2651,11 +2686,13 @@ function attackTarget(attackerIdx, targetIdx) {
       skillFlash(`${attacker.def.name}のスキル！\n相手のコストを${tag.value}消費`);
     }
   }
-  if (killedSomething && tag && tag.effect === 'extraAttackOnKill') {
+  if (killedSomething && tag && tag.effect === 'extraAttackOnKill' && !attacker.usedExtraAttack) {
     attacker.canAttack = true;
+    attacker.usedExtraAttack = true; // 1回の攻撃につき追加攻撃は1回まで（無限連鎖を防止）
     skillFlash(`${attacker.def.name}のスキル！\n連続攻撃発動！`);
   } else {
     attacker.canAttack = false;
+    attacker.usedExtraAttack = false; // ターン終了後、次に攻撃可能になった時点でまた使えるようにリセット
   }
   battle.selectedFieldIdx = null;
   battle.enemyField = cleanupField(battle.enemyField);
@@ -2802,26 +2839,29 @@ function enemyTurn() {
 
   // 攻撃可能な既存ユニットで攻撃（アタッカー/ディフェンダーのルールに従う）
   battle.enemyField.forEach((u, i) => {
-    if (u && u.canAttack) {
+    if (!u || !u.canAttack) return;
+    const tag = u.def.skillTag;
+    const performOneAttack = () => {
       const valid = getValidTargets(u, battle.playerField);
-      const tag = u.def.skillTag;
       const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
       const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) + extraDmg;
+      let killed = false;
       if (tag && tag.effect === 'novaAttack' && valid.indices.length > 0) {
         battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, dmg); });
         skillFlash(`${u.def.name}のスキル！\n攻撃力と同じダメージを敵全体に`);
+        killed = battle.playerField.some(p => p && p.curHp <= 0);
       } else if (valid.indices.length > 0) {
         const targetIdx = valid.indices[0];
         const target = battle.playerField[targetIdx];
         const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
         impactEffect(targetEl, dmg, 0);
         target.curHp -= mitigateIncomingDamage(target, dmg);
-        if ((tag && tag.effect === 'aoeDamage') || (u.def.skill && u.def.skill.includes('全体'))) {
+        if (tag && tag.effect === 'aoeDamage') {
           const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
           battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, aoeVal); });
           skillFlash(`${u.def.name}のスキル！\n全ての敵に${aoeVal}ダメージ`);
         }
-        const killed = target.curHp <= 0;
+        killed = target.curHp <= 0;
         if (tag && tag.effect === 'stunTarget' && !killed) target.stunned = true;
         if (killed && tag && tag.effect === 'drainEnemyCost') {
           battle.playerCost = Math.max(0, battle.playerCost - tag.value);
@@ -2832,6 +2872,15 @@ function enemyTurn() {
         battle.playerHp -= dmg;
       }
       // ディフェンダーで有効な対象がいない場合は何もせず待機
+      return killed;
+    };
+    const killedFirst = performOneAttack();
+    battle.playerField = cleanupField(battle.playerField);
+    // 【ヴォイドリーパー等】撃破した場合のみ、1回だけ追加攻撃（無限連鎖はしない）
+    if (killedFirst && tag && tag.effect === 'extraAttackOnKill') {
+      skillFlash(`${u.def.name}のスキル！\n連続攻撃発動！`);
+      performOneAttack();
+      battle.playerField = cleanupField(battle.playerField);
     }
   });
   battle.enemyField.forEach(u => {
@@ -3448,6 +3497,7 @@ function init() {
   document.querySelectorAll('#cardlist-filter-tabs .cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCardListFilter(btn.dataset.filter));
   });
+  document.getElementById('cardlist-deckonly-toggle').addEventListener('click', toggleCardListDeckOnly);
   document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
   document.querySelectorAll('.cg-back-btn-detail').forEach(b => b.addEventListener('click', () => openCollectionScreen('list')));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
