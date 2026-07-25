@@ -1348,7 +1348,7 @@ function showLockedCardInfo(id) {
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--text-dim-panel)">🔒 未所持</span></div>
       <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">種別: ${typeLabel}　コスト: ${def.cost}</div>
-      <div class="cg-detail-desc">パックやガチャで入手すると、図鑑に登録されます</div>
+      <div class="cg-detail-desc">ガチャで入手すると、図鑑に登録されます</div>
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
 }
@@ -3153,16 +3153,16 @@ function openCollectionScreen(seg) {
   showScreen('collection');
 }
 
-// ---------- ショップ ----------
+// ---------- ガチャ ----------
 const SHOP_PACKS = [
-  { id: 'normal', name: 'ノーマルパック', icon: '📦', currency: 'gold', cost: 300,
-    desc: 'ノーマル〜レアが出やすい基本パック', weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
+  { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gold', cost: 300,
+    desc: 'ノーマル〜レアが出やすい基本ガチャ', weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     preview: ['water_slime', 'nature_wolf', 'water_golem'] },
-  { id: 'rare', name: 'レアパック', icon: '🎁', currency: 'gems', cost: 10,
-    desc: 'レア以上が確定で出るパック', weights: { normal: 0, rare: 65, epic: 28, legend: 7 },
+  { id: 'rare', name: 'レアガチャ', icon: '🎁', currency: 'gems', cost: 10,
+    desc: 'レア以上が確定で出るガチャ', weights: { normal: 0, rare: 65, epic: 28, legend: 7 },
     preview: ['nature_treant', 'dark_wolf', 'light_angel'] },
-  { id: 'premium', name: 'プレミアムパック', icon: '👑', currency: 'gems', cost: 30,
-    desc: 'エピック以上が確定で出る豪華パック', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
+  { id: 'premium', name: 'プレミアムガチャ', icon: '👑', currency: 'gems', cost: 30,
+    desc: 'エピック以上が確定で出る豪華ガチャ', weights: { normal: 0, rare: 0, epic: 70, legend: 30 },
     preview: ['fire_dragon', 'crystal_fox', 'dark_reaper'] },
 ];
 
@@ -3194,11 +3194,11 @@ function renderPackCard(pack) {
     const img = def.image
       ? `<img src="${def.image}" alt="${def.name}"/>`
       : `<span>${def.emoji}</span>`;
-    return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}">${img}</div>`;
+    return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}" data-id="${id}">${img}</div>`;
   }).join('');
   const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
   const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
-  const showPity = !pack.pool && pack.weights.normal > 0; // 固定プールのガチャ・ノーマルが出ないパックには天井表示不要
+  const showPity = !pack.pool && pack.weights.normal > 0; // 固定プールのガチャ・ノーマルが出ないガチャには天井表示不要
   return `
       <div class="cg-pack-card">
         <div class="cg-pack-top">
@@ -3213,8 +3213,8 @@ function renderPackCard(pack) {
           <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" data-times="1" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
           ${show10 ? `<button class="cg-btn cg-pack-buy cg-pack-buy10" data-pack="${pack.id}" data-times="10" ${affordable10 ? '' : 'disabled'}>10連　${currencyIcon} ${pack.cost * 10}</button>` : ''}
         </div>
+        <div class="cg-pack-preview-label">${pack.pool ? '収録カード' : '収録例'}</div>
         <div class="cg-pack-preview-row">
-          <span class="cg-pack-preview-label">${pack.pool ? '収録カード' : '収録例'}</span>
           ${previewHtml}
         </div>
       </div>`;
@@ -3232,6 +3232,9 @@ function renderShop() {
     eventWrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
       btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
     });
+    eventWrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
+      node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
+    });
   }
 
   const wrap = document.getElementById('shop-packs');
@@ -3239,10 +3242,13 @@ function renderShop() {
   wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
     btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
   });
+  wrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
+    node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
+  });
 }
 
 // ---------- ガチャの天井（保証） ----------
-const PITY_LIMIT = 10; // このパックで10回連続ノーマルが出たら、次回はレア以上を確定でプレゼント
+const PITY_LIMIT = 10; // このガチャで10回連続ノーマルが出たら、次回はレア以上を確定でプレゼント
 
 function pickCardForPack(pack) {
   // 固定プールから均等な確率で1枚選ぶ専用ガチャ(天井システム対象外)
@@ -3389,10 +3395,10 @@ const MISSIONS = [
   { id: 'win10', category: 'battle', title: '歴戦の証', desc: 'バトルに10回勝利する', target: 10, check: s => s.totalWins || 0, reward: { gems: 20 } },
   { id: 'win25', category: 'battle', title: 'バトルマスターへの道', desc: 'バトルに25回勝利する', target: 25, check: s => s.totalWins || 0, reward: { gems: 40 } },
   { id: 'win50', category: 'battle', title: '百戦錬磨', desc: 'バトルに50回勝利する', target: 50, check: s => s.totalWins || 0, reward: { gems: 80, gold: 1000 } },
-  { id: 'pack1', category: 'collect', title: '初めてのパック', desc: 'カードパックを1回開封する', target: 1, check: s => s.totalPacksOpened || 0, reward: { gems: 5 } },
-  { id: 'pack5', category: 'collect', title: 'パックコレクター', desc: 'カードパックを5回開封する', target: 5, check: s => s.totalPacksOpened || 0, reward: { gems: 15 } },
-  { id: 'pack15', category: 'collect', title: 'パック愛好家', desc: 'カードパックを15回開封する', target: 15, check: s => s.totalPacksOpened || 0, reward: { gems: 30 } },
-  { id: 'pack30', category: 'collect', title: 'ガチャの求道者', desc: 'カードパックを30回開封する', target: 30, check: s => s.totalPacksOpened || 0, reward: { gems: 60 } },
+  { id: 'pack1', category: 'collect', title: '初めてのガチャ', desc: 'ガチャを1回引く', target: 1, check: s => s.totalPacksOpened || 0, reward: { gems: 5 } },
+  { id: 'pack5', category: 'collect', title: 'ガチャコレクター', desc: 'ガチャを5回引く', target: 5, check: s => s.totalPacksOpened || 0, reward: { gems: 15 } },
+  { id: 'pack15', category: 'collect', title: 'ガチャ愛好家', desc: 'ガチャを15回引く', target: 15, check: s => s.totalPacksOpened || 0, reward: { gems: 30 } },
+  { id: 'pack30', category: 'collect', title: 'ガチャの求道者', desc: 'ガチャを30回引く', target: 30, check: s => s.totalPacksOpened || 0, reward: { gems: 60 } },
   { id: 'upgrade3', category: 'growth', title: 'カードを鍛える', desc: 'カードを3回強化する', target: 3, check: s => s.totalUpgrades || 0, reward: { gold: 400 } },
   { id: 'upgrade10', category: 'growth', title: '熟練の強化師', desc: 'カードを10回強化する', target: 10, check: s => s.totalUpgrades || 0, reward: { gold: 800 } },
   { id: 'upgrade25', category: 'growth', title: '究極の強化師', desc: 'カードを25回強化する', target: 25, check: s => s.totalUpgrades || 0, reward: { gold: 1500, gems: 20 } },
@@ -3421,7 +3427,7 @@ const MISSIONS = [
   { id: 'evolve20', category: 'growth', title: '進化の極致', desc: 'カードを20体進化させる', target: 20, check: s => getEvolvedMonsterCount().evolvedCount, reward: { gold: 2000, gems: 40 } },
   { id: 'dragonlevel10', category: 'growth', title: 'ドラゴンを育てる', desc: 'ドラゴンをLv.10まで育てる', target: 10, check: s => (s.dragon && s.dragon.level) || 1, reward: { gold: 800 } },
   { id: 'dragonlevel20', category: 'growth', title: '古代竜の目覚め', desc: 'ドラゴンをLv.20まで育てる', target: 20, check: s => (s.dragon && s.dragon.level) || 1, reward: { gems: 70 } },
-  { id: 'pack50', category: 'collect', title: 'ガチャの達人', desc: 'カードパックを50回開封する', target: 50, check: s => s.totalPacksOpened || 0, reward: { gems: 80 } },
+  { id: 'pack50', category: 'collect', title: 'ガチャの達人', desc: 'ガチャを50回引く', target: 50, check: s => s.totalPacksOpened || 0, reward: { gems: 80 } },
   { id: 'leaderselect1', category: 'collect', title: 'リーダーを選ぼう', desc: 'デッキにリーダーを設定する', target: 1, check: s => s.leaderId ? 1 : 0, reward: { gold: 300 } },
   { id: 'presetsave1', category: 'collect', title: 'デッキを保存しよう', desc: 'デッキプリセットを1件保存する', target: 1, check: s => (s.deckPresets || []).length, reward: { gold: 300 } },
   { id: 'compendium1', category: 'collect', title: '図鑑コンプリート', desc: '図鑑コンプリート報酬を受け取る', target: 1, check: s => s.compendiumRewardClaimed ? 1 : 0, reward: { gems: 50 } },
@@ -3541,7 +3547,7 @@ const ONBOARDING_STEPS = [
   { emoji: '⚔️', title: '「バトル」でステージに挑戦',
     desc: '「バトル」からステージを選んで挑戦しましょう。手札のカードをコストの範囲で使い、相手のHPを0にすれば勝利です。' },
   { emoji: '✨', title: 'さあ、冒険の始まりです',
-    desc: 'パックでカードを集めたり、ミッションを達成したりと、やり込み要素も盛りだくさん。あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
+    desc: 'ガチャでカードを集めたり、ミッションを達成したりと、やり込み要素も盛りだくさん。あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
 ];
 let onboardingStepIdx = 0;
 
@@ -3578,6 +3584,105 @@ function onboardingNext() {
   } else {
     finishOnboarding();
   }
+}
+
+// ---------- 画面ごとのヘルプ ----------
+const SCREEN_HELP = {
+  home: {
+    title: 'ホーム画面のヘルプ',
+    items: [
+      '<b>① プレイヤー情報</b><br>アイコン・名前をタップすると、プレイヤー設定画面が開きます。',
+      '<b>② トロフィー・ジェム・ゴールド</b><br>現在の所持数を確認できます。⚙アイコンから設定・データ管理も可能です。',
+      '<b>③ クイックメニュー</b><br>バトル・カード・ガチャ・ミッションなどへすぐに移動できます。',
+      '<b>④ デイリー報酬・ランクカード</b><br>毎日受け取れる報酬と、現在のランク・トロフィーを確認できます。',
+    ],
+  },
+  collection: {
+    title: 'カード画面のヘルプ',
+    items: [
+      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加、デッキ側の✕で外せます。属性タブで絞り込みも可能。',
+      '<b>② 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
+      '<b>③ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
+      '<b>④ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
+    ],
+  },
+  cardDetail: {
+    title: 'カード強化・進化画面のヘルプ',
+    items: [
+      '<b>① 強化</b><br>ゴールドを消費してカードのレベルを上げ、ステータスをアップさせます。',
+      '<b>② 進化</b><br>規定のレベルに到達すると、ゴールドを消費して進化させ、ステータスを永続的に強化できます。',
+      '<b>③ デッキ操作</b><br>この画面から直接、デッキへの追加・削除ができます。',
+      '<b>④ 前へ／次へ</b><br>画面上部のボタンで、他の所持カードの詳細に移動できます。',
+    ],
+  },
+  stage: {
+    title: 'ステージ選択画面のヘルプ',
+    items: [
+      '<b>① ステージ挑戦</b><br>ステージをタップして挑戦します。上から順に難易度が上がっていきます。',
+      '<b>② ステージ解放</b><br>ステージをクリアすると、次のステージが解放されます。',
+    ],
+  },
+  events: {
+    title: 'イベントクエスト画面のヘルプ',
+    items: [
+      '<b>① 期間限定ステージ</b><br>開催期間中のみ挑戦できる、期間限定のステージ一覧です。',
+    ],
+  },
+  shop: {
+    title: 'ガチャ画面のヘルプ',
+    items: [
+      '<b>① ガチャを引く</b><br>ゴールドやジェムを消費してガチャを引き、カードを手に入れます。単発・10連が選べます。',
+      '<b>② 天井（保証）</b><br>連続でノーマルばかり出た場合、一定回数を超えると次回はレア以上が確定します。',
+      '<b>③ 収録カード</b><br>各ガチャの下に表示されているカードをタップすると、詳細を確認できます。',
+      '<b>④ 期間限定ガチャ</b><br>チケットを消費して引く、期間限定の特別なガチャです。',
+    ],
+  },
+  mission: {
+    title: 'ミッション画面のヘルプ',
+    items: [
+      '<b>① ミッション達成</b><br>条件を満たすと「達成」になり、報酬を受け取れます。',
+      '<b>② まとめて受け取る</b><br>達成済みのミッションが複数あるとき、一括で報酬を受け取れます。',
+      '<b>③ カテゴリ絞り込み</b><br>「全て／バトル／育成／収集」のタブで、ミッションを絞り込めます。',
+    ],
+  },
+  dragon: {
+    title: 'ドラゴン育成画面のヘルプ',
+    items: [
+      '<b>① エサをあげる</b><br>ゴールドを消費してエサをあげ、ドラゴンの経験値を稼ぎます。',
+      '<b>② レベルアップ</b><br>経験値が貯まるとレベルが上がり、成長段階（見た目）も変化します。',
+      '<b>③ 育成による効果</b><br>ドラゴンのレベルに応じて、バトル開始時の自分の最大HPにボーナスが付きます。',
+    ],
+  },
+  ranking: {
+    title: 'ランキング画面のヘルプ',
+    items: [
+      '<b>① ランク早見表</b><br>各ランク（ブロンズ〜ダイヤモンド）の必要トロフィー数を確認できます。',
+      '<b>② ランキング一覧</b><br>トロフィー数による他プレイヤーとの順位を確認できます。ランクの境目には区切り線が表示されます。',
+      '<b>③ ログイン</b><br>ログインすると、自分の順位もランキングに反映されます。',
+    ],
+  },
+  profile: {
+    title: 'プレイヤー設定画面のヘルプ',
+    items: [
+      '<b>① プレイヤー名・アイコン</b><br>名前の変更や、写真・イラストからのアイコン選択ができます。',
+      '<b>② 保存</b><br>「保存する」を押すと確認ダイアログが表示され、OKで変更が反映されます。',
+    ],
+  },
+  history: {
+    title: '戦績・対戦履歴画面のヘルプ',
+    items: [
+      '<b>① 通算成績</b><br>これまでの通算勝利数・勝率を確認できます。',
+      '<b>② 対戦履歴</b><br>直近の対戦結果とトロフィー増減の履歴を確認できます。',
+    ],
+  },
+};
+
+function openScreenHelp(key) {
+  const help = SCREEN_HELP[key];
+  if (!help) return;
+  document.getElementById('screen-help-title').textContent = help.title;
+  document.getElementById('screen-help-body').innerHTML = help.items.map(item => `<div class="cg-help-item">${item}</div>`).join('');
+  document.getElementById('screen-help-overlay').classList.remove('hidden');
 }
 
 function init() {
@@ -3667,6 +3772,12 @@ function init() {
   document.getElementById('profile-avatar-file').addEventListener('change', (e) => handleAvatarUpload(e.target));
   document.getElementById('onboarding-next').addEventListener('click', onboardingNext);
   document.getElementById('onboarding-skip').addEventListener('click', finishOnboarding);
+  document.querySelectorAll('.cg-screen-help-btn').forEach(btn => {
+    btn.addEventListener('click', () => openScreenHelp(btn.dataset.help));
+  });
+  document.getElementById('screen-help-close').addEventListener('click', () => {
+    document.getElementById('screen-help-overlay').classList.add('hidden');
+  });
   if (window.LisNoirCloud) {
     window.LisNoirCloud.onAuthChange((user) => {
       refreshCloudAuthUI(user);

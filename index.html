@@ -554,7 +554,7 @@
   .cg-tab-main .lb{color:#ffffff; font-weight:700; margin-top:1px;}
   .cg-tab-main .ic{font-size:22px;}
 
-  /* ---------- ショップ ---------- */
+  /* ---------- ガチャ ---------- */
   .cg-shop-currency{display:flex; gap:8px; padding:8px 14px 4px;}
   #shop-event-gacha-panel{margin:6px 14px 4px; padding:10px; border-radius:16px;
     background:linear-gradient(160deg,#241344,#150a26); border:1.5px solid var(--true-gold);
@@ -574,13 +574,13 @@
   .cg-pack-buy10{background:var(--bg-panel2); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   .cg-pack-buy:disabled{opacity:.4; cursor:default;}
   .cg-pack-pity{font-size:10px; color:var(--gold); font-weight:700; margin-top:8px;}
-  .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel); flex-wrap:wrap;}
-  .cg-pack-preview-label{font-size:10px; color:var(--text-dim-panel); flex-shrink:0;}
-  .cg-pack-preview-thumb{width:34px; height:34px; border-radius:8px; overflow:hidden; border:2px solid #8a8c96; flex-shrink:0;
+  .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .cg-pack-preview-label{font-size:10px; color:var(--text-dim-panel); margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel);}
+  .cg-pack-preview-thumb{width:34px; height:34px; border-radius:8px; overflow:hidden; border:2px solid #8a8c96; flex-shrink:0; cursor:pointer;
     background:#14141d; display:flex; align-items:center; justify-content:center; font-size:16px;}
   .cg-pack-preview-thumb img{width:100%; height:100%; object-fit:cover;}
 
-  /* ---------- パック開封演出（結果画面） ---------- */
+  /* ---------- ガチャ開封演出（結果画面） ---------- */
   .cg-reveal-overlay{position:absolute; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
     flex-direction:column; background:radial-gradient(circle at 50% 36%, #3a2166f5, #0d0619fa 78%);
     opacity:1; transition:opacity .2s ease; padding:24px 16px; overflow-y:auto;}
@@ -1173,6 +1173,15 @@
     </div>
   </div>
 
+  <!-- 画面ごとのヘルプ（各画面右上の？アイコンから表示） -->
+  <div id="screen-help-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame">
+      <div class="cg-help-title" id="screen-help-title">ヘルプ</div>
+      <div class="cg-help-body" id="screen-help-body"></div>
+      <button class="cg-btn cg-btn-main" id="screen-help-close">閉じる</button>
+    </div>
+  </div>
+
   <!-- ============ ホーム画面 ============ -->
   <section id="screen-home" class="cg-screen cg-scroll-pad active">
     <div class="cg-topbar">
@@ -1189,6 +1198,7 @@
         <div class="cg-currency">💎 <span id="home-gems">0</span></div>
         <div class="cg-currency">💰 <span id="home-gold">0</span></div>
         <button class="cg-help-btn" id="settings-btn" title="設定・データ管理">⚙</button>
+        <button class="cg-help-btn cg-screen-help-btn" id="screen-help-btn-home" title="ヘルプ" data-help="home">？</button>
       </div>
     </div>
 
@@ -1218,7 +1228,7 @@
     <div class="cg-quick-grid cg-quick-grid-5">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
-      <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ショップ</span></div>
+      <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ガチャ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
       <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
     </div>
@@ -1261,6 +1271,7 @@
         <button class="cg-seg-btn active" id="seg-deck">デッキ編成</button>
         <button class="cg-seg-btn" id="seg-list">カード一覧</button>
       </div>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="collection" title="ヘルプ">？</button>
     </div>
 
     <div id="collection-deck-view">
@@ -1331,6 +1342,7 @@
         <button class="cg-detail-nav-btn" id="detail-prev-btn">◀ 前へ</button>
         <button class="cg-detail-nav-btn" id="detail-next-btn">次へ ▶</button>
       </div>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="cardDetail" title="ヘルプ">？</button>
     </div>
     <div id="detail-body"></div>
   </section>
@@ -1340,6 +1352,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-stage">←</button>
       <span class="cg-section-title" style="padding:0;">ステージ選択</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="stage" title="ヘルプ">？</button>
     </div>
     <div id="stage-list" class="cg-stage-list"></div>
   </section>
@@ -1349,6 +1362,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-events">←</button>
       <span class="cg-section-title" style="padding:0;">イベントクエスト</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="events" title="ヘルプ">？</button>
     </div>
     <div id="event-list" class="cg-stage-list"></div>
   </section>
@@ -1469,11 +1483,12 @@
 
   </section>
 
-  <!-- ============ ショップ画面 ============ -->
+  <!-- ============ ガチャ画面 ============ -->
   <section id="screen-shop" class="cg-screen cg-scroll-pad">
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-shop">←</button>
-      <span class="cg-section-title" style="padding:0;">ショップ</span>
+      <span class="cg-section-title" style="padding:0;">ガチャ</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="shop" title="ヘルプ">？</button>
     </div>
     <div class="cg-shop-currency">
       <span class="cg-currency">💰 <span id="shop-gold">0</span></span>
@@ -1484,7 +1499,7 @@
       <div class="cg-section-title">🌙 期間限定ガチャ</div>
       <div id="shop-event-packs" class="cg-shop-packs"></div>
     </div>
-    <div class="cg-section-title">通常パック</div>
+    <div class="cg-section-title">通常ガチャ</div>
     <div id="shop-packs" class="cg-shop-packs"></div>
   </section>
 
@@ -1500,7 +1515,7 @@
     </div>
   </div>
 
-  <!-- ============ パック開封演出 ============ -->
+  <!-- ============ ガチャ開封演出 ============ -->
   <div id="shop-reveal-overlay" class="cg-reveal-overlay hidden">
     <div class="cg-reveal-inner">
       <div class="cg-reveal-label" id="shop-reveal-label">獲得！</div>
@@ -1578,6 +1593,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-mission">←</button>
       <span class="cg-section-title" style="padding:0;">ミッション</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="mission" title="ヘルプ">？</button>
     </div>
     <button class="cg-btn cg-btn-main cg-mission-claimall-btn hidden" id="mission-claimall-btn">🎁 まとめて受け取る</button>
     <div class="cg-filter-tabs" id="mission-filter-tabs"></div>
@@ -1589,6 +1605,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-dragon">←</button>
       <span class="cg-section-title" style="padding:0;">ドラゴン育成</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="dragon" title="ヘルプ">？</button>
     </div>
     <div class="cg-dragon-hero">
       <div id="dragon-emoji" class="cg-dragon-emoji">🥚</div>
@@ -1615,6 +1632,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-ranking">←</button>
       <span class="cg-section-title" style="padding:0;">ランキング</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="ranking" title="ヘルプ">？</button>
     </div>
     <div id="ranking-body"></div>
   </section>
@@ -1624,6 +1642,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-profile">←</button>
       <span class="cg-section-title" style="padding:0;">プレイヤー設定</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="profile" title="ヘルプ">？</button>
     </div>
     <div class="cg-profile-section">
       <div class="cg-profile-label">現在のアイコン</div>
@@ -1648,6 +1667,7 @@
     <div class="cg-top-row">
       <button class="cg-back-btn cg-back-btn-history">←</button>
       <span class="cg-section-title" style="padding:0;">戦績・対戦履歴</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="history" title="ヘルプ">？</button>
     </div>
     <div id="history-summary" class="cg-history-summary"></div>
     <div id="history-list" class="cg-history-list"></div>
@@ -1680,7 +1700,7 @@
     <div class="cg-tab" id="nav-cards"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="4.5" y="6" width="10" height="14" rx="1.6" transform="rotate(-10 4.5 6)"/><rect x="9.5" y="4.5" width="10" height="14" rx="1.6"/></svg></span></span><span class="lb">カード</span></div>
     <div class="cg-tab" id="nav-battle"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18.5 17 7.5"/><path d="M14.5 5l4.5 4.5"/><path d="M4 20.5l2.3-2.3"/><path d="M15 6.5l1.8-1.8"/></svg></span></span><span class="lb">バトル</span></div>
     <div class="cg-tab cg-tab-main" id="nav-home"><span class="cg-tab-main-btn"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-6h4v6"/></svg></span></span><span class="lb">ホーム</span></div>
-    <div class="cg-tab" id="nav-shop"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.2 4.5h13.6L20 9.5"/><path d="M4 9.5v10h16v-10"/><path d="M4 9.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5"/></svg></span></span><span class="lb">ショップ</span></div>
+    <div class="cg-tab" id="nav-shop"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.2 4.5h13.6L20 9.5"/><path d="M4 9.5v10h16v-10"/><path d="M4 9.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5c.3 1.6 1.7 2.5 3 2.5s2.7-.9 3-2.5"/></svg></span></span><span class="lb">ガチャ</span></div>
     <div class="cg-tab" id="nav-mission"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2.5"/><path d="M8.5 9h7"/><path d="M8.5 12.5h7"/><path d="M8.5 16h4.5"/></svg></span></span><span class="lb">ミッション</span></div>
   </nav>
 
