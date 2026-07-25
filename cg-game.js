@@ -26,20 +26,21 @@ const RARITY = {
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
   fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
-  fire_imp:       { name: 'フレイムインプ',   element: 'fire',   rarity: 'normal', cost: 1, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-imp.png', emoji: '👹' },
+  fire_imp:       { name: 'リーフバード',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-leafbird.png', emoji: '🐦' },
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
-  fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'rare',   cost: 2, atk: 2, hp: 3,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'damageRandomEnemy', value: 2 }, skill: '場に出た時、敵1体に2ダメージを与える', image: 'card-fire-flameslime.png', emoji: '🔥' },
+  fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'rare',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
   water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 2 }, skill: '毎ターン開始時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
-  water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 1, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-water-aquaslime.png', emoji: '🔵' },
+  water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 1,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
   water_serpent:  { name: 'リヴァイアサン',   element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 4,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、攻撃した相手モンスターを1ターン行動不能', image: 'card-water-serpent.png', emoji: '🐍' },
   nature_elfarcher: { name: 'エルフアーチャー', element: 'nature', rarity: 'rare', cost: 3, atk: 3, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で相手に毒を付与（2ターンの間、毎ターン開始時に1ダメージ）', image: 'card-nature-elfarcher.png', emoji: '🏹' },
   nature_wolf:    { name: 'シャドウアサシン', element: 'dark', rarity: 'normal', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-shadowassassin.png', emoji: '🗡️' },
   nature_panda:   { name: '世界樹の守護者', element: 'nature', rarity: 'epic', cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 1, shieldValue: 1 }, skill: '場に出た時、味方全体のHPを1回復し、シールド1を付与する', image: 'card-nature-worldtreeguardian.png', emoji: '🌪️' },
   light_angel:    { name: 'ヴァルキリー', element: 'light', rarity: 'epic', cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-angel.png', emoji: '⚔️' },
-  light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 3, atk: 2, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healLowestAllyCleanse', value: 3 }, skill: '場に出た時、最もHPが減っている味方1体のHPを3回復し、状態異常を解除する', image: 'card-light-holyangel.png', emoji: '👼' },
+  light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
   light_unicorn:  { name: 'セラフィムナイト', element: 'light', rarity: 'normal',  cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 1 }, skill: '場に出た時、味方全体にシールド1を付与する', image: 'card-light-seraphimknight.png', emoji: '🛡️' },
   light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
   dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  role: 'attacker', skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
+  dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'rare',   cost: 2, atk: 1, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
   dark_reaper:    { name: 'ブレイズデーモン', element: 'dark',   rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-reaper.png', emoji: '😈' },
   dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 4, role: 'defender', skill: '', image: 'card-dark-ghost.png', emoji: '👻' },
   rock_giant:     { name: 'グラウンドゴーレム', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
@@ -49,7 +50,7 @@ const CARD_DEFS = {
   nature_elfunicorn:  { name: 'エルフユニコーン', element: 'nature', rarity: 'rare',  cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-nature-elfunicorn.png', emoji: '🦄' },
   nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: null, emoji: '🐇' },
-  dark_demonlord:     { name: 'デモンロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'drainEnemyCost', value: 1 }, skill: '敵モンスターを撃破した時、相手のコストを1消費させる', image: 'card-dark-demonlord.png', emoji: '😈' },
+  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord.png', emoji: '🧛' },
   fire_magmacolossus: { name: 'イフリート', element: 'fire', rarity: 'epic',    cost: 5, atk: 5, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与え、2ターンの間、火傷（毎ターン開始時に1ダメージ）を付与する', image: 'card-fire-ifrit.png', emoji: '👹' },
   dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
@@ -2753,6 +2754,11 @@ function attackTarget(attackerIdx, targetIdx) {
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
   impactEffect(targetEl, dmg, mult);
+  if (tag && tag.effect === 'lifesteal') {
+    // 【ヴァンパイアロード】攻撃時、与えたダメージ分だけ自分のHPを回復する
+    const maxHp = attacker.def.hp + (attacker.hpBonus || 0);
+    attacker.curHp = Math.min(maxHp, attacker.curHp + dmg);
+  }
 
   let killedSomething = false;
   if (targetIdx === null) {
@@ -2792,6 +2798,11 @@ function attackTarget(attackerIdx, targetIdx) {
     if (!killed && tag && tag.effect === 'poisonChance' && Math.random() < (tag.chance || 0.5)) {
       target.ailment = { turns: tag.turns || 2, dmg: tag.value || 1, kind: 'poison' };
       skillFlash(`${attacker.def.name}のスキル！\n相手に毒を付与`);
+    }
+    if (!killed && tag && tag.effect === 'atkDown') {
+      // 【シャドウバット】攻撃時、相手の攻撃力を下げる
+      target.atkBonus = (target.atkBonus || 0) - tag.value;
+      skillFlash(`${attacker.def.name}のスキル！\n相手の攻撃力を${tag.value}下げた`);
     }
   }
   if (killedSomething && tag && tag.effect === 'extraAttackOnKill' && !attacker.usedExtraAttack) {
@@ -2988,10 +2999,19 @@ function enemyTurn() {
           target.ailment = { turns: tag.turns || 2, dmg: tag.value || 1, kind: 'poison' };
           skillFlash(`${u.def.name}のスキル！\n相手に毒を付与`);
         }
+        if (!killed && tag && tag.effect === 'atkDown') {
+          target.atkBonus = (target.atkBonus || 0) - tag.value;
+          skillFlash(`${u.def.name}のスキル！\n相手の攻撃力を${tag.value}下げた`);
+        }
       } else if (valid.faceAllowed) {
         const targetEl = document.getElementById('battle-player-portrait');
         impactEffect(targetEl, dmg, 0);
         battle.playerHp -= dmg;
+      }
+      if (tag && tag.effect === 'lifesteal' && (valid.indices.length > 0 || valid.faceAllowed)) {
+        // 【ヴァンパイアロード】攻撃時、与えたダメージ分だけ自分のHPを回復する
+        const maxHp = u.def.hp + (u.hpBonus || 0);
+        u.curHp = Math.min(maxHp, u.curHp + dmg);
       }
       // ディフェンダーで有効な対象がいない場合は何もせず待機
       return killed;
