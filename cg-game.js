@@ -206,6 +206,8 @@ function defaultState() {
     hasSeenBattleHelp: false,
     hasSeenOnboarding: false,
     sfxMuted: false,
+    bgmMuted: false,
+    bgmVolume: 0.5,
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
     cards: owned,
@@ -382,6 +384,9 @@ function openSettings() {
   document.getElementById('backup-restore-status').textContent = '';
   document.getElementById('auth-status').textContent = '';
   updateSfxToggleLabel();
+  updateBgmToggleLabel();
+  const volSlider = document.getElementById('bgm-volume-slider');
+  if (volSlider) volSlider.value = Math.round(state.bgmVolume * 100);
   if (window.LisNoirCloud && window.LisNoirCloud.getUser()) {
     setCloudSyncStatus('同期状態を確認中…');
   }
@@ -398,6 +403,54 @@ function toggleSfx() {
   saveState();
   updateSfxToggleLabel();
   if (!state.sfxMuted) sfxTap();
+}
+
+// ---------- BGM ----------
+function getBgmAudio() {
+  return document.getElementById('bgm-audio');
+}
+
+function updateBgmToggleLabel() {
+  const btn = document.getElementById('bgm-toggle-btn');
+  if (btn) btn.textContent = state.bgmMuted ? 'BGM: OFF' : 'BGM: ON';
+}
+
+function applyBgmVolume() {
+  const audio = getBgmAudio();
+  if (audio) audio.volume = state.bgmMuted ? 0 : state.bgmVolume;
+}
+
+// スプラッシュ画面の「START」タップ（＝最初のユーザー操作）のタイミングで呼び出す。
+// ブラウザの自動再生制限により、ユーザー操作なしでは音声を再生できないため。
+function playBgm() {
+  const audio = getBgmAudio();
+  if (!audio) return;
+  applyBgmVolume();
+  if (state.bgmMuted) return;
+  const p = audio.play();
+  if (p && p.catch) p.catch(() => {}); // 自動再生がブロックされた場合は静かに無視
+}
+
+function pauseBgm() {
+  const audio = getBgmAudio();
+  if (audio) audio.pause();
+}
+
+function toggleBgm() {
+  state.bgmMuted = !state.bgmMuted;
+  saveState();
+  updateBgmToggleLabel();
+  if (state.bgmMuted) {
+    pauseBgm();
+  } else {
+    playBgm();
+  }
+}
+
+function setBgmVolume(v) {
+  state.bgmVolume = Math.min(1, Math.max(0, v));
+  saveState();
+  applyBgmVolume();
 }
 
 function copyBackupCode() {
@@ -3783,6 +3836,10 @@ function init() {
   });
   document.getElementById('settings-btn').addEventListener('click', openSettings);
   document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
+  document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBgm);
+  document.getElementById('bgm-volume-slider').addEventListener('input', (e) => {
+    setBgmVolume(Number(e.target.value) / 100);
+  });
   document.getElementById('settings-close').addEventListener('click', () => {
     document.getElementById('settings-overlay').classList.add('hidden');
   });
@@ -3829,6 +3886,7 @@ function init() {
   if (startBtn) {
     startBtn.addEventListener('click', () => {
       sfxTap();
+      playBgm();
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('hidden');
       if (!state.hasSeenOnboarding) {

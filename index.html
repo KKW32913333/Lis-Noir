@@ -870,6 +870,8 @@
     background:var(--bg-panel2); color:var(--text-panel); border:1px solid var(--hairline-panel); border-radius:8px;
     padding:8px; margin-bottom:8px; word-break:break-all;}
   .cg-settings-action-btn{width:100%; font-size:12px; padding:9px;}
+  .cg-bgm-volume-row{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:11px; color:var(--text-dim-panel);}
+  .cg-bgm-volume-row input[type="range"]{flex:1; accent-color:var(--gold-bright);}
   .cg-backup-status{font-size:11px; color:var(--gold-bright); margin-top:6px; min-height:14px;}
   .cg-cloud-desc{font-size:11px; color:var(--text-dim-panel); line-height:1.5; margin-bottom:8px;}
   .cg-auth-input{width:100%; font-size:12px; padding:9px 10px; margin-bottom:8px; border-radius:8px;
@@ -1552,6 +1554,14 @@
           <div class="cg-settings-label">🔊 効果音</div>
           <button class="cg-btn cg-settings-action-btn" id="sfx-toggle-btn">効果音: ON</button>
         </div>
+        <div class="cg-settings-section">
+          <div class="cg-settings-label">🎵 BGM</div>
+          <button class="cg-btn cg-settings-action-btn" id="bgm-toggle-btn">BGM: ON</button>
+          <div class="cg-bgm-volume-row">
+            <span>音量</span>
+            <input type="range" id="bgm-volume-slider" min="0" max="100" value="50">
+          </div>
+        </div>
         <div class="cg-help-item">
           <b>⚠️ 保存の注意点</b><br>
           セーブデータはこの端末のブラウザ内にのみ保存されています。アプリを消しても残りますが、Safariで「履歴とWebサイトデータを消去」を行うと消えてしまいます。機種変更・データ引き継ぎの際は、下記の「クラウド保存」のご利用をおすすめします。
@@ -1707,6 +1717,7 @@
     <div class="cg-tab" id="nav-mission"><span class="cg-tab-icon-wrap"><span class="ic cg-svg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2.5"/><path d="M8.5 9h7"/><path d="M8.5 12.5h7"/><path d="M8.5 16h4.5"/></svg></span></span><span class="lb">ミッション</span></div>
   </nav>
 
+  <audio id="bgm-audio" src="bgm-main.mp3" loop preload="none"></audio>
 </div>
 <script type="module" src="firebase-init.js"></script>
 <script src="cg-game.js"></script>
