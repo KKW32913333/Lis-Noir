@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v92';
+const CACHE_NAME = 'lisnoir-cache-v93';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -29,11 +29,12 @@ const CACHE_ASSETS = [
   'leader-mornabane-icon.png',
   'splash-art.jpg',
   'card-fire-dragon.png',
-  'card-water-slime.png',
+  'card-water-aquaslime.png',
   'card-rock-giant.png',
-  'card-nature-wolf.png',
+  'card-dark-shadowassassin.png',
   'card-light-angel.png',
   'card-nature-treant.png',
+  'card-nature-elfarcher.png',
   'card-fire-imp.png',
   'card-spell-apocalypse.png',
   'card-water-icewolf.png',
@@ -49,13 +50,14 @@ const CACHE_ASSETS = [
   'card-dark-shadowslime.png',
   'card-dark-orbitalgrimoire.png',
   'card-fire-magmacolossus.png',
+  'card-fire-flameslime.png',
   'card-water-golem.png',
   'card-water-serpent.png',
   'card-nature-panda.png',
   'card-light-unicorn.png',
   'card-storm-bird.png',
   'card-dark-wolf.png',
-  'card-fire-phoenix.png',
+  'card-fire-phoenixemperor.png',
   'card-light-cleric.png',
   'card-dark-ghost.png',
   'card-crystal-fox.png',
