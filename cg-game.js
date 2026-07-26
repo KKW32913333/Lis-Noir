@@ -26,8 +26,8 @@ const RARITY = {
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
-  leader_lisnoir_f: { name: 'リス・ノワール（ダークエレガンス）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-lisnoir-f-full.png', emoji: '🌙' },
-  leader_lisnoir_m: { name: 'リス・ノワール（ナイトメアドミニオン）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, aoeDamage: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体に2ダメージを与える', image: 'leader-lisnoir-m-full.png', emoji: '🌙' },
+  leader_lisnoir_f: { name: 'ノワール・エレナ（ダークエレガンス）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-lisnoir-f-full.png', emoji: '🌙' },
+  leader_lisnoir_m: { name: 'ノワール・ドミナ（ナイトメアドミニオン）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, aoeDamage: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体に2ダメージを与える', image: 'leader-lisnoir-m-full.png', emoji: '🌙' },
   leader_lisblanc_f: { name: 'Lis.Blanc（ホーリーグロウ）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-lisblanc-f-full.png', emoji: '✨' },
   leader_luxblanc_m: { name: 'Lux.Blanc（ホーリーセイント）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'defender', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-luxblanc-m-full.png', emoji: '✨' },
   leader_liramaline: { name: 'Lira Maline（アクアエンパイア）', element: 'water', rarity: 'epic', cost: 5, atk: 5, hp: 6, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の水属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-liramaline-full.png', emoji: '💧' },
@@ -139,7 +139,7 @@ const EVOLVE_LEVEL_REQ = 5;
 // デッキに1体だけ設定でき、効果はそのデッキの対象属性モンスター全てに反映される
 const LEADERS = {
   lisnoir_f: {
-    name: 'リス・ノワール',
+    name: 'ノワール・エレナ',
     skillName: 'ダークエレガンス',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を25%アップ、HPを15%アップ',
@@ -148,7 +148,7 @@ const LEADERS = {
     icon: 'leader-lisnoir-f-icon.png',
   },
   lisnoir_m: {
-    name: 'リス・ノワール',
+    name: 'ノワール・ドミナ',
     skillName: 'ナイトメアドミニオン',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を25%アップ、敵全体へのダメージを15%アップ',
