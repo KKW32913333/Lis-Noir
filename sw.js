@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v142';
+const CACHE_NAME = 'lisnoir-cache-v143';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -29,12 +29,9 @@ const CACHE_ASSETS = [
   'leader-mornabane-full.png',
   'leader-mornabane-icon.png',
   'splash-art.jpg',
-  'card-fire-dragon.png',
   'card-water-aquaslime.png',
-  'card-rock-giant.png',
   'card-dark-shadowassassin.png',
   'card-light-luminous.png',
-  'card-light-arcguardian.png',
   'card-nature-leafbird.png',
   'card-spell-apocalypse.png',
   'card-water-spiritmaiden.png',
@@ -60,7 +57,6 @@ const CACHE_ASSETS = [
   'card-equip-aqualance.png',
   'gacha-icon-nightlegends.png',
   'gacha-icon-lightblessing.png',
-  'card-fire-ifrit.png',
   'card-fire-flameslime.png',
   'card-water-leviathan.png',
   'card-water-seiren.png',
@@ -68,11 +64,9 @@ const CACHE_ASSETS = [
   'card-nature-emeraldgaia.png',
   'card-nature-worldtreeguardian.png',
   'card-light-holyangel.png',
-  'card-storm-bird.png',
   'card-dark-shadowbat.png',
   'card-fire-phoenixemperor.png',
   'card-fire-bahamut.png',
-  'card-crystal-fox.png',
   'card-dark-nocturia.png',
   'card-spell-healing.png',
   'card-equip-shield.png',

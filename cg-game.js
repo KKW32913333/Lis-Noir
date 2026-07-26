@@ -26,7 +26,6 @@ const RARITY = {
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
-  fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
   fire_imp:       { name: 'リーフバード',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-leafbird.png', emoji: '🐦' },
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
   fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 3, burnDmg: 1, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に3ダメージを与え、3ターンの間火傷を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
@@ -39,18 +38,13 @@ const CARD_DEFS = {
   nature_dryad:   { name: '森羅の樹神ドリアード', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamagePoisonShieldAllies', value: 2, poisonDmg: 1, poisonTurns: 2, shieldValue: 1 }, skill: '場に出た時、敵全体に2ダメージを与えて毒（2ターン）を付与し、味方全体にシールド1を付与する', image: 'card-nature-dryad.png', emoji: '🌲' },
   nature_emeraldgaia: { name: '翠嵐龍エメラルドガイア', element: 'nature', rarity: 'legend', cost: 7, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で1上げる', image: 'card-nature-emeraldgaia.png', emoji: '🐲' },
   light_angel:    { name: '光輝の大天使ルミナス', element: 'light', rarity: 'epic', cost: 4, atk: 4, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-luminous.png', emoji: '👼' },
-  light_arcguardian: { name: '聖騎士アークガーディアン', element: 'light', rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageShieldAllies', value: 3, shieldValue: 2 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体にシールド2を付与する', image: 'card-light-arcguardian.png', emoji: '🛡️' },
   light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
   dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'rare',   cost: 2, atk: 1, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
   dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
-  rock_giant:     { name: 'グラウンドゴーレム', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
-  storm_bird:     { name: 'サンダーイーグル', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
-  crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'epic',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: null, emoji: '🐇' },
   dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord.png', emoji: '🧛' },
   dark_chaosdemon:    { name: '冥王カオスデーモン', element: 'dark', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkDownAll', value: 2, atkDownValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与え、敵全体の攻撃力を1下げる', image: 'card-dark-chaosdemon.png', emoji: '😈' },
-  fire_magmacolossus: { name: 'イフリート', element: 'fire', rarity: 'epic',    cost: 5, atk: 5, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与え、2ターンの間、火傷（毎ターン開始時に1ダメージ）を付与する', image: 'card-fire-ifrit.png', emoji: '👹' },
   dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
   dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 2 }, skill: '【固有】場に出た時、自分のコストを2回復する', image: 'card-dark-lunaelf.png', emoji: '🦋' },
@@ -116,7 +110,7 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
 // ---------- ダンジョン（地下1階〜100階） ----------
 const DUNGEON_MAX_FLOOR = 100;
 // フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
-const DUNGEON_BOSS_CARDS = ['fire_dragon', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcguardian', 'dark_reaper', 'crystal_fox', 'dark_demonlord'];
+const DUNGEON_BOSS_CARDS = ['fire_crimson', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_whitegriffon', 'dark_reaper', 'light_arcknight', 'dark_demonlord'];
 // 10階ごとの装備報酬（フロアボスを撃破した時に手に入るレジェンド装備。floor/10 - 1 が配列インデックスに対応）
 const DUNGEON_EQUIPMENT_REWARDS = [
   'dungeon_equip_10', 'dungeon_equip_20', 'dungeon_equip_30', 'dungeon_equip_40', 'dungeon_equip_50',
@@ -2217,7 +2211,7 @@ const STAGES = [
       { speaker: '月影の女帝', portrait: '👸', text: 'かつてこの国は、四天王の軍勢に呪いを撒き散らされ、滅びかけた。私が守れたのは、この程度の廃墟だけだ。' },
       { speaker: '調教師', portrait: '🧑', text: '四天王……。分かりました、必ず彼らを止めてみせます。' },
     ] },
-  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 52, bossCard: 'storm_bird', spellChance: 0.08, bgTheme: 'cave',
+  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 52, bossCard: 'water_serpent', spellChance: 0.08, bgTheme: 'cave',
     weights: { normal: 0, rare: 14, epic: 40, legend: 46 }, rewardGold: 500, rewardGems: 50, trophyDelta: 76,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '月影の国を越えた先、四天王が支配する領域へと足を踏み入れる。' },
@@ -2229,7 +2223,7 @@ const STAGES = [
       { speaker: '爪の将', portrait: '🦅', text: '……我が爪を退けるか。だが、我らは四人。まだ三人残っている。' },
       { speaker: '調教師', portrait: '🧑', text: '一人ずつでも構わない。必ず、全員を退けてみせる。' },
     ] },
-  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 58, bossCard: 'rock_giant', spellChance: 0.08, bgTheme: 'frost',
+  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 58, bossCard: 'nature_panda', spellChance: 0.08, bgTheme: 'frost',
     weights: { normal: 0, rare: 10, epic: 40, legend: 50 }, rewardGold: 550, rewardGems: 55, trophyDelta: 82,
     storyIntro: [
       { speaker: '鎧の将', portrait: '🐢', text: 'ほう、爪の将を退けたか。だが我が鎧は、何者をも通さぬ。' },
@@ -2251,7 +2245,7 @@ const STAGES = [
       { speaker: '毒の将', portrait: '🐍', text: '……毒が効かぬとは。面白い人の子だこと。' },
       { speaker: '毒の将', portrait: '🐍', text: 'ふふ、気に入ったわ。炎の将によろしく伝えて。彼はあなたを歓迎しないでしょうけど。' },
     ] },
-  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 70, bossCard: 'fire_magmacolossus', spellChance: 0.09, bgTheme: 'inferno2',
+  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 70, bossCard: 'fire_phoenix', spellChance: 0.09, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 6, epic: 36, legend: 58 }, rewardGold: 650, rewardGems: 65, trophyDelta: 94,
     storyIntro: [
       { speaker: '炎の将', portrait: '🐉', text: '三人が敗れたと聞いた。ならば我が炎で、決着をつけよう。' },
@@ -2297,7 +2291,7 @@ const STAGES = [
       { speaker: '呪術師', portrait: '💀', text: '……私の呪詛が届かぬか。お前もまた、何かに選ばれし者か。' },
       { speaker: '呪術師', portrait: '💀', text: 'ならば教えてやろう。この城の呪いの濃さは、玉座に近づくほど増していく。心せよ。' },
     ] },
-  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 102, bossCard: 'crystal_fox', spellChance: 0.12, bgTheme: 'empress',
+  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 102, bossCard: 'light_shirayuki', spellChance: 0.12, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 30, legend: 70 }, rewardGold: 950, rewardGems: 95, trophyDelta: 134,
     storyIntro: [
       { speaker: '処刑人', portrait: '🪓', text: '魔王様に近づく者は、皆ここで終わる。お前も例外ではない。' },
@@ -2320,7 +2314,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '後悔なんてしない。俺は、真実を知るためにここまで来たんだ。' },
       { speaker: '影の宰相', portrait: '🕶️', text: '……その覚悟、忘れるな。行け。' },
     ] },
-  { id: 20, name: '魔王', portrait: '👹', hp: 120, bossCard: 'fire_dragon', spellChance: 0.13, bgTheme: 'inferno2',
+  { id: 20, name: '魔王', portrait: '👹', hp: 120, bossCard: 'fire_bahamut', spellChance: 0.13, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 26, legend: 74 }, rewardGold: 1300, rewardGems: 130, trophyDelta: 170,
     storyIntro: [
       { speaker: '魔王', portrait: '👹', text: 'よくぞ辿り着いた、人の子よ。この世界の呪いの元凶……この私を倒しに来たか。' },
@@ -2345,7 +2339,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '倒しても倒しても、次々と現れる呪い。何かが、根本から間違っている。' },
       { speaker: '調教師', portrait: '🧑', text: '……行こう。この世界の中心にある神殿へ。全ての答えが、そこにあるはずだ。' },
     ] },
-  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 140, bossCard: 'light_arcguardian', spellChance: 0.14, bgTheme: 'empress',
+  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 140, bossCard: 'light_whitegriffon', spellChance: 0.14, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 22, legend: 78 }, rewardGold: 1500, rewardGems: 150, trophyDelta: 190,
     storyIntro: [
       { speaker: '黒百合の巫女', portrait: '🥀', text: 'ふふ……気づいてしまったのね。この世界の呪いの、本当の意味に。' },
@@ -2383,7 +2377,7 @@ const STAGES = [
       { speaker: '女神の影', portrait: '✨', text: '奥で待っているのは、もっと深く呪いに沈んだ、本当の女神の姿。覚悟して。' },
       { speaker: '調教師', portrait: '🧑', text: '……大丈夫。ここまで来た仲間たちと一緒なら、何も怖くない。' },
     ] },
-  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 180, bossCard: 'fire_dragon', spellChance: 0.16, bgTheme: 'purification',
+  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 180, bossCard: 'fire_bahamut', spellChance: 0.16, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 15, legend: 85 }, rewardGold: 2500, rewardGems: 250, trophyDelta: 300,
     storyIntro: [
       { speaker: '黒百合の女神', portrait: '🖤', text: '……よく来たわね、Lis Noirの継承者。私を倒せば、この呪いは終わる。それとも──赦せる？' },
@@ -2407,11 +2401,11 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……この気配、まさか。眠っていたはずの闇が、また動き出している。' },
       { speaker: '女神', portrait: '🌸', text: 'お願い。もう一度だけ、力を貸して。まだ何かが、この世界の底に残っている。' },
     ] },
-  { id: 27, name: '地底湖の哨戒者', portrait: '🌊', hp: 227, bossCard: 'crystal_fox', spellChance: 0.17, bgTheme: 'cave',
+  { id: 27, name: '地底湖の哨戒者', portrait: '🌊', hp: 227, bossCard: 'light_shirayuki', spellChance: 0.17, bgTheme: 'cave',
     weights: { normal: 0, rare: 0, epic: 13, legend: 87 }, rewardGold: 2940, rewardGems: 294, trophyDelta: 350  },
   { id: 28, name: '忘れられた祭壇', portrait: '🕯️', hp: 254, bossCard: 'dark_reaper', spellChance: 0.18, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 12, legend: 88 }, rewardGold: 3160, rewardGems: 316, trophyDelta: 375  },
-  { id: 29, name: '狭間の番人', portrait: '🚪', hp: 281, bossCard: 'light_arcguardian', spellChance: 0.18, bgTheme: 'moonshadow',
+  { id: 29, name: '狭間の番人', portrait: '🚪', hp: 281, bossCard: 'light_whitegriffon', spellChance: 0.18, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 11, legend: 89 }, rewardGold: 3380, rewardGems: 338, trophyDelta: 400  },
   { id: 30, name: '深淵より来たりし者', portrait: '🕳️', hp: 308, bossCard: 'nature_emeraldgaia', spellChance: 0.19, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 10, legend: 90 }, rewardGold: 3600, rewardGems: 360, trophyDelta: 425,
@@ -2429,18 +2423,18 @@ const STAGES = [
     ] },
   { id: 32, name: '亡国の衛兵', portrait: '💂', hp: 362, bossCard: 'fire_bahamut', spellChance: 0.2, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 8, legend: 92 }, rewardGold: 4040, rewardGems: 404, trophyDelta: 475  },
-  { id: 33, name: '灼熱の玉座跡', portrait: '👑', hp: 389, bossCard: 'fire_dragon', spellChance: 0.21, bgTheme: 'inferno2',
+  { id: 33, name: '灼熱の玉座跡', portrait: '👑', hp: 389, bossCard: 'fire_bahamut', spellChance: 0.21, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 7, legend: 93 }, rewardGold: 4260, rewardGems: 426, trophyDelta: 500  },
   { id: 34, name: '業火の残滓', portrait: '🔥', hp: 416, bossCard: 'dark_demonlord', spellChance: 0.21, bgTheme: 'volcano',
     weights: { normal: 0, rare: 0, epic: 6, legend: 94 }, rewardGold: 4480, rewardGems: 448, trophyDelta: 525  },
-  { id: 35, name: '亡国を統べる火竜', portrait: '🐲', hp: 443, bossCard: 'fire_dragon', spellChance: 0.22, bgTheme: 'inferno2',
+  { id: 35, name: '亡国を統べる火竜', portrait: '🐲', hp: 443, bossCard: 'fire_bahamut', spellChance: 0.22, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4700, rewardGems: 470, trophyDelta: 550,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '亡国を統べていた火竜を退け、燃え続けていた炎がついに静まった。' },
       { speaker: '調教師', portrait: '🧑', text: 'ようやく……ここも、終わったか。' },
       { speaker: 'ナレーター', portrait: '📖', text: 'だが灰の下から、凍りついた大地へと続く道が姿を現した。' },
     ] },
-  { id: 36, name: '凍てつく回廊', portrait: '❄️', hp: 450, bossCard: 'crystal_fox', spellChance: 0.23, bgTheme: 'frost',
+  { id: 36, name: '凍てつく回廊', portrait: '❄️', hp: 450, bossCard: 'light_shirayuki', spellChance: 0.23, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 4, legend: 96 }, rewardGold: 4920, rewardGems: 492, trophyDelta: 575,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '灰の道の先は、一転して凍てつく墓所へと続いていた。吐く息すら、瞬く間に凍りつく。' },
@@ -2460,7 +2454,7 @@ const STAGES = [
       { speaker: '氷の女王', portrait: '👑', text: '……ありがとう。長い眠りの果てに、また誰かの温もりを感じられるなんて。' },
       { speaker: 'ナレーター', portrait: '📖', text: '空を見上げると、はるか高くに、光を放つ塔がそびえていた。' },
     ] },
-  { id: 41, name: '天へと続く階', portrait: '🪜', hp: 450, bossCard: 'light_arcguardian', spellChance: 0.26, bgTheme: 'empress',
+  { id: 41, name: '天へと続く階', portrait: '🪜', hp: 450, bossCard: 'light_whitegriffon', spellChance: 0.26, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6020, rewardGems: 602, trophyDelta: 700,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '氷海の先、雲を突き抜けるように、白く輝く聖塔が浮かんでいた。' },
@@ -2471,9 +2465,9 @@ const STAGES = [
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6240, rewardGems: 624, trophyDelta: 725  },
   { id: 43, name: '雲上の詠唱者', portrait: '☁️', hp: 450, bossCard: 'dark_demonlord', spellChance: 0.27, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6460, rewardGems: 646, trophyDelta: 750  },
-  { id: 44, name: '天空を統べる者', portrait: '🌠', hp: 450, bossCard: 'crystal_fox', spellChance: 0.27, bgTheme: 'purification',
+  { id: 44, name: '天空を統べる者', portrait: '🌠', hp: 450, bossCard: 'light_shirayuki', spellChance: 0.27, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6680, rewardGems: 668, trophyDelta: 775  },
-  { id: 45, name: '堕ちた聖騎士', portrait: '🗡️', hp: 450, bossCard: 'light_arcguardian', spellChance: 0.28, bgTheme: 'castle',
+  { id: 45, name: '堕ちた聖騎士', portrait: '🗡️', hp: 450, bossCard: 'light_whitegriffon', spellChance: 0.28, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6900, rewardGems: 690, trophyDelta: 800,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '塔の頂で待っていたのは、かつて光を司っていたはずの、堕ちた聖騎士だった。' },
@@ -2527,7 +2521,7 @@ const HARD_QUESTS = [
   { qid: 'hard_nature', id: 'hard_nature', name: '森羅の悪夢', portrait: '🌿', hp: 2400, bossCard: 'nature_emeraldgaia', spellChance: 0.30, bgTheme: 'emerald',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '自然属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_light', id: 'hard_light', name: '光輝の試練', portrait: '✨', hp: 2400, bossCard: 'light_arcguardian', spellChance: 0.30, bgTheme: 'purification',
+  { qid: 'hard_light', id: 'hard_light', name: '光輝の試練', portrait: '✨', hp: 2400, bossCard: 'light_whitegriffon', spellChance: 0.30, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '光属性の強敵が立ちはだかる、上級者向けの試練。' },
   { qid: 'hard_dark', id: 'hard_dark', name: '漆黒の試練', portrait: '🌙', hp: 2400, bossCard: 'dark_reaper', spellChance: 0.30, bgTheme: 'moonshadow',
@@ -2546,7 +2540,7 @@ const SPECIAL_QUESTS = [
   { qid: 'special_nocturia', id: 'special_nocturia', name: '決戦：虚無の女王', portrait: '😈', hp: 1800, bossCard: 'dark_reaper', spellChance: 0.28, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 10, epic: 30, legend: 60 }, rewardGold: 3000, rewardGems: 200, trophyDelta: 120,
     desc: '行動不能とコスト消費で妨害してくる、虚無の女王との一戦。' },
-  { qid: 'special_twindragons', id: 'special_twindragons', name: '双竜戦', portrait: '🐉', hp: 2000, bossCard: 'fire_dragon', spellChance: 0.28, bgTheme: 'inferno2',
+  { qid: 'special_twindragons', id: 'special_twindragons', name: '双竜戦', portrait: '🐉', hp: 2000, bossCard: 'fire_bahamut', spellChance: 0.28, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 5, epic: 25, legend: 70 }, rewardGold: 3200, rewardGems: 220, trophyDelta: 130,
     desc: '伝説の竜が束になって襲いかかる、高火力デッキとの戦い。' },
 ];
@@ -3263,7 +3257,6 @@ function renderBattle() {
   document.getElementById('battle-player-hp').textContent = battle.playerHp;
   document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
-  document.getElementById('battle-hand-count').textContent = battle.playerHand.length;
   document.getElementById('battle-graveyard-count').textContent = battle.playerGraveyard.length;
   document.getElementById('battle-pp-current').textContent = battle.playerCost;
   document.getElementById('battle-pp-max').textContent = battle.playerMaxCost > 10 ? 10 : battle.playerMaxCost;
@@ -3362,6 +3355,7 @@ function renderBattle() {
   }
   document.getElementById('battle-enemy-portrait').classList.toggle('attackable', faceAttackReady);
   document.getElementById('battle-enemy-hp-chip').classList.toggle('attackable', faceAttackReady);
+  document.getElementById('battle-direct-attack-btn').classList.toggle('attackable', faceAttackReady);
   document.getElementById('battle-direct-attack-label').classList.toggle('show', faceAttackReady);
   const guardLabel = previewingAttack && !attackValid.faceAllowed && attackValid.indices.length > 0;
   document.getElementById('battle-direct-attack-label').textContent = guardLabel ? '🛡️ディフェンダーを先に攻撃' : 'タップで直接攻撃';
@@ -3514,6 +3508,7 @@ function bindBattleEvents() {
   };
   document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
   document.getElementById('battle-enemy-hp-chip').onclick = handleDirectAttackTap;
+  document.getElementById('battle-direct-attack-btn').onclick = handleDirectAttackTap;
   document.getElementById('battle-player-portrait').onclick = () => {
     if (longPressFired) { longPressFired = false; return; }
     executeLeaderUltimate();
@@ -4113,17 +4108,23 @@ function endTurn() {
   }, battleMs(700));
 }
 
+// 敵AIの「カードを引くかどうか」の判断：手札がすでに上限の場合、引いても墓地に送られるだけなので引かない
+function shouldEnemyDraw() {
+  return battle.enemyHand.length < MAX_HAND_SIZE;
+}
+
 function enemyTurn() {
   battle.activeSide = 'enemy';
   battle.enemyMaxCost = Math.min(10, battle.enemyMaxCost + 1);
   battle.enemyCost = battle.enemyMaxCost;
-  if (battle.enemyDeck.length) {
-    drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
-  } else {
+  if (battle.enemyDeck.length === 0) {
     battle.enemyHp = 0; // 山札切れで敗北
     battle.deckOutSide = 'enemy';
     renderBattle();
     return;
+  }
+  if (shouldEnemyDraw()) {
+    drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
   }
   battle.enemyField.forEach(u => applySkillTag(u, 'turnStart', false));
   tickAilment(battle.enemyField);
@@ -4358,16 +4359,30 @@ function enemyTurn() {
   battle.activeSide = 'player';
   battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
   battle.playerCost = battle.playerMaxCost;
-  if (battle.playerDeck.length) {
-    drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
-  } else {
+  if (battle.playerDeck.length === 0) {
     battle.playerHp = 0; // 山札切れで敗北
     battle.deckOutSide = 'player';
+    finishPlayerTurnStart();
+  } else {
+    document.getElementById('draw-choice-deck-count').textContent = battle.playerDeck.length;
+    document.getElementById('draw-choice-overlay').classList.remove('hidden');
   }
+}
+
+// カードを引くかどうかの選択が終わった後、ターン開始処理の残りを行う
+function finishPlayerTurnStart() {
   battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
   tickAilment(battle.playerField);
   battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   renderBattle();
+}
+
+function resolveDrawChoice(shouldDraw) {
+  document.getElementById('draw-choice-overlay').classList.add('hidden');
+  if (shouldDraw && battle && !battle.over) {
+    drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
+  }
+  finishPlayerTurnStart();
 }
 
 function showResult(won) {
@@ -4545,7 +4560,7 @@ function openCollectionScreen(seg) {
 
 // ---------- ガチャ ----------
 const SHOP_PACKS = [
-  { id: 'beginner', name: '初心者ガチャ', icon: '🔰', currency: 'gems', cost: 0, no10: true,
+  { id: 'beginner', name: '初心者ガチャ', icon: '🔰', currency: 'gems', cost: 100,
     desc: '冒険を始める全ての人が、最初に必ず1回引く特別なガチャ。これを引くと他の全てのガチャが解放されます',
     weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     rarityPool: {
@@ -4565,9 +4580,9 @@ const SHOP_PACKS = [
     legendPityLimit: 50,
     rarityPool: {
       epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'],
-      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_whitegriffon'],
     },
-    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian',
+    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_whitegriffon',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
 ];
 
@@ -4591,10 +4606,12 @@ function pickWeightedCardId(weights, rarityPool) {
 }
 
 function renderPackCard(pack) {
+  const isFreeFirstBeginnerPull = pack.id === 'beginner' && !state.beginnerGachaDone;
+  const effectiveCost = isFreeFirstBeginnerPull ? 0 : pack.cost;
   const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : pack.currency === 'lightTickets' ? '☀️' : '🎫';
-  const affordable = state[pack.currency] >= pack.cost;
-  const affordable10 = state[pack.currency] >= pack.cost * 10;
-  const show10 = !pack.pool && !pack.no10; // 固定プールの期間限定ガチャ・no10指定のガチャは10連非対応
+  const affordable = state[pack.currency] >= effectiveCost;
+  const affordable10 = state[pack.currency] >= effectiveCost * 10;
+  const show10 = !pack.pool && !pack.no10 && !isFreeFirstBeginnerPull; // 固定プールの期間限定ガチャ・no10指定のガチャ・初心者ガチャの初回無料分は10連非対応
   const previewIds = pack.pool || pack.preview || [];
   const previewHtml = previewIds.map(id => {
     const def = CARD_DEFS[id];
@@ -4607,7 +4624,7 @@ function renderPackCard(pack) {
   }).join('');
   const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
   const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
-  const showPity = !pack.pool && !pack.no10 && pack.weights.normal > 0; // 固定プールのガチャ・単発専用ガチャ・ノーマルが出ないガチャには天井表示不要
+  const showPity = !pack.pool && !pack.no10 && !isFreeFirstBeginnerPull && pack.weights.normal > 0; // 固定プールのガチャ・単発専用ガチャ・ノーマルが出ないガチャには天井表示不要
   const legendPityCount = (state.legendPityCounters && state.legendPityCounters[pack.id]) || 0;
   const legendPityRemain = pack.legendPityLimit ? Math.max(0, pack.legendPityLimit - legendPityCount) : 0;
   return `
@@ -4622,8 +4639,8 @@ function renderPackCard(pack) {
         ${showPity ? `<div class="cg-pack-pity">🎯 あと${pityRemain}回でレア以上確定</div>` : ''}
         ${pack.legendPityLimit ? `<div class="cg-pack-pity cg-pack-pity-legend">👑 あと${legendPityRemain}回でレジェンド確定</div>` : ''}
         <div class="cg-pack-buy-row">
-          <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" data-times="1" ${affordable ? '' : 'disabled'}>${currencyIcon} ${pack.cost}</button>
-          ${show10 ? `<button class="cg-btn cg-pack-buy cg-pack-buy10" data-pack="${pack.id}" data-times="10" ${affordable10 ? '' : 'disabled'}>10連　${currencyIcon} ${pack.cost * 10}</button>` : ''}
+          <button class="cg-btn cg-btn-main cg-pack-buy" data-pack="${pack.id}" data-times="1" ${affordable ? '' : 'disabled'}>${effectiveCost === 0 ? '無料' : currencyIcon + ' ' + effectiveCost}</button>
+          ${show10 ? `<button class="cg-btn cg-pack-buy cg-pack-buy10" data-pack="${pack.id}" data-times="10" ${affordable10 ? '' : 'disabled'}>10連　${currencyIcon} ${effectiveCost * 10}</button>` : ''}
         </div>
         <div class="cg-pack-preview-label">${pack.pool ? '収録カード' : '収録例'}</div>
         <div class="cg-pack-preview-row">
@@ -4658,7 +4675,7 @@ function renderShop() {
 
   const wrap = document.getElementById('shop-packs');
   const visiblePacks = state.beginnerGachaDone
-    ? SHOP_PACKS.filter(p => p.id !== 'beginner')
+    ? SHOP_PACKS
     : SHOP_PACKS.filter(p => p.id === 'beginner');
   wrap.innerHTML = (!state.beginnerGachaDone ? '<div class="cg-beginner-gacha-banner">🔰 まずは「初心者ガチャ」を引いて、冒険を始めましょう！<br>引くと他のガチャも解放されます。</div>' : '')
     + visiblePacks.map(renderPackCard).join('');
@@ -4707,7 +4724,9 @@ function buyPack(packId, times) {
   times = times || 1;
   const pack = SHOP_PACKS.find(p => p.id === packId) || EVENT_GACHA_PACKS.find(p => p.id === packId);
   if (!pack) return;
-  const totalCost = pack.cost * times;
+  // 初心者ガチャは、最初の1回（必須）のみ無料。それ以降は通常のガチャと同じ料金がかかる
+  const effectiveCost = (packId === 'beginner' && !state.beginnerGachaDone) ? 0 : pack.cost;
+  const totalCost = effectiveCost * times;
   if (state[pack.currency] < totalCost) return;
   state[pack.currency] -= totalCost;
   state.totalPacksOpened = (state.totalPacksOpened || 0) + times;
@@ -5367,6 +5386,8 @@ function init() {
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
   });
+  document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
+  document.getElementById('draw-choice-no').addEventListener('click', () => resolveDrawChoice(false));
   document.getElementById('settings-btn').addEventListener('click', openSettings);
   document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBgm);
