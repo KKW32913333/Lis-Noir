@@ -25,6 +25,14 @@ const RARITY = {
 // image: null の間はプレースホルダー（属性色グラデ+絵文字）を表示。
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
+  // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
+  leader_lisnoir_f: { name: 'リス・ノワール（ダークエレガンス）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-lisnoir-f-full.png', emoji: '🌙' },
+  leader_lisnoir_m: { name: 'リス・ノワール（ナイトメアドミニオン）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, aoeDamage: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体に2ダメージを与える', image: 'leader-lisnoir-m-full.png', emoji: '🌙' },
+  leader_lisblanc_f: { name: 'Lis.Blanc（ホーリーグロウ）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-lisblanc-f-full.png', emoji: '✨' },
+  leader_luxblanc_m: { name: 'Lux.Blanc（ホーリーセイント）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'defender', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-luxblanc-m-full.png', emoji: '✨' },
+  leader_liramaline: { name: 'Lira Maline（アクアエンパイア）', element: 'water', rarity: 'epic', cost: 5, atk: 5, hp: 6, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の水属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-liramaline-full.png', emoji: '💧' },
+  leader_kaien: { name: 'Kaien（フレイムブンリト）', element: 'dark', rarity: 'epic', cost: 5, atk: 6, hp: 5, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, atkDownEnemies: 1 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体の攻撃力を1下げる', image: 'leader-kaien-full.png', emoji: '🌙' },
+  leader_mornabane: { name: 'Morna.Bane（ネスコスポーズル）', element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 6, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 3, hpValue: 1 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を3、HPを1上げる', image: 'leader-mornabane-full.png', emoji: '🌙' },
   fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
   fire_imp:       { name: 'リーフバード',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-leafbird.png', emoji: '🐦' },
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
@@ -1162,6 +1170,7 @@ let deckReorderSelectedId = null;
 function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
   if (!def) return 0;
+  if (def.isLeaderCard) return 1; // リーダーカードは唯一無二のキャラクターのため1枚まで
   return (def.type || 'monster') === 'equipment' ? 1 : 3;
 }
 
@@ -2509,7 +2518,7 @@ function newBattleUnit(id, isPlayerCard) {
 function buildWeightedMonsterDeck(weights, count, spellChance) {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const dungeonExclusiveIds = new Set(DUNGEON_EQUIPMENT_REWARDS);
-  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && !eventExclusiveIds.has(id));
+  const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && !eventExclusiveIds.has(id) && !CARD_DEFS[id].isLeaderCard);
   const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster' && !eventExclusiveIds.has(id) && !dungeonExclusiveIds.has(id));
   const chance = spellChance || 0;
   const deck = [];
@@ -3481,6 +3490,35 @@ function applySkillTag(unit, trigger, isPlayerSide) {
         u.curHp = Math.min(maxHp, u.curHp + (tag.value || 0));
       }
     });
+  } else if (tag.effect === 'boostSameElementAllies') {
+    // 【リーダーカード共通】場に出た時、同じ属性の味方モンスター全体の攻撃力（・HP）を上げる。
+    // カードによっては、敵全体へのダメージや攻撃力ダウンもあわせて発動する
+    field.forEach(u => {
+      if (!u || u === unit) return;
+      if (u.def.element !== unit.def.element) return;
+      u.atkBonus = (u.atkBonus || 0) + (tag.value || 0);
+      if (tag.hpValue) {
+        u.hpBonus = (u.hpBonus || 0) + tag.hpValue;
+        u.curHp += tag.hpValue;
+      }
+    });
+    if (tag.aoeDamage) {
+      const opposingField = isPlayerSide ? battle.enemyField : battle.playerField;
+      const selector = isPlayerSide ? '#battle-enemy-field .cg-field-slot' : '#battle-player-field .cg-field-slot';
+      opposingField.forEach((u, i) => {
+        if (!u) return;
+        const dmg = mitigateIncomingDamage(u, tag.aoeDamage);
+        u.curHp -= dmg;
+        const targetEl = document.querySelectorAll(selector)[i];
+        if (targetEl) impactEffect(targetEl, dmg, 0);
+      });
+      if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+      else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
+    }
+    if (tag.atkDownEnemies) {
+      const opposingField = isPlayerSide ? battle.enemyField : battle.playerField;
+      opposingField.forEach(u => { if (u) u.atkBonus = (u.atkBonus || 0) - tag.atkDownEnemies; });
+    }
   }
 }
 
@@ -4128,7 +4166,7 @@ function pickWeightedCardId(weights, rarityPool) {
     const restricted = rarityPool && rarityPool[rarity];
     const candidates = restricted
       ? restricted.filter(id => CARD_DEFS[id])
-      : Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id));
+      : Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id) && !CARD_DEFS[id].isLeaderCard);
     candidates.forEach(id => pool.push({ id, w }));
   });
   if (!pool.length) return Object.keys(CARD_DEFS)[0];
@@ -4615,6 +4653,7 @@ const SCREEN_HELP = {
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
+      '<b>⑥ リーダーキャラクターカード</b><br>画面上部で選ぶ「リーダー」とは別に、リーダーキャラクター自身も通常のモンスターカードとしてデッキに入れて戦わせることができます（1枚まで）。カード一覧の「モンスター」タブから追加できます。',
     ],
   },
   cardDetail: {
