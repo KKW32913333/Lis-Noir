@@ -409,6 +409,9 @@
     text-align:center; min-height:36px;}
   .cg-selected-skill-info.hidden{display:none;}
   .cg-selected-skill-name{font-size:12px; font-weight:800; color:var(--gold-bright);}
+  .cg-selected-skill-meta{display:flex; gap:5px; flex-wrap:wrap; justify-content:center;}
+  .cg-skill-meta-tag{font-size:9px; font-weight:700; color:#EAE6F5; background:#ffffff1a; border:1px solid #ffffff33;
+    border-radius:8px; padding:2px 7px; white-space:nowrap;}
   .cg-selected-skill-text{font-size:11px; color:#EAE6F5cc; line-height:1.4;}
   .cg-side-portrait{width:52px; height:52px; border-radius:50%; flex-shrink:0;
     background:linear-gradient(145deg,#3a2530,#1c1d24); border:2px solid var(--hp-red); display:flex; align-items:center;
@@ -1525,6 +1528,7 @@
 
       <div id="battle-selected-skill-info" class="cg-selected-skill-info hidden">
         <div class="cg-selected-skill-name" id="selected-skill-name"></div>
+        <div class="cg-selected-skill-meta" id="selected-skill-meta"></div>
         <div class="cg-selected-skill-text" id="selected-skill-text"></div>
       </div>
     </div>
@@ -1606,6 +1610,7 @@
       <span class="cg-currency">💰 <span id="shop-gold">0</span></span>
       <span class="cg-currency">💎 <span id="shop-gems">0</span></span>
       <span class="cg-currency">🎫 <span id="shop-tickets">0</span></span>
+      <span class="cg-currency">☀️ <span id="shop-light-tickets">0</span></span>
     </div>
     <div id="shop-event-gacha-panel">
       <div class="cg-section-title">🌙 期間限定ガチャ</div>

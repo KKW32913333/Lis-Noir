@@ -64,6 +64,13 @@ const CARD_DEFS = {
   dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 7, atk: 5, hp: 13, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.5 }, skill: '【固有】受けるダメージを常に半減する', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
   dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'deathBuffAllies', value: 2 }, skill: '【固有】撃破された時、味方全体の攻撃力を永続+2する', image: 'card-dark-shadowslime.png', emoji: '🟣' },
   spell_orbitalgrimoire:   { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 3 }, skill: '【固有】カードを3枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
+  // ---- 「光耀の祝福」ガチャ限定カード（全て光属性・レジェンド。実際に引くまで所持しない） ----
+  light_shirayuki:      { name: '華光の白姫シラユキ', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 3 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド3を付与する', image: 'card-light-shirayuki.png', emoji: '☂️' },
+  light_lucius:          { name: '聖導の賢者ルシウス', element: 'light', rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawAndRefundCost', value: 2, refundValue: 2 }, skill: '【固有】場に出た時、カードを2枚引き、自分のコストを2回復する', image: 'card-light-lucius.png', emoji: '📜' },
+  light_starlightunicorn:{ name: 'スターライトユニコーン', element: 'light', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'cleanseAndHealAllies', value: 2 }, skill: '【固有】場に出た時、味方全体の状態異常を解除し、HPを2回復する', image: 'card-light-starlightunicorn.png', emoji: '🦄' },
+  light_stardustwhale:   { name: 'スターダストホエール', element: 'light', rarity: 'legend', cost: 7, atk: 8, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを2回復する', image: 'card-light-stardustwhale.png', emoji: '🐋' },
+  light_sunblazenoble:   { name: 'サンブレイズ・ノーブル', element: 'light', rarity: 'legend', cost: 7, atk: 6, hp: 11, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.4 }, skill: '【固有】受けるダメージを常に40%軽減する', image: 'card-light-sunblazenoble.png', emoji: '🥂' },
+  light_whitegriffon:    { name: 'ホワイトグリフォン', element: 'light', rarity: 'legend', cost: 6, atk: 8, hp: 9,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-light-whitegriffon.png', emoji: '🦅' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -197,6 +204,9 @@ const EVENT_GACHA_PACKS = [
   { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'tickets', cost: 1,
     desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
     pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
+  { id: 'lightblessing', name: '光耀の祝福ガチャ', icon: '☀️', currency: 'lightTickets', cost: 1,
+    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・光属性）',
+    pool: ['light_shirayuki', 'light_lucius', 'light_starlightunicorn', 'light_stardustwhale', 'light_sunblazenoble', 'light_whitegriffon'] },
 ];
 
 const EVOLVE_COST = 800;
@@ -220,6 +230,7 @@ function defaultState() {
     deckPresets: [],
     leaderId: null,
     tickets: 1,
+    lightTickets: 1,
     pityCounters: {},
     compendiumRewardClaimed: false,
     battleHistory: [],
@@ -311,6 +322,11 @@ function loadState() {
     if (!saved.grantedBonusTicket_20260724) {
       saved.tickets = (saved.tickets || 0) + 1;
       saved.grantedBonusTicket_20260724 = true;
+    }
+    // 「光耀の祝福」ガチャ用チケットを1枚配布（既存プレイヤーへ1回限り）
+    if (!saved.grantedLightTicket_20260724) {
+      saved.lightTickets = (saved.lightTickets || 0) + 1;
+      saved.grantedLightTicket_20260724 = true;
     }
     // 不具合修正: ダンジョン限定装備が最初から所持できてしまっていたため、
     // 実際にそのフロアのボスを撃破済み（dungeonEquipClaimedに記録済み）のもの以外は取り除く（既存プレイヤーへ1回限り）
@@ -2827,14 +2843,11 @@ function renderBattle() {
 
   // 選択中のカードのスキル効果を、手札の上の余白部分に表示する（未選択時は、直近に場に出した/使用したカードのスキルを表示）
   const skillInfoEl = document.getElementById('battle-selected-skill-info');
-  const skillInfoDef = previewingAttack ? previewingAttack.def : selectedSpell;
+  const skillInfoDef = previewingAttack ? previewingAttack.def : (selectedSpell || battle.lastPlayedInfo);
   if (skillInfoDef) {
     document.getElementById('selected-skill-name').textContent = skillInfoDef.name;
+    document.getElementById('selected-skill-meta').innerHTML = cardMetaHtml(skillInfoDef);
     document.getElementById('selected-skill-text').textContent = skillInfoDef.skill || '固有スキルなし';
-    skillInfoEl.classList.remove('hidden');
-  } else if (battle.lastPlayedInfo) {
-    document.getElementById('selected-skill-name').textContent = battle.lastPlayedInfo.name;
-    document.getElementById('selected-skill-text').textContent = battle.lastPlayedInfo.skill;
     skillInfoEl.classList.remove('hidden');
   } else {
     skillInfoEl.classList.add('hidden');
@@ -3110,6 +3123,21 @@ function discardFieldUnit(idx) {
   renderBattle();
 }
 
+// カードの種別・属性・役割（アタッカー/ディフェンダー）を、手札上のスキル表示欄向けに小さなタグとして生成する。
+// 該当しない項目（スペル・装備・フィールドカードの役割など）は表示しない
+function cardMetaHtml(def) {
+  const type = def.type || 'monster';
+  const typeLabel = type === 'monster' ? 'モンスター' : type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
+  const parts = [`<span class="cg-skill-meta-tag">${typeLabel}</span>`];
+  const el = ELEMENTS[def.element];
+  if (el) parts.push(`<span class="cg-skill-meta-tag" style="color:${el.color}">${el.icon} ${el.name}</span>`);
+  if (type === 'monster' && def.role) {
+    const roleLabel = def.role === 'defender' ? '🛡 ディフェンダー' : '⚔ アタッカー';
+    parts.push(`<span class="cg-skill-meta-tag">${roleLabel}</span>`);
+  }
+  return parts.join('');
+}
+
 function showHandCardInfo(id, handIdx) {
   const def = CARD_DEFS[id];
   if (!def) return;
@@ -3154,7 +3182,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   summonEffect();
-  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
+  if (def.skill) battle.lastPlayedInfo = def;
   renderBattle();
 }
 
@@ -3209,7 +3237,7 @@ function castSpell(handIdx, targetIdx) {
       }
     }
   }
-  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
+  if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
   renderBattle();
 }
@@ -3223,7 +3251,7 @@ function playFieldCard(handIdx) {
   battle.selectedHandIdx = null;
   battle.fieldCard = id;
   sfxCardPlay();
-  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
+  if (def.skill) battle.lastPlayedInfo = def;
   renderBattle();
 }
 
@@ -3240,7 +3268,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   sfxCardPlay();
-  if (def.skill) battle.lastPlayedInfo = { name: def.name, skill: def.skill };
+  if (def.skill) battle.lastPlayedInfo = def;
   renderBattle();
 }
 
@@ -3387,6 +3415,22 @@ function applySkillTag(unit, trigger, isPlayerSide) {
     });
     const opposingField = isPlayerSide ? battle.enemyField : battle.playerField;
     opposingField.forEach(u => { if (u) u.atkBonus = (u.atkBonus || 0) - (tag.atkDownValue || 1); });
+  } else if (tag.effect === 'drawAndRefundCost') {
+    // 【聖導の賢者ルシウス】場に出た時、カードを引き、自分のコストを回復する
+    for (let i = 0; i < (tag.value || 0); i++) { drawCardToHand(deck, hand, isPlayerSide ? battle.playerGraveyard : battle.enemyGraveyard); }
+    if (isPlayerSide) battle.playerCost = Math.min(battle.playerMaxCost, battle.playerCost + (tag.refundValue || 0));
+    else battle.enemyCost = Math.min(battle.enemyMaxCost, battle.enemyCost + (tag.refundValue || 0));
+  } else if (tag.effect === 'cleanseAndHealAllies') {
+    // 【スターライトユニコーン】場に出た時、味方全体の状態異常を解除してHPを回復する
+    field.forEach(u => {
+      if (!u) return;
+      u.stunned = false;
+      u.ailment = null;
+      if (!healBlocked) {
+        const maxHp = u.def.hp + (u.hpBonus || 0);
+        u.curHp = Math.min(maxHp, u.curHp + (tag.value || 0));
+      }
+    });
   }
 }
 
@@ -3964,15 +4008,31 @@ function revealResultScreen(won, stage) {
   const rareLabel = document.getElementById('result-rare-label');
   if (rareLabel) rareLabel.classList.toggle('hidden', !isRareReward);
 
-  // 「次へ」ボタン：勝利かつ次のステージが存在する場合は次のステージへ、それ以外は同じステージに再挑戦
+  // 「次へ」ボタン：勝利かつ次のステージ／フロアが存在する場合はそこへ、それ以外は同じ内容に再挑戦
   const primaryBtn = document.getElementById('result-primary');
-  const nextStage = (won && typeof stage.id === 'number') ? STAGES.find(s => s.id === stage.id + 1) : null;
-  if (nextStage) {
-    primaryBtn.textContent = '次のステージへ';
-    primaryBtn.onclick = () => startBattle(nextStage);
+  const backBtn = document.getElementById('result-stageselect');
+  if (stage.isDungeon) {
+    const nextFloor = (won && stage.dungeonFloor < DUNGEON_MAX_FLOOR) ? stage.dungeonFloor + 1 : null;
+    if (nextFloor) {
+      primaryBtn.textContent = '次に進む';
+      primaryBtn.onclick = () => startBattle(getDungeonFloorStage(nextFloor));
+    } else {
+      primaryBtn.textContent = 'もう一度挑戦する';
+      primaryBtn.onclick = () => startBattle(stage);
+    }
+    backBtn.innerHTML = 'ダンジョン選択に<br>戻る';
+    backBtn.onclick = () => { renderDungeonSelect(); showScreen('dungeon-select'); };
   } else {
-    primaryBtn.textContent = 'もう一度挑戦する';
-    primaryBtn.onclick = () => startBattle(stage);
+    const nextStage = (won && typeof stage.id === 'number') ? STAGES.find(s => s.id === stage.id + 1) : null;
+    if (nextStage) {
+      primaryBtn.textContent = '次のステージへ';
+      primaryBtn.onclick = () => startBattle(nextStage);
+    } else {
+      primaryBtn.textContent = 'もう一度挑戦する';
+      primaryBtn.onclick = () => startBattle(stage);
+    }
+    backBtn.innerHTML = 'ステージ選択に<br>戻る';
+    backBtn.onclick = () => { renderStageSelect(); showScreen('stage'); };
   }
   showScreen('result');
 }
@@ -4029,7 +4089,7 @@ function pickWeightedCardId(weights, rarityPool) {
 }
 
 function renderPackCard(pack) {
-  const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : '🎫';
+  const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : pack.currency === 'lightTickets' ? '☀️' : '🎫';
   const affordable = state[pack.currency] >= pack.cost;
   const affordable10 = state[pack.currency] >= pack.cost * 10;
   const show10 = !pack.pool; // 固定プールの期間限定ガチャ（チケット制）は10連非対応
@@ -4075,6 +4135,8 @@ function renderShop() {
   document.getElementById('shop-gems').textContent = state.gems.toLocaleString();
   const ticketEl = document.getElementById('shop-tickets');
   if (ticketEl) ticketEl.textContent = (state.tickets || 0).toLocaleString();
+  const lightTicketEl = document.getElementById('shop-light-tickets');
+  if (lightTicketEl) lightTicketEl.textContent = (state.lightTickets || 0).toLocaleString();
 
   const eventWrap = document.getElementById('shop-event-packs');
   if (eventWrap) {
@@ -4649,7 +4711,6 @@ function init() {
     showScreen('home');
     renderHome();
   });
-  document.getElementById('result-stageselect').addEventListener('click', () => { renderStageSelect(); showScreen('stage'); });
   document.getElementById('deckout-confirm-btn').addEventListener('click', () => {
     document.getElementById('deckout-overlay').classList.add('hidden');
     showResult(battle.playerHp > 0);
