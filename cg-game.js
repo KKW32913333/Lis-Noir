@@ -1552,7 +1552,7 @@ function renderDeckSynergy() {
   if (!panel) return;
   const monsterIds = state.deck.filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster');
   if (monsterIds.length === 0) {
-    panel.innerHTML = '';
+    panel.innerHTML = '<div class="cg-synergy-title">📊 デッキシナジー</div><div class="cg-synergy-empty">モンスターカードをデッキに追加すると、属性・役割のバランスが表示されます</div>';
     return;
   }
   const elementCounts = {};

@@ -321,7 +321,8 @@
     font-weight:800; border-radius:8px; padding:2px 6px; z-index:2;}
   .cg-leader-none-card{display:flex; flex-direction:column; align-items:center; justify-content:center; height:96px;
     font-size:11px; color:var(--text-dim-panel); gap:4px;}
-  #deck-slots{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; padding:10px 14px;}
+  #deck-slots{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; padding:10px 14px;
+    max-height:300px; overflow-y:auto;}
   #collection-list{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:10px 14px 30px; flex:1;}
   .cg-empty{grid-column:1/-1; text-align:center; color:var(--text-dim); font-size:12px; padding:20px;}
 
@@ -1177,7 +1178,8 @@
   /* ---------- デッキ編成UX改善 ---------- */
   .cg-deck-hint{font-size:10px; color:var(--text-dim); padding:0 14px 6px;}
   .cg-deck-synergy-panel{margin:10px 14px 4px; padding:12px 14px; border-radius:14px; background:var(--bg-panel2);
-    border:1px solid var(--hairline-panel);}
+    border:1px solid var(--hairline-panel); min-height:150px; box-sizing:border-box;}
+  .cg-synergy-empty{font-size:11px; color:var(--text-dim-panel); line-height:1.6; padding-top:6px;}
   .cg-synergy-title{font-size:12px; font-weight:800; color:var(--text-panel); margin-bottom:8px;}
   .cg-synergy-row{display:flex; align-items:center; gap:8px; margin-bottom:4px;}
   .cg-synergy-label{font-size:10px; color:var(--text-dim-panel); flex-shrink:0; width:64px;}
