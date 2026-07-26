@@ -259,7 +259,7 @@ function defaultState() {
     hasSeenBattleHelp: false,
     hasSeenOnboarding: false,
     sfxMuted: false,
-    bgmMuted: false,
+    bgmMuted: true,
     bgmVolume: 0.5,
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
@@ -707,10 +707,10 @@ function showScreen(name) {
 const RANK_TIERS = [
   // image: ランクアイコン画像ファイル名（null間は絵文字iconを表示。画像を追加したらファイル名を入れるだけで反映される）
   { name: 'ブロンズ', min: 0, icon: '🥉', image: 'rank-bronze.jpg' },
-  { name: 'シルバー', min: 1001, icon: '🥈', image: 'rank-silver.jpg' },
-  { name: 'ゴールド', min: 2001, icon: '🥇', image: 'rank-gold.jpg' },
-  { name: 'プラチナ', min: 4001, icon: '💠', image: 'rank-platinum.jpg' },
-  { name: 'ダイヤモンド', min: 6001, icon: '💎', image: 'rank-diamond.jpg' },
+  { name: 'シルバー', min: 3000, icon: '🥈', image: 'rank-silver.jpg' },
+  { name: 'ゴールド', min: 7000, icon: '🥇', image: 'rank-gold.jpg' },
+  { name: 'プラチナ', min: 15000, icon: '💠', image: 'rank-platinum.jpg' },
+  { name: 'ダイヤモンド', min: 30000, icon: '💎', image: 'rank-diamond.jpg' },
 ];
 
 // トロフィー数からランクTierオブジェクトを取得
@@ -1752,7 +1752,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……勝てた。本当に、勝てるんだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '束の間の平穏の中、彼は森の奥へと続く道を見つめた。' },
     ] },
-  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 12, bossCard: 'fire_imp', spellChance: 0.04, bgTheme: 'snow',
+  { id: 2, name: '素材集めの試練', portrait: '🍃', hp: 12, bossCard: 'fire_imp', spellChance: 0.02, bgTheme: 'snow',
     weights: { normal: 80, rare: 17, epic: 3, legend: 0 }, rewardGold: 100, rewardGems: 8, trophyDelta: 25,
     storyIntro: [
       { speaker: '村長', portrait: '👴', text: 'よく戻った。噂には聞いていたが、まさか本当に森の影を退けるとはな。' },
@@ -1765,7 +1765,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'これが……呪いの結晶。なんだか、悲しい色をしている。' },
       { speaker: 'ナレーター', portrait: '📖', text: '村へ戻る足取りは、来た時より少しだけ重かった。' },
     ] },
-  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 14, bossCard: 'dark_ghost', spellChance: 0.06, bgTheme: 'cave',
+  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 14, bossCard: 'dark_ghost', spellChance: 0.03, bgTheme: 'cave',
     weights: { normal: 55, rare: 32, epic: 11, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '洞窟の奥から、言葉にならない囁きが聞こえる。呪いに深く蝕まれたモンスターの気配だ。' },
@@ -1776,7 +1776,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '囁きは静まった。だが、これほどの呪いが集まる理由が、どうしても引っかかる。' },
       { speaker: '調教師', portrait: '🧑', text: 'まるで、この森全体が何かに怯えているみたいだ。' },
     ] },
-  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 17, bossCard: 'fire_flameslime', spellChance: 0.1, bgTheme: 'volcano',
+  { id: 4, name: '竜の血を継ぐ者', portrait: '🐲', hp: 17, bossCard: 'fire_flameslime', spellChance: 0.03, bgTheme: 'volcano',
     weights: { normal: 32, rare: 35, epic: 26, legend: 7 }, rewardGold: 160, rewardGems: 14, trophyDelta: 32,
     storyIntro: [
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: 'グルル……我が縄張りに踏み込むとは、良い度胸だ。' },
@@ -1787,7 +1787,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '古き竜の力もまた、呪いに触れれば牙を剥く。それでも、この地に平和が戻った。' },
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: '……ぐ……見事だ、人の子よ。この森には、まだ知らぬ強者がいる。心せよ。' },
     ] },
-  { id: 5, name: '森の女王', portrait: '👑', hp: 20, bossCard: 'nature_elfunicorn', spellChance: 0.13, bgTheme: 'castle',
+  { id: 5, name: '森の女王', portrait: '👑', hp: 20, bossCard: 'nature_elfunicorn', spellChance: 0.04, bgTheme: 'castle',
     weights: { normal: 12, rare: 28, epic: 38, legend: 22 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: '森の女王', portrait: '👑', text: 'ここまで来たか、人の子よ。ならば見せてやろう、この森の真の姿を。' },
@@ -1799,7 +1799,7 @@ const STAGES = [
       { speaker: '森の女王', portrait: '👑', text: 'この森を抜けた先に、かつて栄えた月影の国がある。そこで、お前は真実の一端を知るだろう。' },
       { speaker: '調教師', portrait: '🧑', text: '……ありがとうございます。必ず、この呪いの正体を突き止めてみせます。' },
     ] },
-  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 26, bossCard: 'dark_wolf', spellChance: 0.18, bgTheme: 'moonshadow',
+  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 26, bossCard: 'dark_wolf', spellChance: 0.05, bgTheme: 'moonshadow',
     weights: { normal: 20, rare: 32, epic: 35, legend: 13 }, rewardGold: 250, rewardGems: 22, trophyDelta: 44,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '森を抜けた先には、かつて栄えたという月影の国の廃墟が広がっていた。' },
@@ -1811,7 +1811,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '廃墟の奥に、まだ息づく者たちがいた。ここから、村と国の復興が始まる。' },
       { speaker: '月下の斥候', portrait: '🌙', text: '……その力、本物のようだな。良かろう、お前の話を聞こう。' },
     ] },
-  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 30, bossCard: 'nature_elfarcher', spellChance: 0.2, bgTheme: 'emerald',
+  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 30, bossCard: 'nature_elfarcher', spellChance: 0.05, bgTheme: 'emerald',
     weights: { normal: 14, rare: 30, epic: 38, legend: 18 }, rewardGold: 280, rewardGems: 25, trophyDelta: 48,
     storyIntro: [
       { speaker: '荒野の守護者', portrait: '🍃', text: '復興だと？ この荒野に、もう希望などない。' },
@@ -1823,7 +1823,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '一緒に、この国を立て直そう。' },
       { speaker: '荒野の守護者', portrait: '🍃', text: 'フン……悪くない誘いだ。' },
     ] },
-  { id: 8, name: '氷の試練', portrait: '❄️', hp: 33, bossCard: 'water_golem', spellChance: 0.23, bgTheme: 'frost',
+  { id: 8, name: '氷の試練', portrait: '❄️', hp: 33, bossCard: 'water_golem', spellChance: 0.06, bgTheme: 'frost',
     weights: { normal: 8, rare: 26, epic: 40, legend: 26 }, rewardGold: 310, rewardGems: 28, trophyDelta: 52,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '新たな仲間を迎えるには、氷の祠が課す試練を越えねばならないという。' },
@@ -1834,7 +1834,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '試練を越えた証に、祠は静かに光を放ち、新たな絆が芽生えた。' },
       { speaker: '調教師', portrait: '🧑', text: 'これから、よろしく頼む。一緒に、この呪いの謎を解き明かそう。' },
     ] },
-  { id: 9, name: '業火の番人', portrait: '🔥', hp: 37, bossCard: 'dark_shadowbat', spellChance: 0.25, bgTheme: 'inferno2',
+  { id: 9, name: '業火の番人', portrait: '🔥', hp: 37, bossCard: 'dark_shadowbat', spellChance: 0.06, bgTheme: 'inferno2',
     weights: { normal: 5, rare: 22, epic: 40, legend: 33 }, rewardGold: 350, rewardGems: 32, trophyDelta: 58,
     storyIntro: [
       { speaker: '業火の番人', portrait: '🔥', text: '女帝様の宝を狙う者に、我が炎は容赦せぬ。' },
@@ -1845,7 +1845,7 @@ const STAGES = [
       { speaker: '業火の番人', portrait: '🔥', text: '……我が炎が届かぬとはな。女帝様に伝えよ、危険な者が来ると。' },
       { speaker: '調教師', portrait: '🧑', text: '危険なつもりはない。ただ、この国を救う手立てを探しているだけだ。' },
     ] },
-  { id: 10, name: '月影の女帝', portrait: '👸', hp: 41, bossCard: 'water_icewolf', spellChance: 0.27, bgTheme: 'empress',
+  { id: 10, name: '月影の女帝', portrait: '👸', hp: 41, bossCard: 'water_icewolf', spellChance: 0.07, bgTheme: 'empress',
     weights: { normal: 2, rare: 16, epic: 38, legend: 44 }, rewardGold: 450, rewardGems: 45, trophyDelta: 70,
     storyIntro: [
       { speaker: '月影の女帝', portrait: '👸', text: 'よくぞここまで。復興を志す者よ、我が力、見せてやろう。' },
@@ -1857,7 +1857,7 @@ const STAGES = [
       { speaker: '月影の女帝', portrait: '👸', text: 'かつてこの国は、四天王の軍勢に呪いを撒き散らされ、滅びかけた。私が守れたのは、この程度の廃墟だけだ。' },
       { speaker: '調教師', portrait: '🧑', text: '四天王……。分かりました、必ず彼らを止めてみせます。' },
     ] },
-  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 52, bossCard: 'storm_bird', spellChance: 0.36, bgTheme: 'cave',
+  { id: 11, name: '四天王・爪の将', portrait: '🦅', hp: 52, bossCard: 'storm_bird', spellChance: 0.08, bgTheme: 'cave',
     weights: { normal: 0, rare: 14, epic: 40, legend: 46 }, rewardGold: 500, rewardGems: 50, trophyDelta: 76,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '月影の国を越えた先、四天王が支配する領域へと足を踏み入れる。' },
@@ -1869,7 +1869,7 @@ const STAGES = [
       { speaker: '爪の将', portrait: '🦅', text: '……我が爪を退けるか。だが、我らは四人。まだ三人残っている。' },
       { speaker: '調教師', portrait: '🧑', text: '一人ずつでも構わない。必ず、全員を退けてみせる。' },
     ] },
-  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 58, bossCard: 'rock_giant', spellChance: 0.38, bgTheme: 'frost',
+  { id: 12, name: '四天王・鎧の将', portrait: '🐢', hp: 58, bossCard: 'rock_giant', spellChance: 0.08, bgTheme: 'frost',
     weights: { normal: 0, rare: 10, epic: 40, legend: 50 }, rewardGold: 550, rewardGems: 55, trophyDelta: 82,
     storyIntro: [
       { speaker: '鎧の将', portrait: '🐢', text: 'ほう、爪の将を退けたか。だが我が鎧は、何者をも通さぬ。' },
@@ -1880,7 +1880,7 @@ const STAGES = [
       { speaker: '鎧の将', portrait: '🐢', text: '……鎧が、砕けた。人の子よ、お前は本物だ。' },
       { speaker: '鎧の将', portrait: '🐢', text: 'だが油断するな。次に待つ毒の将は、我のような真っ向勝負を好まぬ。' },
     ] },
-  { id: 13, name: '四天王・毒の将', portrait: '🐍', hp: 64, bossCard: 'water_serpent', spellChance: 0.40, bgTheme: 'emerald',
+  { id: 13, name: '四天王・毒の将', portrait: '🐍', hp: 64, bossCard: 'water_serpent', spellChance: 0.09, bgTheme: 'emerald',
     weights: { normal: 0, rare: 8, epic: 38, legend: 54 }, rewardGold: 600, rewardGems: 60, trophyDelta: 88,
     storyIntro: [
       { speaker: '毒の将', portrait: '🐍', text: 'シュルル……その息、いつまで保つかしらねぇ。' },
@@ -1891,7 +1891,7 @@ const STAGES = [
       { speaker: '毒の将', portrait: '🐍', text: '……毒が効かぬとは。面白い人の子だこと。' },
       { speaker: '毒の将', portrait: '🐍', text: 'ふふ、気に入ったわ。炎の将によろしく伝えて。彼はあなたを歓迎しないでしょうけど。' },
     ] },
-  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 70, bossCard: 'fire_magmacolossus', spellChance: 0.42, bgTheme: 'inferno2',
+  { id: 14, name: '四天王・炎の将', portrait: '🐉', hp: 70, bossCard: 'fire_magmacolossus', spellChance: 0.09, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 6, epic: 36, legend: 58 }, rewardGold: 650, rewardGems: 65, trophyDelta: 94,
     storyIntro: [
       { speaker: '炎の将', portrait: '🐉', text: '三人が敗れたと聞いた。ならば我が炎で、決着をつけよう。' },
@@ -1902,7 +1902,7 @@ const STAGES = [
       { speaker: '炎の将', portrait: '🐉', text: '……我が炎すら凌ぐか。もはや止める者はいない。魔王城へ行くがいい。' },
       { speaker: '炎の将', portrait: '🐉', text: 'だが、最後に待つ者は我らの誰よりも強い。心して行け、人の子よ。' },
     ] },
-  { id: 15, name: '四天王を統べる者', portrait: '⚔️', hp: 78, bossCard: 'dark_chaosdemon', spellChance: 0.45, bgTheme: 'moonshadow',
+  { id: 15, name: '四天王を統べる者', portrait: '⚔️', hp: 78, bossCard: 'dark_chaosdemon', spellChance: 0.1, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 4, epic: 34, legend: 62 }, rewardGold: 800, rewardGems: 80, trophyDelta: 110,
     storyIntro: [
       { speaker: '四天王を統べる者', portrait: '⚔️', text: '四天王すべてを退けるとは……。だが我こそが、その頂点だと知れ。' },
@@ -1915,7 +1915,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……どういう意味だ？ 教えてくれ。' },
       { speaker: '四天王を統べる者', portrait: '⚔️', text: '会えば分かる。行くがいい。' },
     ] },
-  { id: 16, name: '魔王城・門番', portrait: '🗿', hp: 86, bossCard: 'fire_bahamut', spellChance: 0.47, bgTheme: 'castle',
+  { id: 16, name: '魔王城・門番', portrait: '🗿', hp: 86, bossCard: 'fire_bahamut', spellChance: 0.11, bgTheme: 'castle',
     weights: { normal: 0, rare: 2, epic: 32, legend: 66 }, rewardGold: 850, rewardGems: 85, trophyDelta: 118,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '聳え立つ魔王城。その門を、巨大な石の番人が塞いでいた。' },
@@ -1926,7 +1926,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '門は開いた。魔王城の内部へ、一歩ずつ近づいていく。' },
       { speaker: '調教師', portrait: '🧑', text: '……不思議と、恐怖より確信の方が強い。俺は、間違っていない。' },
     ] },
-  { id: 17, name: '魔王城・呪術師', portrait: '💀', hp: 94, bossCard: 'dark_reaper', spellChance: 0.49, bgTheme: 'cave',
+  { id: 17, name: '魔王城・呪術師', portrait: '💀', hp: 94, bossCard: 'dark_reaper', spellChance: 0.11, bgTheme: 'cave',
     weights: { normal: 0, rare: 2, epic: 30, legend: 68 }, rewardGold: 900, rewardGems: 90, trophyDelta: 126,
     storyIntro: [
       { speaker: '呪術師', portrait: '💀', text: 'クククッ……この城で正気を保てる者など、いはしないよ。' },
@@ -1937,7 +1937,7 @@ const STAGES = [
       { speaker: '呪術師', portrait: '💀', text: '……私の呪詛が届かぬか。お前もまた、何かに選ばれし者か。' },
       { speaker: '呪術師', portrait: '💀', text: 'ならば教えてやろう。この城の呪いの濃さは、玉座に近づくほど増していく。心せよ。' },
     ] },
-  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 102, bossCard: 'crystal_fox', spellChance: 0.51, bgTheme: 'empress',
+  { id: 18, name: '魔王城・処刑人', portrait: '🪓', hp: 102, bossCard: 'crystal_fox', spellChance: 0.12, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 30, legend: 70 }, rewardGold: 950, rewardGems: 95, trophyDelta: 134,
     storyIntro: [
       { speaker: '処刑人', portrait: '🪓', text: '魔王様に近づく者は、皆ここで終わる。お前も例外ではない。' },
@@ -1948,7 +1948,7 @@ const STAGES = [
       { speaker: '処刑人', portrait: '🪓', text: '……この斧が、届かぬだと……。魔王様、お気をつけを……。' },
       { speaker: '調教師', portrait: '🧑', text: '……その最後の言葉、まるで魔王を案じているみたいだった。' },
     ] },
-  { id: 19, name: '魔王城・影の宰相', portrait: '🕶️', hp: 110, bossCard: 'dark_demonlord', spellChance: 0.53, bgTheme: 'frost',
+  { id: 19, name: '魔王城・影の宰相', portrait: '🕶️', hp: 110, bossCard: 'dark_demonlord', spellChance: 0.12, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 28, legend: 72 }, rewardGold: 1000, rewardGems: 100, trophyDelta: 142,
     storyIntro: [
       { speaker: '影の宰相', portrait: '🕶️', text: 'ここまで来たか。魔王様の前に立つ最後の壁は、私だ。' },
@@ -1960,7 +1960,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '後悔なんてしない。俺は、真実を知るためにここまで来たんだ。' },
       { speaker: '影の宰相', portrait: '🕶️', text: '……その覚悟、忘れるな。行け。' },
     ] },
-  { id: 20, name: '魔王', portrait: '👹', hp: 120, bossCard: 'fire_dragon', spellChance: 0.56, bgTheme: 'inferno2',
+  { id: 20, name: '魔王', portrait: '👹', hp: 120, bossCard: 'fire_dragon', spellChance: 0.13, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 26, legend: 74 }, rewardGold: 1300, rewardGems: 130, trophyDelta: 170,
     storyIntro: [
       { speaker: '魔王', portrait: '👹', text: 'よくぞ辿り着いた、人の子よ。この世界の呪いの元凶……この私を倒しに来たか。' },
@@ -1973,7 +1973,7 @@ const STAGES = [
       { speaker: '魔王', portrait: '👹', text: '……女神に、会いに行け……。全ては、そこから始まった……。' },
       { speaker: 'ナレーター', portrait: '📖', text: '魔王は光の粒となって消えていった。世界中の人々が歓喜する中、調教師の胸には拭えない違和感が残った。' },
     ] },
-  { id: 21, name: '崩れゆく世界', portrait: '🌑', hp: 130, bossCard: 'water_seiren', spellChance: 0.58, bgTheme: 'moonshadow',
+  { id: 21, name: '崩れゆく世界', portrait: '🌑', hp: 130, bossCard: 'water_seiren', spellChance: 0.14, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 24, legend: 76 }, rewardGold: 1400, rewardGems: 140, trophyDelta: 180,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '魔王を倒したはずなのに、モンスターの呪いは消えるどころか、むしろ濃くなっていく。' },
@@ -1985,7 +1985,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '倒しても倒しても、次々と現れる呪い。何かが、根本から間違っている。' },
       { speaker: '調教師', portrait: '🧑', text: '……行こう。この世界の中心にある神殿へ。全ての答えが、そこにあるはずだ。' },
     ] },
-  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 140, bossCard: 'light_arcguardian', spellChance: 0.60, bgTheme: 'empress',
+  { id: 22, name: '黒百合の巫女', portrait: '🥀', hp: 140, bossCard: 'light_arcguardian', spellChance: 0.14, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 22, legend: 78 }, rewardGold: 1500, rewardGems: 150, trophyDelta: 190,
     storyIntro: [
       { speaker: '黒百合の巫女', portrait: '🥀', text: 'ふふ……気づいてしまったのね。この世界の呪いの、本当の意味に。' },
@@ -1998,7 +1998,7 @@ const STAGES = [
       { speaker: '黒百合の巫女', portrait: '🥀', text: '神殿の奥、白と黒の百合が咲く場所に、全ての真実が眠っている。' },
       { speaker: '調教師', portrait: '🧑', text: '……分かった。行こう。' },
     ] },
-  { id: 23, name: '記憶の断片', portrait: '🕸️', hp: 150, bossCard: 'nature_emeraldgaia', spellChance: 0.62, bgTheme: 'cave',
+  { id: 23, name: '記憶の断片', portrait: '🕸️', hp: 150, bossCard: 'nature_emeraldgaia', spellChance: 0.15, bgTheme: 'cave',
     weights: { normal: 0, rare: 0, epic: 20, legend: 80 }, rewardGold: 1600, rewardGems: 160, trophyDelta: 200,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '砕け散った記憶の欠片が、モンスターの姿となって襲いかかる。' },
@@ -2010,7 +2010,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……世界を守るために、自分が犠牲になったっていうのか。そんなの、あんまりだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '彼は拳を強く握りしめ、神殿の最奥へと歩みを進めた。' },
     ] },
-  { id: 24, name: '女神の影', portrait: '✨', hp: 162, bossCard: 'fire_bahamut', spellChance: 0.64, bgTheme: 'castle',
+  { id: 24, name: '女神の影', portrait: '✨', hp: 162, bossCard: 'fire_bahamut', spellChance: 0.15, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 18, legend: 82 }, rewardGold: 1700, rewardGems: 170, trophyDelta: 210,
     storyIntro: [
       { speaker: '女神の影', portrait: '✨', text: 'ようこそ、我が最後の使者よ。あなたなら、私を止められるかしら。' },
@@ -2023,7 +2023,7 @@ const STAGES = [
       { speaker: '女神の影', portrait: '✨', text: '奥で待っているのは、もっと深く呪いに沈んだ、本当の女神の姿。覚悟して。' },
       { speaker: '調教師', portrait: '🧑', text: '……大丈夫。ここまで来た仲間たちと一緒なら、何も怖くない。' },
     ] },
-  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 180, bossCard: 'fire_dragon', spellChance: 0.68, bgTheme: 'purification',
+  { id: 25, name: '黒百合の女神', portrait: '🖤', hp: 180, bossCard: 'fire_dragon', spellChance: 0.16, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 15, legend: 85 }, rewardGold: 2500, rewardGems: 250, trophyDelta: 300,
     storyIntro: [
       { speaker: '黒百合の女神', portrait: '🖤', text: '……よく来たわね、Lis Noirの継承者。私を倒せば、この呪いは終わる。それとも──赦せる？' },
@@ -2039,7 +2039,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'ああ。これからは、一緒に生きよう。' },
       { speaker: 'ナレーター', portrait: '📖', text: '数年後。世界には再び、人と共存できる小さく穏やかなモンスターたちが現れるようになった。神殿の前には、黒百合と白百合が寄り添って咲いている。' },
     ] },
-  { id: 26, name: '静寂を破る足音', portrait: '👣', hp: 200, bossCard: 'dark_demonlord', spellChance: 0.69, bgTheme: 'cave',
+  { id: 26, name: '静寂を破る足音', portrait: '👣', hp: 200, bossCard: 'dark_demonlord', spellChance: 0.17, bgTheme: 'cave',
     weights: { normal: 0, rare: 0, epic: 14, legend: 86 }, rewardGold: 2720, rewardGems: 272, trophyDelta: 325,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '数年の時が流れた。世界には平和が戻り、人とモンスターが共に生きる村々が各地に生まれていた。' },
@@ -2047,93 +2047,93 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '……この気配、まさか。眠っていたはずの闇が、また動き出している。' },
       { speaker: '女神', portrait: '🌸', text: 'お願い。もう一度だけ、力を貸して。まだ何かが、この世界の底に残っている。' },
     ] },
-  { id: 27, name: '地底湖の哨戒者', portrait: '🌊', hp: 227, bossCard: 'crystal_fox', spellChance: 0.7, bgTheme: 'cave',
+  { id: 27, name: '地底湖の哨戒者', portrait: '🌊', hp: 227, bossCard: 'crystal_fox', spellChance: 0.17, bgTheme: 'cave',
     weights: { normal: 0, rare: 0, epic: 13, legend: 87 }, rewardGold: 2940, rewardGems: 294, trophyDelta: 350  },
-  { id: 28, name: '忘れられた祭壇', portrait: '🕯️', hp: 254, bossCard: 'dark_reaper', spellChance: 0.71, bgTheme: 'moonshadow',
+  { id: 28, name: '忘れられた祭壇', portrait: '🕯️', hp: 254, bossCard: 'dark_reaper', spellChance: 0.18, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 12, legend: 88 }, rewardGold: 3160, rewardGems: 316, trophyDelta: 375  },
-  { id: 29, name: '狭間の番人', portrait: '🚪', hp: 281, bossCard: 'light_arcguardian', spellChance: 0.72, bgTheme: 'moonshadow',
+  { id: 29, name: '狭間の番人', portrait: '🚪', hp: 281, bossCard: 'light_arcguardian', spellChance: 0.18, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 11, legend: 89 }, rewardGold: 3380, rewardGems: 338, trophyDelta: 400  },
-  { id: 30, name: '深淵より来たりし者', portrait: '🕳️', hp: 308, bossCard: 'nature_emeraldgaia', spellChance: 0.73, bgTheme: 'empress',
+  { id: 30, name: '深淵より来たりし者', portrait: '🕳️', hp: 308, bossCard: 'nature_emeraldgaia', spellChance: 0.19, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 10, legend: 90 }, rewardGold: 3600, rewardGems: 360, trophyDelta: 425,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '深淵の最奥で、封じられていた古き者を打ち破った。' },
       { speaker: '調教師', portrait: '🧑', text: 'これで終わり……いや、まだ何か違う気配がする。もっと大きな影が。' },
       { speaker: '女神', portrait: '🌸', text: '気をつけて。深淵の奥には、さらに古い時代の「亡国」が眠っているという伝説がある。' },
     ] },
-  { id: 31, name: '灰と炎の遺跡', portrait: '🏚️', hp: 335, bossCard: 'water_seiren', spellChance: 0.73, bgTheme: 'volcano',
+  { id: 31, name: '灰と炎の遺跡', portrait: '🏚️', hp: 335, bossCard: 'water_seiren', spellChance: 0.2, bgTheme: 'volcano',
     weights: { normal: 0, rare: 0, epic: 9, legend: 91 }, rewardGold: 3820, rewardGems: 382, trophyDelta: 450,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '深淵を抜けた先には、かつて栄えたという亡国の遺跡が、灰と炎に包まれて広がっていた。' },
       { speaker: '調教師', portrait: '🧑', text: 'ここが……亡国。何百年も燃え続けているって、本当だったんだな。' },
       { speaker: 'ナレーター', portrait: '📖', text: '崩れた玉座の奥から、炎をまとう衛兵たちの気配が近づいてくる。' },
     ] },
-  { id: 32, name: '亡国の衛兵', portrait: '💂', hp: 362, bossCard: 'fire_bahamut', spellChance: 0.74, bgTheme: 'inferno2',
+  { id: 32, name: '亡国の衛兵', portrait: '💂', hp: 362, bossCard: 'fire_bahamut', spellChance: 0.2, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 8, legend: 92 }, rewardGold: 4040, rewardGems: 404, trophyDelta: 475  },
-  { id: 33, name: '灼熱の玉座跡', portrait: '👑', hp: 389, bossCard: 'fire_dragon', spellChance: 0.75, bgTheme: 'inferno2',
+  { id: 33, name: '灼熱の玉座跡', portrait: '👑', hp: 389, bossCard: 'fire_dragon', spellChance: 0.21, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 7, legend: 93 }, rewardGold: 4260, rewardGems: 426, trophyDelta: 500  },
-  { id: 34, name: '業火の残滓', portrait: '🔥', hp: 416, bossCard: 'dark_demonlord', spellChance: 0.76, bgTheme: 'volcano',
+  { id: 34, name: '業火の残滓', portrait: '🔥', hp: 416, bossCard: 'dark_demonlord', spellChance: 0.21, bgTheme: 'volcano',
     weights: { normal: 0, rare: 0, epic: 6, legend: 94 }, rewardGold: 4480, rewardGems: 448, trophyDelta: 525  },
-  { id: 35, name: '亡国を統べる火竜', portrait: '🐲', hp: 443, bossCard: 'fire_dragon', spellChance: 0.77, bgTheme: 'inferno2',
+  { id: 35, name: '亡国を統べる火竜', portrait: '🐲', hp: 443, bossCard: 'fire_dragon', spellChance: 0.22, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4700, rewardGems: 470, trophyDelta: 550,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '亡国を統べていた火竜を退け、燃え続けていた炎がついに静まった。' },
       { speaker: '調教師', portrait: '🧑', text: 'ようやく……ここも、終わったか。' },
       { speaker: 'ナレーター', portrait: '📖', text: 'だが灰の下から、凍りついた大地へと続く道が姿を現した。' },
     ] },
-  { id: 36, name: '凍てつく回廊', portrait: '❄️', hp: 470, bossCard: 'crystal_fox', spellChance: 0.78, bgTheme: 'frost',
+  { id: 36, name: '凍てつく回廊', portrait: '❄️', hp: 450, bossCard: 'crystal_fox', spellChance: 0.23, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 4, legend: 96 }, rewardGold: 4920, rewardGems: 492, trophyDelta: 575,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '灰の道の先は、一転して凍てつく墓所へと続いていた。吐く息すら、瞬く間に凍りつく。' },
       { speaker: '調教師', portrait: '🧑', text: '火の次は、氷か……。この世界には、本当にいろんな「終わり方」が眠っているんだな。' },
       { speaker: 'ナレーター', portrait: '📖', text: '氷結の回廊の奥から、静かな足音が響いてくる。' },
     ] },
-  { id: 37, name: '氷結の見張り', portrait: '🧊', hp: 497, bossCard: 'water_seiren', spellChance: 0.79, bgTheme: 'snow',
+  { id: 37, name: '氷結の見張り', portrait: '🧊', hp: 450, bossCard: 'water_seiren', spellChance: 0.23, bgTheme: 'snow',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5140, rewardGems: 514, trophyDelta: 600  },
-  { id: 38, name: '蒼氷の祭司', portrait: '⛄', hp: 524, bossCard: 'dark_reaper', spellChance: 0.8, bgTheme: 'frost',
+  { id: 38, name: '蒼氷の祭司', portrait: '⛄', hp: 450, bossCard: 'dark_reaper', spellChance: 0.24, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5360, rewardGems: 536, trophyDelta: 625  },
-  { id: 39, name: '永久凍土の主', portrait: '🥶', hp: 551, bossCard: 'nature_emeraldgaia', spellChance: 0.81, bgTheme: 'frost',
+  { id: 39, name: '永久凍土の主', portrait: '🥶', hp: 450, bossCard: 'nature_emeraldgaia', spellChance: 0.24, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5580, rewardGems: 558, trophyDelta: 650  },
-  { id: 40, name: '氷海に眠りし女王', portrait: '🌌', hp: 578, bossCard: 'water_seiren', spellChance: 0.82, bgTheme: 'moonshadow',
+  { id: 40, name: '氷海に眠りし女王', portrait: '🌌', hp: 450, bossCard: 'water_seiren', spellChance: 0.25, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 5800, rewardGems: 580, trophyDelta: 675,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '氷海に眠っていた女王を解き放ち、凍りついた大地に、久方ぶりの陽光が差し込んだ。' },
       { speaker: '氷の女王', portrait: '👑', text: '……ありがとう。長い眠りの果てに、また誰かの温もりを感じられるなんて。' },
       { speaker: 'ナレーター', portrait: '📖', text: '空を見上げると、はるか高くに、光を放つ塔がそびえていた。' },
     ] },
-  { id: 41, name: '天へと続く階', portrait: '🪜', hp: 605, bossCard: 'light_arcguardian', spellChance: 0.82, bgTheme: 'empress',
+  { id: 41, name: '天へと続く階', portrait: '🪜', hp: 450, bossCard: 'light_arcguardian', spellChance: 0.26, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6020, rewardGems: 602, trophyDelta: 700,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '氷海の先、雲を突き抜けるように、白く輝く聖塔が浮かんでいた。' },
       { speaker: '調教師', portrait: '🧑', text: 'あの塔……まるで、天まで続いているみたいだ。' },
       { speaker: 'ナレーター', portrait: '📖', text: '塔へと続く階段の下で、門衛たちが静かに待ち構えていた。' },
     ] },
-  { id: 42, name: '聖塔の門衛', portrait: '⛩️', hp: 632, bossCard: 'fire_bahamut', spellChance: 0.83, bgTheme: 'castle',
+  { id: 42, name: '聖塔の門衛', portrait: '⛩️', hp: 450, bossCard: 'fire_bahamut', spellChance: 0.26, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6240, rewardGems: 624, trophyDelta: 725  },
-  { id: 43, name: '雲上の詠唱者', portrait: '☁️', hp: 659, bossCard: 'dark_demonlord', spellChance: 0.84, bgTheme: 'moonshadow',
+  { id: 43, name: '雲上の詠唱者', portrait: '☁️', hp: 450, bossCard: 'dark_demonlord', spellChance: 0.27, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6460, rewardGems: 646, trophyDelta: 750  },
-  { id: 44, name: '天空を統べる者', portrait: '🌠', hp: 686, bossCard: 'crystal_fox', spellChance: 0.85, bgTheme: 'purification',
+  { id: 44, name: '天空を統べる者', portrait: '🌠', hp: 450, bossCard: 'crystal_fox', spellChance: 0.27, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6680, rewardGems: 668, trophyDelta: 775  },
-  { id: 45, name: '堕ちた聖騎士', portrait: '🗡️', hp: 713, bossCard: 'light_arcguardian', spellChance: 0.86, bgTheme: 'castle',
+  { id: 45, name: '堕ちた聖騎士', portrait: '🗡️', hp: 450, bossCard: 'light_arcguardian', spellChance: 0.28, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 6900, rewardGems: 690, trophyDelta: 800,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '塔の頂で待っていたのは、かつて光を司っていたはずの、堕ちた聖騎士だった。' },
       { speaker: '調教師', portrait: '🧑', text: 'あなたも、何かを守ろうとして、道を間違えただけなんだな。' },
       { speaker: 'ナレーター', portrait: '📖', text: '聖騎士の鎧から、静かに光が漏れ出し、天空に小さな祈りが響いた。' },
     ] },
-  { id: 46, name: '終焉の兆し', portrait: '⏳', hp: 740, bossCard: 'dark_reaper', spellChance: 0.87, bgTheme: 'purification',
+  { id: 46, name: '終焉の兆し', portrait: '⏳', hp: 450, bossCard: 'dark_reaper', spellChance: 0.29, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7120, rewardGems: 712, trophyDelta: 825,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: 'すべての戦いの果てに、時間そのものが歪んだ空間へとたどり着いた。ここが、最後の場所らしい。' },
       { speaker: '女神', portrait: '🌸', text: 'ここから先は、私にも見えない。あなたが初めて、本当の意味で「未知」に足を踏み入れる。' },
       { speaker: '調教師', portrait: '🧑', text: '……構わない。ここまで来た以上、最後まで見届ける。' },
     ] },
-  { id: 47, name: '回帰の狭間', portrait: '🌀', hp: 767, bossCard: 'nature_emeraldgaia', spellChance: 0.88, bgTheme: 'moonshadow',
+  { id: 47, name: '回帰の狭間', portrait: '🌀', hp: 450, bossCard: 'nature_emeraldgaia', spellChance: 0.29, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7340, rewardGems: 734, trophyDelta: 850  },
-  { id: 48, name: '時を喰らう者', portrait: '🕰️', hp: 794, bossCard: 'water_seiren', spellChance: 0.89, bgTheme: 'empress',
+  { id: 48, name: '時を喰らう者', portrait: '🕰️', hp: 450, bossCard: 'water_seiren', spellChance: 0.3, bgTheme: 'empress',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7560, rewardGems: 756, trophyDelta: 875  },
-  { id: 49, name: '永劫の番人', portrait: '👁️', hp: 821, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
+  { id: 49, name: '永劫の番人', portrait: '👁️', hp: 450, bossCard: 'dark_demonlord', spellChance: 0.3, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 7780, rewardGems: 778, trophyDelta: 900  },
-  { id: 50, name: 'すべての始まりの座', portrait: '🖤', hp: 1230, bossCard: 'dark_demonlord', spellChance: 0.9, bgTheme: 'purification',
+  { id: 50, name: 'すべての始まりの座', portrait: '🖤', hp: 450, bossCard: 'dark_demonlord', spellChance: 0.3, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 3, legend: 97 }, rewardGold: 8000, rewardGems: 800, trophyDelta: 925,
     storyVictory: [
       { speaker: 'ナレーター', portrait: '📖', text: '永劫回帰の座で、すべての始まりであり終わりでもある者を打ち破った。世界に、静かな朝が訪れる。' },
@@ -2158,35 +2158,35 @@ const WORLDS = [
 
 // ---------- 高難易度クエスト（属性ごとの試練。ストーリーとは別枠の腕試しコンテンツ） ----------
 const HARD_QUESTS = [
-  { qid: 'hard_fire', id: 'hard_fire', name: '灼熱の悪夢', portrait: '🔥', hp: 2400, bossCard: 'fire_bahamut', spellChance: 0.75, bgTheme: 'inferno2',
+  { qid: 'hard_fire', id: 'hard_fire', name: '灼熱の悪夢', portrait: '🔥', hp: 2400, bossCard: 'fire_bahamut', spellChance: 0.30, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '火属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_water', id: 'hard_water', name: '深海の悪夢', portrait: '🌊', hp: 2400, bossCard: 'water_seiren', spellChance: 0.75, bgTheme: 'frost',
+  { qid: 'hard_water', id: 'hard_water', name: '深海の悪夢', portrait: '🌊', hp: 2400, bossCard: 'water_seiren', spellChance: 0.30, bgTheme: 'frost',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '水属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_nature', id: 'hard_nature', name: '森羅の悪夢', portrait: '🌿', hp: 2400, bossCard: 'nature_emeraldgaia', spellChance: 0.75, bgTheme: 'emerald',
+  { qid: 'hard_nature', id: 'hard_nature', name: '森羅の悪夢', portrait: '🌿', hp: 2400, bossCard: 'nature_emeraldgaia', spellChance: 0.30, bgTheme: 'emerald',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '自然属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_light', id: 'hard_light', name: '光輝の試練', portrait: '✨', hp: 2400, bossCard: 'light_arcguardian', spellChance: 0.75, bgTheme: 'purification',
+  { qid: 'hard_light', id: 'hard_light', name: '光輝の試練', portrait: '✨', hp: 2400, bossCard: 'light_arcguardian', spellChance: 0.30, bgTheme: 'purification',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '光属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_dark', id: 'hard_dark', name: '漆黒の試練', portrait: '🌙', hp: 2400, bossCard: 'dark_reaper', spellChance: 0.75, bgTheme: 'moonshadow',
+  { qid: 'hard_dark', id: 'hard_dark', name: '漆黒の試練', portrait: '🌙', hp: 2400, bossCard: 'dark_reaper', spellChance: 0.30, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 0, epic: 5, legend: 95 }, rewardGold: 4000, rewardGems: 300, trophyDelta: 150,
     desc: '闇属性の強敵が立ちはだかる、上級者向けの試練。' },
-  { qid: 'hard_final', id: 'hard_final', name: '五属性の覇者', portrait: '💠', hp: 3600, bossCard: 'dark_demonlord', spellChance: 0.85, bgTheme: 'castle',
+  { qid: 'hard_final', id: 'hard_final', name: '五属性の覇者', portrait: '💠', hp: 3600, bossCard: 'dark_demonlord', spellChance: 0.32, bgTheme: 'castle',
     weights: { normal: 0, rare: 0, epic: 0, legend: 100 }, rewardGold: 6000, rewardGems: 500, trophyDelta: 250,
     desc: 'すべての属性を極めた、高難易度クエスト最強格の相手。' },
 ];
 
 // ---------- 特別クエスト（期間限定ではない、いつでも遊べる特殊ルールの一戦） ----------
 const SPECIAL_QUESTS = [
-  { qid: 'special_vampirelord', id: 'special_vampirelord', name: '決戦：ヴァンパイアロード', portrait: '🧛', hp: 1800, bossCard: 'dark_demonlord', spellChance: 0.6, bgTheme: 'castle',
+  { qid: 'special_vampirelord', id: 'special_vampirelord', name: '決戦：ヴァンパイアロード', portrait: '🧛', hp: 1800, bossCard: 'dark_demonlord', spellChance: 0.28, bgTheme: 'castle',
     weights: { normal: 0, rare: 10, epic: 30, legend: 60 }, rewardGold: 3000, rewardGems: 200, trophyDelta: 120,
     desc: '吸血で自己回復し続ける、ヴァンパイアロードとの一騎打ち。長期戦を覚悟せよ。' },
-  { qid: 'special_nocturia', id: 'special_nocturia', name: '決戦：虚無の女王', portrait: '😈', hp: 1800, bossCard: 'dark_reaper', spellChance: 0.6, bgTheme: 'moonshadow',
+  { qid: 'special_nocturia', id: 'special_nocturia', name: '決戦：虚無の女王', portrait: '😈', hp: 1800, bossCard: 'dark_reaper', spellChance: 0.28, bgTheme: 'moonshadow',
     weights: { normal: 0, rare: 10, epic: 30, legend: 60 }, rewardGold: 3000, rewardGems: 200, trophyDelta: 120,
     desc: '行動不能とコスト消費で妨害してくる、虚無の女王との一戦。' },
-  { qid: 'special_twindragons', id: 'special_twindragons', name: '双竜戦', portrait: '🐉', hp: 2000, bossCard: 'fire_dragon', spellChance: 0.55, bgTheme: 'inferno2',
+  { qid: 'special_twindragons', id: 'special_twindragons', name: '双竜戦', portrait: '🐉', hp: 2000, bossCard: 'fire_dragon', spellChance: 0.28, bgTheme: 'inferno2',
     weights: { normal: 0, rare: 5, epic: 25, legend: 70 }, rewardGold: 3200, rewardGems: 220, trophyDelta: 130,
     desc: '伝説の竜が束になって襲いかかる、高火力デッキとの戦い。' },
 ];
@@ -2250,7 +2250,7 @@ function getDungeonFloorStage(floor) {
     portrait: boss ? '👑' : '🗝️',
     hp: getDungeonFloorHp(floor),
     bossCard: getDungeonFloorBossCard(floor),
-    spellChance: Math.min(0.85, 0.05 + floor * 0.008),
+    spellChance: Math.min(0.32, 0.02 + floor * 0.003),
     bgTheme: DUNGEON_BG_THEMES[idx % DUNGEON_BG_THEMES.length],
     weights: getDungeonFloorWeights(floor),
     rewardGold: 300 + floor * 45,
@@ -2392,9 +2392,9 @@ function renderStoryStages() {
       const cleared = stage.id < state.stageProgress;
       return `
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
-          <div class="cg-stage-portrait">${stagePortraitHtml(stage, unlocked)}</div>
+          <div class="cg-stage-portrait">${stagePortraitHtml(stage, unlocked)}${cleared ? '<span class="cg-stage-cleared-badge">✓</span>' : ''}</div>
           <div class="cg-stage-info">
-            <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}</div>
+            <div class="cg-stage-name">ステージ${stage.id}　${unlocked ? stage.name : '？？？'}${cleared ? ' <span class="cg-stage-cleared-tag">クリア済み</span>' : ''}</div>
             <div class="cg-stage-desc">${unlocked ? `敵HP ${stage.hp}　報酬 💰${stage.rewardGold} 💎${stage.rewardGems}` : '前のステージをクリアすると解放'}</div>
           </div>
           <div class="cg-stage-go">${unlocked ? '⚔️' : ''}</div>
@@ -2471,9 +2471,9 @@ function renderDungeonSelect() {
       const boss = isDungeonBossFloor(floor);
       floorsHtml.push(`
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''} ${boss ? 'cg-dungeon-boss-card' : ''}" data-floor="${floor}">
-          <div class="cg-stage-portrait">${stagePortraitHtml(stageInfo, unlocked)}</div>
+          <div class="cg-stage-portrait">${stagePortraitHtml(stageInfo, unlocked)}${cleared ? '<span class="cg-stage-cleared-badge">✓</span>' : ''}</div>
           <div class="cg-stage-info">
-            <div class="cg-stage-name">地下${floor}階${boss ? '（フロアボス）' : ''}</div>
+            <div class="cg-stage-name">地下${floor}階${boss ? '（フロアボス）' : ''}${cleared ? ' <span class="cg-stage-cleared-tag">クリア済み</span>' : ''}</div>
             <div class="cg-stage-desc">${unlocked
               ? `敵HP ${stageInfo.hp}　報酬 💰${stageInfo.rewardGold} 💎${stageInfo.rewardGems}${stageInfo.dungeonEquipReward ? ' <span class="cg-dungeon-equip-tag">👑レジェンド装備</span>' : ''}`
               : '前の階層をクリアすると解放'}</div>
