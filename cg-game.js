@@ -231,6 +231,28 @@ const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
 const CARD_MAX_LEVEL = 10;
 
+// ---------- 絆レベル ----------
+// 同じカードを繰り返し入手（重複取得）した際の、進化のさらに上位段階。純粋に見た目・演出の変化のみで、
+// 能力値には影響しない（重複入手そのものに新しい価値を持たせるための仕組み）
+const BOND_LEVEL_THRESHOLDS = [
+  { level: 0, count: 0, title: null,        color: null },
+  { level: 1, count: 5, title: '見習いの絆', color: '#c58a4a' }, // 銅
+  { level: 2, count: 15, title: '深き絆',    color: '#c0c0c8' }, // 銀
+  { level: 3, count: 30, title: '無二の絆',  color: '#f0c15c' }, // 金
+];
+
+// カードの累計入手数（count）から、現在の絆レベル情報を返す
+function getBondLevel(count) {
+  count = count || 0;
+  let current = BOND_LEVEL_THRESHOLDS[0];
+  for (const tier of BOND_LEVEL_THRESHOLDS) {
+    if (count >= tier.count) current = tier;
+  }
+  const idx = BOND_LEVEL_THRESHOLDS.indexOf(current);
+  const next = BOND_LEVEL_THRESHOLDS[idx + 1] || null;
+  return { ...current, next };
+}
+
 function defaultState() {
   const owned = {};
   const starterIds = new Set(buildStarterDeck()); // 序盤の実用性を確保するため、初期デッキ分のカードのみ最初から所持する
@@ -267,6 +289,7 @@ function defaultState() {
     hasSeenBattleHelp: false,
     hasSeenOnboarding: false,
     sfxMuted: false,
+    battleFastMode: false,
     bgmMuted: true,
     bgmVolume: 0.5,
     dragon: { level: 1, exp: 0 },
@@ -703,13 +726,20 @@ function renderCardFace(id, opts) {
     : '';
   const foil = (def.rarity === 'legend' && !opts.locked) ? `<div class="cg-card-foil ${def.rarity}"></div>` : '';
   const lockIcon = opts.locked ? '<div class="cg-card-lock-icon">🔒</div>' : '';
+  // 絆レベル：同じカードを繰り返し入手した際の見た目の変化（能力値には影響しない）
+  const ownedInfo = state.cards[id];
+  const bond = (ownedInfo && !opts.locked) ? getBondLevel(ownedInfo.count) : null;
+  const bondClass = (bond && bond.level > 0 && !opts.battleMode) ? ` cg-card-bond-lv${bond.level}` : '';
+  const bondBadge = (bond && bond.level > 0 && !opts.battleMode)
+    ? `<div class="cg-card-bond-badge" style="background:${bond.color}" title="${bond.title}（絆Lv.${bond.level}）">${'★'.repeat(bond.level)}</div>`
+    : '';
   // バトル画面では、カード内表示をイラスト・コスト・ATK・HPの4情報のみに絞るため、名称・属性アイコンを省略
   const nameLine = opts.battleMode ? '' : `<div class="cg-card-name">${def.name}</div>`;
   const elLine = opts.battleMode ? '' : `<div class="cg-card-el" style="color:${el.color}">${el.icon}</div>`;
   return `
-    <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
+    <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}${bondClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${def.cost}</div>
-      <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}</div>
+      <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}${bondBadge}</div>
       ${nameLine}
       ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
       ${elLine}
@@ -725,7 +755,7 @@ function showScreen(name) {
   document.querySelectorAll('.cg-screen.active').forEach(s => {
     s.classList.remove('active');
     // フェードアウトが終わってから完全に非表示にする（表示中のアニメーションを止め、CPU/GPU負荷を抑えるため）
-    setTimeout(() => { if (!s.classList.contains('active')) s.classList.add('cg-screen-idle'); }, 260);
+    setTimeout(() => { if (!s.classList.contains('active')) s.classList.add('cg-screen-idle'); }, 340);
   });
   const el = document.getElementById('screen-' + name);
   if (el) {
@@ -1379,6 +1409,7 @@ function renderDeck() {
      </div>`
   ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
+  renderDeckSynergy();
 
   deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1483,8 +1514,162 @@ function swapDeckGroups(idA, idB) {
   state.deck = uniqueIds.flatMap(id => Array(counts[id]).fill(id));
 }
 
+// ---------- デッキシナジー表示 ----------
+// デッキ内のモンスターカードの属性・役割バランスを可視化し、初心者でも組みやすいよう簡単なアドバイスを添える
+function renderDeckSynergy() {
+  const panel = document.getElementById('deck-synergy-panel');
+  if (!panel) return;
+  const monsterIds = state.deck.filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster');
+  if (monsterIds.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  const elementCounts = {};
+  const roleCounts = { attacker: 0, defender: 0 };
+  monsterIds.forEach(id => {
+    const def = CARD_DEFS[id];
+    elementCounts[def.element] = (elementCounts[def.element] || 0) + 1;
+    const role = def.role === 'defender' ? 'defender' : 'attacker';
+    roleCounts[role]++;
+  });
+  const total = monsterIds.length;
+  const elementOrder = ['fire', 'water', 'nature', 'light', 'dark'];
+  const presentElements = elementOrder.filter(e => elementCounts[e]);
+
+  const elementBarHtml = presentElements.map(e => {
+    const pct = Math.round((elementCounts[e] / total) * 100);
+    const el = ELEMENTS[e];
+    return `<div class="cg-synergy-seg" style="width:${pct}%; background:${el.color};" title="${el.name} ${elementCounts[e]}枚（${pct}%）"></div>`;
+  }).join('');
+  const elementLegendHtml = presentElements.map(e => {
+    const el = ELEMENTS[e];
+    const pct = Math.round((elementCounts[e] / total) * 100);
+    return `<span class="cg-synergy-legend-item"><span class="cg-synergy-dot" style="background:${el.color}"></span>${el.icon}${el.name} ${elementCounts[e]}（${pct}%）</span>`;
+  }).join('');
+
+  const atkPct = Math.round((roleCounts.attacker / total) * 100);
+  const defPct = 100 - atkPct;
+
+  // 初心者向けの簡単なアドバイスを生成
+  const tips = [];
+  const dominantElement = presentElements.reduce((a, b) => (elementCounts[a] >= elementCounts[b] ? a : b));
+  const dominantRatio = elementCounts[dominantElement] / total;
+  if (presentElements.length >= 4) {
+    tips.push('属性が広く分散しています。属性を絞ると、対応するリーダーのボーナスを活かしやすくなります。');
+  } else if (dominantRatio >= 0.6) {
+    tips.push(`${ELEMENTS[dominantElement].icon}${ELEMENTS[dominantElement].name}属性が中心の構成です。対応するリーダーを選ぶと恩恵を受けやすくなります。`);
+  }
+  if (roleCounts.defender === 0) {
+    tips.push('ディフェンダーがいません。相手の攻撃を受け止めるカードを入れると安定しやすくなります。');
+  } else if (defPct >= 60) {
+    tips.push('ディフェンダーが多めの構成です。攻めきれるよう、アタッカーも意識すると良いかもしれません。');
+  }
+  if (monsterIds.length < 15) {
+    tips.push('モンスターの枚数が少なめです。増やすと安定した展開がしやすくなります。');
+  }
+
+  panel.innerHTML = `
+    <div class="cg-synergy-title">📊 デッキシナジー</div>
+    <div class="cg-synergy-row">
+      <div class="cg-synergy-label">属性バランス</div>
+      <div class="cg-synergy-bar">${elementBarHtml}</div>
+    </div>
+    <div class="cg-synergy-legend">${elementLegendHtml}</div>
+    <div class="cg-synergy-row">
+      <div class="cg-synergy-label">役割バランス</div>
+      <div class="cg-synergy-bar">
+        <div class="cg-synergy-seg" style="width:${atkPct}%; background:var(--hp-red);" title="アタッカー ${roleCounts.attacker}枚"></div>
+        <div class="cg-synergy-seg" style="width:${defPct}%; background:#3f6f8f;" title="ディフェンダー ${roleCounts.defender}枚"></div>
+      </div>
+    </div>
+    <div class="cg-synergy-legend">
+      <span class="cg-synergy-legend-item"><span class="cg-synergy-dot" style="background:var(--hp-red)"></span>⚔ アタッカー ${roleCounts.attacker}（${atkPct}%）</span>
+      <span class="cg-synergy-legend-item"><span class="cg-synergy-dot" style="background:#3f6f8f"></span>🛡 ディフェンダー ${roleCounts.defender}（${defPct}%）</span>
+    </div>
+    ${tips.length ? `<div class="cg-synergy-tips">${tips.map(t => `<div class="cg-synergy-tip">💡 ${t}</div>`).join('')}</div>` : ''}
+  `;
+}
+
 // ---------- デッキ保存（プリセット） ----------
 const MAX_DECK_PRESETS = 5;
+
+// ---------- デッキ共有コード ----------
+// フレンドとお互いのデッキを見せ合うための機能。サーバーを介さず、コードの中にデッキ情報を
+// そのまま埋め込む方式（コードをコピーして相手に送り、相手が貼り付けると内容を確認できる）
+function generateDeckShareCode() {
+  const payload = {
+    n: state.playerName,
+    l: state.leaderId,
+    d: state.deck,
+  };
+  const json = JSON.stringify(payload);
+  return btoa(unescape(encodeURIComponent(json)));
+}
+
+function decodeDeckShareCode(code) {
+  try {
+    const json = decodeURIComponent(escape(atob(code.trim())));
+    const payload = JSON.parse(json);
+    if (!payload || !Array.isArray(payload.d)) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function openDeckShareOverlay() {
+  document.getElementById('deck-share-code-text').value = generateDeckShareCode();
+  document.getElementById('deck-share-view-result').innerHTML = '';
+  document.getElementById('deck-share-input').value = '';
+  document.getElementById('deck-share-overlay').classList.remove('hidden');
+}
+
+function copyDeckShareCode() {
+  const textEl = document.getElementById('deck-share-code-text');
+  textEl.select();
+  try {
+    navigator.clipboard.writeText(textEl.value);
+  } catch (e) {
+    document.execCommand('copy');
+  }
+  const btn = document.getElementById('deck-share-copy-btn');
+  const original = btn.textContent;
+  btn.textContent = 'コピーしました！';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+}
+
+// フレンドから受け取ったデッキ共有コードを読み取り、その内容を表示する（読み取り専用。自分のデッキには影響しない）
+function viewSharedDeckCode() {
+  const code = document.getElementById('deck-share-input').value;
+  const resultEl = document.getElementById('deck-share-view-result');
+  const payload = decodeDeckShareCode(code);
+  if (!payload) {
+    resultEl.innerHTML = '<div class="cg-empty">コードを読み取れませんでした。正しいコードか確認してください。</div>';
+    return;
+  }
+  const leader = payload.l ? LEADERS[payload.l] : null;
+  const groups = [];
+  const idToGroup = {};
+  payload.d.forEach(id => {
+    if (!CARD_DEFS[id]) return; // 相手側で削除済みのカードは無視
+    if (idToGroup[id] === undefined) { idToGroup[id] = groups.length; groups.push({ id, count: 1 }); }
+    else groups[idToGroup[id]].count++;
+  });
+  resultEl.innerHTML = `
+    <div class="cg-shared-deck-header">
+      <div class="cg-shared-deck-name">${payload.n || '名無しのプレイヤー'} さんのデッキ</div>
+      ${leader ? `<div class="cg-shared-deck-leader">👑 リーダー: ${leader.name}（${leader.skillName}）</div>` : ''}
+      <div class="cg-shared-deck-count">合計 ${payload.d.length}枚</div>
+    </div>
+    <div class="cg-shared-deck-grid">
+      ${groups.map(g => `
+        <div class="cg-shared-deck-item">
+          ${renderCardFace(g.id, { small: true, locked: !state.cards[g.id] })}
+          ${g.count > 1 ? `<span class="cg-coll-count">×${g.count}</span>` : ''}
+        </div>`).join('')}
+    </div>
+    <div class="cg-deck-hint">グレー表示のカードは、あなたがまだ持っていないカードです</div>`;
+}
 
 function renderDeckPresets() {
   const wrap = document.getElementById('deck-preset-list');
@@ -1728,11 +1913,18 @@ function openCardDetail(id) {
       <button class="cg-btn cg-detail-deck-btn" id="detail-deck-remove-btn" ${deckCount <= 0 ? 'disabled' : ''}>− 外す</button>
       <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 40) ? 'disabled' : ''}>＋ 追加</button>
     </div>`;
+  const bond = getBondLevel(owned.count);
+  const bondHtml = `
+    <div class="cg-detail-bond-row" style="${bond.level > 0 ? `border-color:${bond.color};` : ''}">
+      <span class="cg-detail-bond-label">${bond.level > 0 ? `${'★'.repeat(bond.level)} ${bond.title}（絆Lv.${bond.level}）` : '絆レベルなし（重複入手で称号を獲得）'}</span>
+      <span class="cg-detail-bond-progress">${bond.next ? `累計${owned.count}枚 / 次まであと${bond.next.count - owned.count}枚` : `累計${owned.count}枚（最大絆レベル）`}</span>
+    </div>`;
   document.getElementById('detail-body').innerHTML = `
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
+      ${bondHtml}
       ${deckControlHtml}
       <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
@@ -2706,8 +2898,21 @@ function startBattle(stage) {
   applyBattleBgTheme(stage.bgTheme, isBossBattleStage(stage));
   applyLeaderPortraits();
   renderBattle();
+  updateBattleSpeedBtn();
   showScreen('battle');
   showVsIntro(stage);
+}
+
+// バトル倍速モード：ONの場合、演出・待ち時間を短縮する
+function battleMs(baseMs) {
+  return state.battleFastMode ? Math.round(baseMs / 2.5) : baseMs;
+}
+
+function updateBattleSpeedBtn() {
+  const btn = document.getElementById('battle-speed-btn');
+  if (!btn) return;
+  btn.textContent = state.battleFastMode ? '2x' : '1x';
+  btn.classList.toggle('fast', !!state.battleFastMode);
 }
 
 function showVsIntro(stage) {
@@ -2715,13 +2920,13 @@ function showVsIntro(stage) {
   document.getElementById('vs-enemy-name').textContent = stage.name;
   const overlay = document.getElementById('battle-vs-intro');
   overlay.classList.remove('hidden');
-  setTimeout(() => overlay.classList.add('hidden'), 1400);
+  setTimeout(() => overlay.classList.add('hidden'), battleMs(1400));
   setTimeout(() => {
     showTurnBanner('YOUR TURN');
     if (!state.hasSeenBattleHelp) {
       document.getElementById('battle-help-overlay').classList.remove('hidden');
     }
-  }, 1450);
+  }, battleMs(1450));
 }
 
 const MAX_HAND_SIZE = 5;
@@ -2860,14 +3065,14 @@ function spawnImpactBurst(targetEl, dmg, mult) {
   burst.style.left = x + 'px';
   burst.style.top = y + 'px';
   board.appendChild(burst);
-  setTimeout(() => burst.remove(), 550);
+  setTimeout(() => burst.remove(), battleMs(550));
 
   const slash = document.createElement('div');
   slash.className = 'cg-impact-slash';
   slash.style.left = x + 'px';
   slash.style.top = y + 'px';
   board.appendChild(slash);
-  setTimeout(() => slash.remove(), 420);
+  setTimeout(() => slash.remove(), battleMs(420));
 
   for (let i = 0; i < 6; i++) {
     const spark = document.createElement('div');
@@ -2876,7 +3081,7 @@ function spawnImpactBurst(targetEl, dmg, mult) {
     spark.style.top = y + 'px';
     spark.style.setProperty('--sa', (i * 60) + 'deg');
     board.appendChild(spark);
-    setTimeout(() => spark.remove(), 500);
+    setTimeout(() => spark.remove(), battleMs(500));
   }
 
   if (dmg !== undefined) {
@@ -2886,7 +3091,7 @@ function spawnImpactBurst(targetEl, dmg, mult) {
     dmgEl.style.left = x + 'px';
     dmgEl.style.top = y + 'px';
     board.appendChild(dmgEl);
-    setTimeout(() => dmgEl.remove(), 950);
+    setTimeout(() => dmgEl.remove(), battleMs(950));
   }
 }
 
@@ -3061,7 +3266,7 @@ function renderBattle() {
     if (battle.deckOutSide) {
       showDeckOutPopup(battle.deckOutSide);
     } else {
-      setTimeout(() => showResult(battle.playerHp > 0), 600);
+      setTimeout(() => showResult(battle.playerHp > 0), battleMs(600));
     }
   }
 }
@@ -3797,7 +4002,7 @@ function endTurn() {
   setTimeout(() => {
     enemyTurn();
     if (!battle.over) showTurnBanner('YOUR TURN');
-  }, 700);
+  }, battleMs(700));
 }
 
 function enemyTurn() {
@@ -4995,6 +5200,12 @@ function init() {
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
   document.getElementById('deck-clear-btn').addEventListener('click', clearDeck);
+  document.getElementById('deck-share-btn').addEventListener('click', openDeckShareOverlay);
+  document.getElementById('deck-share-close').addEventListener('click', () => {
+    document.getElementById('deck-share-overlay').classList.add('hidden');
+  });
+  document.getElementById('deck-share-copy-btn').addEventListener('click', copyDeckShareCode);
+  document.getElementById('deck-share-view-btn').addEventListener('click', viewSharedDeckCode);
   document.getElementById('deck-preset-save-btn').addEventListener('click', saveDeckPreset);
   document.getElementById('compendium-claim-btn').addEventListener('click', claimCompendiumReward);
   document.querySelectorAll('#collection-filter-tabs .cg-filter-tab').forEach(btn => {
@@ -5036,6 +5247,11 @@ function init() {
   });
   document.getElementById('battle-help-btn').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.remove('hidden');
+  });
+  document.getElementById('battle-speed-btn').addEventListener('click', () => {
+    state.battleFastMode = !state.battleFastMode;
+    saveState();
+    updateBattleSpeedBtn();
   });
   document.getElementById('battle-help-close').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.add('hidden');

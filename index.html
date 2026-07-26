@@ -188,10 +188,10 @@
     overflow:hidden; box-shadow:0 0 60px #00000022;}
 
   .cg-screen{position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden;
-    opacity:0; transform:translateY(10px) scale(.99); pointer-events:none; visibility:hidden;
-    transition:opacity .24s ease, transform .24s ease, visibility 0s linear .24s;}
+    opacity:0; transform:translateY(22px) scale(.97); pointer-events:none; visibility:hidden;
+    transition:opacity .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1), visibility 0s linear .32s;}
   .cg-screen.active{opacity:1; transform:translateY(0) scale(1); pointer-events:auto; visibility:visible;
-    transition:opacity .24s ease, transform .24s ease, visibility 0s linear 0s; z-index:2;}
+    transition:opacity .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1), visibility 0s linear 0s; z-index:2;}
   .cg-screen.cg-screen-idle{display:none;}
 
   /* ---------- Top status bar ---------- */
@@ -364,6 +364,10 @@
   .cg-detail-deck-count{flex:1; font-size:11px; font-weight:700; color:var(--text-dim);}
   .cg-detail-deck-row.in-deck .cg-detail-deck-count{color:var(--gold);}
   .cg-detail-deck-btn{flex-shrink:0; font-size:11px; padding:6px 10px;}
+  .cg-detail-bond-row{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;
+    padding:7px 10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); flex-wrap:wrap;}
+  .cg-detail-bond-label{font-size:11px; font-weight:700; color:var(--text-dim);}
+  .cg-detail-bond-progress{font-size:10px; color:var(--text-dim); opacity:.85;}
   .cg-detail-deck-btn:disabled{opacity:.35; cursor:default;}
   .cg-detail-bar{height:6px; background:var(--hairline); border-radius:4px; overflow:hidden; margin-bottom:10px;}
   .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
@@ -458,11 +462,12 @@
     border:1px solid var(--hairline-panel); border-radius:22px; padding:6px 10px 6px 14px; box-shadow:0 4px 14px #00000044;}
   .cg-battle-navbar-info{flex-shrink:0; font-size:11px; color:var(--text-dim-panel); background:#e8e8ec;
     padding:6px 10px; border-radius:14px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;}
-  .cg-deck-back-icon{position:relative; width:12px; height:16px; border-radius:2px; flex-shrink:0;
-    background:linear-gradient(160deg,var(--gold-bright),var(--gold)); border:1px solid #ffffffaa;
-    display:inline-flex; align-items:center; justify-content:center; font-size:6px; color:#fff; margin-left:3px;}
+  .cg-deck-back-icon{position:relative; width:14px; height:19px; border-radius:2px; flex-shrink:0;
+    background:linear-gradient(160deg,#3a1f63,#1c0f33); border:1px solid var(--gold-bright);
+    display:inline-flex; align-items:center; justify-content:center; font-size:7px; color:var(--gold-bright); margin:4px 3px 0 5px;
+    box-shadow:inset 0 0 3px #00000088;}
   .cg-deck-back-icon::before, .cg-deck-back-icon::after{content:''; position:absolute; width:100%; height:100%;
-    border-radius:2px; background:inherit; border:1px solid #ffffff66; z-index:-1;}
+    border-radius:2px; background:inherit; border:1px solid var(--gold-bright); z-index:-1;}
   .cg-deck-back-icon::before{top:-2px; left:-2px;}
   .cg-deck-back-icon::after{top:-4px; left:-4px; opacity:.7;}
   .cg-battle-navbar-end{flex:1; padding:9px 18px; font-size:14px;}
@@ -862,6 +867,10 @@
   /* ---------- ヘルプボタン・直接攻撃ラベル ---------- */
   .cg-help-btn{width:26px; height:26px; border-radius:50%; border:1px solid var(--hairline-panel); background:var(--bg-panel2);
     color:var(--text-dim-panel); font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0;}
+  .cg-battle-header-right{display:flex; align-items:center; gap:6px;}
+  .cg-battle-speed-btn{height:26px; padding:0 10px; border-radius:13px; border:1px solid var(--hairline-panel); background:var(--bg-panel2);
+    color:var(--text-dim-panel); font-size:11px; font-weight:800; cursor:pointer; flex-shrink:0;}
+  .cg-battle-speed-btn.fast{background:var(--gold); color:#fff; border-color:var(--gold-bright);}
   .cg-direct-attack-label{display:block; text-align:center; margin:-2px auto 2px; width:fit-content; z-index:6; font-size:9px; color:var(--hp-red);
     background:var(--dark-chip); padding:3px 8px; border-radius:10px; border:1px solid var(--hp-red);
     white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s ease;}
@@ -959,6 +968,16 @@
     text-shadow:0 0 4px #000, 0 0 2px #000; z-index:3;}
   .cg-card-evolved-badge.lg{font-size:22px; position:absolute; top:6px; right:6px;}
   .cg-evolved-tag{font-size:11px; color:var(--gold-bright); font-weight:700;}
+  /* 絆レベル：同じカードを繰り返し入手すると付く称号バッジ・演出（能力値には影響しない） */
+  .cg-card-bond-badge{position:absolute; top:2px; left:2px; font-size:7px; font-weight:800; color:#1a1620;
+    padding:1px 4px; border-radius:6px; z-index:4; box-shadow:0 1px 2px #00000055; letter-spacing:-1px;}
+  .cg-card.cg-card-bond-lv3{position:relative;}
+  .cg-card.cg-card-bond-lv3::after{content:''; position:absolute; inset:-3px; border-radius:14px;
+    border:2px solid #f0c15c; pointer-events:none; z-index:5; animation:cgBondPulse 2.2s ease-in-out infinite;}
+  @keyframes cgBondPulse{
+    0%,100%{opacity:.45; transform:scale(1);}
+    50%{opacity:1; transform:scale(1.025);}
+  }
   .cg-card-role{position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%; z-index:3;
     display:flex; align-items:center; justify-content:center; font-size:9px; background:#23242bcc; color:#fff; border:1px solid #ffffff55;}
   .cg-card-role.defender{color:#7ec4f0;}
@@ -1148,6 +1167,18 @@
 
   /* ---------- デッキ編成UX改善 ---------- */
   .cg-deck-hint{font-size:10px; color:var(--text-dim); padding:0 14px 6px;}
+  .cg-deck-synergy-panel{margin:10px 14px 4px; padding:12px 14px; border-radius:14px; background:var(--bg-panel2);
+    border:1px solid var(--hairline-panel);}
+  .cg-synergy-title{font-size:12px; font-weight:800; color:var(--text-panel); margin-bottom:8px;}
+  .cg-synergy-row{display:flex; align-items:center; gap:8px; margin-bottom:4px;}
+  .cg-synergy-label{font-size:10px; color:var(--text-dim-panel); flex-shrink:0; width:64px;}
+  .cg-synergy-bar{flex:1; height:12px; border-radius:6px; overflow:hidden; display:flex; background:#00000022;}
+  .cg-synergy-seg{height:100%; transition:width .3s ease;}
+  .cg-synergy-legend{display:flex; flex-wrap:wrap; gap:6px 12px; font-size:10px; color:var(--text-dim-panel); margin:2px 0 10px 72px;}
+  .cg-synergy-legend-item{display:flex; align-items:center; gap:4px;}
+  .cg-synergy-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .cg-synergy-tips{display:flex; flex-direction:column; gap:5px; margin-top:4px; padding-top:8px; border-top:1px solid var(--hairline-panel);}
+  .cg-synergy-tip{font-size:10.5px; color:var(--text-panel); line-height:1.5;}
   .cg-sort-row{display:flex; align-items:center; gap:8px; padding:0 14px 8px;}
   .cg-sort-label{font-size:11px; color:var(--text-dim);}
   .cg-sort-select{font-family:inherit; font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
@@ -1156,6 +1187,19 @@
   .cg-deck-preset-bar{padding:2px 14px 8px; display:flex; gap:8px;}
   .cg-deck-preset-save-btn{flex:1; font-size:12px; padding:9px;}
   .cg-deck-preset-save-btn:disabled{opacity:.4; cursor:default;}
+  .cg-deck-share-btn{flex-shrink:0; font-size:12px; padding:9px 14px;}
+  .cg-deck-share-section{margin-bottom:8px;}
+  .cg-deck-share-label{font-size:11px; color:var(--text-dim-panel); margin-bottom:6px; font-weight:700;}
+  .cg-deck-share-textarea{width:100%; box-sizing:border-box; font-family:monospace; font-size:10px; padding:8px;
+    border-radius:10px; border:1px solid var(--hairline-panel); background:var(--bg-panel2); color:var(--text-panel);
+    resize:none; margin-bottom:8px;}
+  .cg-deck-share-divider{height:1px; background:var(--hairline-panel); margin:14px 0;}
+  .cg-shared-deck-header{margin:10px 0 8px; padding:10px 12px; border-radius:12px; background:var(--gold-soft); border:1px solid var(--gold-bright);}
+  .cg-shared-deck-name{font-size:13px; font-weight:800; color:var(--gold);}
+  .cg-shared-deck-leader{font-size:11px; color:var(--text-panel); margin-top:3px;}
+  .cg-shared-deck-count{font-size:10px; color:var(--text-dim-panel); margin-top:3px;}
+  .cg-shared-deck-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-height:280px; overflow-y:auto; padding-bottom:4px;}
+  .cg-shared-deck-item{position:relative;}
   .cg-deck-clear-btn{flex-shrink:0; font-size:12px; padding:9px 12px; white-space:nowrap;
     background:var(--bg-panel2); color:var(--wine); border:1.5px solid var(--wine);}
   .cg-deck-preset-list{display:flex; flex-direction:column; gap:6px; padding:0 14px 4px;}
@@ -1170,13 +1214,15 @@
   .cg-deck-preset-del-btn{flex-shrink:0; font-size:10px; padding:5px 8px; border-radius:10px; border:1.5px solid var(--hp-red);
     background:var(--bg-panel); color:var(--hp-red); font-weight:700; cursor:pointer;}
   .cg-auto-build-btn{padding:6px 12px; font-size:11px;}
-  .cg-filter-tabs{display:flex; gap:6px; padding:0 14px 14px; overflow-x:auto;}
+  .cg-filter-tabs{display:flex; gap:6px; padding:2px 14px 14px; overflow-x:auto; overflow-y:visible; flex-shrink:0;}
   .cg-filter-tab{flex-shrink:0; border:1px solid var(--hairline-panel); background:var(--bg-panel2); color:var(--text-dim-panel);
     font-family:inherit; font-size:11px; padding:6px 12px; border-radius:14px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;}
   .cg-filter-tab.active{background:var(--bg-panel); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   /* ミッション画面のみ、分類タブをひとまわり大きく表示 */
   #mission-filter-tabs{gap:8px; position:relative; z-index:2; margin-bottom:4px; flex-wrap:wrap;}
   #mission-filter-tabs .cg-filter-tab{font-size:13px; padding:10px 16px; border-radius:16px;}
+  /* ステージ選択画面のモードタブ（ストーリー/ダンジョン/高難易度/特別クエスト）も大きく表示 */
+  #stage-mode-tabs .cg-filter-tab{font-size:13px; padding:10px 16px; border-radius:16px; font-weight:700;}
   .cg-filter-badge{background:var(--hp-red); color:#fff; font-size:9px; font-weight:800; min-width:15px; height:15px;
     border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0 3px;}
   .cg-coll-item{position:relative;}
@@ -1254,6 +1300,28 @@
     <div class="cg-help-panel cg-card-info-panel cg-ornate cg-double-frame">
       <div id="card-info-body"></div>
       <button class="cg-btn cg-btn-main" id="card-info-close">閉じる</button>
+    </div>
+  </div>
+
+  <!-- デッキ共有（コードでフレンドとデッキを見せ合う） -->
+  <div id="deck-share-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame">
+      <div class="cg-help-title">デッキを共有</div>
+      <div class="cg-help-body">
+        <div class="cg-deck-share-section">
+          <div class="cg-deck-share-label">あなたのデッキコード（コピーしてフレンドに送りましょう）</div>
+          <textarea id="deck-share-code-text" class="cg-deck-share-textarea" readonly rows="3"></textarea>
+          <button class="cg-btn cg-btn-main" id="deck-share-copy-btn">📋 コードをコピー</button>
+        </div>
+        <div class="cg-deck-share-divider"></div>
+        <div class="cg-deck-share-section">
+          <div class="cg-deck-share-label">フレンドのデッキコードを貼り付けて見る</div>
+          <textarea id="deck-share-input" class="cg-deck-share-textarea" rows="3" placeholder="ここにコードを貼り付け"></textarea>
+          <button class="cg-btn" id="deck-share-view-btn">👀 デッキを見る</button>
+          <div id="deck-share-view-result"></div>
+        </div>
+      </div>
+      <button class="cg-btn cg-btn-main" id="deck-share-close">閉じる</button>
     </div>
   </div>
 
@@ -1392,12 +1460,14 @@
         <span class="cg-section-title" style="padding:0;">デッキ</span>
         <span style="font-size:12px; color:var(--text-dim);">枚数: <span id="deck-count">0/30</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
       </div>
-      <div class="cg-deck-hint">右上の✕をタップして外せます／カードを長押しでドラッグすると並び替えられます</div>
+      <div class="cg-deck-hint">タップして選択→別のカードをタップで並び替え。外すのは各カードの「−」ボタンから</div>
       <div id="deck-slots"></div>
+      <div id="deck-synergy-panel" class="cg-deck-synergy-panel"></div>
 
       <div class="cg-deck-preset-bar">
         <button class="cg-btn cg-deck-preset-save-btn" id="deck-preset-save-btn">💾 このデッキを保存</button>
         <button class="cg-btn cg-deck-clear-btn" id="deck-clear-btn">🗑 一括解除</button>
+        <button class="cg-btn cg-deck-share-btn" id="deck-share-btn">🔗 共有</button>
       </div>
       <div id="deck-preset-list" class="cg-deck-preset-list"></div>
 
@@ -1517,7 +1587,10 @@
     <div class="cg-battle-header">
       <button class="cg-back-btn cg-battle-back-btn" id="battle-back-btn" title="ホームへ戻る">←</button>
       <div class="cg-timer" id="battle-turn-timer">ターン 1</div>
-      <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
+      <div class="cg-battle-header-right">
+        <button class="cg-battle-speed-btn" id="battle-speed-btn" title="バトル速度切り替え">1x</button>
+        <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
+      </div>
     </div>
 
     <div class="cg-element-strip" title="属性相性：矢印の先が弱点。光と闇はお互いが弱点">
@@ -1566,7 +1639,7 @@
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
             <span class="cg-substat-chip" title="敵の残り手札枚数">🎴×<span id="battle-enemy-hand-count">0</span></span>
-            <span class="cg-substat-chip" title="敵の残り山札枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-enemy-deck-remaining">0</span></span>
+            <span class="cg-substat-chip" title="敵の残り山札枚数"><span class="cg-deck-back-icon">◆</span>×<span id="battle-enemy-deck-remaining">0</span></span>
             <span class="cg-substat-chip" title="敵の墓地枚数">🪦×<span id="battle-enemy-graveyard-count">0</span></span>
           </div>
         </div>
@@ -1586,7 +1659,7 @@
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" id="battle-pp-badge" title="自分のマナ">マナ <span id="battle-pp-current">1</span>/<span id="battle-pp-max">1</span></span>
             <span class="cg-substat-chip" title="残り手札">🎴×<span id="battle-hand-count">0</span></span>
-            <span class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">✦</span>×<span id="battle-deck-remaining">0</span></span>
+            <span class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">◆</span>×<span id="battle-deck-remaining">0</span></span>
             <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></span>
           </div>
         </div>
