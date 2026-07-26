@@ -722,9 +722,15 @@ const IMMERSIVE_SCREENS = ['battle', 'card-detail', 'result']; // タブバー�
 const SCREEN_TAB_MAP = { home: 'nav-home', collection: 'nav-cards', stage: 'nav-battle', shop: 'nav-shop', mission: 'nav-mission' };
 
 function showScreen(name) {
-  document.querySelectorAll('.cg-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.cg-screen.active').forEach(s => {
+    s.classList.remove('active');
+    // フェードアウトが終わってから完全に非表示にする（表示中のアニメーションを止め、CPU/GPU負荷を抑えるため）
+    setTimeout(() => { if (!s.classList.contains('active')) s.classList.add('cg-screen-idle'); }, 260);
+  });
   const el = document.getElementById('screen-' + name);
   if (el) {
+    el.classList.remove('cg-screen-idle');
+    void el.offsetWidth; // 上のdisplay解除を確実に反映させてから、次のフレームでフェードインを開始する
     el.classList.add('active');
     el.scrollTop = 0;
     requestAnimationFrame(() => { el.scrollTop = 0; });
@@ -5098,7 +5104,10 @@ function init() {
       sfxTap();
       playBgm();
       const splash = document.getElementById('splash-screen');
-      if (splash) splash.classList.add('hidden');
+      if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(() => { if (splash.classList.contains('hidden')) splash.style.display = 'none'; }, 650);
+      }
       if (!state.hasSeenOnboarding) {
         setTimeout(startOnboarding, 500); // スプラッシュのフェードアウト後に表示
       }
