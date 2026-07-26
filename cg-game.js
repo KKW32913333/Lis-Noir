@@ -79,6 +79,12 @@ const CARD_DEFS = {
   light_stardustwhale:   { name: 'スターダストホエール', element: 'light', rarity: 'legend', cost: 7, atk: 8, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを2回復する', image: 'card-light-stardustwhale.png', emoji: '🐋' },
   light_sunblazenoble:   { name: 'サンブレイズ・ノーブル', element: 'light', rarity: 'legend', cost: 7, atk: 6, hp: 11, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.4 }, skill: '【固有】受けるダメージを常に40%軽減する', image: 'card-light-sunblazenoble.png', emoji: '🥂' },
   light_whitegriffon:    { name: 'ホワイトグリフォン', element: 'light', rarity: 'legend', cost: 6, atk: 8, hp: 9,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-light-whitegriffon.png', emoji: '🦅' },
+  // ---- 初心者ガチャ用の新規カード ----
+  fire_flarelion:      { name: 'フレアライオン', element: 'fire', rarity: 'rare', cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-fire-flarelion.png', emoji: '🦁' },
+  nature_venomscorpion: { name: 'ヴェノムスコーピオン', element: 'nature', rarity: 'rare', cost: 3, atk: 3, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.6, turns: 2 }, skill: '攻撃時、60%の確率で毒（2ターン）を付与する', image: 'card-nature-venomscorpion.png', emoji: '🦂' },
+  light_lightguardian:  { name: 'ライトガーディアン', element: 'light', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 1 }, skill: '場に出た時、味方全体にシールド1を付与する', image: 'card-light-lightguardian.png', emoji: '🛡️' },
+  fire_crimson:         { name: '炎龍王クリムゾン', element: 'fire', rarity: 'legend', cost: 6, atk: 7, hp: 8, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与えて火傷（2ターン）を付与する', image: 'card-fire-crimson.png', emoji: '🐉' },
+  light_arcknight:      { name: '聖騎士アークナイト', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 9, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 2, shieldValue: 2 }, skill: '場に出た時、味方全体のHPを2回復し、シールド2を付与する', image: 'card-light-arcknight.png', emoji: '🛡️' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -264,6 +270,7 @@ function defaultState() {
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
     presentsClaimed: {},
+    beginnerGachaDone: false,
     cards: owned,
     deck: buildStarterDeck(),
   };
@@ -4177,6 +4184,17 @@ function openCollectionScreen(seg) {
 
 // ---------- ガチャ ----------
 const SHOP_PACKS = [
+  { id: 'beginner', name: '初心者ガチャ', icon: '🔰', currency: 'gems', cost: 0, no10: true,
+    desc: '冒険を始める全ての人が、最初に必ず1回引く特別なガチャ。これを引くと他の全てのガチャが解放されます',
+    weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
+    rarityPool: {
+      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat'],
+      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon'],
+      legend: ['fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper'],
+    },
+    preview: ['fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper',
+              'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon'] },
   { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
     desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },
     preview: ['water_slime', 'nature_wolf', 'water_golem'] },
@@ -4215,7 +4233,7 @@ function renderPackCard(pack) {
   const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : pack.currency === 'lightTickets' ? '☀️' : '🎫';
   const affordable = state[pack.currency] >= pack.cost;
   const affordable10 = state[pack.currency] >= pack.cost * 10;
-  const show10 = !pack.pool; // 固定プールの期間限定ガチャ（チケット制）は10連非対応
+  const show10 = !pack.pool && !pack.no10; // 固定プールの期間限定ガチャ・no10指定のガチャは10連非対応
   const previewIds = pack.pool || pack.preview || [];
   const previewHtml = previewIds.map(id => {
     const def = CARD_DEFS[id];
@@ -4228,7 +4246,7 @@ function renderPackCard(pack) {
   }).join('');
   const pityCount = (state.pityCounters && state.pityCounters[pack.id]) || 0;
   const pityRemain = Math.max(0, PITY_LIMIT - pityCount);
-  const showPity = !pack.pool && pack.weights.normal > 0; // 固定プールのガチャ・ノーマルが出ないガチャには天井表示不要
+  const showPity = !pack.pool && !pack.no10 && pack.weights.normal > 0; // 固定プールのガチャ・単発専用ガチャ・ノーマルが出ないガチャには天井表示不要
   const legendPityCount = (state.legendPityCounters && state.legendPityCounters[pack.id]) || 0;
   const legendPityRemain = pack.legendPityLimit ? Math.max(0, pack.legendPityLimit - legendPityCount) : 0;
   return `
@@ -4263,17 +4281,26 @@ function renderShop() {
 
   const eventWrap = document.getElementById('shop-event-packs');
   if (eventWrap) {
-    eventWrap.innerHTML = EVENT_GACHA_PACKS.map(renderPackCard).join('');
-    eventWrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
-      btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
-    });
-    eventWrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
-      node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
-    });
+    if (!state.beginnerGachaDone) {
+      // 初心者ガチャを引くまでは、期間限定ガチャも表示しない
+      eventWrap.innerHTML = '';
+    } else {
+      eventWrap.innerHTML = EVENT_GACHA_PACKS.map(renderPackCard).join('');
+      eventWrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
+        btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
+      });
+      eventWrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
+        node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
+      });
+    }
   }
 
   const wrap = document.getElementById('shop-packs');
-  wrap.innerHTML = SHOP_PACKS.map(renderPackCard).join('');
+  const visiblePacks = state.beginnerGachaDone
+    ? SHOP_PACKS.filter(p => p.id !== 'beginner')
+    : SHOP_PACKS.filter(p => p.id === 'beginner');
+  wrap.innerHTML = (!state.beginnerGachaDone ? '<div class="cg-beginner-gacha-banner">🔰 まずは「初心者ガチャ」を引いて、冒険を始めましょう！<br>引くと他のガチャも解放されます。</div>' : '')
+    + visiblePacks.map(renderPackCard).join('');
   wrap.querySelectorAll('.cg-pack-buy').forEach(btn => {
     btn.addEventListener('click', () => buyPack(btn.dataset.pack, Number(btn.dataset.times) || 1));
   });
@@ -4323,6 +4350,7 @@ function buyPack(packId, times) {
   if (state[pack.currency] < totalCost) return;
   state[pack.currency] -= totalCost;
   state.totalPacksOpened = (state.totalPacksOpened || 0) + times;
+  if (packId === 'beginner') state.beginnerGachaDone = true; // 初心者ガチャを引いたら、他の全てのガチャが解放される
   saveState();
   renderShop();
   renderHome();
@@ -4865,6 +4893,16 @@ function openScreenHelp(key) {
 function init() {
   checkSeasonReset();
   renderHome();
+  // 初心者ガチャを引くまでは、他の画面へ移動できないようにする（ショップ画面に留める）
+  document.addEventListener('click', (e) => {
+    if (state.beginnerGachaDone) return;
+    if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-back-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      renderShop();
+      showScreen('shop');
+    }
+  }, true);
   document.addEventListener('click', (e) => {
     if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-btn, .cg-stage-card, .cg-help-btn')) sfxTap();
   });
@@ -4990,7 +5028,12 @@ function init() {
       if (user) setCloudSyncStatus('☁️ ログイン中（' + user.email + '）');
     });
   }
-  showScreen('home');
+  if (state.beginnerGachaDone) {
+    showScreen('home');
+  } else {
+    renderShop();
+    showScreen('shop');
+  }
   setTimeout(() => {
     const loader = document.getElementById('splash-loader');
     const startBtn = document.getElementById('splash-start-btn');
