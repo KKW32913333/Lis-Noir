@@ -1304,7 +1304,7 @@ function renderLeaderSelect(containerId) {
       renderHome();
     });
     if (node.dataset.leader) {
-      bindLongPress(node, () => showLeaderInfo(node.dataset.leader));
+      bindLongPress(node, () => showLeaderDetailInfo(node.dataset.leader));
     }
   });
 }
@@ -1351,21 +1351,6 @@ function executeLeaderUltimate() {
     return;
   }
   renderBattle();
-}
-
-function showLeaderInfo(lid) {
-  const l = LEADERS[lid];
-  if (!l) return;
-  const el = ELEMENTS[l.element];
-  document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="background:linear-gradient(160deg,#3a1f63,#1c0f33);"><img src="${l.icon}"/></div>
-    <div class="cg-detail-info">
-      <div class="cg-detail-name">${l.name}</div>
-      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--true-gold)">LEADER・${l.skillName}</span></div>
-      <div class="cg-detail-desc">対象属性: <span style="color:${elementTextColor(l.element)}">${el.icon} ${el.name}</span></div>
-      <div class="cg-detail-desc">${l.desc}</div>
-    </div>`;
-  document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
 // ---------- デッキ内カードの並び替え(長押し→ドラッグ) ----------
@@ -1907,6 +1892,7 @@ function showLeaderDetailInfo(lid) {
   if (!l) return;
   const el = ELEMENTS[l.element];
   const isActive = state.leaderId === lid;
+  const inBattle = !!(battle && !battle.over);
   document.getElementById('card-info-body').innerHTML = `
     <div class="cg-detail-art" style="background:linear-gradient(160deg,#3a1f63,#1c0f33);">
       ${l.fullImage ? `<img src="${l.fullImage}" data-emoji="👑" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">👑</span>`}
@@ -1918,7 +1904,7 @@ function showLeaderDetailInfo(lid) {
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(l.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc"><b>👑 リーダースキル：${l.skillName}</b><br>${l.desc}</div>
       ${l.ultimateSkill ? `<div class="cg-detail-desc"><b>⚡ アルティメットスキル：${l.ultimateSkill.name}</b><br>${l.ultimateSkill.desc}<br><span style="opacity:.75;">（バトル中、5ターンごとに使用可能）</span></div>` : ''}
-      <button class="cg-btn cg-btn-main" id="leader-detail-select-btn" data-leader="${lid}">${isActive ? '設定中' : 'このリーダーを設定'}</button>
+      ${inBattle ? '' : `<button class="cg-btn cg-btn-main" id="leader-detail-select-btn" data-leader="${lid}">${isActive ? '設定中' : 'このリーダーを設定'}</button>`}
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
   const selectBtn = document.getElementById('leader-detail-select-btn');
@@ -3009,7 +2995,7 @@ function startBattle(stage) {
   const playerPortraitEl = document.getElementById('battle-player-portrait');
   if (playerPortraitEl && !playerPortraitEl.dataset.longpressBound) {
     playerPortraitEl.dataset.longpressBound = '1';
-    bindLongPress(playerPortraitEl, () => { if (state.leaderId) showLeaderInfo(state.leaderId); });
+    bindLongPress(playerPortraitEl, () => { if (state.leaderId) showLeaderDetailInfo(state.leaderId); });
   }
   renderBattle();
   updateBattleSpeedBtn();
