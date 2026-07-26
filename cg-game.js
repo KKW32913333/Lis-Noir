@@ -2539,8 +2539,8 @@ function startBattle(stage) {
     playerMaxCost: 1, enemyMaxCost: 1,
     playerCost: 1, enemyCost: 1,
     playerDeck, enemyDeck,
-    playerHand: playerDeck.splice(0, 4),
-    enemyHand: enemyDeck.splice(0, 4),
+    playerHand: playerDeck.splice(0, 2),
+    enemyHand: enemyDeck.splice(0, 2),
     playerField: [null, null, null, null, null],
     enemyField: [null, null, null, null, null],
     fieldCard: null,
@@ -2812,7 +2812,6 @@ function renderBattle() {
   document.getElementById('battle-turn-timer').textContent = 'ターン ' + battle.turn;
   document.getElementById('battle-player-hp').textContent = battle.playerHp;
   document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
-  document.getElementById('battle-cost-fill').style.width = (battle.playerCost / 10 * 100) + '%';
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
   document.getElementById('battle-hand-count').textContent = battle.playerHand.length;
   document.getElementById('battle-graveyard-count').textContent = battle.playerGraveyard.length;

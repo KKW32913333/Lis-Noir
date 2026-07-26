@@ -464,10 +464,7 @@
     border-radius:2px; background:inherit; border:1px solid #ffffff66; z-index:-1;}
   .cg-deck-back-icon::before{top:-2px; left:-2px;}
   .cg-deck-back-icon::after{top:-4px; left:-4px; opacity:.7;}
-  .cg-battle-navbar-cost{flex:1; display:flex; align-items:center; gap:6px; min-width:0;}
-  .cg-battle-navbar-end{flex-shrink:0; padding:9px 18px;}
-  .cg-cost-track{flex:1; height:14px; background:#e4e6ea; border-radius:8px; overflow:hidden; margin-right:10px; border:1px solid var(--hairline);}
-  .cg-cost-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--cyan));}
+  .cg-battle-navbar-end{flex:1; padding:12px 18px; font-size:15px;}
 
   #battle-skill-flash{position:absolute; top:40%; left:50%; transform:translate(-50%,-50%) scale(.7); opacity:0;
     text-align:center; font-size:17px; font-weight:800; color:var(--true-gold); text-shadow:0 0 18px #000, 0 0 8px #000;
@@ -876,7 +873,7 @@
   .cg-help-item{font-size:12px; line-height:1.6; color:var(--text-dim-panel);}
   .cg-help-item b{color:var(--text-panel);}
   /* ---------- 属性相性ストリップ（バトル画面に常時表示） ---------- */
-  .cg-element-strip{display:flex; align-items:center; justify-content:flex-start; gap:10px; padding:2px 12px 4px; opacity:.92;}
+  .cg-element-strip{display:flex; align-items:center; justify-content:flex-start; gap:10px; padding:2px 12px 4px; opacity:.92; flex-wrap:wrap;}
   .cg-element-circle{width:60px; height:57px; flex-shrink:0;}
   .cg-element-arc{stroke:var(--gold-bright); stroke-width:2.5; fill:none;}
   .cg-element-node2 circle{stroke:#00000040; stroke-width:1.5;}
@@ -892,7 +889,12 @@
   .cg-el-chip-text{font-size:10px; font-weight:800; padding:3px 7px; border-radius:8px; color:#fff; box-shadow:0 1px 3px #00000055;}
   .cg-el-chip-text.light{background:#a9822f;}
   .cg-el-chip-text.dark{background:#5A2D91;}
+  .cg-el-chip-text.status{background:#7a3fa0;}
+  .cg-el-chip-text.shield{background:#2f5f8f;}
   .cg-element-mutual-label{font-size:8px; color:#C7B6FFbb;}
+  .cg-element-status-legend{display:flex; flex-direction:column; gap:3px; font-size:9px; color:#C7B6FFdd;}
+  .cg-element-status-row{display:flex; align-items:center; gap:5px;}
+  .cg-element-status-row .cg-el-chip-text{font-size:9px; padding:2px 5px;}
   .cg-card-info-panel{display:flex; flex-direction:column; align-items:center;
     background:linear-gradient(165deg,#2c1854,#150a2b); border-color:var(--gold-bright);}
   .cg-card-info-panel .cg-detail-name{color:#F5EFFF;}
@@ -937,7 +939,7 @@
 
   /* ---------- 進化 ---------- */
   .cg-card.evolved-glow{border-width:3px; box-shadow:0 0 14px var(--gold-soft), 0 3px 10px #00000040 !important;}
-  .cg-card-evolved-badge{position:absolute; bottom:2px; left:2px; font-size:11px; color:var(--true-gold);
+  .cg-card-evolved-badge{position:absolute; bottom:2px; left:21px; font-size:11px; color:var(--true-gold);
     text-shadow:0 0 4px #000, 0 0 2px #000; z-index:3;}
   .cg-card-evolved-badge.lg{font-size:22px; position:absolute; top:6px; right:6px;}
   .cg-evolved-tag{font-size:11px; color:var(--gold-bright); font-weight:700;}
@@ -1486,6 +1488,11 @@
         </div>
         <div class="cg-element-mutual-label">お互いが弱点</div>
       </div>
+      <span class="cg-element-strip-divider"></span>
+      <div class="cg-element-status-legend">
+        <div class="cg-element-status-row"><span class="cg-el-chip-text status">☠️/🔥</span>継続ダメージ</div>
+        <div class="cg-element-status-row"><span class="cg-el-chip-text shield">🛡</span>シールド</div>
+      </div>
     </div>
 
     <div class="cg-battle-board">
@@ -1537,9 +1544,6 @@
 
     <div class="cg-battle-footer">
       <div class="cg-battle-navbar">
-        <div class="cg-battle-navbar-cost">
-          <div class="cg-cost-track"><div class="cg-cost-fill" id="battle-cost-fill"></div></div>
-        </div>
         <button class="cg-btn cg-btn-main cg-battle-navbar-end" id="battle-end-turn">ターン終了</button>
       </div>
     </div>
