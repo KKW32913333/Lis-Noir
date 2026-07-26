@@ -984,10 +984,14 @@
   .cg-quick-grid-6 .cg-quick-btn .ic{font-size:17px;}
   .cg-quick-grid-6 .cg-quick-btn .lb{font-size:9px;}
   .cg-quick-btn{background:linear-gradient(180deg,var(--bg-panel2),var(--bg-panel)); border:1px solid var(--hairline-panel);
-    border-radius:12px; padding:12px 4px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 2px 8px #00000033;}
+    border-radius:12px; padding:12px 4px; text-align:center; cursor:pointer; transition:transform .15s; box-shadow:0 2px 8px #00000033; position:relative;}
   .cg-quick-btn:active{transform:scale(.94);}
   .cg-quick-btn .ic{font-size:20px; display:block; margin-bottom:4px;}
   .cg-quick-btn .lb{font-size:10px; color:var(--text-dim-panel); font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
+  .cg-quick-badge{position:absolute; top:4px; right:6px; min-width:16px; height:16px; padding:0 4px; border-radius:8px;
+    background:var(--hp-red); color:#fff; font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 1px 3px #00000055;}
+  .cg-quick-badge.hidden{display:none;}
 
   .cg-featured-mission{margin:0 16px 18px; background:var(--bg-panel); border:1px solid var(--gold); border-radius:14px;
     padding:12px 14px; box-shadow:0 3px 10px #00000033; cursor:pointer;}
@@ -1317,12 +1321,13 @@
       </div>
     </div>
 
-    <div class="cg-quick-grid cg-quick-grid-6">
+    <div class="cg-quick-grid">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
       <div class="cg-quick-btn" id="quick-dungeon"><span class="ic">🕳️</span><span class="lb">ダンジョン</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
       <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ガチャ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
+      <div class="cg-quick-btn" id="quick-present"><span class="ic">🎁</span><span class="lb">プレゼント</span><span class="cg-quick-badge hidden" id="present-badge">0</span></div>
       <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
     </div>
 
@@ -1779,6 +1784,17 @@
     <button class="cg-btn cg-btn-main cg-mission-claimall-btn hidden" id="mission-claimall-btn">🎁 まとめて受け取る</button>
     <div class="cg-filter-tabs" id="mission-filter-tabs"></div>
     <div id="mission-list" class="cg-mission-list"></div>
+  </section>
+
+  <!-- ============ プレゼント画面 ============ -->
+  <section id="screen-present" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-present">←</button>
+      <span class="cg-section-title" style="padding:0;">プレゼント</span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="present" title="ヘルプ">？</button>
+    </div>
+    <button class="cg-btn cg-btn-main cg-mission-claimall-btn hidden" id="present-claimall-btn">🎁 まとめて受け取る</button>
+    <div id="present-list" class="cg-mission-list"></div>
   </section>
 
   <!-- ============ ドラゴン育成画面 ============ -->

@@ -224,11 +224,11 @@ const CARD_MAX_LEVEL = 10;
 
 function defaultState() {
   const owned = {};
-  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
-  const dungeonExclusiveIds = new Set(DUNGEON_EQUIPMENT_REWARDS);
+  const starterIds = new Set(buildStarterDeck()); // 序盤の実用性を確保するため、初期デッキ分のカードのみ最初から所持する
   Object.keys(CARD_DEFS).forEach(id => {
-    if (eventExclusiveIds.has(id)) return; // 期間限定ガチャ専用カードは、実際に引くまで所持しない
-    if (dungeonExclusiveIds.has(id)) return; // ダンジョン限定装備は、フロアボスを撃破するまで所持しない
+    const def = CARD_DEFS[id];
+    if (def.isLeaderCard) { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; return; } // リーダーカードは従来通り最初から使用可能
+    if (!starterIds.has(id)) return; // それ以外のカードは、実際にガチャで当たるまで所持しない（スペル・装備・フィールドも同様）
     owned[id] = { level: 1, exp: 0, count: 1, evolved: false };
   });
   return {
@@ -244,8 +244,8 @@ function defaultState() {
     battleHistory: [],
     playerLevel: 1,
     playerExp: 0,
-    gold: 25300,
-    gems: 1250,
+    gold: 3000,
+    gems: 5000,
     trophy: 0,
     seasonId: null,
     dailyDate: '', dailyProgress: 0, dailyMax: 5, dailyClaimed: false,
@@ -263,6 +263,7 @@ function defaultState() {
     bgmVolume: 0.5,
     dragon: { level: 1, exp: 0 },
     missionsClaimed: {},
+    presentsClaimed: {},
     cards: owned,
     deck: buildStarterDeck(),
   };
@@ -810,6 +811,7 @@ function claimDailyReward() {
 
 function renderHome() {
   checkDailyReset();
+  updatePresentBadge();
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -4468,6 +4470,78 @@ function hideReveal() {
   document.getElementById('shop-reveal-overlay').classList.add('hidden');
 }
 
+// ---------- プレゼント ----------
+// 今後、新しいプレゼント（お詫び配布・イベント配布など）を追加する場合はこの配列に1件追加するだけでOK
+const PRESENTS = [
+  { id: 'welcome_bonus', title: '🎉 スタートダッシュ応援プレゼント', desc: 'ゲームを始めてくれてありがとうございます！冒険に役立つアイテムをプレゼントします。',
+    reward: { gold: 2000, tickets: 1, lightTickets: 1 } },
+];
+
+function renderPresents() {
+  const wrap = document.getElementById('present-list');
+  const unclaimedCount = PRESENTS.filter(p => !state.presentsClaimed[p.id]).length;
+  wrap.innerHTML = PRESENTS.map(p => {
+    const claimed = !!state.presentsClaimed[p.id];
+    return `
+      <div class="cg-mission-card ${claimed ? '' : 'done'}">
+        <div class="cg-mission-top">
+          <div>
+            <div class="cg-mission-title">${p.title}</div>
+            <div class="cg-mission-desc">${p.desc}</div>
+          </div>
+          <div class="cg-mission-reward">${formatReward(p.reward)}</div>
+        </div>
+        <div class="cg-mission-bottom">
+          <button class="cg-mission-claim ${claimed ? 'claimed' : ''}" data-present="${p.id}" ${claimed ? 'disabled' : ''}>${claimed ? '受取済み' : '受け取る'}</button>
+        </div>
+      </div>`;
+  }).join('') + (PRESENTS.length === 0 ? '<div class="cg-empty">プレゼントはありません</div>' : '');
+  wrap.querySelectorAll('.cg-mission-claim:not(.claimed):not(:disabled)').forEach(btn => {
+    btn.addEventListener('click', () => claimPresent(btn.dataset.present));
+  });
+  const claimAllBtn = document.getElementById('present-claimall-btn');
+  claimAllBtn.classList.toggle('hidden', unclaimedCount === 0);
+  claimAllBtn.textContent = `🎁 まとめて受け取る（${unclaimedCount}件）`;
+  updatePresentBadge();
+}
+
+function claimPresent(presentId) {
+  const p = PRESENTS.find(x => x.id === presentId);
+  if (!p || state.presentsClaimed[presentId]) return;
+  state.gold += p.reward.gold || 0;
+  state.gems += p.reward.gems || 0;
+  state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
+  state.lightTickets = (state.lightTickets || 0) + (p.reward.lightTickets || 0);
+  state.presentsClaimed[presentId] = true;
+  saveState();
+  renderPresents();
+  renderHome();
+}
+
+function claimAllPresents() {
+  PRESENTS.forEach(p => { if (!state.presentsClaimed[p.id]) claimPresentSilent(p); });
+  saveState();
+  renderPresents();
+  renderHome();
+}
+
+function claimPresentSilent(p) {
+  state.gold += p.reward.gold || 0;
+  state.gems += p.reward.gems || 0;
+  state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
+  state.lightTickets = (state.lightTickets || 0) + (p.reward.lightTickets || 0);
+  state.presentsClaimed[p.id] = true;
+}
+
+// ホーム画面のプレゼントボタンに、未受け取り件数のバッジを表示する
+function updatePresentBadge() {
+  const badge = document.getElementById('present-badge');
+  if (!badge) return;
+  const count = PRESENTS.filter(p => !state.presentsClaimed[p.id]).length;
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+}
+
 // ---------- ミッション ----------
 const MISSIONS = [
   { id: 'win1', category: 'battle', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
@@ -4525,6 +4599,8 @@ function formatReward(reward) {
   const parts = [];
   if (reward.gold) parts.push(`💰${reward.gold}`);
   if (reward.gems) parts.push(`💎${reward.gems}`);
+  if (reward.tickets) parts.push(`🎫${reward.tickets}`);
+  if (reward.lightTickets) parts.push(`☀️${reward.lightTickets}`);
   return parts.join(' ');
 }
 
@@ -4739,6 +4815,13 @@ const SCREEN_HELP = {
       '<b>③ カテゴリ絞り込み</b><br>「全て／バトル／育成／収集」のタブで、ミッションを絞り込めます。',
     ],
   },
+  present: {
+    title: 'プレゼント画面のヘルプ',
+    items: [
+      '<b>① プレゼントの受け取り</b><br>運営からのお知らせやボーナスなど、受け取っていないプレゼントが一覧で表示されます。「受け取る」をタップすると報酬を獲得できます。',
+      '<b>② まとめて受け取る</b><br>複数のプレゼントがある場合、一括で受け取ることもできます。',
+    ],
+  },
   dragon: {
     title: 'ドラゴン育成画面のヘルプ',
     items: [
@@ -4802,10 +4885,12 @@ function init() {
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
+  document.getElementById('quick-present').addEventListener('click', () => { renderPresents(); showScreen('present'); });
   const quickDragonBtn = document.getElementById('quick-dragon');
   if (quickDragonBtn) quickDragonBtn.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
   document.getElementById('mission-claimall-btn').addEventListener('click', claimAllMissions);
+  document.getElementById('present-claimall-btn').addEventListener('click', claimAllPresents);
   const dragonSummaryEl = document.getElementById('dragon-summary');
   if (dragonSummaryEl) dragonSummaryEl.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('dragon-feed-btn').addEventListener('click', feedDragon);
