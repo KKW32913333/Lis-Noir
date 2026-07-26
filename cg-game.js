@@ -226,10 +226,10 @@ function leaderAppliesTo(unit, isPlayerCard) {
 // ---------- イベント限定ガチャ(チケット消費・専用プール) ----------
 // ※ defaultState()から参照されるため、state初期化より前に定義する必要がある
 const EVENT_GACHA_PACKS = [
-  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', currency: 'tickets', cost: 1,
+  { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', iconImage: 'gacha-icon-nightlegends.png', currency: 'tickets', cost: 1,
     desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
     pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
-  { id: 'lightblessing', name: '光耀の祝福ガチャ', icon: '☀️', currency: 'lightTickets', cost: 1,
+  { id: 'lightblessing', name: '光耀の祝福ガチャ', icon: '☀️', iconImage: 'gacha-icon-lightblessing.png', currency: 'lightTickets', cost: 1,
     desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・光属性）',
     pool: ['light_shirayuki', 'light_lucius', 'light_starlightunicorn', 'light_stardustwhale', 'light_sunblazenoble', 'light_whitegriffon'] },
 ];
@@ -676,6 +676,22 @@ function cardStatsLine(def, evolved, opts) {
   return `<div class="cg-card-stats"><span class="cg-stat atk">ATK ${atk}</span><span class="cg-stat hp">HP ${hp}</span></div>`;
 }
 
+// カード画像の読み込みに失敗した場合（ファイルが見つからない等）、絵文字プレースホルダーに差し替える
+function handleCardImgError(imgEl) {
+  const placeholder = document.createElement('div');
+  placeholder.className = 'cg-card-placeholder';
+  placeholder.setAttribute('style', imgEl.dataset.bgstyle || '');
+  placeholder.innerHTML = `<span>${imgEl.dataset.emoji || '❓'}</span>`;
+  imgEl.replaceWith(placeholder);
+}
+// カード詳細ポップアップ内の画像用（背景は親要素が既に持っているため、絵文字のspanだけに差し替える）
+function handleDetailImgError(imgEl) {
+  const span = document.createElement('span');
+  span.className = 'cg-detail-emoji';
+  span.textContent = imgEl.dataset.emoji || '❓';
+  imgEl.replaceWith(span);
+}
+
 function renderCardFace(id, opts) {
   opts = opts || {};
   const def = CARD_DEFS[id];
@@ -688,7 +704,7 @@ function renderCardFace(id, opts) {
   const inDeckClass = opts.inDeck ? ' in-deck' : '';
   const inDeckBadge = opts.inDeck ? '<div class="cg-card-indeck-badge">デッキ内</div>' : '';
   const img = def.image
-    ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img"/>`
+    ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img" data-emoji="${def.emoji}" data-bgstyle="${cardArtStyle(def)}" onerror="handleCardImgError(this)"/>`
     : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
   const isMonster = (def.type || 'monster') === 'monster';
   const roleBadge = (isMonster && !opts.battleMode)
@@ -1422,10 +1438,21 @@ function renderDeck() {
     const atMax = count >= max;
     return `<div class="cg-coll-item ${count > 0 ? 'in-deck' : ''} ${atMax ? 'at-max' : ''}" data-id="${id}">
       ${renderCardFace(id, { small: true, evolved: state.cards[id].evolved })}
-      ${count > 0 ? `<span class="cg-coll-count">×${count}</span>` : ''}
+      ${count > 0 ? `<span class="cg-coll-count">×${count}</span><button class="cg-coll-remove-btn" data-id="${id}" aria-label="デッキから1枚外す">−</button>` : ''}
     </div>`;
   }).join('');
 
+  collEl.querySelectorAll('.cg-coll-remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const idx = state.deck.indexOf(id);
+      if (idx !== -1) state.deck.splice(idx, 1);
+      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
+      saveState();
+      renderDeck();
+    });
+  });
   collEl.querySelectorAll('.cg-coll-item').forEach(node => {
     node.addEventListener('click', () => {
       if (longPressFired) { longPressFired = false; return; }
@@ -1662,7 +1689,7 @@ function showLockedCardInfo(id) {
   const type = def.type || 'monster';
   const typeLabel = type === 'monster' ? 'モンスター' : type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art cg-card-locked" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
+    <div class="cg-detail-art cg-card-locked" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--text-dim-panel)">🔒 未所持</span></div>
@@ -1705,7 +1732,7 @@ function openCardDetail(id) {
       <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 40) ? 'disabled' : ''}>＋ 追加</button>
     </div>`;
   document.getElementById('detail-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -3208,7 +3235,7 @@ function showCardInfo(unit, playerFieldIdx) {
     ? `<button class="cg-btn cg-detail-discard-btn" id="card-info-discard-btn" data-idx="${playerFieldIdx}">🪦 墓地に送る（場から除外）</button>`
     : '';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
@@ -3277,7 +3304,7 @@ function showHandCardInfo(id, handIdx) {
     ? `<button class="cg-btn cg-detail-discard-btn" id="card-info-hand-discard-btn" data-hand-idx="${handIdx}">🪦 墓地に送る（手札から除外）</button>`
     : '';
   document.getElementById('card-info-body').innerHTML = `
-    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
+    <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
@@ -4263,7 +4290,7 @@ function renderPackCard(pack) {
     if (!def) return '';
     const rarity = RARITY[def.rarity];
     const img = def.image
-      ? `<img src="${def.image}" alt="${def.name}"/>`
+      ? `<img src="${def.image}" alt="${def.name}" data-emoji="${def.emoji}" onerror="this.style.display='none'; this.parentElement.textContent='${def.emoji}';"/>`
       : `<span>${def.emoji}</span>`;
     return `<div class="cg-pack-preview-thumb" style="border-color:${rarity.color}" title="${def.name}" data-id="${id}">${img}</div>`;
   }).join('');
@@ -4275,7 +4302,7 @@ function renderPackCard(pack) {
   return `
       <div class="cg-pack-card">
         <div class="cg-pack-top">
-          <div class="cg-pack-icon">${pack.icon}</div>
+          <div class="cg-pack-icon">${pack.iconImage ? `<img src="${pack.iconImage}" alt="${pack.name}"/>` : pack.icon}</div>
           <div class="cg-pack-info">
             <div class="cg-pack-name">${pack.name}${pack.flavor ? `<span class="cg-pack-flavor">〜${pack.flavor}〜</span>` : ''}</div>
             <div class="cg-pack-desc">${pack.desc}</div>
@@ -4388,7 +4415,15 @@ function showOpeningAnimation(pack, cardIds) {
   const inner = document.getElementById('opening-tap-zone');
   const iconEl = document.getElementById('opening-pack-icon');
   inner.classList.remove('bursting');
-  iconEl.textContent = pack.icon;
+  if (pack.iconImage) {
+    iconEl.textContent = '';
+    iconEl.style.backgroundImage = `url('${pack.iconImage}')`;
+    iconEl.classList.add('has-image');
+  } else {
+    iconEl.textContent = pack.icon;
+    iconEl.style.backgroundImage = '';
+    iconEl.classList.remove('has-image');
+  }
 
   // 獲得カードの中で最も高いレアリティに応じて、演出のグレード（発光色・激しさ）を変える
   const rarityOrder = ['normal', 'rare', 'epic', 'legend'];
@@ -4808,7 +4843,7 @@ const SCREEN_HELP = {
   collection: {
     title: 'カード画面のヘルプ',
     items: [
-      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加、デッキ側の✕で外せます。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
+      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加できます。デッキに入っているカードには、左上に赤い「−」ボタンが表示され、タップすると1枚外せます（デッキ側に移動しなくてもその場で調整できます）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
       '<b>② カードの並べ替え</b><br>デッキ内のカードをタップして選択（金色に光ります）→入れ替えたい場所のカードをタップすると、位置が入れ替わります。',
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
@@ -4942,7 +4977,6 @@ function init() {
       renderStageSelect();
     });
   });
-  document.getElementById('quick-dungeon').addEventListener('click', () => { renderDungeonSelect(); showScreen('dungeon-select'); });
   document.getElementById('quick-cards').addEventListener('click', () => openCollectionScreen('deck'));
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });

@@ -574,7 +574,8 @@
     border-radius:14px; padding:12px; color:var(--text-panel);}
   .cg-pack-top{display:flex; align-items:center; gap:12px;}
   .cg-pack-icon{width:56px; height:56px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    font-size:26px; background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); border:1px solid var(--hairline-panel);}
+    font-size:26px; background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); border:1px solid var(--hairline-panel); overflow:hidden;}
+  .cg-pack-icon img{width:100%; height:100%; object-fit:cover;}
   .cg-pack-info{flex:1; min-width:0;}
   .cg-pack-name{font-size:14px; font-weight:700; margin-bottom:2px;}
   .cg-pack-flavor{font-size:10px; font-weight:600; color:var(--gold); margin-left:4px;}
@@ -650,6 +651,8 @@
   @keyframes cgSparkleTwinkle{0%,100%{opacity:0; transform:scale(.4);} 50%{opacity:1; transform:scale(1.2);}}
   .cg-opening-pack{position:relative; font-size:72px; z-index:1; animation:cgOpeningShake 1.4s ease-in-out infinite;
     filter:drop-shadow(0 0 18px var(--lavender));}
+  .cg-opening-pack.has-image{width:120px; height:120px; border-radius:50%; background-size:cover; background-position:center;
+    box-shadow:0 0 0 4px #ffffff33;}
   @keyframes cgOpeningShake{
     0%,100%{transform:rotate(0deg) scale(1);}
     20%{transform:rotate(-6deg) scale(1.03);}
@@ -1181,6 +1184,10 @@
   .cg-coll-count{position:absolute; top:2px; right:2px; min-width:20px; height:20px; padding:0 5px; border-radius:10px;
     background:var(--gold); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; z-index:4;
     box-shadow:0 2px 4px #00000033;}
+  .cg-coll-remove-btn{position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%;
+    background:var(--hp-red); color:#fff; font-size:15px; font-weight:800; line-height:1; display:flex; align-items:center; justify-content:center;
+    z-index:5; border:2px solid #fff; box-shadow:0 2px 5px #00000055; cursor:pointer; padding:0;}
+  .cg-coll-remove-btn:active{transform:scale(.9);}
   @keyframes cgShake{
     0%,100%{transform:translateX(0);}
     20%{transform:translateX(-5px);}
@@ -1325,7 +1332,6 @@
 
     <div class="cg-quick-grid">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
-      <div class="cg-quick-btn" id="quick-dungeon"><span class="ic">🕳️</span><span class="lb">ダンジョン</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
       <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ガチャ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
@@ -1414,7 +1420,7 @@
           <option value="cost">コスト順</option>
         </select>
       </div>
-      <div class="cg-deck-hint">タップで追加（同カード最大3枚・装備は1枚まで）。外すのはデッキ側の✕から</div>
+      <div class="cg-deck-hint">タップで追加（同カード最大3枚・装備は1枚まで）。カード左上の「−」で1枚外せます</div>
       <div id="collection-list"></div>
     </div>
 
