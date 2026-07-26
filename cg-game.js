@@ -132,7 +132,7 @@ const EVOLVE_LEVEL_REQ = 5;
 // デッキに1体だけ設定でき、効果はそのデッキの対象属性モンスター全てに反映される
 const LEADERS = {
   lisnoir_f: {
-    name: 'ノワール・エレナ',
+    name: 'エレナ・ノワール',
     skillName: 'ダークエレガンス',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を25%アップ、HPを15%アップ',
@@ -142,7 +142,7 @@ const LEADERS = {
     ultimateSkill: { name: '漆黒の断罪', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与える', dmg: 5 },
   },
   lisnoir_m: {
-    name: 'ノワール・ディアブロ',
+    name: 'ディアブロ・ノワール',
     skillName: 'ナイトメアドミニオン',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を25%アップ、敵全体へのダメージを15%アップ',
@@ -152,7 +152,7 @@ const LEADERS = {
     ultimateSkill: { name: '悪夢の侵食', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、モンスターを1ターン行動不能にする', dmg: 4, stunTurns: 1 },
   },
   lisblanc_f: {
-    name: 'Lis.Blanc',
+    name: 'テスタ・ブラン',
     skillName: 'ホーリーグロウ',
     element: 'light',
     desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
@@ -162,7 +162,7 @@ const LEADERS = {
     ultimateSkill: { name: '聖なる浄化', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを3回復する', dmg: 4, healAllies: 3 },
   },
   luxblanc_m: {
-    name: 'Lux.Blanc',
+    name: 'ジュード・ブラン',
     skillName: 'ホーリーセイント',
     element: 'light',
     desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
@@ -172,7 +172,7 @@ const LEADERS = {
     ultimateSkill: { name: '聖域の裁き', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体にシールド2を付与する', dmg: 4, shieldAllies: 2 },
   },
   liramaline: {
-    name: 'Lira Maline',
+    name: 'リーラ・マリーン',
     skillName: 'アクアエンパイア',
     element: 'water',
     desc: '水属性ユニットの攻撃力を25%アップ、HPを15%アップ',
@@ -182,20 +182,20 @@ const LEADERS = {
     ultimateSkill: { name: '深海の怒涛', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを2回復する', dmg: 4, healAllies: 2 },
   },
   kaien: {
-    name: 'Kaien',
+    name: 'エル・カイエン',
     skillName: 'フレイムブンリト',
-    element: 'dark',
-    desc: '闇属性ユニットの攻撃力を25%アップ、敵全体の防御力を15%ダウン',
+    element: 'fire',
+    desc: '火属性ユニットの攻撃力を25%アップ、敵全体の防御力を15%ダウン',
     effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
     fullImage: 'leader-kaien-full.png',
     icon: 'leader-kaien-icon.png',
     ultimateSkill: { name: '業火の焔', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与え、敵の場にいるモンスターの攻撃力を永続で1下げる', dmg: 5, atkDownEnemies: 1 },
   },
   mornabane: {
-    name: 'Morna.Bane',
+    name: 'モナ・ロマネスク',
     skillName: 'ネスコスポーズル',
-    element: 'dark',
-    desc: '闇属性ユニットの攻撃力を30%アップ、敵の回復効果を無効化',
+    element: 'nature',
+    desc: '自然属性ユニットの攻撃力を30%アップ、敵の回復効果を無効化',
     effect: { atkPct: 0.30, hpPct: 0, enemyDmgPct: 0, nullifyEnemyHeal: true },
     fullImage: 'leader-mornabane-full.png',
     icon: 'leader-mornabane-icon.png',
