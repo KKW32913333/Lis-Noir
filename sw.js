@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v129';
+const CACHE_NAME = 'lisnoir-cache-v131';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -35,12 +35,9 @@ const CACHE_ASSETS = [
   'card-dark-shadowassassin.png',
   'card-light-luminous.png',
   'card-light-arcguardian.png',
-  'card-nature-elfarcher.png',
   'card-nature-leafbird.png',
   'card-spell-apocalypse.png',
   'card-water-spiritmaiden.png',
-  'card-nature-elfunicorn.png',
-  'card-nature-sylph.png',
   'card-dark-vampirelord.png',
   'card-dark-chaosdemon.png',
   'card-dark-voidreaper.png',
@@ -65,21 +62,16 @@ const CACHE_ASSETS = [
   'gacha-icon-lightblessing.png',
   'card-fire-ifrit.png',
   'card-fire-flameslime.png',
-  'card-water-golem.png',
   'card-water-leviathan.png',
   'card-water-seiren.png',
   'card-nature-dryad.png',
   'card-nature-emeraldgaia.png',
   'card-nature-worldtreeguardian.png',
-  'card-light-seraphimknight.png',
   'card-light-holyangel.png',
   'card-storm-bird.png',
-  'card-dark-wolf.png',
   'card-dark-shadowbat.png',
   'card-fire-phoenixemperor.png',
   'card-fire-bahamut.png',
-  'card-light-cleric.png',
-  'card-dark-ghost.png',
   'card-crystal-fox.png',
   'card-dark-nocturia.png',
   'card-spell-healing.png',

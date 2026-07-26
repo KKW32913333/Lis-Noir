@@ -38,11 +38,9 @@ const CARD_DEFS = {
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
   fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 3, burnDmg: 1, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に3ダメージを与え、3ターンの間火傷を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
   fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'rare',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
-  water_golem:    { name: 'アクアゴーレム',   element: 'water',  rarity: 'rare',   cost: 3, atk: 3, hp: 6,  role: 'defender', skillTag: { trigger: 'turnStart', effect: 'healSelf', value: 2 }, skill: '毎ターン開始時、自分のHPを2回復', image: 'card-water-golem.png', emoji: '🌊' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 1,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
   water_serpent:  { name: '海皇リヴァイアサン', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 5,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 2, healValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与えて1ターン行動不能にし、味方全体のHPを1回復する', image: 'card-water-leviathan.png', emoji: '🐍' },
   water_seiren:   { name: '水奏の女王セイレーン', element: 'water', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healShieldAlliesAtkDownEnemies', healValue: 3, shieldValue: 2, atkDownValue: 1 }, skill: '場に出た時、味方全体のHPを3回復してシールド2を付与し、敵全体の攻撃力を永続で1下げる', image: 'card-water-seiren.png', emoji: '👑' },
-  nature_elfarcher: { name: 'エルフアーチャー', element: 'nature', rarity: 'rare', cost: 3, atk: 3, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で相手に毒を付与（2ターンの間、毎ターン開始時に1ダメージ）', image: 'card-nature-elfarcher.png', emoji: '🏹' },
   nature_wolf:    { name: 'シャドウアサシン', element: 'dark', rarity: 'normal', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-shadowassassin.png', emoji: '🗡️' },
   nature_panda:   { name: '世界樹の守護者', element: 'nature', rarity: 'epic', cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 1, shieldValue: 1 }, skill: '場に出た時、味方全体のHPを1回復し、シールド1を付与する', image: 'card-nature-worldtreeguardian.png', emoji: '🌪️' },
   nature_dryad:   { name: '森羅の樹神ドリアード', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamagePoisonShieldAllies', value: 2, poisonDmg: 1, poisonTurns: 2, shieldValue: 1 }, skill: '場に出た時、敵全体に2ダメージを与えて毒（2ターン）を付与し、味方全体にシールド1を付与する', image: 'card-nature-dryad.png', emoji: '🌲' },
@@ -50,18 +48,12 @@ const CARD_DEFS = {
   light_angel:    { name: '光輝の大天使ルミナス', element: 'light', rarity: 'epic', cost: 4, atk: 4, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-luminous.png', emoji: '👼' },
   light_arcguardian: { name: '聖騎士アークガーディアン', element: 'light', rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageShieldAllies', value: 3, shieldValue: 2 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体にシールド2を付与する', image: 'card-light-arcguardian.png', emoji: '🛡️' },
   light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
-  light_unicorn:  { name: 'セラフィムナイト', element: 'light', rarity: 'normal',  cost: 2, atk: 2, hp: 4,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 1 }, skill: '場に出た時、味方全体にシールド1を付与する', image: 'card-light-seraphimknight.png', emoji: '🛡️' },
-  light_cleric:   { name: 'クレリック',       element: 'light',  rarity: 'normal', cost: 2, atk: 1, hp: 3,  role: 'defender', skill: '', image: 'card-light-cleric.png', emoji: '🕊️' },
-  dark_wolf:      { name: 'シャドウウルフ',   element: 'dark',   rarity: 'rare',   cost: 3, atk: 4, hp: 3,  role: 'attacker', skill: '', image: 'card-dark-wolf.png', emoji: '🐾' },
   dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'rare',   cost: 2, atk: 1, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
   dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
-  dark_ghost:     { name: 'ワンダリングゴースト', element: 'dark', rarity: 'normal', cost: 1, atk: 1, hp: 4, role: 'defender', skill: '', image: 'card-dark-ghost.png', emoji: '👻' },
   rock_giant:     { name: 'グラウンドゴーレム', element: 'nature', rarity: 'epic', cost: 5, atk: 4, hp: 9,  role: 'defender', skill: '', image: 'card-rock-giant.png', emoji: '🗿' },
   storm_bird:     { name: 'サンダーイーグル', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 3,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-storm-bird.png', emoji: '🦅' },
   crystal_fox:    { name: 'クリスタルフォックス', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-crystal-fox.png', emoji: '🦊' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'epic',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
-  nature_elfunicorn:  { name: 'エルフユニコーン', element: 'nature', rarity: 'rare',  cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-nature-elfunicorn.png', emoji: '🦄' },
-  nature_sylph:       { name: 'シルフ',           element: 'nature', rarity: 'normal',  cost: 1, atk: 2, hp: 2, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-nature-sylph.png', emoji: '🧚' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: null, emoji: '🐇' },
   dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord.png', emoji: '🧛' },
   dark_chaosdemon:    { name: '冥王カオスデーモン', element: 'dark', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkDownAll', value: 2, atkDownValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与え、敵全体の攻撃力を1下げる', image: 'card-dark-chaosdemon.png', emoji: '😈' },
@@ -244,8 +236,7 @@ function defaultState() {
   const starterIds = new Set(buildStarterDeck()); // 序盤の実用性を確保するため、初期デッキ分のカードのみ最初から所持する
   Object.keys(CARD_DEFS).forEach(id => {
     const def = CARD_DEFS[id];
-    if (def.isLeaderCard) { owned[id] = { level: 1, exp: 0, count: 1, evolved: false }; return; } // リーダーカードは従来通り最初から使用可能
-    if (!starterIds.has(id)) return; // それ以外のカードは、実際にガチャで当たるまで所持しない（スペル・装備・フィールドも同様）
+    if (!starterIds.has(id)) return; // それ以外のカードは、実際にガチャで当たるまで所持しない（リーダーカード・スペル・装備・フィールドも同様）
     owned[id] = { level: 1, exp: 0, count: 1, evolved: false };
   });
   return {
@@ -1843,7 +1834,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: 'これが……呪いの結晶。なんだか、悲しい色をしている。' },
       { speaker: 'ナレーター', portrait: '📖', text: '村へ戻る足取りは、来た時より少しだけ重かった。' },
     ] },
-  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 14, bossCard: 'dark_ghost', spellChance: 0.03, bgTheme: 'cave',
+  { id: 3, name: '深淵よりの囁き', portrait: '🔮', hp: 14, bossCard: 'nature_wolf', spellChance: 0.03, bgTheme: 'cave',
     weights: { normal: 55, rare: 32, epic: 11, legend: 2 }, rewardGold: 130, rewardGems: 10, trophyDelta: 28,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '洞窟の奥から、言葉にならない囁きが聞こえる。呪いに深く蝕まれたモンスターの気配だ。' },
@@ -1865,7 +1856,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '古き竜の力もまた、呪いに触れれば牙を剥く。それでも、この地に平和が戻った。' },
       { speaker: '竜の血を継ぐ者', portrait: '🐲', text: '……ぐ……見事だ、人の子よ。この森には、まだ知らぬ強者がいる。心せよ。' },
     ] },
-  { id: 5, name: '森の女王', portrait: '👑', hp: 20, bossCard: 'nature_elfunicorn', spellChance: 0.04, bgTheme: 'castle',
+  { id: 5, name: '森の女王', portrait: '👑', hp: 20, bossCard: 'nature_venomscorpion', spellChance: 0.04, bgTheme: 'castle',
     weights: { normal: 12, rare: 28, epic: 38, legend: 22 }, rewardGold: 220, rewardGems: 20, trophyDelta: 40,
     storyIntro: [
       { speaker: '森の女王', portrait: '👑', text: 'ここまで来たか、人の子よ。ならば見せてやろう、この森の真の姿を。' },
@@ -1877,7 +1868,7 @@ const STAGES = [
       { speaker: '森の女王', portrait: '👑', text: 'この森を抜けた先に、かつて栄えた月影の国がある。そこで、お前は真実の一端を知るだろう。' },
       { speaker: '調教師', portrait: '🧑', text: '……ありがとうございます。必ず、この呪いの正体を突き止めてみせます。' },
     ] },
-  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 26, bossCard: 'dark_wolf', spellChance: 0.05, bgTheme: 'moonshadow',
+  { id: 6, name: '月下の斥候', portrait: '🌙', hp: 26, bossCard: 'dark_shadowbat', spellChance: 0.05, bgTheme: 'moonshadow',
     weights: { normal: 20, rare: 32, epic: 35, legend: 13 }, rewardGold: 250, rewardGems: 22, trophyDelta: 44,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '森を抜けた先には、かつて栄えたという月影の国の廃墟が広がっていた。' },
@@ -1889,7 +1880,7 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '廃墟の奥に、まだ息づく者たちがいた。ここから、村と国の復興が始まる。' },
       { speaker: '月下の斥候', portrait: '🌙', text: '……その力、本物のようだな。良かろう、お前の話を聞こう。' },
     ] },
-  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 30, bossCard: 'nature_elfarcher', spellChance: 0.05, bgTheme: 'emerald',
+  { id: 7, name: '荒野の守護者', portrait: '🍃', hp: 30, bossCard: 'nature_swiftrabbit', spellChance: 0.05, bgTheme: 'emerald',
     weights: { normal: 14, rare: 30, epic: 38, legend: 18 }, rewardGold: 280, rewardGems: 25, trophyDelta: 48,
     storyIntro: [
       { speaker: '荒野の守護者', portrait: '🍃', text: '復興だと？ この荒野に、もう希望などない。' },
@@ -1901,7 +1892,7 @@ const STAGES = [
       { speaker: '調教師', portrait: '🧑', text: '一緒に、この国を立て直そう。' },
       { speaker: '荒野の守護者', portrait: '🍃', text: 'フン……悪くない誘いだ。' },
     ] },
-  { id: 8, name: '氷の試練', portrait: '❄️', hp: 33, bossCard: 'water_golem', spellChance: 0.06, bgTheme: 'frost',
+  { id: 8, name: '氷の試練', portrait: '❄️', hp: 33, bossCard: 'water_slime', spellChance: 0.06, bgTheme: 'frost',
     weights: { normal: 8, rare: 26, epic: 40, legend: 26 }, rewardGold: 310, rewardGems: 28, trophyDelta: 52,
     storyIntro: [
       { speaker: 'ナレーター', portrait: '📖', text: '新たな仲間を迎えるには、氷の祠が課す試練を越えねばならないという。' },
@@ -4247,7 +4238,7 @@ const SHOP_PACKS = [
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon'] },
   { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
     desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },
-    preview: ['water_slime', 'nature_wolf', 'water_golem'] },
+    preview: ['water_slime', 'nature_wolf', 'fire_flarelion'] },
   { id: 'premium1', name: 'プレミアムガチャ第1弾', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
     desc: '「冒険の始まり」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
@@ -4258,6 +4249,9 @@ const SHOP_PACKS = [
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
+  { id: 'leader', name: 'リーダーガチャ', icon: '🎭', currency: 'gems', cost: 200,
+    desc: '7人のリーダーキャラクターのうち、いずれか1体が必ず出現。当たったリーダーキャラのみ、リーダー選択・デッキ編成の両方で使用できるようになります',
+    pool: ['leader_lisnoir_f', 'leader_lisnoir_m', 'leader_lisblanc_f', 'leader_luxblanc_m', 'leader_liramaline', 'leader_kaien', 'leader_mornabane'] },
 ];
 
 function pickWeightedCardId(weights, rarityPool) {
@@ -4848,7 +4842,7 @@ const SCREEN_HELP = {
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
-      '<b>⑥ リーダーキャラクターカード</b><br>画面上部で選ぶ「リーダー」とは別に、リーダーキャラクター自身も通常のモンスターカードとしてデッキに入れて戦わせることができます（1枚まで）。カード一覧の「モンスター」タブから追加できます。',
+      '<b>⑥ リーダーキャラクターカード</b><br>画面上部で選ぶ「リーダー」とは別に、リーダーキャラクター自身も通常のモンスターカードとしてデッキに入れて戦わせることができます（1枚まで）。「リーダーガチャ」で当たったキャラクターのみ、カード一覧の「モンスター」タブに表示され、デッキに追加できるようになります。',
       '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
     ],
   },
