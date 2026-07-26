@@ -117,6 +117,16 @@ const CARD_DEFS = {
   field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'dark', atk: 2 }, skill: '場に出ている間、闇属性モンスターの攻撃力+2（両陣営）', image: null, emoji: '🕳️' },
 };
 
+// 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
+// アプリ起動時のstate読み込み処理からも安全に参照できるよう、先にここで定義しておく）
+const BEGINNER_GACHA_CARD_IDS = new Set([
+  'fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing', 'equip_ironsword',
+  'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield',
+  'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail',
+  'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse', 'equip_aqualance',
+]);
+
+
 
 // ---------- ダンジョン（地下1階〜100階） ----------
 const DUNGEON_MAX_FLOOR = 100;
@@ -282,18 +292,25 @@ function defaultState() {
 // 　序盤で身動きが取れなくなる不具合があったため、コストで並べ替えて選ぶ方式に変更）
 function buildStarterDeck() {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  // 初心者ガチャの対象カードは、初期デッキには含めない（ガチャで手に入れる楽しみを残すため）
   const candidates = Object.keys(CARD_DEFS).filter(id => {
     const def = CARD_DEFS[id];
     if (eventExclusiveIds.has(id)) return false;
+    if (BEGINNER_GACHA_CARD_IDS.has(id)) return false;
     if ((def.type || 'monster') !== 'monster') return false;
     return def.rarity === 'normal' || def.rarity === 'rare';
   }).sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
 
   const deck = [];
-  candidates.forEach(id => {
-    const count = deck.filter(d => d === id).length;
-    if (count < 3 && deck.length < 20) deck.push(id);
-  });
+  let progressed = true;
+  while (deck.length < 20 && progressed) {
+    progressed = false;
+    for (const id of candidates) {
+      if (deck.length >= 20) break;
+      const count = deck.filter(d => d === id).length;
+      if (count < 3) { deck.push(id); progressed = true; }
+    }
+  }
   return deck;
 }
 
@@ -344,6 +361,11 @@ function loadState() {
     if (!saved.grantedLightTicket_20260724) {
       saved.lightTickets = (saved.lightTickets || 0) + 1;
       saved.grantedLightTicket_20260724 = true;
+    }
+    // 初心者ガチャ必須化に伴う後方互換対応: この仕組みが無かった時期からの既存プレイヤーが、
+    // 意図せずロックされて他の画面に進めなくなることがないよう、既に完了済み扱いにする
+    if (saved.beginnerGachaDone === undefined) {
+      saved.beginnerGachaDone = true;
     }
     // 不具合修正: ダンジョン限定装備が最初から所持できてしまっていたため、
     // 実際にそのフロアのボスを撃破済み（dungeonEquipClaimedに記録済み）のもの以外は取り除く（既存プレイヤーへ1回限り）
