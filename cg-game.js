@@ -1213,7 +1213,7 @@ function showLeaderInfo(lid) {
     <div class="cg-detail-info">
       <div class="cg-detail-name">${l.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--true-gold)">LEADER・${l.skillName}</span></div>
-      <div class="cg-detail-desc">対象属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">対象属性: <span style="color:${elementTextColor(l.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${l.desc}</div>
     </div>`;
   document.getElementById('card-info-overlay').classList.remove('hidden');
@@ -1606,7 +1606,7 @@ function showLockedCardInfo(id) {
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:var(--text-dim-panel)">🔒 未所持</span></div>
-      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">種別: ${typeLabel}　コスト: ${def.cost}</div>
       <div class="cg-detail-desc">ガチャで入手すると、図鑑に登録されます</div>
     </div>`;
@@ -1651,7 +1651,7 @@ function openCardDetail(id) {
       <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       ${deckControlHtml}
       <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>
-      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
         ${detailStatsBlock(def, owned.evolved)}
@@ -3138,7 +3138,7 @@ function showCardInfo(unit, playerFieldIdx) {
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span></div>
-      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${roleText}</div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
@@ -3167,12 +3167,20 @@ function discardFieldUnit(idx) {
 
 // カードの種別・属性・役割（アタッカー/ディフェンダー）を、手札上のスキル表示欄向けに小さなタグとして生成する。
 // 該当しない項目（スペル・装備・フィールドカードの役割など）は表示しない
+// 属性を「文字色」として表示する際の色を返す。闇属性の色(#5A2D91)は背景色としては使えるが、
+// 暗い背景の上に文字色として使うと読みにくいため、表示用には明るい紫に差し替える
+function elementTextColor(elementKey) {
+  if (elementKey === 'dark') return '#c9a8f0';
+  const el = ELEMENTS[elementKey];
+  return el ? el.color : '#fff';
+}
+
 function cardMetaHtml(def) {
   const type = def.type || 'monster';
   const typeLabel = type === 'monster' ? 'モンスター' : type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
   const parts = [`<span class="cg-skill-meta-tag">${typeLabel}</span>`];
   const el = ELEMENTS[def.element];
-  if (el) parts.push(`<span class="cg-skill-meta-tag" style="color:${el.color}">${el.icon} ${el.name}</span>`);
+  if (el) parts.push(`<span class="cg-skill-meta-tag" style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span>`);
   if (type === 'monster' && def.role) {
     const roleLabel = def.role === 'defender' ? '🛡 ディフェンダー' : '⚔ アタッカー';
     parts.push(`<span class="cg-skill-meta-tag">${roleLabel}</span>`);
@@ -3199,7 +3207,7 @@ function showHandCardInfo(id, handIdx) {
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
       <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
-      <div class="cg-detail-desc">属性: <span style="color:${el.color}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       ${roleText ? `<div class="cg-detail-desc">${roleText}</div>` : ''}
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
