@@ -1138,6 +1138,10 @@
 
   /* ---------- デッキ編成UX改善 ---------- */
   .cg-deck-hint{font-size:10px; color:var(--text-dim); padding:0 14px 6px;}
+  .cg-sort-row{display:flex; align-items:center; gap:8px; padding:0 14px 8px;}
+  .cg-sort-label{font-size:11px; color:var(--text-dim);}
+  .cg-sort-select{font-family:inherit; font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
+    background:var(--bg-panel2); color:var(--text-panel);}
   .cg-deck-toolbar{display:flex; align-items:center; justify-content:space-between; padding:10px 14px 0;}
   .cg-deck-preset-bar{padding:2px 14px 8px; display:flex; gap:8px;}
   .cg-deck-preset-save-btn{flex:1; font-size:12px; padding:9px;}
@@ -1394,6 +1398,15 @@
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
+      <div class="cg-sort-row">
+        <span class="cg-sort-label">並び替え:</span>
+        <select class="cg-sort-select" id="collection-sort-select">
+          <option value="default">通常</option>
+          <option value="rarity">レアリティ順</option>
+          <option value="element">属性順</option>
+          <option value="cost">コスト順</option>
+        </select>
+      </div>
       <div class="cg-deck-hint">タップで追加（同カード最大3枚・装備は1枚まで）。外すのはデッキ側の✕から</div>
       <div id="collection-list"></div>
     </div>
@@ -1417,6 +1430,15 @@
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
+      </div>
+      <div class="cg-sort-row">
+        <span class="cg-sort-label">並び替え:</span>
+        <select class="cg-sort-select" id="cardlist-sort-select">
+          <option value="default">通常</option>
+          <option value="rarity">レアリティ順</option>
+          <option value="element">属性順</option>
+          <option value="cost">コスト順</option>
+        </select>
       </div>
       <button class="cg-deck-only-toggle" id="cardlist-deckonly-toggle">🃏 デッキ内のカードのみ表示</button>
       <div id="cardlist-grid"></div>
@@ -1445,6 +1467,7 @@
     </div>
     <div class="cg-filter-tabs" id="stage-mode-tabs">
       <button class="cg-filter-tab active" data-mode="story">ストーリー</button>
+      <button class="cg-filter-tab" data-mode="dungeon">ダンジョン</button>
       <button class="cg-filter-tab" data-mode="hard">高難易度</button>
       <button class="cg-filter-tab" data-mode="special">特別クエスト</button>
     </div>
@@ -1599,6 +1622,7 @@
           <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターや手札のカードを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
           <div class="cg-help-item"><b>⑩ 墓地から手札に戻す</b><br>🪦アイコンから墓地を開き、カードをタップすると、マナ1を消費して手札に戻せます（手札に空きが必要です）。長押しするとカードの詳細を確認できます。</div>
           <div class="cg-help-item"><b>⑪ スキル効果の確認</b><br>手札の上の欄に、カードのスキル効果が表示されます。カードやモンスターを選択中はそのカードの効果を、何も選択していない時は直近に場に出した／使用したカードの効果を表示します。</div>
+          <div class="cg-help-item"><b>⑫ リーダー情報の確認</b><br>自分のアイコン（リーダー）をタップすると、設定中のリーダーのスキル・属性などの情報を確認できます。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>

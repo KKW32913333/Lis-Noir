@@ -1165,6 +1165,25 @@ async function renderRanking() {
 
 
 let collectionFilter = 'all';
+let collectionSortMode = 'default';
+let cardListSortMode = 'default';
+const RARITY_SORT_ORDER = { legend: 0, epic: 1, rare: 2, normal: 3 };
+const ELEMENT_SORT_ORDER = { fire: 0, water: 1, nature: 2, light: 3, dark: 4 };
+
+// カードIDの配列を、指定した並び順（レアリティ・属性・コスト）に並び替える。
+// 'default'の場合は、CARD_DEFSの定義順（元の並び）のまま変更しない
+function sortCardIds(ids, mode) {
+  if (mode === 'default' || !mode) return ids;
+  const arr = ids.slice();
+  if (mode === 'rarity') {
+    arr.sort((a, b) => (RARITY_SORT_ORDER[CARD_DEFS[a].rarity] ?? 9) - (RARITY_SORT_ORDER[CARD_DEFS[b].rarity] ?? 9));
+  } else if (mode === 'element') {
+    arr.sort((a, b) => (ELEMENT_SORT_ORDER[CARD_DEFS[a].element] ?? 9) - (ELEMENT_SORT_ORDER[CARD_DEFS[b].element] ?? 9));
+  } else if (mode === 'cost') {
+    arr.sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
+  }
+  return arr;
+}
 let deckReorderSelectedId = null;
 
 function maxCopiesFor(id) {
@@ -1360,11 +1379,11 @@ function renderDeck() {
   renderDeckPresets();
 
   const collEl = document.getElementById('collection-list');
-  const owned = Object.keys(state.cards).filter(id => {
+  const owned = sortCardIds(Object.keys(state.cards).filter(id => {
     if (!CARD_DEFS[id]) return false; // 削除済みカードが紛れていた場合、空白セルにならないよう除外
     if (collectionFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === collectionFilter;
-  });
+  }), collectionSortMode);
   collEl.innerHTML = owned.map(id => {
     const count = countInDeck(id);
     const max = maxCopiesFor(id);
@@ -1579,12 +1598,12 @@ function renderCardList() {
   const listEl = document.getElementById('cardlist-grid');
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const deckIdSet = new Set(state.deck);
-  const ids = Object.keys(CARD_DEFS).filter(id => {
+  const ids = sortCardIds(Object.keys(CARD_DEFS).filter(id => {
     if (eventExclusiveIds.has(id) && !state.cards[id]) return false; // 期間限定カードは入手するまで図鑑にも表示しない
     if (cardListDeckOnly && !deckIdSet.has(id)) return false; // デッキ内のみ表示
     if (cardListFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === cardListFilter;
-  });
+  }), cardListSortMode);
   cardListOrder = ids.filter(id => !!state.cards[id]); // 前へ/次へナビゲーションの対象は所持カードのみ
   listEl.innerHTML = ids.map(id => {
     const owned = state.cards[id];
@@ -2378,6 +2397,7 @@ let stageSelectMode = 'story';
 
 function renderStageSelect() {
   if (stageSelectMode === 'story') { renderStoryStages(); return; }
+  if (stageSelectMode === 'dungeon') { renderDungeonSelect('stage-list'); return; }
   if (stageSelectMode === 'hard') { renderQuestList(HARD_QUESTS, '高難易度クエスト', 26); return; }
   renderQuestList(SPECIAL_QUESTS, '特別クエスト', 26);
 }
@@ -2455,13 +2475,23 @@ function renderQuestList(quests, sectionLabel, unlockStageProgress) {
   });
 }
 
-function renderDungeonSelect() {
-  document.getElementById('dungeon-current-floor').textContent = state.dungeonFloor;
-  const wrap = document.getElementById('dungeon-list');
+function renderDungeonSelect(containerId) {
+  containerId = containerId || 'dungeon-list';
+  const currentFloorEl = document.getElementById('dungeon-current-floor');
+  if (currentFloorEl) currentFloorEl.textContent = state.dungeonFloor;
+  const wrap = document.getElementById(containerId);
   const groups = [];
   for (let g = 0; g < DUNGEON_MAX_FLOOR / 10; g++) groups.push({ start: g * 10 + 1, end: g * 10 + 10 });
 
-  wrap.innerHTML = groups.map(group => {
+  // #stage-list（ステージ選択画面のタブ経由）に表示する場合は、進捗バナーを自前で先頭に付ける
+  const progressBanner = containerId === 'stage-list'
+    ? `<div class="cg-dungeon-progress-banner">
+        <div class="cg-dungeon-progress-label">現在の到達階層</div>
+        <div class="cg-dungeon-progress-value">地下 ${state.dungeonFloor} / ${DUNGEON_MAX_FLOOR} 階</div>
+      </div>`
+    : '';
+
+  wrap.innerHTML = progressBanner + groups.map(group => {
     const groupUnlocked = group.start <= state.dungeonFloor;
     const floorsHtml = [];
     for (let floor = group.start; floor <= group.end; floor++) {
@@ -3116,6 +3146,9 @@ function bindBattleEvents() {
   };
   document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
   document.getElementById('battle-enemy-hp-chip').onclick = handleDirectAttackTap;
+  document.getElementById('battle-player-portrait').onclick = () => {
+    if (state.leaderId) showLeaderInfo(state.leaderId);
+  };
 }
 
 // ---------- 長押し検知（フィールドのモンスターをタップ操作と区別して詳細表示） ----------
@@ -4654,6 +4687,7 @@ const SCREEN_HELP = {
       '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
       '<b>⑥ リーダーキャラクターカード</b><br>画面上部で選ぶ「リーダー」とは別に、リーダーキャラクター自身も通常のモンスターカードとしてデッキに入れて戦わせることができます（1枚まで）。カード一覧の「モンスター」タブから追加できます。',
+      '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
     ],
   },
   cardDetail: {
@@ -4670,7 +4704,7 @@ const SCREEN_HELP = {
     items: [
       '<b>① ステージ挑戦</b><br>ステージをタップして挑戦します。上から順に難易度が上がっていきます。',
       '<b>② ステージ解放</b><br>ステージをクリアすると、次のステージが解放されます。',
-      '<b>③ 高難易度・特別クエスト</b><br>画面上部のタブから切り替えられる、ストーリーとは別枠の強敵クエストです。ステージ26以降を解放すると挑戦できるようになります。',
+      '<b>③ ダンジョン・高難易度・特別クエスト</b><br>画面上部のタブから切り替えられます。ダンジョンはホーム画面からも同じ内容にアクセスできます。高難易度・特別クエストは、ストーリーとは別枠の強敵クエストで、ステージ26以降を解放すると挑戦できるようになります。',
     ],
   },
   events: {
@@ -4788,6 +4822,14 @@ function init() {
   });
   document.querySelectorAll('#cardlist-filter-tabs .cg-filter-tab').forEach(btn => {
     btn.addEventListener('click', () => setCardListFilter(btn.dataset.filter));
+  });
+  document.getElementById('collection-sort-select').addEventListener('change', (e) => {
+    collectionSortMode = e.target.value;
+    renderDeck();
+  });
+  document.getElementById('cardlist-sort-select').addEventListener('change', (e) => {
+    cardListSortMode = e.target.value;
+    renderCardList();
   });
   document.getElementById('cardlist-deckonly-toggle').addEventListener('click', toggleCardListDeckOnly);
   document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
