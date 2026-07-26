@@ -26,13 +26,6 @@ const RARITY = {
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
-  leader_lisnoir_f: { name: 'ノワール・エレナ（ダークエレガンス）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 8, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-lisnoir-f-full.png', emoji: '🌙' },
-  leader_lisnoir_m: { name: 'ノワール・ディアブロ（ナイトメアドミニオン）', element: 'dark', rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, aoeDamage: 2 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体に2ダメージを与える', image: 'leader-lisnoir-m-full.png', emoji: '🌙' },
-  leader_lisblanc_f: { name: 'Lis.Blanc（ホーリーグロウ）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-lisblanc-f-full.png', emoji: '✨' },
-  leader_luxblanc_m: { name: 'Lux.Blanc（ホーリーセイント）', element: 'light', rarity: 'epic', cost: 5, atk: 5, hp: 7, role: 'defender', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 3 }, skill: '【固有】場に出た時、味方の光属性モンスター全体の攻撃力を2、HPを3上げる', image: 'leader-luxblanc-m-full.png', emoji: '✨' },
-  leader_liramaline: { name: 'Lira Maline（アクアエンパイア）', element: 'water', rarity: 'epic', cost: 5, atk: 5, hp: 6, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, hpValue: 2 }, skill: '【固有】場に出た時、味方の水属性モンスター全体の攻撃力を2、HPを2上げる', image: 'leader-liramaline-full.png', emoji: '💧' },
-  leader_kaien: { name: 'Kaien（フレイムブンリト）', element: 'dark', rarity: 'epic', cost: 5, atk: 6, hp: 5, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 2, atkDownEnemies: 1 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を2上げ、敵全体の攻撃力を1下げる', image: 'leader-kaien-full.png', emoji: '🌙' },
-  leader_mornabane: { name: 'Morna.Bane（ネスコスポーズル）', element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 6, role: 'attacker', isLeaderCard: true, skillTag: { trigger: 'onPlay', effect: 'boostSameElementAllies', value: 3, hpValue: 1 }, skill: '【固有】場に出た時、味方の闇属性モンスター全体の攻撃力を3、HPを1上げる', image: 'leader-mornabane-full.png', emoji: '🌙' },
   fire_dragon:    { name: 'フレイムドレイク', element: 'fire',   rarity: 'legend', cost: 5, atk: 6, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージ', image: 'card-fire-dragon.png', emoji: '🐉' },
   fire_imp:       { name: 'リーフバード',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-leafbird.png', emoji: '🐦' },
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
@@ -146,6 +139,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
     fullImage: 'leader-lisnoir-f-full.png',
     icon: 'leader-lisnoir-f-icon.png',
+    ultimateSkill: { name: '漆黒の断罪', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与える', dmg: 5 },
   },
   lisnoir_m: {
     name: 'ノワール・ディアブロ',
@@ -155,6 +149,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
     fullImage: 'leader-lisnoir-m-full.png',
     icon: 'leader-lisnoir-m-icon.png',
+    ultimateSkill: { name: '悪夢の侵食', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、モンスターを1ターン行動不能にする', dmg: 4, stunTurns: 1 },
   },
   lisblanc_f: {
     name: 'Lis.Blanc',
@@ -164,6 +159,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
     fullImage: 'leader-lisblanc-f-full.png',
     icon: 'leader-lisblanc-f-icon.png',
+    ultimateSkill: { name: '聖なる浄化', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを3回復する', dmg: 4, healAllies: 3 },
   },
   luxblanc_m: {
     name: 'Lux.Blanc',
@@ -173,6 +169,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
     fullImage: 'leader-luxblanc-m-full.png',
     icon: 'leader-luxblanc-m-icon.png',
+    ultimateSkill: { name: '聖域の裁き', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体にシールド2を付与する', dmg: 4, shieldAllies: 2 },
   },
   liramaline: {
     name: 'Lira Maline',
@@ -182,6 +179,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
     fullImage: 'leader-liramaline-full.png',
     icon: 'leader-liramaline-icon.png',
+    ultimateSkill: { name: '深海の怒涛', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを2回復する', dmg: 4, healAllies: 2 },
   },
   kaien: {
     name: 'Kaien',
@@ -191,6 +189,7 @@ const LEADERS = {
     effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
     fullImage: 'leader-kaien-full.png',
     icon: 'leader-kaien-icon.png',
+    ultimateSkill: { name: '業火の焔', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与え、敵の場にいるモンスターの攻撃力を永続で1下げる', dmg: 5, atkDownEnemies: 1 },
   },
   mornabane: {
     name: 'Morna.Bane',
@@ -200,8 +199,11 @@ const LEADERS = {
     effect: { atkPct: 0.30, hpPct: 0, enemyDmgPct: 0, nullifyEnemyHeal: true },
     fullImage: 'leader-mornabane-full.png',
     icon: 'leader-mornabane-icon.png',
+    ultimateSkill: { name: '虚無の審判', desc: '敵本体と敵の場にいる全モンスターに6ダメージを与える', dmg: 6 },
   },
 };
+
+const ULTIMATE_COOLDOWN_TURNS = 5; // アルティメットスキルが使えるまでの必要ターン数
 
 function getActiveLeader() {
   return state.leaderId ? LEADERS[state.leaderId] : null;
@@ -1307,6 +1309,50 @@ function renderLeaderSelect(containerId) {
   });
 }
 
+// アルティメットスキルの発動：敵本体と敵の場にいる全モンスターに効果を及ぼす（5ターンに1回）
+function executeLeaderUltimate() {
+  if (!battle || battle.over) return;
+  const leader = getActiveLeader();
+  if (!leader || !leader.ultimateSkill) return;
+  if ((battle.leaderUltimateCharge || 0) < ULTIMATE_COOLDOWN_TURNS) return;
+  const skill = leader.ultimateSkill;
+
+  battle.enemyHp = Math.max(0, battle.enemyHp - skill.dmg);
+  impactEffect(document.getElementById('battle-enemy-portrait'), skill.dmg, 0);
+
+  const enemySlots = document.querySelectorAll('#battle-enemy-field .cg-field-slot');
+  battle.enemyField.forEach((u, i) => {
+    if (!u) return;
+    const dmg = mitigateIncomingDamage(u, skill.dmg);
+    u.curHp -= dmg;
+    if (skill.stunTurns) u.stunned = true;
+    if (skill.atkDownEnemies) u.atkBonus = (u.atkBonus || 0) - skill.atkDownEnemies;
+    if (enemySlots[i]) impactEffect(enemySlots[i], dmg, 0);
+  });
+  battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+
+  if (skill.healAllies || skill.shieldAllies) {
+    battle.playerField.forEach(u => {
+      if (!u) return;
+      if (skill.healAllies) {
+        const maxHp = u.def.hp + (u.hpBonus || 0);
+        u.curHp = Math.min(maxHp, u.curHp + skill.healAllies);
+      }
+      if (skill.shieldAllies) u.shield = (u.shield || 0) + skill.shieldAllies;
+    });
+  }
+
+  battle.leaderUltimateCharge = 0;
+  battle.lastPlayedInfo = { name: skill.name, skill: skill.desc };
+
+  if (battle.enemyHp <= 0) {
+    renderBattle();
+    setTimeout(() => showResult(true), battleMs(600));
+    return;
+  }
+  renderBattle();
+}
+
 function showLeaderInfo(lid) {
   const l = LEADERS[lid];
   if (!l) return;
@@ -1834,25 +1880,86 @@ function toggleCardListDeckOnly() {
   renderCardList();
 }
 
+// リーダーを、カード図鑑内でカードと同じ見た目で表示するための専用レンダリング関数
+// （リーダーはCARD_DEFSのカードではないため、renderCardFaceとは別に用意する）
+function renderLeaderCardFace(lid) {
+  const l = LEADERS[lid];
+  if (!l) return '';
+  const el = ELEMENTS[l.element];
+  const isActive = state.leaderId === lid;
+  const bgStyle = 'background:linear-gradient(160deg,#3a1f63,#1c0f33);';
+  const img = l.fullImage
+    ? `<img src="${l.fullImage}" alt="${l.name}" class="cg-card-img" data-emoji="👑" data-bgstyle="${bgStyle}" onerror="handleCardImgError(this)"/>`
+    : `<div class="cg-card-placeholder" style="${bgStyle}"><span>👑</span></div>`;
+  return `
+    <div class="cg-card cg-card-sm ${isActive ? 'in-deck' : ''}" data-leader="${lid}" data-rarity="legend" style="--rarity-color:${RARITY.legend.color}; box-shadow:${RARITY.legend.glow};">
+      <div class="cg-card-cost">👑</div>
+      <div class="cg-card-art">${img}${isActive ? '<div class="cg-card-indeck-badge">設定中</div>' : ''}<div class="cg-card-foil legend"></div></div>
+      <div class="cg-card-name">${l.name}</div>
+      <div class="cg-card-stats"><span class="cg-stat">${l.skillName}</span></div>
+      <div class="cg-card-el" style="color:${el.color}">${el.icon}</div>
+    </div>`;
+}
+
+// リーダーの詳細情報（リーダースキル・アルティメットスキル）を表示するポップアップ
+function showLeaderDetailInfo(lid) {
+  const l = LEADERS[lid];
+  if (!l) return;
+  const el = ELEMENTS[l.element];
+  const isActive = state.leaderId === lid;
+  document.getElementById('card-info-body').innerHTML = `
+    <div class="cg-detail-art" style="background:linear-gradient(160deg,#3a1f63,#1c0f33);">
+      ${l.fullImage ? `<img src="${l.fullImage}" data-emoji="👑" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">👑</span>`}
+      <div class="cg-card-foil legend"></div>
+    </div>
+    <div class="cg-detail-info">
+      <div class="cg-detail-name">${l.name}</div>
+      <div class="cg-detail-level"><span class="cg-detail-rarity" style="color:${RARITY.legend.color}">レジェンド・リーダー</span>${isActive ? ' <span class="cg-evolved-tag">設定中</span>' : ''}</div>
+      <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(l.element)}">${el.icon} ${el.name}</span></div>
+      <div class="cg-detail-desc"><b>👑 リーダースキル：${l.skillName}</b><br>${l.desc}</div>
+      ${l.ultimateSkill ? `<div class="cg-detail-desc"><b>⚡ アルティメットスキル：${l.ultimateSkill.name}</b><br>${l.ultimateSkill.desc}<br><span style="opacity:.75;">（バトル中、5ターンごとに使用可能）</span></div>` : ''}
+      <button class="cg-btn cg-btn-main" id="leader-detail-select-btn" data-leader="${lid}">${isActive ? '設定中' : 'このリーダーを設定'}</button>
+    </div>`;
+  document.getElementById('card-info-overlay').classList.remove('hidden');
+  const selectBtn = document.getElementById('leader-detail-select-btn');
+  if (selectBtn && !isActive) {
+    selectBtn.addEventListener('click', () => {
+      state.leaderId = lid;
+      saveState();
+      document.getElementById('card-info-overlay').classList.add('hidden');
+      renderLeaderSelect();
+      renderCardList();
+      renderHome();
+    });
+  }
+}
+
 function renderCardList() {
-  renderLeaderSelect('cardlist-leader-row');
   const listEl = document.getElementById('cardlist-grid');
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const deckIdSet = new Set(state.deck);
-  const ids = sortCardIds(Object.keys(CARD_DEFS).filter(id => {
+  const showLeaders = cardListFilter === 'all' || cardListFilter === 'leader';
+  const leaderIds = (showLeaders && !cardListDeckOnly) ? Object.keys(LEADERS) : [];
+  const ids = cardListFilter === 'leader' ? [] : sortCardIds(Object.keys(CARD_DEFS).filter(id => {
     if (eventExclusiveIds.has(id) && !state.cards[id]) return false; // 期間限定カードは入手するまで図鑑にも表示しない
     if (cardListDeckOnly && !deckIdSet.has(id)) return false; // デッキ内のみ表示
     if (cardListFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === cardListFilter;
   }), cardListSortMode);
   cardListOrder = ids.filter(id => !!state.cards[id]); // 前へ/次へナビゲーションの対象は所持カードのみ
-  listEl.innerHTML = ids.map(id => {
+  const leaderHtml = leaderIds.map(lid => renderLeaderCardFace(lid)).join('');
+  const cardHtml = ids.map(id => {
     const owned = state.cards[id];
     return owned
       ? renderCardFace(id, { small: true, evolved: owned.evolved, inDeck: deckIdSet.has(id) })
       : renderCardFace(id, { small: true, locked: true });
-  }).join('') + (ids.length === 0 ? `<div class="cg-empty">${cardListDeckOnly ? 'デッキにカードが入っていません' : '該当するカードがありません'}</div>` : '');
-  listEl.querySelectorAll('.cg-card').forEach(node => {
+  }).join('');
+  listEl.innerHTML = leaderHtml + cardHtml
+    + ((ids.length === 0 && leaderIds.length === 0) ? `<div class="cg-empty">${cardListDeckOnly ? 'デッキにカードが入っていません' : '該当するカードがありません'}</div>` : '');
+  listEl.querySelectorAll('.cg-card[data-leader]').forEach(node => {
+    node.addEventListener('click', () => showLeaderDetailInfo(node.dataset.leader));
+  });
+  listEl.querySelectorAll('.cg-card[data-id]').forEach(node => {
     const id = node.dataset.id;
     if (state.cards[id]) {
       node.addEventListener('click', () => openCardDetail(id));
@@ -2882,6 +2989,8 @@ function startBattle(stage) {
     playerGraveyard: [],
     enemyGraveyard: [],
     lastPlayedInfo: null,
+    leaderUltimateCharge: 1,
+    leaderUltimateReady: false,
   };
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const enemyPortraitEl = document.getElementById('battle-enemy-portrait');
@@ -2897,6 +3006,11 @@ function startBattle(stage) {
   }
   applyBattleBgTheme(stage.bgTheme, isBossBattleStage(stage));
   applyLeaderPortraits();
+  const playerPortraitEl = document.getElementById('battle-player-portrait');
+  if (playerPortraitEl && !playerPortraitEl.dataset.longpressBound) {
+    playerPortraitEl.dataset.longpressBound = '1';
+    bindLongPress(playerPortraitEl, () => { if (state.leaderId) showLeaderInfo(state.leaderId); });
+  }
   renderBattle();
   updateBattleSpeedBtn();
   showScreen('battle');
@@ -3153,6 +3267,13 @@ function previewDamage(attackerUnit, defenderUnit) {
 function renderBattle() {
   if (!battle) return;
   document.getElementById('battle-turn-timer').textContent = 'ターン ' + battle.turn;
+  const ultimateBadge = document.getElementById('battle-ultimate-charge');
+  if (ultimateBadge) {
+    const charge = Math.min(ULTIMATE_COOLDOWN_TURNS, battle.leaderUltimateCharge || 0);
+    const ready = charge >= ULTIMATE_COOLDOWN_TURNS;
+    ultimateBadge.textContent = ready ? '⚡準備完了' : `${charge}/${ULTIMATE_COOLDOWN_TURNS}`;
+    ultimateBadge.classList.toggle('ready', ready);
+  }
   document.getElementById('battle-player-hp').textContent = battle.playerHp;
   document.getElementById('battle-enemy-hp').textContent = battle.enemyHp;
   document.getElementById('battle-deck-remaining').textContent = battle.playerDeck.length;
@@ -3408,7 +3529,8 @@ function bindBattleEvents() {
   document.getElementById('battle-enemy-portrait').onclick = handleDirectAttackTap;
   document.getElementById('battle-enemy-hp-chip').onclick = handleDirectAttackTap;
   document.getElementById('battle-player-portrait').onclick = () => {
-    if (state.leaderId) showLeaderInfo(state.leaderId);
+    if (longPressFired) { longPressFired = false; return; }
+    executeLeaderUltimate();
   };
 }
 
@@ -4246,6 +4368,7 @@ function enemyTurn() {
 
   // 次は自分のターン
   battle.turn += 1;
+  battle.leaderUltimateCharge = Math.min(ULTIMATE_COOLDOWN_TURNS, (battle.leaderUltimateCharge || 0) + 1);
   battle.activeSide = 'player';
   battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
   battle.playerCost = battle.playerMaxCost;
@@ -4460,9 +4583,6 @@ const SHOP_PACKS = [
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcguardian',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
-  { id: 'leader', name: 'リーダーガチャ', icon: '🎭', currency: 'gems', cost: 200,
-    desc: '7人のリーダーキャラクターのうち、いずれか1体が必ず出現。当たったリーダーキャラのみ、リーダー選択・デッキ編成の両方で使用できるようになります',
-    pool: ['leader_lisnoir_f', 'leader_lisnoir_m', 'leader_lisblanc_f', 'leader_luxblanc_m', 'leader_liramaline', 'leader_kaien', 'leader_mornabane'] },
 ];
 
 function pickWeightedCardId(weights, rarityPool) {
@@ -5053,7 +5173,7 @@ const SCREEN_HELP = {
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
-      '<b>⑥ リーダーキャラクターカード</b><br>画面上部で選ぶ「リーダー」とは別に、リーダーキャラクター自身も通常のモンスターカードとしてデッキに入れて戦わせることができます（1枚まで）。「リーダーガチャ」で当たったキャラクターのみ、カード一覧の「モンスター」タブに表示され、デッキに追加できるようになります。',
+      '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。ここからリーダーを設定することもできます。',
       '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
     ],
   },

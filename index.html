@@ -423,6 +423,15 @@
     justify-content:center; font-size:22px; cursor:pointer; z-index:3; box-shadow:0 0 12px #A2334755, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;
     background-size:cover; background-position:center; position:relative;}
   #battle-player-portrait.cg-side-portrait{border-color:#4fa8e0; box-shadow:0 0 12px #1c5a8f55, 0 0 0 3px #1A172588, 0 0 0 4px #D9B45B66;}
+  .cg-ultimate-charge-badge{position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); z-index:6;
+    font-size:9px; font-weight:800; color:#fff; background:#2a2440; border:1.5px solid #6a5aa8; border-radius:10px;
+    padding:1px 6px; white-space:nowrap; box-shadow:0 1px 3px #00000066;}
+  .cg-ultimate-charge-badge.ready{background:var(--gold); border-color:var(--gold-bright); color:#1a1620;
+    animation:cgUltimateReadyPulse 1.1s ease-in-out infinite;}
+  @keyframes cgUltimateReadyPulse{
+    0%,100%{transform:translateX(-50%) scale(1); box-shadow:0 0 4px 1px var(--gold-bright);}
+    50%{transform:translateX(-50%) scale(1.12); box-shadow:0 0 10px 3px var(--gold-bright);}
+  }
   .cg-side-info-main{display:flex; flex-direction:column; gap:5px;}
   .cg-side-sub-row{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
 
@@ -1496,9 +1505,6 @@
     </div>
 
     <div id="collection-list-view" style="display:none;">
-      <div class="cg-section-title">リーダー</div>
-      <div id="cardlist-leader-row" class="cg-leader-select-row"></div>
-
       <div id="compendium-panel" class="cg-compendium-panel">
         <div class="cg-compendium-row">
           <span class="cg-compendium-label">📖 図鑑コンプリート（全カード収集数）</span>
@@ -1510,6 +1516,7 @@
       <div class="cg-section-title">カード図鑑（タップで詳細・グレー表示は未所持）</div>
       <div class="cg-filter-tabs" id="cardlist-filter-tabs">
         <button class="cg-filter-tab active" data-filter="all">全て</button>
+        <button class="cg-filter-tab" data-filter="leader">リーダー</button>
         <button class="cg-filter-tab" data-filter="monster">モンスター</button>
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
@@ -1653,7 +1660,9 @@
       <div class="cg-field-row" id="battle-player-field"></div>
 
       <div class="cg-side-info-row cg-side-info-player">
-        <div id="battle-player-portrait" class="cg-side-portrait"></div>
+        <div id="battle-player-portrait" class="cg-side-portrait" title="タップでアルティメットスキル発動／長押しでリーダー情報">
+          <span class="cg-ultimate-charge-badge" id="battle-ultimate-charge">1/5</span>
+        </div>
         <div class="cg-side-info-main">
           <div class="cg-hp-chip cg-hp-chip-self">HP <span class="val" id="battle-player-hp">30</span></div>
           <div class="cg-side-sub-row">
@@ -1709,7 +1718,7 @@
           <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターや手札のカードを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
           <div class="cg-help-item"><b>⑩ 墓地から手札に戻す</b><br>🪦アイコンから墓地を開き、カードをタップすると、マナ1を消費して手札に戻せます（手札に空きが必要です）。長押しするとカードの詳細を確認できます。</div>
           <div class="cg-help-item"><b>⑪ スキル効果の確認</b><br>手札の上の欄に、カードのスキル効果が表示されます。カードやモンスターを選択中はそのカードの効果を、何も選択していない時は直近に場に出した／使用したカードの効果を表示します。</div>
-          <div class="cg-help-item"><b>⑫ リーダー情報の確認</b><br>自分のアイコン（リーダー）をタップすると、設定中のリーダーのスキル・属性などの情報を確認できます。</div>
+          <div class="cg-help-item"><b>⑫ アルティメットスキル</b><br>自分のアイコン（リーダー）の下に、アルティメットスキルの準備状況（現在のターン数/5）が表示されます。5ターンたまったらアイコンをタップして発動できます。長押しするとリーダースキル・アルティメットスキルの詳細を確認できます。</div>
         </div>
         <button class="cg-btn cg-btn-main" id="battle-help-close">閉じる</button>
       </div>
