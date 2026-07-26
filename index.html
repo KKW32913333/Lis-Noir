@@ -895,6 +895,11 @@
   .cg-element-status-legend{display:flex; flex-direction:column; gap:3px; font-size:9px; color:#C7B6FFdd;}
   .cg-element-status-row{display:flex; align-items:center; gap:5px;}
   .cg-element-status-row .cg-el-chip-text{font-size:9px; padding:2px 5px;}
+  .cg-cardbadge-dot{display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px;
+    border-radius:50%; font-size:8px; font-weight:800; color:#fff; flex-shrink:0; box-shadow:0 1px 2px #00000055;}
+  .cg-cardbadge-dot.cost{background:#23242bcc; border:1px solid var(--gold-bright);}
+  .cg-cardbadge-dot.atk{background:radial-gradient(circle at 35% 30%, #ff8a95, #a2334f 75%);}
+  .cg-cardbadge-dot.hp{background:radial-gradient(circle at 35% 30%, #7ec8f0, #2f5f8f 75%);}
   .cg-card-info-panel{display:flex; flex-direction:column; align-items:center;
     background:linear-gradient(165deg,#2c1854,#150a2b); border-color:var(--gold-bright);}
   .cg-card-info-panel .cg-detail-name{color:#F5EFFF;}
@@ -1169,9 +1174,15 @@
     80%{transform:translateX(4px);}
   }
   .cg-shake{animation:cgShake .35s ease-in-out;}
-  .cg-deck-slot-item{position:relative; touch-action:pan-y; transition:transform .15s ease, opacity .15s ease;}
+  .cg-deck-slot-item{position:relative; touch-action:pan-y; transition:transform .15s ease, opacity .15s ease; cursor:pointer;}
   .cg-deck-slot-item.dragging{transform:scale(1.08); z-index:10; opacity:.85; box-shadow:0 8px 20px #00000055; touch-action:none;}
   .cg-deck-slot-item.drop-target .cg-card{outline:3px solid var(--true-gold); outline-offset:2px; border-radius:10px;}
+  .cg-deck-slot-item.reorder-selected{transform:scale(1.06); z-index:6;}
+  .cg-deck-slot-item.reorder-selected .cg-card{outline:3px solid var(--true-gold); outline-offset:2px; border-radius:10px;
+    box-shadow:0 0 12px var(--gold-soft);}
+  .cg-deck-slot-count{position:absolute; top:2px; left:2px; min-width:22px; height:20px; padding:0 5px; border-radius:10px;
+    background:var(--gold); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; z-index:5;
+    box-shadow:0 2px 4px #00000033;}
   .cg-deck-remove-btn{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; z-index:5;
     background:#23242bdd; color:#ff8a95; border:1px solid var(--hp-red); font-size:11px; cursor:pointer;
     display:flex; align-items:center; justify-content:center; padding:0;}
@@ -1492,6 +1503,12 @@
       <div class="cg-element-status-legend">
         <div class="cg-element-status-row"><span class="cg-el-chip-text status">☠️/🔥</span>継続ダメージ</div>
         <div class="cg-element-status-row"><span class="cg-el-chip-text shield">🛡</span>シールド</div>
+      </div>
+      <span class="cg-element-strip-divider"></span>
+      <div class="cg-element-status-legend">
+        <div class="cg-element-status-row"><span class="cg-cardbadge-dot cost">1</span>マナ</div>
+        <div class="cg-element-status-row"><span class="cg-cardbadge-dot atk">2</span>攻撃力</div>
+        <div class="cg-element-status-row"><span class="cg-cardbadge-dot hp">3</span>HP</div>
       </div>
     </div>
 

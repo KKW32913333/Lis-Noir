@@ -1157,6 +1157,7 @@ async function renderRanking() {
 
 
 let collectionFilter = 'all';
+let deckReorderSelectedId = null;
 
 function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
@@ -1286,10 +1287,22 @@ function bindDeckDragReorder(deckEl) {
 function renderDeck() {
   renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
-  deckEl.innerHTML = state.deck.map((id, i) =>
-    `<div class="cg-deck-slot-item" data-index="${i}">
-       ${renderCardFace(id, { small: true, evolved: state.cards[id] && state.cards[id].evolved })}
-       <button class="cg-deck-remove-btn" data-index="${i}" aria-label="デッキから外す">✕</button>
+  // 同じカードは1枠にまとめ、枚数を「×N」バッジで表示する
+  const groups = [];
+  const idToGroup = {};
+  state.deck.forEach(id => {
+    if (idToGroup[id] === undefined) {
+      idToGroup[id] = groups.length;
+      groups.push({ id, count: 1 });
+    } else {
+      groups[idToGroup[id]].count++;
+    }
+  });
+  deckEl.innerHTML = groups.map(g =>
+    `<div class="cg-deck-slot-item ${deckReorderSelectedId === g.id ? 'reorder-selected' : ''}" data-id="${g.id}">
+       ${renderCardFace(g.id, { small: true, evolved: state.cards[g.id] && state.cards[g.id].evolved })}
+       ${g.count > 1 ? `<span class="cg-deck-slot-count">×${g.count}</span>` : ''}
+       <button class="cg-deck-remove-btn" data-id="${g.id}" aria-label="デッキから1枚外す">✕</button>
      </div>`
   ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
@@ -1297,13 +1310,37 @@ function renderDeck() {
   deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const i = Number(btn.dataset.index);
-      state.deck.splice(i, 1);
+      const id = btn.dataset.id;
+      const idx = state.deck.indexOf(id); // 同じカードの1枚だけを外す
+      if (idx !== -1) state.deck.splice(idx, 1);
+      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
       saveState();
       renderDeck();
     });
   });
-  bindDeckDragReorder(deckEl);
+
+  // 並べ替え：1枚目をタップして選択→入れ替えたいカードをタップで位置を交換する
+  // （ドラッグ＆ドロップより誤操作が少なく、片手でも操作しやすいため）
+  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.cg-deck-remove-btn')) return;
+      if (longPressFired) { longPressFired = false; return; }
+      const id = item.dataset.id;
+      if (deckReorderSelectedId === null) {
+        deckReorderSelectedId = id;
+        renderDeck();
+      } else if (deckReorderSelectedId === id) {
+        deckReorderSelectedId = null;
+        renderDeck();
+      } else {
+        swapDeckGroups(deckReorderSelectedId, id);
+        deckReorderSelectedId = null;
+        saveState();
+        renderDeck();
+      }
+    });
+    bindLongPress(item, () => showHandCardInfo(item.dataset.id));
+  });
 
   const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
   const avgCost = validDeckIds.length
@@ -1345,6 +1382,21 @@ function renderDeck() {
     });
     bindLongPress(node, () => showHandCardInfo(node.dataset.id));
   });
+}
+
+// 並べ替え用: 2つのカードグループ（同カードのまとまり）の位置を入れ替える。
+// 枚数が違っても正しく動作するよう、一旦「ユニークな並び順」を作ってから、その順序でデッキ配列を再構築する
+function swapDeckGroups(idA, idB) {
+  const uniqueIds = [];
+  const seen = new Set();
+  state.deck.forEach(id => { if (!seen.has(id)) { seen.add(id); uniqueIds.push(id); } });
+  const idxA = uniqueIds.indexOf(idA);
+  const idxB = uniqueIds.indexOf(idB);
+  if (idxA === -1 || idxB === -1 || idxA === idxB) return;
+  [uniqueIds[idxA], uniqueIds[idxB]] = [uniqueIds[idxB], uniqueIds[idxA]];
+  const counts = {};
+  state.deck.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+  state.deck = uniqueIds.flatMap(id => Array(counts[id]).fill(id));
 }
 
 // ---------- デッキ保存（プリセット） ----------
@@ -2479,33 +2531,24 @@ const BATTLE_BG_THEMES = {
   volcano: 'battle-bg-volcano.jpg',
   castle:  'battle-bg-castle.jpg',
 };
-const BATTLE_BG_GRADIENTS = {
-  forest:     'radial-gradient(ellipse 500px 400px at 50% 30%, #2d6a4444 0%, transparent 70%), linear-gradient(160deg, #0c1f14 0%, #1a3323 55%, #081008 100%)',
-  snow:       'radial-gradient(ellipse 500px 400px at 50% 30%, #6fa8c944 0%, transparent 70%), linear-gradient(160deg, #101f2b 0%, #22384d 55%, #0a141c 100%)',
-  cave:       'radial-gradient(ellipse 500px 400px at 50% 30%, #6b573344 0%, transparent 70%), linear-gradient(160deg, #1a1522 0%, #2e2440 55%, #0c0a12 100%)',
-  volcano:    'radial-gradient(ellipse 500px 400px at 50% 30%, #b8451f44 0%, transparent 70%), linear-gradient(160deg, #260a06 0%, #4a1f0c 55%, #140402 100%)',
-  castle:     'radial-gradient(ellipse 500px 400px at 50% 30%, #8a2e6e44 0%, transparent 70%), linear-gradient(160deg, #1c0f1a 0%, #3a1f30 55%, #0d0609 100%)',
-  moonshadow: 'radial-gradient(ellipse 500px 400px at 50% 30%, #3a3a6644 0%, transparent 70%), linear-gradient(160deg, #14142c 0%, #23234a 55%, #0d0d1e 100%)',
-  emerald:    'radial-gradient(ellipse 500px 400px at 50% 30%, #1f6b4a44 0%, transparent 70%), linear-gradient(160deg, #0d1f16 0%, #163a26 55%, #081109 100%)',
-  frost:      'radial-gradient(ellipse 500px 400px at 50% 30%, #4a7a9944 0%, transparent 70%), linear-gradient(160deg, #0d1e2b 0%, #1c3a52 55%, #081018 100%)',
-  inferno2:   'radial-gradient(ellipse 500px 400px at 50% 30%, #8a2e2244 0%, transparent 70%), linear-gradient(160deg, #260a06 0%, #4a150c 55%, #140402 100%)',
-  empress:    'radial-gradient(ellipse 500px 400px at 50% 30%, #8A4FFF44 0%, transparent 70%), linear-gradient(160deg, #1c0f33 0%, #3a1f63 55%, #0d0619 100%)',
-  purification: 'radial-gradient(ellipse 600px 450px at 50% 25%, #D9B45B55 0%, transparent 65%), radial-gradient(ellipse 500px 400px at 50% 60%, #8A4FFF44 0%, transparent 70%), linear-gradient(160deg, #241344 0%, #3a1f63 45%, #1c0f33 100%)',
-};
+// バトル画面の背景グラデーションは、通常戦・ボス戦の2種類に統一する
+// （通常戦：Lis Noirのテーマカラーである紫を基調にしたグラデーション。ボス戦：金＋紫の特別なグラデーション）
+const BATTLE_BG_STANDARD = 'radial-gradient(ellipse 500px 400px at 50% 30%, #8A4FFF44 0%, transparent 70%), linear-gradient(160deg, #1c0f33 0%, #3a1f63 55%, #0d0619 100%)';
+const BATTLE_BG_BOSS = 'radial-gradient(ellipse 600px 450px at 50% 25%, #D9B45B55 0%, transparent 65%), radial-gradient(ellipse 500px 400px at 50% 60%, #8A4FFF44 0%, transparent 70%), linear-gradient(160deg, #241344 0%, #3a1f63 45%, #1c0f33 100%)';
 
-function applyBattleBgTheme(theme) {
+// 現在のステージ／ダンジョン階／クエストが「ボス戦」に該当するかどうかを判定する
+// （各ワールドの最終ステージ、ダンジョンのフロアボス、高難易度・特別クエストはすべてボス戦扱い）
+function isBossBattleStage(stage) {
+  if (!stage) return false;
+  if (stage.isDungeon) return isDungeonBossFloor(stage.dungeonFloor);
+  if (stage.qid) return true;
+  return isWorldLastStage(stage);
+}
+
+function applyBattleBgTheme(theme, isBoss) {
   const board = document.querySelector('.cg-battle-board');
   if (!board) return;
-  if (BATTLE_BG_GRADIENTS[theme]) {
-    board.style.backgroundImage = BATTLE_BG_GRADIENTS[theme];
-    board.style.backgroundSize = 'cover';
-    board.style.backgroundPosition = 'center';
-    board.style.backgroundRepeat = 'no-repeat';
-    return;
-  }
-  const img = BATTLE_BG_THEMES[theme] || BATTLE_BG_THEMES.forest;
-  board.style.backgroundImage =
-    `linear-gradient(180deg, #1A1725b8 0%, #1A1725d9 50%, #1A1725b8 100%), url('${img}')`;
+  board.style.backgroundImage = isBoss ? BATTLE_BG_BOSS : BATTLE_BG_STANDARD;
   board.style.backgroundSize = 'cover';
   board.style.backgroundPosition = 'center';
   board.style.backgroundRepeat = 'no-repeat';
@@ -2565,7 +2608,7 @@ function startBattle(stage) {
     enemyPortraitEl.classList.remove('has-boss-image');
     enemyEmojiEl.textContent = stage.portrait;
   }
-  applyBattleBgTheme(stage.bgTheme);
+  applyBattleBgTheme(stage.bgTheme, isBossBattleStage(stage));
   applyLeaderPortraits();
   renderBattle();
   showScreen('battle');
@@ -4559,10 +4602,11 @@ const SCREEN_HELP = {
   collection: {
     title: 'カード画面のヘルプ',
     items: [
-      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加、デッキ側の✕で外せます。属性タブで絞り込みも可能。',
-      '<b>② 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
-      '<b>③ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
-      '<b>④ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
+      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加、デッキ側の✕で外せます。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
+      '<b>② カードの並べ替え</b><br>デッキ内のカードをタップして選択（金色に光ります）→入れ替えたい場所のカードをタップすると、位置が入れ替わります。',
+      '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
+      '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
+      '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
     ],
   },
   cardDetail: {
