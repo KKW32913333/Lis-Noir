@@ -406,6 +406,7 @@
     border-radius:14px; padding:5px 10px; cursor:pointer; box-shadow:0 2px 5px #00000044; flex-shrink:0; white-space:nowrap;}
   .cg-direct-attack-btn:active{transform:scale(.94);}
   .cg-direct-attack-btn.attackable{animation:pulseEnemyChip 1.1s ease-in-out infinite;}
+  .cg-direct-attack-btn-footer{flex:1; font-size:14px; padding:9px 18px; border-radius:26px; flex-shrink:1;}
   .cg-hp-chip .val{font-weight:800; color:var(--hp-red);}
   .cg-hp-chip-self .val{color:#7ec8f0;}
   .cg-timer{font-size:14px; font-weight:700; color:var(--true-gold); text-align:center; background:#00000055; padding:6px 20px; border-radius:16px; letter-spacing:1px;}
@@ -932,6 +933,7 @@
   .cg-el-chip-text.dark{background:#5A2D91;}
   .cg-el-chip-text.status{background:#7a3fa0;}
   .cg-el-chip-text.shield{background:#2f5f8f;}
+  .cg-el-chip-text.stun{background:#6a6a3f;}
   .cg-element-mutual-label{font-size:8px; color:#C7B6FFbb;}
   .cg-element-status-legend{display:flex; flex-direction:column; gap:3px; font-size:9px; color:#C7B6FFdd;}
   .cg-element-status-row{display:flex; align-items:center; gap:5px;}
@@ -1650,6 +1652,7 @@
       <div class="cg-element-status-legend">
         <div class="cg-element-status-row"><span class="cg-el-chip-text status">☠️/🔥</span>継続ダメージ</div>
         <div class="cg-element-status-row"><span class="cg-el-chip-text shield">🛡</span>シールド</div>
+        <div class="cg-element-status-row"><span class="cg-el-chip-text stun">💫</span>行動不能</div>
       </div>
       <span class="cg-element-strip-divider"></span>
       <div class="cg-element-status-legend">
@@ -1667,15 +1670,12 @@
       <div class="cg-side-info-row cg-side-info-enemy">
         <div id="battle-enemy-portrait" class="cg-side-portrait"><span id="battle-enemy-emoji">👹</span><span id="battle-portrait-preview" class="cg-preview-badge"></span></div>
         <div class="cg-side-info-main">
-          <div class="cg-hp-row">
-            <div class="cg-hp-chip" id="battle-enemy-hp-chip">HP <span class="val" id="battle-enemy-hp">30</span></div>
-            <button class="cg-direct-attack-btn" id="battle-direct-attack-btn">⚔️ 直接攻撃</button>
-          </div>
+          <div class="cg-hp-chip" id="battle-enemy-hp-chip">HP <span class="val" id="battle-enemy-hp">30</span></div>
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
-            <span class="cg-substat-chip" title="敵の残り手札枚数">🎴×<span id="battle-enemy-hand-count">0</span></span>
-            <span class="cg-substat-chip" title="敵の残り山札枚数"><span class="cg-deck-back-icon">◆</span>×<span id="battle-enemy-deck-remaining">0</span></span>
-            <span class="cg-substat-chip" title="敵の墓地枚数">🪦×<span id="battle-enemy-graveyard-count">0</span></span>
+            <span class="cg-substat-chip" title="敵の残り手札枚数">手札×<span id="battle-enemy-hand-count">0</span></span>
+            <span class="cg-substat-chip" title="敵の残り山札枚数">山札×<span id="battle-enemy-deck-remaining">0</span></span>
+            <span class="cg-substat-chip" title="敵の墓地枚数">墓地×<span id="battle-enemy-graveyard-count">0</span></span>
           </div>
         </div>
       </div>
@@ -1695,8 +1695,8 @@
           <div class="cg-hp-chip cg-hp-chip-self">HP <span class="val" id="battle-player-hp">30</span></div>
           <div class="cg-side-sub-row">
             <span class="cg-pp-badge" id="battle-pp-badge" title="自分のマナ">マナ <span id="battle-pp-current">1</span>/<span id="battle-pp-max">1</span></span>
-            <span class="cg-substat-chip" title="残りデッキ枚数"><span class="cg-deck-back-icon">◆</span>×<span id="battle-deck-remaining">0</span></span>
-            <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">🪦×<span id="battle-graveyard-count">0</span></span>
+            <span class="cg-substat-chip" title="残りデッキ枚数">山札×<span id="battle-deck-remaining">0</span></span>
+            <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">墓地×<span id="battle-graveyard-count">0</span></span>
           </div>
         </div>
       </div>
@@ -1712,6 +1712,7 @@
 
     <div class="cg-battle-footer">
       <div class="cg-battle-navbar">
+        <button class="cg-direct-attack-btn cg-direct-attack-btn-footer" id="battle-direct-attack-btn">⚔️ 直接攻撃</button>
         <button class="cg-btn cg-btn-main cg-battle-navbar-end" id="battle-end-turn">ターン終了</button>
       </div>
     </div>
@@ -1784,7 +1785,6 @@
       <span class="cg-currency">💰 <span id="shop-gold">0</span></span>
       <span class="cg-currency">💎 <span id="shop-gems">0</span></span>
       <span class="cg-currency">🎫 <span id="shop-tickets">0</span></span>
-      <span class="cg-currency">☀️ <span id="shop-light-tickets">0</span></span>
     </div>
     <div id="shop-event-gacha-panel">
       <div class="cg-section-title">🌙 期間限定ガチャ</div>

@@ -215,10 +215,10 @@ function leaderAppliesTo(unit, isPlayerCard) {
 // ※ defaultState()から参照されるため、state初期化より前に定義する必要がある
 const EVENT_GACHA_PACKS = [
   { id: 'nightlegends', name: '夜天の英雄ガチャ', icon: '🌙', iconImage: 'gacha-icon-nightlegends.png', currency: 'tickets', cost: 1,
-    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
+    desc: '期間限定ガチャチケットを使用。この6体のうち、いずれか1体が必ず出現（全てレジェンド・闇属性）',
     pool: ['dark_voidreaper', 'dark_nocturnaldragon', 'dark_lunaelf', 'dark_nightmarecavalier', 'dark_shadowslime', 'spell_orbitalgrimoire'] },
-  { id: 'lightblessing', name: '光耀の祝福ガチャ', icon: '☀️', iconImage: 'gacha-icon-lightblessing.png', currency: 'lightTickets', cost: 1,
-    desc: 'この6体のうち、いずれか1体が必ず出現（全てレジェンド・光属性）',
+  { id: 'lightblessing', name: '光耀の祝福ガチャ', icon: '☀️', iconImage: 'gacha-icon-lightblessing.png', currency: 'tickets', cost: 1,
+    desc: '期間限定ガチャチケットを使用。この6体のうち、いずれか1体が必ず出現（全てレジェンド・光属性）',
     pool: ['light_shirayuki', 'light_lucius', 'light_starlightunicorn', 'light_stardustwhale', 'light_sunblazenoble', 'light_whitegriffon'] },
 ];
 
@@ -263,8 +263,7 @@ function defaultState() {
     avatarImage: null,
     deckPresets: [],
     leaderId: null,
-    tickets: 1,
-    lightTickets: 1,
+    tickets: 2,
     pityCounters: {},
     compendiumRewardClaimed: false,
     battleHistory: [],
@@ -369,8 +368,15 @@ function loadState() {
     }
     // 「光耀の祝福」ガチャ用チケットを1枚配布（既存プレイヤーへ1回限り）
     if (!saved.grantedLightTicket_20260724) {
-      saved.lightTickets = (saved.lightTickets || 0) + 1;
+      saved.tickets = (saved.tickets || 0) + 1;
       saved.grantedLightTicket_20260724 = true;
+    }
+    // チケット統合: 「夜天の英雄」用・「光耀の祝福」用に分かれていたチケットを、
+    // 「期間限定ガチャチケット」として1本化する（既存プレイヤーへ1回限り、既存の所持数はそのまま合算）
+    if (!saved.mergedLightTickets_20260725) {
+      saved.tickets = (saved.tickets || 0) + (saved.lightTickets || 0);
+      delete saved.lightTickets;
+      saved.mergedLightTickets_20260725 = true;
     }
     // 初心者ガチャ必須化に伴う後方互換対応: この仕組みが無かった時期からの既存プレイヤーが、
     // 意図せずロックされて他の画面に進めなくなることがないよう、既に完了済み扱いにする
@@ -4608,7 +4614,7 @@ function pickWeightedCardId(weights, rarityPool) {
 function renderPackCard(pack) {
   const isFreeFirstBeginnerPull = pack.id === 'beginner' && !state.beginnerGachaDone;
   const effectiveCost = isFreeFirstBeginnerPull ? 0 : pack.cost;
-  const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : pack.currency === 'lightTickets' ? '☀️' : '🎫';
+  const currencyIcon = pack.currency === 'gold' ? '💰' : pack.currency === 'gems' ? '💎' : '🎫';
   const affordable = state[pack.currency] >= effectiveCost;
   const affordable10 = state[pack.currency] >= effectiveCost * 10;
   const show10 = !pack.pool && !pack.no10 && !isFreeFirstBeginnerPull; // 固定プールの期間限定ガチャ・no10指定のガチャ・初心者ガチャの初回無料分は10連非対応
@@ -4654,8 +4660,6 @@ function renderShop() {
   document.getElementById('shop-gems').textContent = state.gems.toLocaleString();
   const ticketEl = document.getElementById('shop-tickets');
   if (ticketEl) ticketEl.textContent = (state.tickets || 0).toLocaleString();
-  const lightTicketEl = document.getElementById('shop-light-tickets');
-  if (lightTicketEl) lightTicketEl.textContent = (state.lightTickets || 0).toLocaleString();
 
   const eventWrap = document.getElementById('shop-event-packs');
   if (eventWrap) {
@@ -4890,7 +4894,7 @@ function hideReveal() {
 // 今後、新しいプレゼント（お詫び配布・イベント配布など）を追加する場合はこの配列に1件追加するだけでOK
 const PRESENTS = [
   { id: 'welcome_bonus', title: '🎉 スタートダッシュ応援プレゼント', desc: 'ゲームを始めてくれてありがとうございます！冒険に役立つアイテムをプレゼントします。',
-    reward: { gold: 2000, tickets: 1, lightTickets: 1 } },
+    reward: { gold: 2000, tickets: 2 } },
 ];
 
 function renderPresents() {
@@ -4927,7 +4931,6 @@ function claimPresent(presentId) {
   state.gold += p.reward.gold || 0;
   state.gems += p.reward.gems || 0;
   state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
-  state.lightTickets = (state.lightTickets || 0) + (p.reward.lightTickets || 0);
   state.presentsClaimed[presentId] = true;
   saveState();
   renderPresents();
@@ -4945,7 +4948,6 @@ function claimPresentSilent(p) {
   state.gold += p.reward.gold || 0;
   state.gems += p.reward.gems || 0;
   state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
-  state.lightTickets = (state.lightTickets || 0) + (p.reward.lightTickets || 0);
   state.presentsClaimed[p.id] = true;
 }
 
@@ -5016,7 +5018,6 @@ function formatReward(reward) {
   if (reward.gold) parts.push(`💰${reward.gold}`);
   if (reward.gems) parts.push(`💎${reward.gems}`);
   if (reward.tickets) parts.push(`🎫${reward.tickets}`);
-  if (reward.lightTickets) parts.push(`☀️${reward.lightTickets}`);
   return parts.join(' ');
 }
 
@@ -5220,7 +5221,7 @@ const SCREEN_HELP = {
       '<b>① ガチャを引く</b><br>ゴールドやジェムを消費してガチャを引き、カードを手に入れます。単発・10連が選べます。',
       '<b>② 天井（保証）</b><br>連続でノーマルばかり出た場合、一定回数を超えると次回はレア以上が確定します。',
       '<b>③ 収録カード</b><br>各ガチャの下に表示されているカードをタップすると、詳細を確認できます。',
-      '<b>④ 期間限定ガチャ</b><br>チケットを消費して引く、期間限定の特別なガチャです。',
+      '<b>④ 期間限定ガチャ</b><br>「期間限定ガチャチケット」🎫を消費して引く、期間限定の特別なガチャです。1種類のチケットで、どの期間限定ガチャも引くことができます。',
     ],
   },
   mission: {
