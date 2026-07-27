@@ -614,6 +614,9 @@
   .cg-pack-odds-btn{margin-top:10px; width:100%; font-size:10px; padding:7px; border-radius:10px; border:1px solid var(--hairline-panel);
     background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
   .cg-gacha-odds-panel{max-width:380px;}
+  .cg-cloud-restore-panel{max-width:340px; text-align:center;}
+  .cg-cloud-restore-desc{font-size:13px; color:var(--text-panel); margin-bottom:10px; line-height:1.6;}
+  .cg-cloud-restore-warning{font-size:12px; color:var(--hp-red); font-weight:700; margin-bottom:16px; line-height:1.5;}
   .cg-odds-list{display:flex; flex-direction:column; gap:4px; max-height:55vh; overflow-y:auto; margin-bottom:14px;
     padding:8px 10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
   .cg-odds-row{display:flex; align-items:center; gap:8px; font-size:11px; padding:4px 0; border-bottom:1px solid var(--hairline-panel);}
@@ -749,7 +752,7 @@
   @keyframes cgTeaserTextIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
   /* ---------- ミッション ---------- */
-  .cg-mission-claimall-btn{display:block; width:calc(100% - 16px); margin:14px 8px 20px; font-size:13px; padding:13px 10px;
+  .cg-mission-claimall-btn{display:block; width:calc(100% - 16px); margin:14px 8px 28px; font-size:13px; padding:13px 10px;
     position:relative; z-index:2;
     line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-sizing:border-box;}
   .cg-mission-claimall-btn.hidden{display:none;}
@@ -1315,7 +1318,7 @@
     font-family:inherit; font-size:11px; padding:6px 12px; border-radius:14px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;}
   .cg-filter-tab.active{background:var(--bg-panel); color:var(--gold); border:1.5px solid var(--gold-bright); font-weight:700;}
   /* ミッション画面のみ、分類タブをひとまわり大きく表示 */
-  #mission-filter-tabs{gap:8px; position:relative; z-index:2; margin-bottom:4px; flex-wrap:wrap;}
+  #mission-filter-tabs{gap:8px; position:relative; z-index:2; margin-top:6px; margin-bottom:4px; flex-wrap:wrap;}
   #mission-filter-tabs .cg-filter-tab{font-size:13px; padding:10px 16px; border-radius:16px;}
   /* ステージ選択画面のモードタブ（ストーリー/ダンジョン/高難易度/特別クエスト）も大きく表示 */
   #stage-mode-tabs .cg-filter-tab{font-size:13px; padding:10px 16px; border-radius:16px; font-weight:700;}
@@ -1955,6 +1958,27 @@
   </div>
 
   <!-- ============ 設定・データ管理 ============ -->
+  <!-- 汎用の確認モーダル（window.confirm()はスタンドアロンPWAで動作が不安定なため、専用モーダルを使用） -->
+  <div id="generic-confirm-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame cg-cloud-restore-panel">
+      <div class="cg-help-title" id="generic-confirm-title">確認</div>
+      <div class="cg-cloud-restore-desc" id="generic-confirm-desc"></div>
+      <button class="cg-btn cg-btn-main" id="generic-confirm-yes">はい</button>
+      <button class="cg-btn" id="generic-confirm-no">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- クラウドデータの復元確認（window.confirm()はスタンドアロンPWAで動作が不安定なため、専用モーダルを使用） -->
+  <div id="cloud-restore-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame cg-cloud-restore-panel">
+      <div class="cg-help-title">☁️ クラウドデータが見つかりました</div>
+      <div class="cg-cloud-restore-desc" id="cloud-restore-desc">クラウドにセーブデータが見つかりました。読み込みますか？</div>
+      <div class="cg-cloud-restore-warning">⚠️ 読み込むと、この端末の現在のデータは上書きされます。</div>
+      <button class="cg-btn cg-btn-main" id="cloud-restore-yes">クラウドのデータを読み込む</button>
+      <button class="cg-btn" id="cloud-restore-no">この端末のデータのままにする</button>
+    </div>
+  </div>
+
   <div id="settings-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-ornate cg-double-frame">
       <div class="cg-help-title">設定・データ管理</div>
