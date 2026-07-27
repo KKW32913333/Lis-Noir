@@ -785,9 +785,12 @@
   .cg-world-stages{display:flex; flex-direction:column; gap:10px;}
 
   .cg-dungeon-progress-banner{margin:0 14px 14px; padding:12px 16px; border-radius:14px; text-align:center;
-    background:linear-gradient(135deg,#2a2440,#1c1725); border:1px solid var(--gold-soft); box-shadow:0 3px 10px #00000033;}
+    background:linear-gradient(135deg,#2a2440,#1c1725); border:1px solid var(--gold-soft); box-shadow:0 3px 10px #00000033;
+    cursor:pointer;}
+  .cg-dungeon-progress-banner:active{transform:scale(.98);}
   .cg-dungeon-progress-label{font-size:10px; color:#C7B6FFbb; letter-spacing:1px;}
   .cg-dungeon-progress-value{font-size:18px; font-weight:800; color:var(--true-gold); margin-top:2px;}
+  .cg-dungeon-progress-hint{font-size:9px; color:#C7B6FF88; margin-top:3px;}
   .cg-dungeon-boss-card{border-color:var(--true-gold); background:linear-gradient(135deg,var(--bg-panel),#2a2440);}
   .cg-dungeon-boss-card .cg-stage-portrait{border-color:var(--true-gold); box-shadow:0 0 10px var(--gold-soft);}
   .cg-dungeon-equip-tag{color:var(--true-gold); font-weight:800;}
@@ -1365,7 +1368,7 @@
 
   <div id="draw-choice-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-draw-choice-panel cg-ornate cg-double-frame">
-      <div class="cg-draw-choice-title">🎴 カードを引きますか？</div>
+      <div class="cg-draw-choice-title">カードを引きますか？</div>
       <div class="cg-draw-choice-sub">残り山札: <span id="draw-choice-deck-count">0</span>枚</div>
       <div class="cg-draw-choice-buttons">
         <button class="cg-btn" id="draw-choice-no">引かない</button>

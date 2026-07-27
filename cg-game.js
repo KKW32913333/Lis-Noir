@@ -2905,9 +2905,10 @@ function renderDungeonSelect(containerId) {
 
   // #stage-list（ステージ選択画面のタブ経由）に表示する場合は、進捗バナーを自前で先頭に付ける
   const progressBanner = containerId === 'stage-list'
-    ? `<div class="cg-dungeon-progress-banner">
+    ? `<div class="cg-dungeon-progress-banner" id="dungeon-progress-jump-btn" title="タップして現在の階からプレイ">
         <div class="cg-dungeon-progress-label">現在の到達階層</div>
         <div class="cg-dungeon-progress-value">地下 ${state.dungeonFloor} / ${DUNGEON_MAX_FLOOR} 階</div>
+        <div class="cg-dungeon-progress-hint">タップしてこの階からプレイ</div>
       </div>`
     : '';
 
@@ -2947,6 +2948,12 @@ function renderDungeonSelect(containerId) {
       startBattle(getDungeonFloorStage(floor));
     });
   });
+  const jumpBtn = document.getElementById('dungeon-progress-jump-btn');
+  if (jumpBtn) {
+    jumpBtn.addEventListener('click', () => {
+      startBattle(getDungeonFloorStage(state.dungeonFloor));
+    });
+  }
 }
 
 function newBattleUnit(id, isPlayerCard) {
