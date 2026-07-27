@@ -4708,6 +4708,20 @@ function isOnlineBattleAvailable() {
   return !!(window.LisNoirCloud && typeof window.LisNoirCloud.createBattleRoom === 'function');
 }
 
+// オンライン対戦にはFirebase Authenticationへのログインが必要なため、
+// 未ログインの場合は自動的に匿名ログインする（メール登録なしでも対戦できるようにするため）
+async function ensureOnlineAuth() {
+  if (window.LisNoirCloud.getUser()) return true;
+  if (typeof window.LisNoirCloud.signInAnon !== 'function') return false;
+  try {
+    await window.LisNoirCloud.signInAnon();
+    return true;
+  } catch (err) {
+    console.error('signInAnon failed', err);
+    return false;
+  }
+}
+
 function openOnlineScreen() {
   document.getElementById('online-lobby-view').classList.remove('hidden');
   document.getElementById('online-waiting-view').classList.add('hidden');
@@ -4731,6 +4745,9 @@ async function createOnlineRoom() {
     return;
   }
   try {
+    setOnlineStatus('準備しています…');
+    const authOk = await ensureOnlineAuth();
+    if (!authOk) { setOnlineStatus('ログインに失敗しました。時間をおいて再度お試しください。'); return; }
     setOnlineStatus('部屋を作成しています…');
     const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
     const hostShuffledDeck = shuffle(validDeck.slice());
@@ -4766,6 +4783,9 @@ async function joinOnlineRoom() {
     return;
   }
   try {
+    setOnlineStatus('準備しています…');
+    const authOk = await ensureOnlineAuth();
+    if (!authOk) { setOnlineStatus('ログインに失敗しました。時間をおいて再度お試しください。'); return; }
     setOnlineStatus('参加しています…');
     const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
     const guestShuffledDeck = shuffle(validDeck.slice());
