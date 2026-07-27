@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v166';
+const CACHE_NAME = 'lisnoir-cache-v167';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -36,7 +36,7 @@ const CACHE_ASSETS = [
   'card-nature-swiftrabbit.png',
   'card-spell-apocalypse.png',
   'card-water-spiritmaiden.png',
-  'card-dark-vampirelord.png',
+  'card-dark-vampirelord2.png',
   'card-dark-chaosdemon.png',
   'card-dark-voidreaper.png',
   'card-dark-nocturnaldragon.png',
@@ -53,7 +53,7 @@ const CACHE_ASSETS = [
   'card-fire-flarelion.png',
   'card-nature-venomscorpion.png',
   'card-light-lightguardian.png',
-  'card-fire-crimson.png',
+  'card-fire-crimson2.png',
   'card-light-arcknight.png',
   'card-equip-aqualance.png',
   'card-field-sanctuary.png',
