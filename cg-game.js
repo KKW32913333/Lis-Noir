@@ -285,6 +285,7 @@ function defaultState() {
     hasSeenOnboarding: false,
     sfxMuted: false,
     battleFastMode: false,
+    autoBattleMode: false,
     bgmMuted: true,
     bgmVolume: 0.5,
     dragon: { level: 1, exp: 0 },
@@ -856,6 +857,81 @@ function todayStr() {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+// ---------- ログインボーナスカレンダー ----------
+// 7日周期。7日目を過ぎるとまた1日目から繰り返す
+const LOGIN_CALENDAR = [
+  { day: 1, reward: { gold: 500 } },
+  { day: 2, reward: { gems: 20 } },
+  { day: 3, reward: { gold: 1000 } },
+  { day: 4, reward: { tickets: 1 } },
+  { day: 5, reward: { gems: 50 } },
+  { day: 6, reward: { gold: 2000 } },
+  { day: 7, reward: { gems: 100, tickets: 2 } },
+];
+
+function yesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+// 日付が変わっていたら、連続ログイン日数を更新する（連続が途切れていたら1日目からやり直し）
+function checkLoginBonus() {
+  const today = todayStr();
+  if (state.loginBonusDate === today) return;
+  const yesterday = yesterdayStr();
+  if (state.loginBonusDate === yesterday) {
+    state.loginStreak = ((state.loginStreak || 0) % 7) + 1;
+  } else {
+    state.loginStreak = 1;
+  }
+  state.loginBonusDate = today;
+  state.loginBonusClaimedToday = false;
+  saveState();
+}
+
+function updateLoginBonusBadge() {
+  const badge = document.getElementById('login-bonus-badge');
+  if (!badge) return;
+  badge.classList.toggle('hidden', !!state.loginBonusClaimedToday);
+}
+
+function renderLoginBonusCalendar() {
+  checkLoginBonus();
+  const today = state.loginStreak || 1;
+  document.getElementById('login-bonus-streak').textContent = `現在 ${today}日目`;
+  document.getElementById('login-bonus-grid').innerHTML = LOGIN_CALENDAR.map(entry => {
+    const claimed = entry.day < today || (entry.day === today && state.loginBonusClaimedToday);
+    const isToday = entry.day === today && !state.loginBonusClaimedToday;
+    const icon = entry.reward.tickets ? '🎫' : entry.reward.gems ? '💎' : '💰';
+    const amount = entry.reward.tickets ? `${entry.reward.tickets}枚` : entry.reward.gems ? `${entry.reward.gems}` : `${entry.reward.gold}`;
+    return `<div class="cg-login-bonus-day ${claimed ? 'claimed' : ''} ${isToday ? 'today' : ''}">
+      <span class="day-label">${entry.day}日目</span>
+      <span class="day-icon">${icon}</span>
+      <span class="day-amount">${amount}</span>
+      ${claimed ? '<span class="day-label">済</span>' : ''}
+    </div>`;
+  }).join('');
+  const claimBtn = document.getElementById('login-bonus-claim-btn');
+  claimBtn.disabled = !!state.loginBonusClaimedToday;
+  claimBtn.textContent = state.loginBonusClaimedToday ? '本日は受取済み' : `${today}日目を受け取る`;
+  updateLoginBonusBadge();
+}
+
+function claimLoginBonus() {
+  checkLoginBonus();
+  if (state.loginBonusClaimedToday) return;
+  const day = state.loginStreak || 1;
+  const entry = LOGIN_CALENDAR.find(e => e.day === day) || LOGIN_CALENDAR[0];
+  state.gold += entry.reward.gold || 0;
+  state.gems += entry.reward.gems || 0;
+  state.tickets = (state.tickets || 0) + (entry.reward.tickets || 0);
+  state.loginBonusClaimedToday = true;
+  saveState();
+  renderLoginBonusCalendar();
+  renderHome();
+}
+
 function checkDailyReset() {
   const today = todayStr();
   if (state.dailyDate !== today) {
@@ -887,6 +963,8 @@ function claimDailyReward() {
 function renderHome() {
   checkDailyReset();
   updatePresentBadge();
+  checkLoginBonus();
+  updateLoginBonusBadge();
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -1316,6 +1394,7 @@ function executeLeaderUltimate() {
   if (!leader || !leader.ultimateSkill) return;
   if ((battle.leaderUltimateCharge || 0) < ULTIMATE_COOLDOWN_TURNS) return;
   const skill = leader.ultimateSkill;
+  logBattleAction(`💥 アルティメットスキル発動！${skill.name}`);
 
   battle.enemyHp = Math.max(0, battle.enemyHp - skill.dmg);
   impactEffect(document.getElementById('battle-enemy-portrait'), skill.dmg, 0);
@@ -2977,6 +3056,7 @@ function startBattle(stage) {
     lastPlayedInfo: null,
     leaderUltimateCharge: 1,
     leaderUltimateReady: false,
+    log: [],
   };
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const enemyPortraitEl = document.getElementById('battle-enemy-portrait');
@@ -2999,6 +3079,7 @@ function startBattle(stage) {
   }
   renderBattle();
   updateBattleSpeedBtn();
+  updateAutoBattleBtn();
   showScreen('battle');
   showVsIntro(stage);
 }
@@ -3015,6 +3096,92 @@ function updateBattleSpeedBtn() {
   btn.classList.toggle('fast', !!state.battleFastMode);
 }
 
+// ---------- オートバトル ----------
+function updateAutoBattleBtn() {
+  const btn = document.getElementById('battle-auto-btn');
+  if (!btn) return;
+  btn.classList.toggle('on', !!state.autoBattleMode);
+}
+
+function toggleAutoBattle() {
+  state.autoBattleMode = !state.autoBattleMode;
+  saveState();
+  updateAutoBattleBtn();
+  if (state.autoBattleMode && battle && !battle.over && battle.activeSide === 'player') {
+    runAutoBattleTurn();
+  }
+}
+
+// 自分のターンに、敵AIと同様のロジックでカードを出し続け、攻撃可能なモンスターで全て攻撃してからターンを終了する
+function runAutoBattleTurn() {
+  if (!battle || battle.over || !state.autoBattleMode) return;
+  if (battle.activeSide !== 'player') return;
+
+  let progressed = true;
+  let guard = 0;
+  while (progressed && guard < 30) {
+    progressed = false;
+    guard++;
+    for (let i = 0; i < battle.playerHand.length; i++) {
+      const id = battle.playerHand[i];
+      const def = CARD_DEFS[id];
+      if (!def || def.cost > battle.playerCost) continue;
+      const type = def.type || 'monster';
+
+      if (type === 'monster') {
+        const emptyIdx = battle.playerField.findIndex(s => s === null);
+        if (emptyIdx === -1) continue;
+        playCardFromHand(i, emptyIdx);
+        progressed = true;
+        break;
+      }
+      if (type === 'equipment' && def.target === 'friendly') {
+        const targetIdx = battle.playerField.findIndex(u => u !== null);
+        if (targetIdx === -1) continue;
+        equipCardFromHand(i, targetIdx);
+        progressed = true;
+        break;
+      }
+      if (type === 'field') {
+        playFieldCard(i);
+        progressed = true;
+        break;
+      }
+      if (type === 'spell') {
+        const target = def.target || 'none';
+        if (target === 'none' || target === 'enemy') {
+          castSpell(i, null);
+          progressed = true;
+          break;
+        }
+        if (target === 'enemy_monster') {
+          const targetIdx = battle.enemyField.findIndex(u => u !== null);
+          if (targetIdx === -1) continue;
+          castSpell(i, targetIdx);
+          progressed = true;
+          break;
+        }
+      }
+    }
+    if (battle.over) return;
+  }
+
+  battle.playerField.forEach((u, i) => {
+    if (!u || !u.canAttack || battle.over) return;
+    const valid = getValidTargets(u, battle.enemyField);
+    if (valid.faceAllowed) {
+      attackTarget(i, null);
+    } else if (valid.indices.length) {
+      attackTarget(i, valid.indices[0]);
+    }
+  });
+
+  renderBattle();
+  if (!battle.over && state.autoBattleMode) {
+    setTimeout(() => { if (state.autoBattleMode && battle && !battle.over) endTurn(); }, battleMs(700));
+  }
+}
+
 function showVsIntro(stage) {
   document.getElementById('vs-enemy-portrait').textContent = stage.portrait;
   document.getElementById('vs-enemy-name').textContent = stage.name;
@@ -3025,6 +3192,9 @@ function showVsIntro(stage) {
     showTurnBanner('YOUR TURN');
     if (!state.hasSeenBattleHelp) {
       document.getElementById('battle-help-overlay').classList.remove('hidden');
+    }
+    if (state.autoBattleMode && battle && !battle.over) {
+      runAutoBattleTurn();
     }
   }, battleMs(1450));
 }
@@ -3633,6 +3803,15 @@ function showHandCardInfo(id, handIdx) {
   }
 }
 
+const MAX_BATTLE_LOG = 60;
+// バトル中の主要な行動（カード使用・攻撃など）を記録する。後で対戦履歴の詳細として振り返れるようにするため
+function logBattleAction(text) {
+  if (!battle) return;
+  battle.log = battle.log || [];
+  battle.log.push({ turn: battle.turn, side: battle.activeSide, text });
+  if (battle.log.length > MAX_BATTLE_LOG) battle.log.shift();
+}
+
 function playCardFromHand(handIdx, fieldIdx) {
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
@@ -3645,6 +3824,7 @@ function playCardFromHand(handIdx, fieldIdx) {
   sfxCardPlay();
   summonEffect();
   if (def.skill) battle.lastPlayedInfo = def;
+  logBattleAction(`🃏 ${def.name} を場に出した`);
   renderBattle();
 }
 
@@ -3701,6 +3881,7 @@ function castSpell(handIdx, targetIdx) {
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+  logBattleAction(`✨ ${def.name} を使用した`);
   renderBattle();
 }
 
@@ -3714,6 +3895,7 @@ function playFieldCard(handIdx) {
   battle.fieldCard = id;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
+  logBattleAction(`🏞️ ${def.name} を設置した`);
   renderBattle();
 }
 
@@ -3731,6 +3913,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
+  logBattleAction(`🛡️ ${unit.def.name} に ${def.name} を装備した`);
   renderBattle();
 }
 
@@ -3990,6 +4173,7 @@ function attackTarget(attackerIdx, targetIdx) {
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
   impactEffect(targetEl, dmg, mult);
+  logBattleAction(`⚔️ ${attacker.def.name} が${targetIdx === null ? '敵本体' : '敵モンスター'}に${dmg}ダメージ`);
   if (tag && tag.effect === 'lifesteal') {
     // 【ヴァンパイアロード】攻撃時、与えたダメージ分だけ自分のHPを回復する
     const maxHp = attacker.def.hp + (attacker.hpBonus || 0);
@@ -4156,6 +4340,7 @@ function enemyTurn() {
         applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
         battle.enemyHand.splice(i, 1);
         progressed = true;
+        logBattleAction(`🃏 敵が ${def.name} を場に出した`);
         break;
       }
 
@@ -4253,6 +4438,7 @@ function enemyTurn() {
       const valid = getValidTargets(u, battle.playerField);
       const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
       const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) + extraDmg;
+      logBattleAction(`⚔️ 敵の ${u.def.name} が攻撃（${dmg}ダメージ）`);
       let killed = false;
       if (tag && tag.effect === 'novaAttack' && valid.indices.length > 0) {
         battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, dmg); });
@@ -4369,6 +4555,10 @@ function enemyTurn() {
     battle.playerHp = 0; // 山札切れで敗北
     battle.deckOutSide = 'player';
     finishPlayerTurnStart();
+  } else if (state.autoBattleMode) {
+    // オートバトル中は、自動的に「引く」を選んで進める
+    drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
+    finishPlayerTurnStart();
   } else {
     document.getElementById('draw-choice-deck-count').textContent = battle.playerDeck.length;
     document.getElementById('draw-choice-overlay').classList.remove('hidden');
@@ -4381,6 +4571,9 @@ function finishPlayerTurnStart() {
   tickAilment(battle.playerField);
   battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   renderBattle();
+  if (state.autoBattleMode && battle && !battle.over) {
+    setTimeout(() => runAutoBattleTurn(), battleMs(500));
+  }
 }
 
 function resolveDrawChoice(shouldDraw) {
@@ -4471,6 +4664,7 @@ function logBattleHistory(stage, won, trophyDelta) {
     won,
     trophyDelta,
     date: Date.now(),
+    log: (battle && battle.log) ? battle.log.slice() : [],
   });
   if (state.battleHistory.length > MAX_BATTLE_HISTORY) {
     state.battleHistory.length = MAX_BATTLE_HISTORY;
@@ -4490,19 +4684,38 @@ function renderBattleHistory() {
     listEl.innerHTML = '<div class="cg-rank-empty">まだ対戦履歴がありません。<br>バトルに挑戦してみましょう！</div>';
     return;
   }
-  listEl.innerHTML = history.map(h => {
+  listEl.innerHTML = history.map((h, idx) => {
     const d = new Date(h.date);
     const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     return `
-      <div class="cg-history-item ${h.won ? 'win' : 'lose'}">
+      <div class="cg-history-item ${h.won ? 'win' : 'lose'}" data-idx="${idx}">
         <div class="cg-history-result">${h.won ? 'WIN' : 'LOSE'}</div>
         <div class="cg-history-info">
           <div class="cg-history-stage">${h.isEvent ? '🎉 ' : ''}${h.name}</div>
           <div class="cg-history-date">${dateStr}</div>
         </div>
         <div class="cg-history-trophy ${h.won ? 'win' : 'lose'}">${h.trophyDelta > 0 ? '+' : ''}${h.trophyDelta}</div>
+        ${(h.log && h.log.length) ? `<button class="cg-history-detail-btn" data-idx="${idx}">詳細</button>` : ''}
       </div>`;
   }).join('');
+  listEl.querySelectorAll('.cg-history-detail-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showBattleReplay(Number(btn.dataset.idx));
+    });
+  });
+}
+
+// 対戦履歴の1件について、記録されている行動ログを振り返り表示する
+function showBattleReplay(idx) {
+  const entry = (state.battleHistory || [])[idx];
+  if (!entry) return;
+  const log = entry.log || [];
+  document.getElementById('replay-title').textContent = `${entry.isEvent ? '🎉 ' : ''}${entry.name}（${entry.won ? 'WIN' : 'LOSE'}）`;
+  document.getElementById('replay-log-list').innerHTML = log.length
+    ? log.map(e => `<div class="cg-replay-log-item"><span class="cg-replay-log-turn">ターン${e.turn}</span><span class="cg-replay-log-text ${e.side === 'enemy' ? 'enemy' : ''}">${e.text}</span></div>`).join('')
+    : '<div class="cg-empty">この対戦の詳細ログはありません</div>';
+  document.getElementById('battle-replay-overlay').classList.remove('hidden');
 }
 
 function revealResultScreen(won, stage) {
@@ -5267,6 +5480,7 @@ const SCREEN_HELP = {
     items: [
       '<b>① 通算成績</b><br>これまでの通算勝利数・勝率を確認できます。',
       '<b>② 対戦履歴</b><br>直近の対戦結果とトロフィー増減の履歴を確認できます。',
+      '<b>③ 対戦の詳細（リプレイ）</b><br>「詳細」ボタンをタップすると、そのバトルで実際に起きた行動（カードの使用・攻撃など）を振り返って確認できます。',
     ],
   },
 };
@@ -5312,6 +5526,17 @@ function init() {
   document.getElementById('quick-shop').addEventListener('click', () => { renderShop(); showScreen('shop'); });
   document.getElementById('quick-mission').addEventListener('click', () => { renderMissions(); showScreen('mission'); });
   document.getElementById('quick-present').addEventListener('click', () => { renderPresents(); showScreen('present'); });
+  document.getElementById('quick-login-bonus').addEventListener('click', () => {
+    renderLoginBonusCalendar();
+    document.getElementById('login-bonus-overlay').classList.remove('hidden');
+  });
+  document.getElementById('login-bonus-claim-btn').addEventListener('click', claimLoginBonus);
+  document.getElementById('login-bonus-close').addEventListener('click', () => {
+    document.getElementById('login-bonus-overlay').classList.add('hidden');
+  });
+  document.getElementById('battle-replay-close').addEventListener('click', () => {
+    document.getElementById('battle-replay-overlay').classList.add('hidden');
+  });
   const quickDragonBtn = document.getElementById('quick-dragon');
   if (quickDragonBtn) quickDragonBtn.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
@@ -5379,6 +5604,7 @@ function init() {
     saveState();
     updateBattleSpeedBtn();
   });
+  document.getElementById('battle-auto-btn').addEventListener('click', toggleAutoBattle);
   document.getElementById('battle-help-close').addEventListener('click', () => {
     document.getElementById('battle-help-overlay').classList.add('hidden');
     state.hasSeenBattleHelp = true;

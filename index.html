@@ -888,6 +888,7 @@
   .cg-battle-speed-btn{height:26px; padding:0 10px; border-radius:13px; border:1px solid var(--hairline-panel); background:var(--bg-panel2);
     color:var(--text-dim-panel); font-size:11px; font-weight:800; cursor:pointer; flex-shrink:0;}
   .cg-battle-speed-btn.fast{background:var(--gold); color:#fff; border-color:var(--gold-bright);}
+  .cg-battle-speed-btn.on{background:#2fa86a; color:#fff; border-color:#4fd98c;}
   .cg-direct-attack-label{display:block; text-align:center; margin:-2px auto 2px; width:fit-content; z-index:6; font-size:9px; color:var(--hp-red);
     background:var(--dark-chip); padding:3px 8px; border-radius:10px; border:1px solid var(--hp-red);
     white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s ease;}
@@ -910,6 +911,17 @@
   .cg-help-item{font-size:12px; line-height:1.6; color:var(--text-dim-panel);}
   .cg-help-item b{color:var(--text-panel);}
   .cg-draw-choice-panel{max-width:300px; text-align:center;}
+  .cg-login-bonus-panel{max-width:340px; text-align:center;}
+  .cg-login-bonus-sub{font-size:12px; color:var(--text-dim-panel); margin-bottom:12px;}
+  .cg-login-bonus-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px;}
+  .cg-login-bonus-day{border-radius:12px; border:1.5px solid var(--hairline-panel); background:var(--bg-panel2);
+    padding:8px 4px; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .cg-login-bonus-day .day-label{font-size:9px; color:var(--text-dim-panel); font-weight:700;}
+  .cg-login-bonus-day .day-icon{font-size:16px;}
+  .cg-login-bonus-day .day-amount{font-size:9px; color:var(--text-panel); font-weight:700;}
+  .cg-login-bonus-day.claimed{opacity:.45; border-color:var(--gold-bright);}
+  .cg-login-bonus-day.today{border-color:var(--gold-bright); background:var(--gold-soft); box-shadow:0 0 8px var(--gold-soft);}
+  .cg-login-bonus-day.today .day-label{color:var(--gold);}
   .cg-draw-choice-title{font-size:16px; font-weight:800; color:var(--gold-bright); margin-bottom:6px;}
   .cg-draw-choice-sub{font-size:12px; color:var(--text-dim-panel); margin-bottom:16px;}
   .cg-draw-choice-buttons{display:flex; gap:10px;}
@@ -1134,6 +1146,16 @@
     background:var(--bg-panel); border:1px solid var(--hairline-panel);}
   .cg-history-item.win{border-left:4px solid #3d9d6f;}
   .cg-history-item.lose{border-left:4px solid var(--hp-red);}
+  .cg-history-detail-btn{flex-shrink:0; font-size:10px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
+    background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
+  .cg-battle-replay-panel{max-width:400px;}
+  .cg-replay-log-list{display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; margin-bottom:14px;
+    padding:10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
+  .cg-replay-log-item{display:flex; gap:8px; font-size:11px; align-items:baseline;}
+  .cg-replay-log-turn{flex-shrink:0; font-size:9px; font-weight:800; color:var(--gold); background:var(--gold-soft);
+    padding:2px 6px; border-radius:8px;}
+  .cg-replay-log-text{color:var(--text-panel);}
+  .cg-replay-log-text.enemy{color:var(--hp-red);}
   .cg-history-result{font-size:11px; font-weight:800; flex-shrink:0; width:38px; text-align:center; border-radius:8px; padding:3px 0;}
   .cg-history-item.win .cg-history-result{color:#3d9d6f; background:#3d9d6f22;}
   .cg-history-item.lose .cg-history-result{color:var(--hp-red); background:#c1495e22;}
@@ -1321,6 +1343,26 @@
 
   <!-- カード情報（長押しで表示・全画面共通） -->
   <!-- ターン開始時のカードを引くかどうかの選択 -->
+  <!-- ログインボーナスカレンダー -->
+  <!-- 対戦履歴の詳細（バトルリプレイ） -->
+  <div id="battle-replay-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-battle-replay-panel cg-ornate cg-double-frame">
+      <div class="cg-help-title" id="replay-title">対戦の詳細</div>
+      <div class="cg-replay-log-list" id="replay-log-list"></div>
+      <button class="cg-btn cg-btn-main" id="battle-replay-close">閉じる</button>
+    </div>
+  </div>
+
+  <div id="login-bonus-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-login-bonus-panel cg-ornate cg-double-frame">
+      <div class="cg-help-title">📅 ログインボーナス</div>
+      <div class="cg-login-bonus-sub" id="login-bonus-streak">現在 1日目</div>
+      <div class="cg-login-bonus-grid" id="login-bonus-grid"></div>
+      <button class="cg-btn cg-btn-main" id="login-bonus-claim-btn">受け取る</button>
+      <button class="cg-btn" id="login-bonus-close">閉じる</button>
+    </div>
+  </div>
+
   <div id="draw-choice-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-draw-choice-panel cg-ornate cg-double-frame">
       <div class="cg-draw-choice-title">🎴 カードを引きますか？</div>
@@ -1435,12 +1477,13 @@
       </div>
     </div>
 
-    <div class="cg-quick-grid cg-quick-grid-6">
+    <div class="cg-quick-grid">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
       <div class="cg-quick-btn" id="quick-cards"><span class="ic">🃏</span><span class="lb">カード</span></div>
       <div class="cg-quick-btn" id="quick-shop"><span class="ic">🏪</span><span class="lb">ガチャ</span></div>
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
       <div class="cg-quick-btn" id="quick-present"><span class="ic">🎁</span><span class="lb">プレゼント</span><span class="cg-quick-badge hidden" id="present-badge">0</span></div>
+      <div class="cg-quick-btn" id="quick-login-bonus"><span class="ic">📅</span><span class="lb">ログイン</span><span class="cg-quick-badge hidden" id="login-bonus-badge">!</span></div>
       <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
     </div>
 
@@ -1622,6 +1665,7 @@
       <button class="cg-back-btn cg-battle-back-btn" id="battle-back-btn" title="ホームへ戻る">←</button>
       <div class="cg-timer" id="battle-turn-timer">ターン 1</div>
       <div class="cg-battle-header-right">
+        <button class="cg-battle-speed-btn" id="battle-auto-btn" title="オートバトル切り替え">AUTO</button>
         <button class="cg-battle-speed-btn" id="battle-speed-btn" title="バトル速度切り替え">1x</button>
         <button class="cg-help-btn" id="battle-help-btn" title="遊び方">？</button>
       </div>
