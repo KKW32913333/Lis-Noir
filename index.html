@@ -207,6 +207,13 @@
   .cg-player-exp-track{width:64px; height:3px; border-radius:2px; background:var(--hairline-panel); margin-top:3px; overflow:hidden;}
   .cg-player-exp-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--true-gold));}
   .cg-currency-group{display:flex; gap:6px; font-size:11px; flex-shrink:0;}
+  .cg-cloud-backup-banner{display:flex; align-items:center; gap:8px; margin:0 16px 14px; padding:10px 12px; border-radius:12px;
+    background:var(--gold-soft); border:1px solid var(--gold-bright);}
+  .cg-cloud-backup-banner.hidden{display:none;}
+  .cg-cloud-backup-text{flex:1; font-size:11px; color:var(--text-panel); line-height:1.5;}
+  .cg-cloud-backup-actions{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+  .cg-cloud-backup-btn{font-size:11px; padding:8px 12px; white-space:nowrap;}
+  .cg-cloud-backup-dismiss{background:none; border:none; color:var(--text-dim-panel); font-size:14px; cursor:pointer; padding:4px;}
   .cg-currency{display:flex; align-items:center; gap:3px; background:var(--bg-panel2); border:1px solid var(--hairline-panel); padding:4px 8px; border-radius:20px; white-space:nowrap; box-shadow:0 1px 4px #00000033;}
 
   /* ---------- Home ---------- */
@@ -615,6 +622,11 @@
     background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
   .cg-gacha-odds-panel{max-width:380px;}
   .cg-cloud-restore-panel{max-width:340px; text-align:center;}
+  .cg-auto-restore-toast{position:fixed; top:calc(14px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
+    z-index:300; background:var(--bg-panel); border:1.5px solid var(--gold-bright); border-radius:14px; padding:10px 18px;
+    font-size:12px; color:var(--text-panel); box-shadow:0 6px 18px #00000055; white-space:nowrap;
+    opacity:1; transition:opacity .4s ease;}
+  .cg-auto-restore-toast.hidden{opacity:0; pointer-events:none;}
   .cg-cloud-restore-desc{font-size:13px; color:var(--text-panel); margin-bottom:10px; line-height:1.6;}
   .cg-cloud-restore-warning{font-size:12px; color:var(--hp-red); font-weight:700; margin-bottom:16px; line-height:1.5;}
   .cg-odds-list{display:flex; flex-direction:column; gap:4px; max-height:55vh; overflow-y:auto; margin-bottom:14px;
@@ -1529,6 +1541,14 @@
       </div>
     </div>
 
+    <div id="cloud-backup-banner" class="cg-cloud-backup-banner hidden">
+      <div class="cg-cloud-backup-text">☁️ 端末を機種変更・再起動してもデータを失わないために、クラウド保存の設定をおすすめします。</div>
+      <div class="cg-cloud-backup-actions">
+        <button class="cg-btn cg-btn-main cg-cloud-backup-btn" id="cloud-backup-goto-settings">設定する</button>
+        <button class="cg-cloud-backup-dismiss" id="cloud-backup-dismiss" title="閉じる">✕</button>
+      </div>
+    </div>
+
     <div class="cg-hero cg-ornate">
       <div class="cg-hero-fog"></div>
       <div class="cg-hero-magic-circle"></div>
@@ -1969,6 +1989,9 @@
   </div>
 
   <!-- クラウドデータの復元確認（window.confirm()はスタンドアロンPWAで動作が不安定なため、専用モーダルを使用） -->
+  <!-- クラウドから自動復元した際の通知（操作不要、自動で消える） -->
+  <div id="auto-restore-toast" class="cg-auto-restore-toast hidden">☁️ クラウドのデータを自動で読み込みました</div>
+
   <div id="cloud-restore-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-ornate cg-double-frame cg-cloud-restore-panel">
       <div class="cg-help-title">☁️ クラウドデータが見つかりました</div>
@@ -2207,6 +2230,12 @@
 <script type="module" src="firebase-init.js"></script>
 <script src="cg-game.js"></script>
 <script>
+  // 端末のストレージが不足した際などに、このアプリのデータが自動で消去されにくくなるよう、
+  // 永続化ストレージを要求する（iOSのホーム画面アプリでデータが消えてしまう問題への対策の一つ。
+  // 保証されるものではないが、毎回のアプリ起動時に要求することが推奨されている）
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').then((registration) => {

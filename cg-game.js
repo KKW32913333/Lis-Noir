@@ -516,6 +516,14 @@ function showCloudRestoreConfirm(desc) {
   });
 }
 
+// 自動でクラウドから復元した際、操作を求めず短く通知するだけのトースト表示
+function showAutoRestoreToast() {
+  const toast = document.getElementById('auto-restore-toast');
+  if (!toast) return;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3200);
+}
+
 // クラウドのデータを、現在の端末データにマージ適用する共通処理
 function applyCloudData(cloudData) {
   const base = defaultState();
@@ -535,6 +543,7 @@ function applyCloudData(cloudData) {
 function refreshCloudAuthUI(user) {
   const loggedOut = document.getElementById('cloud-section-loggedout');
   const loggedIn = document.getElementById('cloud-section-loggedin');
+  updateCloudBackupBanner(user);
   if (!loggedOut || !loggedIn) return;
   if (user) {
     loggedOut.classList.add('hidden');
@@ -544,6 +553,16 @@ function refreshCloudAuthUI(user) {
     loggedOut.classList.remove('hidden');
     loggedIn.classList.add('hidden');
   }
+}
+
+// クラウドにログインしていない状態で、ある程度進行している場合に、ホーム画面でバックアップ設定を案内する
+// （端末側のデータのみに依存していると、iOSの仕様上、突然データが消えてしまうリスクがあるため）
+function updateCloudBackupBanner(user) {
+  const banner = document.getElementById('cloud-backup-banner');
+  if (!banner) return;
+  const loggedIn = user || (window.LisNoirCloud && window.LisNoirCloud.getUser && window.LisNoirCloud.getUser());
+  const shouldShow = !loggedIn && state.beginnerGachaDone && !state.cloudBackupBannerDismissed;
+  banner.classList.toggle('hidden', !shouldShow);
 }
 
 async function handleSignUp() {
@@ -1028,6 +1047,7 @@ function renderHome() {
   updatePresentBadge();
   checkLoginBonus();
   updateLoginBonusBadge();
+  updateCloudBackupBanner();
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -6162,6 +6182,15 @@ function init() {
   });
   document.getElementById('tutorial-skip-btn').addEventListener('click', finishInteractiveTutorial);
   window.addEventListener('resize', () => repositionTutorialIfActive());
+  document.getElementById('cloud-backup-goto-settings').addEventListener('click', () => {
+    document.getElementById('cloud-backup-banner').classList.add('hidden');
+    openSettings();
+  });
+  document.getElementById('cloud-backup-dismiss').addEventListener('click', () => {
+    state.cloudBackupBannerDismissed = true;
+    saveState();
+    document.getElementById('cloud-backup-banner').classList.add('hidden');
+  });
   document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBgm);
   document.getElementById('bgm-volume-slider').addEventListener('input', (e) => {
@@ -6201,15 +6230,13 @@ function init() {
       if (!user) return;
       setCloudSyncStatus('☁️ ログイン中（' + user.email + '）');
       // ログインセッションは残っているのに、この端末のデータが初期状態のままに見える場合
-      // （端末側のストレージだけが消えてしまった可能性があるため）、クラウドの復元を提案する
+      // （端末側のストレージだけが消えてしまった可能性が高いため）、確認を挟まず自動でクラウドから復元する
       if (!state.beginnerGachaDone) {
         try {
           const cloudData = await window.LisNoirCloud.loadCloud();
           if (cloudData && cloudData.beginnerGachaDone) {
-            const useCloud = await showCloudRestoreConfirm(
-              'ログイン済みのクラウドデータが見つかりました。この端末のデータが消えている可能性があります。読み込みますか？'
-            );
-            if (useCloud) applyCloudData(cloudData);
+            applyCloudData(cloudData);
+            showAutoRestoreToast();
           }
         } catch (err) {
           console.error('auto cloud restore check failed', err);
