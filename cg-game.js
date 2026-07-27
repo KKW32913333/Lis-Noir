@@ -5318,11 +5318,6 @@ function showRevealMulti(results) {
 
 function hideReveal() {
   document.getElementById('shop-reveal-overlay').classList.add('hidden');
-  // 初心者ガチャの獲得演出を閉じた直後（＝プレイヤーが実際にカードを見終えたタイミング）に、
-  // 体験型チュートリアルを開始する（購入した瞬間ではなく、演出を見終わってから始まるようにするため）
-  if (state.beginnerGachaDone && state.hasSeenOnboarding && !state.hasSeenInteractiveTutorial && !interactiveTutorialActive) {
-    setTimeout(() => { if (!interactiveTutorialActive) startInteractiveTutorial(); }, 500);
-  }
 }
 
 // ---------- プレゼント ----------
@@ -5551,10 +5546,10 @@ function claimAllMissions() {
 const ONBOARDING_STEPS = [
   { emoji: '🏰', title: 'ようこそ、Lis Noirへ',
     desc: 'ここはホーム画面です。トロフィー・ランクや、ログインボーナス、ステージ挑戦などがまとまっています。まずは全体の流れを簡単にご案内します（あとで設定画面からいつでも見返せます）。' },
-  { emoji: '🔰', title: 'はじめに：初心者ガチャ',
-    desc: '一番最初に「初心者ガチャ」を1回引きます（無料）。ここで手に入るカードが、最初の戦力になります。引き終えると他の画面もすべて解放されます。' },
   { emoji: '👆', title: 'このあと、実際に操作してみましょう',
-    desc: 'ガチャを引き終えたら、実際の画面を操作しながら「デッキ編成」と「バトル」の基本を体験できるご案内が始まります。画面の光っている部分をタップして進めてください。' },
+    desc: 'これから、実際の画面を操作しながら「デッキ編成」と「バトル」の基本を体験できるご案内が始まります。画面の光っている部分をタップして進めてください。' },
+  { emoji: '🔰', title: '体験のあとは：初心者ガチャ',
+    desc: '操作を一通り体験したら、「初心者ガチャ」を1回引きます（無料）。ここで手に入るカードが、さらなる戦力になります。引き終えると他の画面もすべて解放されます。' },
   { emoji: '✨', title: 'ガチャでカードを集めよう',
     desc: '「ガチャ」からカードを集められます。同じカードを何度も入手すると「絆レベル」が上がり、見た目に称号や光る演出がつきます。レア度が高いカードほど強力です。' },
   { emoji: '📜', title: 'やり込み要素いろいろ',
@@ -5745,8 +5740,9 @@ function finishOnboarding() {
     state.hasSeenOnboarding = true;
     saveState();
   }
-  // 初心者ガチャが済んでいる状態（設定画面からの再視聴時など）なら、続けて体験型チュートリアルも見せる
-  if (state.beginnerGachaDone && !interactiveTutorialActive) {
+  // スライドが終わったら、続けて体験型チュートリアルを開始する（初回・再視聴のどちらの場合も）
+  // 初心者ガチャは、チュートリアル完了後に案内する流れのため、ここでは完了チェックをしない
+  if (!interactiveTutorialActive) {
     setTimeout(() => startInteractiveTutorial(), 400);
   }
 }
@@ -5909,10 +5905,13 @@ function init() {
 
   checkSeasonReset();
   renderHome();
-  // 初心者ガチャを引くまでは、他の画面へ移動できないようにする（ショップ画面に留める）
+  // 体験型チュートリアルを終えたのに初心者ガチャをまだ引いていない場合のみ、他の画面へ移動できないようにする
+  // （チュートリアル自体がスポットライトで画面遷移を誘導するため、チュートリアル中・完了前は自由に操作できるようにしている）
   document.addEventListener('click', (e) => {
     if (state.beginnerGachaDone) return;
-    if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-back-btn')) {
+    if (!state.hasSeenInteractiveTutorial) return;
+    if (interactiveTutorialActive) return;
+    if (e.target.closest('.cg-tab, .cg-quick-btn, .cg-back-btn, #result-stageselect, #result-primary')) {
       e.preventDefault();
       e.stopPropagation();
       renderShop();
@@ -6098,7 +6097,7 @@ function init() {
       if (user) setCloudSyncStatus('☁️ ログイン中（' + user.email + '）');
     });
   }
-  if (state.beginnerGachaDone) {
+  if (state.beginnerGachaDone || !state.hasSeenInteractiveTutorial) {
     showScreen('home');
   } else {
     renderShop();
