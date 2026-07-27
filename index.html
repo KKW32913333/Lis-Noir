@@ -2185,8 +2185,24 @@
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch((err) => {
+      navigator.serviceWorker.register('sw.js').then((registration) => {
+        // アプリを開いた時・前面に戻した時に、毎回新しい資材がないかチェックする
+        // （iOSのホーム画面アプリはブラウザの自動チェックだけでは反映が遅れることがあるため）
+        registration.update();
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') registration.update();
+        });
+      }).catch((err) => {
         console.warn('Service Worker registration failed:', err);
+      });
+
+      // 新しいService Workerが有効になったら、自動的にページを再読み込みして
+      // 新しい資材をすぐに反映する（アプリの削除・キャッシュクリアを不要にするための対応）
+      let swRefreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (swRefreshing) return;
+        swRefreshing = true;
+        window.location.reload();
       });
     });
   }
