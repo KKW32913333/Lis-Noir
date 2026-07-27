@@ -5349,13 +5349,23 @@ function claimAllMissions() {
 // ---------- 初回オンボーディング ----------
 const ONBOARDING_STEPS = [
   { emoji: '🏰', title: 'ようこそ、Lis Noirへ',
-    desc: 'ここはホーム画面です。トロフィー・ランクや、デイリー報酬、ステージ挑戦などがまとまっています。まずは全体の流れを簡単にご案内します。' },
+    desc: 'ここはホーム画面です。トロフィー・ランクや、ログインボーナス、ステージ挑戦などがまとまっています。まずは全体の流れを簡単にご案内します（あとで設定画面からいつでも見返せます）。' },
+  { emoji: '🔰', title: 'はじめに：初心者ガチャ',
+    desc: '一番最初に「初心者ガチャ」を1回引きます（無料）。ここで手に入るカードが、最初の戦力になります。引き終えると他の画面もすべて解放されます。' },
   { emoji: '🎴', title: '「カード」でデッキを編成',
-    desc: '下のタブの「カード」から、バトルで使うデッキを編成できます。カードをタップして追加、✕で外せます。カードを長押しすると詳細も確認できます。' },
-  { emoji: '⚔️', title: '「バトル」でステージに挑戦',
-    desc: '「バトル」からステージを選んで挑戦しましょう。手札のカードをコストの範囲で使い、相手のHPを0にすれば勝利です。' },
-  { emoji: '✨', title: 'さあ、冒険の始まりです',
-    desc: 'ガチャでカードを集めたり、ミッションを達成したりと、やり込み要素も盛りだくさん。あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
+    desc: '下のタブの「カード」→「デッキ編成」から、バトルで使うデッキを作れます。下のカード一覧をタップして追加、デッキに入っているカードの左上「−」ボタンで外せます。画面上部でリーダー（1体）も選べます。' },
+  { emoji: '⚔️', title: 'バトルの基本操作',
+    desc: '手札のカードをタップして選び、自分の場の空きマスをタップすると召喚できます（コストが必要）。攻撃可能なモンスター（緑の点つき）をタップ→敵モンスターか、敵の顔アイコン／画面下の「直接攻撃」ボタンをタップで攻撃します。' },
+  { emoji: '👑', title: 'リーダーとアルティメットスキル',
+    desc: 'リーダーは対応属性の味方を常に強化してくれます。さらに、自分のアイコンの下に表示される「◯/5」が貯まると、アイコンをタップしてアルティメットスキル（強力な全体攻撃）を発動できます。長押しでリーダーの詳細も確認できます。' },
+  { emoji: '🃏', title: 'ターンの流れ',
+    desc: '自分のターンが来ると「カードを引きますか？」と聞かれます。状況に応じて引く／引かないを選べます。行動が終わったら「ターン終了」ボタンでターンを渡しましょう。' },
+  { emoji: '✨', title: 'ガチャでカードを集めよう',
+    desc: '「ガチャ」からカードを集められます。同じカードを何度も入手すると「絆レベル」が上がり、見た目に称号や光る演出がつきます。レア度が高いカードほど強力です。' },
+  { emoji: '📜', title: 'やり込み要素いろいろ',
+    desc: '「ミッション」や「ログインボーナス」「プレゼント」から報酬を受け取れます。周回プレイには、バトル画面の「AUTO」（オートバトル）や「1x/2x」（倍速）が便利です。' },
+  { emoji: '❓', title: '困ったときは',
+    desc: 'それぞれの画面右上にある「？」ボタンから、その画面の詳しい遊び方をいつでも確認できます。さあ、あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
 ];
 let onboardingStepIdx = 0;
 
@@ -5653,6 +5663,10 @@ function init() {
   document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
   document.getElementById('draw-choice-no').addEventListener('click', () => resolveDrawChoice(false));
   document.getElementById('settings-btn').addEventListener('click', openSettings);
+  document.getElementById('rewatch-onboarding-btn').addEventListener('click', () => {
+    document.getElementById('settings-overlay').classList.add('hidden');
+    startOnboarding();
+  });
   document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBgm);
   document.getElementById('bgm-volume-slider').addEventListener('input', (e) => {
