@@ -64,6 +64,8 @@ function friendlyAuthError(err) {
     'auth/wrong-password': 'パスワードが違います。',
     'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません。',
     'auth/too-many-requests': '試行回数が多すぎます。しばらく待ってから再度お試しください。',
+    'auth/operation-not-allowed': 'この機能は現在利用できません（匿名ログインが無効になっている可能性があります）。',
+    'auth/network-request-failed': '通信エラーが発生しました。電波状況をご確認の上、再度お試しください。',
   };
   return map[code] || ('エラーが発生しました（' + code + '）');
 }
