@@ -870,10 +870,10 @@ const LOGIN_CALENDAR = [
   { day: 1, reward: { gold: 500 } },
   { day: 2, reward: { gems: 20 } },
   { day: 3, reward: { gold: 1000 } },
-  { day: 4, reward: { tickets: 1 } },
-  { day: 5, reward: { gems: 50 } },
-  { day: 6, reward: { gold: 2000 } },
-  { day: 7, reward: { gems: 100, tickets: 2 } },
+  { day: 4, reward: { gems: 30 } },
+  { day: 5, reward: { gold: 1500 } },
+  { day: 6, reward: { gems: 50 } },
+  { day: 7, reward: { gems: 150 } },
 ];
 
 function yesterdayStr() {
@@ -910,8 +910,8 @@ function renderLoginBonusCalendar() {
   document.getElementById('login-bonus-grid').innerHTML = LOGIN_CALENDAR.map(entry => {
     const claimed = entry.day < today || (entry.day === today && state.loginBonusClaimedToday);
     const isToday = entry.day === today && !state.loginBonusClaimedToday;
-    const icon = entry.reward.tickets ? '🎫' : entry.reward.gems ? '💎' : '💰';
-    const amount = entry.reward.tickets ? `${entry.reward.tickets}枚` : entry.reward.gems ? `${entry.reward.gems}` : `${entry.reward.gold}`;
+    const icon = entry.reward.gems ? '💎' : '💰';
+    const amount = entry.reward.gems ? `${entry.reward.gems}` : `${entry.reward.gold}`;
     return `<div class="cg-login-bonus-day ${claimed ? 'claimed' : ''} ${isToday ? 'today' : ''}">
       <span class="day-label">${entry.day}日目</span>
       <span class="day-icon">${icon}</span>
@@ -3130,6 +3130,12 @@ function toggleAutoBattle() {
 function runAutoBattleTurn() {
   if (!battle || battle.over || !state.autoBattleMode) return;
   if (battle.activeSide !== 'player') return;
+
+  // アルティメットスキルが準備できていれば、オート中も自動的に使用する
+  if ((battle.leaderUltimateCharge || 0) >= ULTIMATE_COOLDOWN_TURNS) {
+    executeLeaderUltimate();
+    if (battle.over) return;
+  }
 
   let progressed = true;
   let guard = 0;
@@ -5509,6 +5515,22 @@ function openScreenHelp(key) {
 }
 
 function init() {
+  // 全てのオーバーレイ（ヘルプ・カード情報・各種モーダル）について、非表示になった後は
+  // display:noneにして完全にレンダリングを止める（見えない間もアニメーション等が動き続けて
+  // 端末が発熱する問題への対策）。既存の hidden クラスの付け外しはそのままで動作する
+  document.querySelectorAll('.cg-help-overlay').forEach(overlay => {
+    const observer = new MutationObserver(() => {
+      if (overlay.classList.contains('hidden')) {
+        setTimeout(() => {
+          if (overlay.classList.contains('hidden')) overlay.style.display = 'none';
+        }, 220);
+      } else {
+        overlay.style.display = '';
+      }
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  });
+
   checkSeasonReset();
   renderHome();
   // 初心者ガチャを引くまでは、他の画面へ移動できないようにする（ショップ画面に留める）

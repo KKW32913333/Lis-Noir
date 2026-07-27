@@ -278,17 +278,18 @@
     background:#23242bcc; border:1px solid var(--gold-bright); color:#F2EEFF; font-size:11px; font-weight:800;
     display:flex; align-items:center; justify-content:center; z-index:2;}
   .cg-card-art{flex:1; position:relative; overflow:hidden;}
-  .cg-card-foil{position:absolute; inset:0; pointer-events:none; z-index:2; background-size:250% 250%; mix-blend-mode:overlay;}
-  .cg-card-foil.epic{
-    background-image:linear-gradient(115deg, transparent 25%, rgba(255,255,255,.5) 38%, rgba(199,182,255,.6) 44%, rgba(138,79,255,.55) 50%, rgba(255,255,255,.4) 56%, transparent 70%);
+  .cg-card-foil{position:absolute; inset:0; pointer-events:none; z-index:2; mix-blend-mode:overlay; overflow:hidden;}
+  .cg-card-foil::before{content:''; position:absolute; top:0; left:-60%; width:220%; height:100%; will-change:transform;}
+  .cg-card-foil.epic::before{
+    background-image:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.5) 46%, rgba(199,182,255,.6) 49%, rgba(138,79,255,.55) 52%, rgba(255,255,255,.4) 55%, transparent 61%);
     animation:cgFoilShine 3.6s ease-in-out infinite;}
-  .cg-card-foil.legend{
-    background-image:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55) 33%, rgba(255,205,110,.6) 40%, rgba(255,120,180,.5) 46%, rgba(120,200,255,.5) 52%, rgba(255,255,255,.45) 60%, transparent 75%);
+  .cg-card-foil.legend::before{
+    background-image:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.55) 45%, rgba(255,205,110,.6) 48%, rgba(255,120,180,.5) 51%, rgba(120,200,255,.5) 54%, rgba(255,255,255,.45) 61%, transparent 68%);
     animation:cgFoilShine 3s ease-in-out infinite;}
   @keyframes cgFoilShine{
-    0%{background-position:0% 0%;}
-    50%{background-position:100% 100%;}
-    100%{background-position:0% 0%;}
+    0%{transform:translateX(0%);}
+    50%{transform:translateX(27%);}
+    100%{transform:translateX(0%);}
   }
   .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:28px;}
   .cg-card-img{width:100%; height:100%; object-fit:cover; -webkit-touch-callout:none; -webkit-user-drag:none; pointer-events:none;}
