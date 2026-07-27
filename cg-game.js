@@ -283,6 +283,7 @@ function defaultState() {
     dungeonEquipClaimed: [],
     hasSeenBattleHelp: false,
     hasSeenOnboarding: false,
+    hasSeenInteractiveTutorial: false,
     sfxMuted: false,
     battleFastMode: false,
     autoBattleMode: false,
@@ -345,6 +346,8 @@ function loadState() {
     // 既存プレイヤーへの後方互換対応: 旧セーブにhasSeenOnboardingが無い場合、
     // 新規プレイヤー向けチュートリアルが誤って表示されないよう「見た事にする」
     if (saved.hasSeenOnboarding === undefined) saved.hasSeenOnboarding = true;
+    // 体験型チュートリアル追加に伴う後方互換対応: 既存プレイヤーには表示しない
+    if (saved.hasSeenInteractiveTutorial === undefined) saved.hasSeenInteractiveTutorial = true;
     // カード完全削除時の後方互換対応: 廃止したカードIDが旧セーブに残っていると、
     // カード一覧の空白セルや、デッキ内での参照切れの原因になるため、
     // 「現在のCARD_DEFSに存在しないIDすべて」を所持カード・デッキ・デッキプリセットから自動的に取り除く
@@ -972,6 +975,9 @@ function renderHome() {
   updatePresentBadge();
   checkLoginBonus();
   updateLoginBonusBadge();
+  if (state.beginnerGachaDone && state.hasSeenOnboarding && !state.hasSeenInteractiveTutorial && !interactiveTutorialActive) {
+    setTimeout(() => { if (!interactiveTutorialActive) startInteractiveTutorial(); }, 600);
+  }
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -5523,14 +5529,8 @@ const ONBOARDING_STEPS = [
     desc: 'ここはホーム画面です。トロフィー・ランクや、ログインボーナス、ステージ挑戦などがまとまっています。まずは全体の流れを簡単にご案内します（あとで設定画面からいつでも見返せます）。' },
   { emoji: '🔰', title: 'はじめに：初心者ガチャ',
     desc: '一番最初に「初心者ガチャ」を1回引きます（無料）。ここで手に入るカードが、最初の戦力になります。引き終えると他の画面もすべて解放されます。' },
-  { emoji: '🎴', title: '「カード」でデッキを編成',
-    desc: '下のタブの「カード」→「デッキ編成」から、バトルで使うデッキを作れます。下のカード一覧をタップして追加、デッキに入っているカードの左上「−」ボタンで外せます。画面上部でリーダー（1体）も選べます。' },
-  { emoji: '⚔️', title: 'バトルの基本操作',
-    desc: '手札のカードをタップして選び、自分の場の空きマスをタップすると召喚できます（コストが必要）。攻撃可能なモンスター（緑の点つき）をタップ→敵モンスターか、敵の顔アイコン／画面下の「直接攻撃」ボタンをタップで攻撃します。' },
-  { emoji: '👑', title: 'リーダーとアルティメットスキル',
-    desc: 'リーダーは対応属性の味方を常に強化してくれます。さらに、自分のアイコンの下に表示される「◯/5」が貯まると、アイコンをタップしてアルティメットスキル（強力な全体攻撃）を発動できます。長押しでリーダーの詳細も確認できます。' },
-  { emoji: '🃏', title: 'ターンの流れ',
-    desc: '自分のターンが来ると「カードを引きますか？」と聞かれます。状況に応じて引く／引かないを選べます。行動が終わったら「ターン終了」ボタンでターンを渡しましょう。' },
+  { emoji: '👆', title: 'このあと、実際に操作してみましょう',
+    desc: 'ガチャを引き終えたら、実際の画面を操作しながら「デッキ編成」と「バトル」の基本を体験できるご案内が始まります。画面の光っている部分をタップして進めてください。' },
   { emoji: '✨', title: 'ガチャでカードを集めよう',
     desc: '「ガチャ」からカードを集められます。同じカードを何度も入手すると「絆レベル」が上がり、見た目に称号や光る演出がつきます。レア度が高いカードほど強力です。' },
   { emoji: '📜', title: 'やり込み要素いろいろ',
@@ -5539,6 +5539,164 @@ const ONBOARDING_STEPS = [
     desc: 'それぞれの画面右上にある「？」ボタンから、その画面の詳しい遊び方をいつでも確認できます。さあ、あなただけのデッキで、Lis Noirの世界を制覇しましょう！' },
 ];
 let onboardingStepIdx = 0;
+
+// ---------- 体験型チュートリアル（実際の画面を操作しながら学ぶ） ----------
+let interactiveTutorialActive = false;
+let interactiveTutorialStepIdx = 0;
+let interactiveTutorialWaiter = null; // setTimeoutのID、または{target, handler}
+
+const INTERACTIVE_TUTORIAL_STEPS = [
+  { selector: '#nav-cards',
+    matches: (el) => !!el.closest('#nav-cards'),
+    text: 'まずは「カード」タブをタップして、デッキ編成画面を開いてみましょう。', hint: '👆 「カード」タブをタップ' },
+  { selector: '#collection-list .cg-coll-item',
+    matches: (el) => !!el.closest('#collection-list .cg-coll-item'),
+    text: '下のカード一覧からカードをタップすると、デッキに追加できます。試しに1枚タップしてみましょう。', hint: '👆 好きなカードをタップ' },
+  { selector: '#nav-battle',
+    matches: (el) => !!el.closest('#nav-battle'),
+    text: '次は「バトル」タブをタップして、ステージ選択画面に進みましょう。', hint: '👆 「バトル」タブをタップ' },
+  { selector: '.cg-stage-card:not(.locked)',
+    matches: (el) => !!el.closest('.cg-stage-card:not(.locked)'),
+    text: 'ステージをタップするとバトルが始まります。挑戦してみましょう。', hint: '👆 一番上のステージをタップ' },
+  { findTarget: findTutorialMonsterHandCard,
+    matches: (el) => {
+      const card = el.closest('#battle-hand .cg-hand-card');
+      if (!card || !battle) return false;
+      const id = battle.playerHand && battle.playerHand[Number(card.dataset.idx)];
+      return !!(id && CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster');
+    },
+    text: '手札のモンスターカードをタップして選んでみましょう。', hint: '👆 モンスターカードをタップ' },
+  { selector: '#battle-player-field .cg-field-slot:not(.filled)',
+    matches: (el) => !!el.closest('#battle-player-field .cg-field-slot:not(.filled)'),
+    text: '空いている自分の場のマスをタップすると、選んだカードを召喚できます。', hint: '👆 空いているマスをタップ' },
+  { selector: '#battle-end-turn',
+    matches: (el) => !!el.closest('#battle-end-turn'),
+    text: 'よくできました！行動が終わったら「ターン終了」をタップして、相手にターンを渡しましょう。', hint: '👆 「ターン終了」をタップ' },
+];
+
+// 手札の中から「モンスター」タイプのカードだけを対象にする（スペル・装備等だと後続の「空きマスをタップ」が成立しないため）
+function findTutorialMonsterHandCard() {
+  if (!battle || !battle.playerHand) return null;
+  const idx = battle.playerHand.findIndex(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster');
+  if (idx === -1) return null;
+  return document.querySelector(`#battle-hand .cg-hand-card[data-idx="${idx}"]`);
+}
+
+function isTutorialTargetVisible(el) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return false;
+  const style = getComputedStyle(el);
+  return style.display !== 'none' && style.visibility !== 'hidden';
+}
+
+function startInteractiveTutorial() {
+  interactiveTutorialActive = true;
+  interactiveTutorialStepIdx = 0;
+  document.addEventListener('click', onTutorialDocumentClick, true);
+  showInteractiveTutorialStep();
+}
+
+// 現在のステップの完了条件を、クリックのたびにその場のデータで判定する（対象要素が再描画で
+// 差し替わっていても、正しく検知できるようにするため。特定のDOMノードにバインドする方式は
+// 再描画で対象が消えると反応しなくなるため採用していない）
+function onTutorialDocumentClick(e) {
+  if (!interactiveTutorialActive) return;
+  const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
+  if (!step || !step.matches(e.target)) return;
+  interactiveTutorialStepIdx++;
+  // 画面遷移・再描画の完了を少し待ってから次のステップを表示する
+  setTimeout(() => showInteractiveTutorialStep(), 400);
+}
+
+function clearInteractiveTutorialWaiter() {
+  if (interactiveTutorialWaiter) clearTimeout(interactiveTutorialWaiter);
+  interactiveTutorialWaiter = null;
+}
+
+function showInteractiveTutorialStep() {
+  clearInteractiveTutorialWaiter();
+  if (!interactiveTutorialActive) return;
+  if (interactiveTutorialStepIdx >= INTERACTIVE_TUTORIAL_STEPS.length) {
+    finishInteractiveTutorial();
+    return;
+  }
+  const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
+  document.getElementById('tutorial-tooltip-step').textContent = `ステップ ${interactiveTutorialStepIdx + 1} / ${INTERACTIVE_TUTORIAL_STEPS.length}`;
+  document.getElementById('tutorial-tooltip-text').textContent = step.text;
+  document.getElementById('tutorial-tooltip-hint').textContent = step.hint;
+  waitForTutorialTarget(step, 0);
+}
+
+// 対象要素が現れる（画面遷移・再描画後）まで、短い間隔でポーリングし、見つかり次第スポットライトを合わせる
+// （完了判定そのものはonTutorialDocumentClickが担うため、ここでは表示位置合わせのみ行う）
+function waitForTutorialTarget(step, attempts) {
+  if (!interactiveTutorialActive) return;
+  const vsIntro = document.getElementById('battle-vs-intro');
+  const introShowing = vsIntro && !vsIntro.classList.contains('hidden');
+  const target = step.findTarget ? step.findTarget() : document.querySelector(step.selector);
+  if (!introShowing && target && isTutorialTargetVisible(target)) {
+    positionTutorialSpotlight(target);
+    // 再描画で対象の位置がずれることがあるため、このステップの間は定期的に位置を再計算する
+    interactiveTutorialWaiter = setTimeout(() => waitForTutorialTarget(step, 0), 400);
+    return;
+  }
+  if (attempts > 150) { // 約30秒待っても対象が現れない場合は、このステップを諦めて次へ
+    interactiveTutorialStepIdx++;
+    showInteractiveTutorialStep();
+    return;
+  }
+  interactiveTutorialWaiter = setTimeout(() => waitForTutorialTarget(step, attempts + 1), 200);
+}
+
+function positionTutorialSpotlight(target) {
+  const rect = target.getBoundingClientRect();
+  const pad = 6;
+  const top = Math.max(0, rect.top - pad);
+  const left = Math.max(0, rect.left - pad);
+  const right = rect.right + pad;
+  const bottom = rect.bottom + pad;
+  const vw = window.innerWidth, vh = window.innerHeight;
+
+  document.getElementById('tutorial-mask-top').style.cssText = `top:0; left:0; width:100%; height:${top}px;`;
+  document.getElementById('tutorial-mask-bottom').style.cssText = `top:${bottom}px; left:0; width:100%; height:${Math.max(0, vh - bottom)}px;`;
+  document.getElementById('tutorial-mask-left').style.cssText = `top:${top}px; left:0; width:${left}px; height:${bottom - top}px;`;
+  document.getElementById('tutorial-mask-right').style.cssText = `top:${top}px; left:${right}px; width:${Math.max(0, vw - right)}px; height:${bottom - top}px;`;
+  document.getElementById('tutorial-spotlight-ring').style.cssText = `top:${top}px; left:${left}px; width:${right - left}px; height:${bottom - top}px;`;
+
+  ['tutorial-mask-top', 'tutorial-mask-bottom', 'tutorial-mask-left', 'tutorial-mask-right', 'tutorial-spotlight-ring', 'tutorial-tooltip'].forEach(id => {
+    document.getElementById(id).classList.remove('hidden');
+  });
+
+  // 対象の下に十分な余白があれば下に、なければ上にツールチップを表示する
+  const tooltip = document.getElementById('tutorial-tooltip');
+  if (vh - bottom > 170) {
+    tooltip.style.top = (bottom + 14) + 'px';
+    tooltip.style.bottom = 'auto';
+  } else {
+    tooltip.style.bottom = (vh - top + 14) + 'px';
+    tooltip.style.top = 'auto';
+  }
+}
+
+function repositionTutorialIfActive() {
+  if (!interactiveTutorialActive) return;
+  const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
+  if (!step) return;
+  const target = step.findTarget ? step.findTarget() : document.querySelector(step.selector);
+  if (target && isTutorialTargetVisible(target)) positionTutorialSpotlight(target);
+}
+
+function finishInteractiveTutorial() {
+  interactiveTutorialActive = false;
+  clearInteractiveTutorialWaiter();
+  document.removeEventListener('click', onTutorialDocumentClick, true);
+  ['tutorial-mask-top', 'tutorial-mask-bottom', 'tutorial-mask-left', 'tutorial-mask-right', 'tutorial-spotlight-ring', 'tutorial-tooltip'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  state.hasSeenInteractiveTutorial = true;
+  saveState();
+}
 
 function renderOnboardingStep() {
   const step = ONBOARDING_STEPS[onboardingStepIdx];
@@ -5562,6 +5720,10 @@ function finishOnboarding() {
   if (!state.hasSeenOnboarding) {
     state.hasSeenOnboarding = true;
     saveState();
+  }
+  // 初心者ガチャが済んでいる状態（設定画面からの再視聴時など）なら、続けて体験型チュートリアルも見せる
+  if (state.beginnerGachaDone && !interactiveTutorialActive) {
+    setTimeout(() => startInteractiveTutorial(), 400);
   }
 }
 
@@ -5871,6 +6033,8 @@ function init() {
     document.getElementById('settings-overlay').classList.add('hidden');
     startOnboarding();
   });
+  document.getElementById('tutorial-skip-btn').addEventListener('click', finishInteractiveTutorial);
+  window.addEventListener('resize', () => repositionTutorialIfActive());
   document.getElementById('sfx-toggle-btn').addEventListener('click', toggleSfx);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBgm);
   document.getElementById('bgm-volume-slider').addEventListener('input', (e) => {
