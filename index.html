@@ -611,6 +611,16 @@
   .cg-pack-pity{font-size:10px; color:var(--gold); font-weight:700; margin-top:8px;}
   .cg-pack-pity-legend{color:var(--true-gold);}
   .cg-pack-preview-row{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .cg-pack-odds-btn{margin-top:10px; width:100%; font-size:10px; padding:7px; border-radius:10px; border:1px solid var(--hairline-panel);
+    background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
+  .cg-gacha-odds-panel{max-width:380px;}
+  .cg-odds-list{display:flex; flex-direction:column; gap:4px; max-height:55vh; overflow-y:auto; margin-bottom:14px;
+    padding:8px 10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
+  .cg-odds-row{display:flex; align-items:center; gap:8px; font-size:11px; padding:4px 0; border-bottom:1px solid var(--hairline-panel);}
+  .cg-odds-row:last-child{border-bottom:none;}
+  .cg-odds-rarity{flex-shrink:0; width:52px; font-weight:800;}
+  .cg-odds-name{flex:1; color:var(--text-panel); min-width:0;}
+  .cg-odds-pct{flex-shrink:0; font-weight:800; color:var(--gold);}
   .cg-pack-preview-label{font-size:10px; color:var(--text-dim-panel); margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline-panel);}
   .cg-beginner-gacha-banner{margin:0 8px 14px; padding:14px 16px; border-radius:14px; text-align:center; font-size:13px; font-weight:700;
     line-height:1.6; color:#fff; background:linear-gradient(135deg,#8A4FFF,#3a1f63); border:1px solid var(--gold-bright); box-shadow:0 3px 10px #00000044;}
@@ -1364,6 +1374,15 @@
       <div class="cg-login-bonus-grid" id="login-bonus-grid"></div>
       <button class="cg-btn cg-btn-main" id="login-bonus-claim-btn">受け取る</button>
       <button class="cg-btn" id="login-bonus-close">閉じる</button>
+    </div>
+  </div>
+
+  <!-- ガチャの排出確率表示（App Store等の審査基準に対応） -->
+  <div id="gacha-odds-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-gacha-odds-panel cg-ornate cg-double-frame">
+      <div class="cg-help-title" id="gacha-odds-title">排出確率</div>
+      <div class="cg-odds-list" id="gacha-odds-list"></div>
+      <button class="cg-btn cg-btn-main" id="gacha-odds-close">閉じる</button>
     </div>
   </div>
 

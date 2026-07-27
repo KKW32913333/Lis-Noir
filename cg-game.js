@@ -4826,6 +4826,50 @@ const SHOP_PACKS = [
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
 ];
 
+// ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）
+function computeGachaOdds(pack) {
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  if (pack.pool) {
+    // 固定プールのガチャ：収録カードから均等な確率で1枚
+    const pct = 100 / pack.pool.length;
+    return pack.pool
+      .filter(id => CARD_DEFS[id])
+      .map(id => ({ id, name: CARD_DEFS[id].name, rarity: CARD_DEFS[id].rarity, percent: pct }));
+  }
+  const results = [];
+  Object.keys(pack.weights || {}).forEach(rarity => {
+    const w = pack.weights[rarity];
+    if (w <= 0) return;
+    const restricted = pack.rarityPool && pack.rarityPool[rarity];
+    const candidates = restricted
+      ? restricted.filter(id => CARD_DEFS[id])
+      : Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id) && !CARD_DEFS[id].isLeaderCard);
+    if (!candidates.length) return;
+    const perCardPct = w / candidates.length;
+    candidates.forEach(id => results.push({ id, name: CARD_DEFS[id].name, rarity, percent: perCardPct }));
+  });
+  return results.sort((a, b) => b.percent - a.percent);
+}
+
+// ガチャの排出確率一覧を表示する
+function showGachaOdds(packId) {
+  const pack = SHOP_PACKS.find(p => p.id === packId) || EVENT_GACHA_PACKS.find(p => p.id === packId);
+  if (!pack) return;
+  const odds = computeGachaOdds(pack);
+  const rarityOrder = { legend: 0, epic: 1, rare: 2, normal: 3 };
+  odds.sort((a, b) => (rarityOrder[a.rarity] ?? 9) - (rarityOrder[b.rarity] ?? 9) || b.percent - a.percent);
+  document.getElementById('gacha-odds-title').textContent = `${pack.name}：排出確率`;
+  document.getElementById('gacha-odds-list').innerHTML = odds.map(o => {
+    const rarity = RARITY[o.rarity] || { name: o.rarity, color: '#999' };
+    return `<div class="cg-odds-row">
+      <span class="cg-odds-rarity" style="color:${rarity.color}">${rarity.name}</span>
+      <span class="cg-odds-name">${o.name}</span>
+      <span class="cg-odds-pct">${o.percent.toFixed(2)}%</span>
+    </div>`;
+  }).join('') || '<div class="cg-empty">確率情報を表示できません</div>';
+  document.getElementById('gacha-odds-overlay').classList.remove('hidden');
+}
+
 function pickWeightedCardId(weights, rarityPool) {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const pool = [];
@@ -4836,7 +4880,11 @@ function pickWeightedCardId(weights, rarityPool) {
     const candidates = restricted
       ? restricted.filter(id => CARD_DEFS[id])
       : Object.keys(CARD_DEFS).filter(id => CARD_DEFS[id].rarity === rarity && !eventExclusiveIds.has(id) && !CARD_DEFS[id].isLeaderCard);
-    candidates.forEach(id => pool.push({ id, w }));
+    if (!candidates.length) return;
+    // 表示している確率（例：ノーマル60%）が、そのレア度内のカード枚数に関わらず実際の排出率と一致するよう、
+    // 均等に重みを分配する（1枚あたりの重み = 該当レア度の重み ÷ 該当レア度の候補カード数）
+    const perCardWeight = w / candidates.length;
+    candidates.forEach(id => pool.push({ id, w: perCardWeight }));
   });
   if (!pool.length) return Object.keys(CARD_DEFS)[0];
   const total = pool.reduce((s, p) => s + p.w, 0);
@@ -4886,6 +4934,7 @@ function renderPackCard(pack) {
         <div class="cg-pack-preview-row">
           ${previewHtml}
         </div>
+        <button class="cg-pack-odds-btn" data-pack="${pack.id}">📊 排出確率を見る</button>
       </div>`;
 }
 
@@ -4908,6 +4957,9 @@ function renderShop() {
       eventWrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
         node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
       });
+      eventWrap.querySelectorAll('.cg-pack-odds-btn').forEach(btn => {
+        btn.addEventListener('click', () => showGachaOdds(btn.dataset.pack));
+      });
     }
   }
 
@@ -4922,6 +4974,9 @@ function renderShop() {
   });
   wrap.querySelectorAll('.cg-pack-preview-thumb').forEach(node => {
     node.addEventListener('click', () => showHandCardInfo(node.dataset.id));
+  });
+  wrap.querySelectorAll('.cg-pack-odds-btn').forEach(btn => {
+    btn.addEventListener('click', () => showGachaOdds(btn.dataset.pack));
   });
 }
 
@@ -5466,6 +5521,7 @@ const SCREEN_HELP = {
       '<b>② 天井（保証）</b><br>連続でノーマルばかり出た場合、一定回数を超えると次回はレア以上が確定します。',
       '<b>③ 収録カード</b><br>各ガチャの下に表示されているカードをタップすると、詳細を確認できます。',
       '<b>④ 期間限定ガチャ</b><br>「期間限定ガチャチケット」🎫を消費して引く、期間限定の特別なガチャです。1種類のチケットで、どの期間限定ガチャも引くことができます。',
+      '<b>⑤ 排出確率</b><br>各ガチャの「📊排出確率を見る」から、カード1枚ごとの正確な排出確率を確認できます。',
     ],
   },
   mission: {
@@ -5661,6 +5717,9 @@ function init() {
     document.getElementById('card-info-overlay').classList.add('hidden');
   });
   document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
+  document.getElementById('gacha-odds-close').addEventListener('click', () => {
+    document.getElementById('gacha-odds-overlay').classList.add('hidden');
+  });
   document.getElementById('draw-choice-no').addEventListener('click', () => resolveDrawChoice(false));
   document.getElementById('settings-btn').addEventListener('click', openSettings);
   document.getElementById('rewatch-onboarding-btn').addEventListener('click', () => {
