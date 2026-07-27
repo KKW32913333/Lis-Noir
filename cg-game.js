@@ -4691,6 +4691,122 @@ function logBattleHistory(stage, won, trophyDelta) {
   }
 }
 
+// ---------- オンライン対戦（試験提供） ----------
+// window.LisNoirCloud に createBattleRoom / joinBattleRoom / listenToBattleRoom などが
+// 実装されるまでは「準備中」を案内する。実装後は自動的につながる設計にしている
+let onlineRoomUnsubscribe = null;
+let onlineCurrentRoomCode = null;
+let onlineIsHost = false;
+
+function isOnlineBattleAvailable() {
+  return !!(window.LisNoirCloud && typeof window.LisNoirCloud.createBattleRoom === 'function');
+}
+
+function openOnlineScreen() {
+  document.getElementById('online-lobby-view').classList.remove('hidden');
+  document.getElementById('online-waiting-view').classList.add('hidden');
+  document.getElementById('online-status-msg').textContent = '';
+  document.getElementById('online-join-code-input').value = '';
+  showScreen('online');
+}
+
+function setOnlineStatus(msg) {
+  const el = document.getElementById('online-status-msg');
+  if (el) el.textContent = msg || '';
+}
+
+async function createOnlineRoom() {
+  if (!isOnlineBattleAvailable()) {
+    setOnlineStatus('オンライン対戦は現在準備中です。しばらくお待ちください。');
+    return;
+  }
+  if (!state.deck.length) {
+    setOnlineStatus('先にデッキを編成してください。');
+    return;
+  }
+  try {
+    setOnlineStatus('部屋を作成しています…');
+    const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
+    const hostShuffledDeck = shuffle(validDeck.slice());
+    const hostInitialHand = hostShuffledDeck.splice(0, 2);
+    const roomCode = await window.LisNoirCloud.createBattleRoom({
+      hostName: state.playerName || 'プレイヤー',
+      hostDeck: validDeck,
+      hostLeaderId: state.leaderId,
+      hostShuffledDeck,
+      hostInitialHand,
+    });
+    onlineCurrentRoomCode = roomCode;
+    onlineIsHost = true;
+    document.getElementById('online-room-code-display').textContent = roomCode;
+    document.getElementById('online-lobby-view').classList.add('hidden');
+    document.getElementById('online-waiting-view').classList.remove('hidden');
+    subscribeToOnlineRoom(roomCode);
+  } catch (err) {
+    console.error('createBattleRoom failed', err);
+    setOnlineStatus('部屋の作成に失敗しました。時間をおいて再度お試しください。');
+  }
+}
+
+async function joinOnlineRoom() {
+  const code = document.getElementById('online-join-code-input').value.trim().toUpperCase();
+  if (!code) { setOnlineStatus('合言葉コードを入力してください。'); return; }
+  if (!isOnlineBattleAvailable()) {
+    setOnlineStatus('オンライン対戦は現在準備中です。しばらくお待ちください。');
+    return;
+  }
+  if (!state.deck.length) {
+    setOnlineStatus('先にデッキを編成してください。');
+    return;
+  }
+  try {
+    setOnlineStatus('参加しています…');
+    const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
+    const guestShuffledDeck = shuffle(validDeck.slice());
+    const guestInitialHand = guestShuffledDeck.splice(0, 2);
+    await window.LisNoirCloud.joinBattleRoom(code, {
+      guestName: state.playerName || 'プレイヤー',
+      guestDeck: validDeck,
+      guestLeaderId: state.leaderId,
+      guestShuffledDeck,
+      guestInitialHand,
+    });
+    onlineCurrentRoomCode = code;
+    onlineIsHost = false;
+    subscribeToOnlineRoom(code);
+  } catch (err) {
+    console.error('joinBattleRoom failed', err);
+    setOnlineStatus('参加できませんでした。コードをご確認の上、再度お試しください。');
+  }
+}
+
+function subscribeToOnlineRoom(roomCode) {
+  if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
+  onlineRoomUnsubscribe = window.LisNoirCloud.listenToBattleRoom(roomCode, (roomData) => {
+    if (!roomData) return;
+    if (roomData.status === 'active' && roomData.guestUid) {
+      startOnlineBattleFromRoom(roomData);
+    }
+  });
+}
+
+// 相手が参加し、部屋が'active'になった時点で、両者共通の初期状態を使ってオンライン対戦を開始する
+function startOnlineBattleFromRoom(roomData) {
+  if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
+  // 実際のバトル開始処理は、firebase-init.js 側の実装が整い次第つなぎ込みます
+  // （host/guestそれぞれの initialSeed を使って、両者が同じ山札順・初期手札で対戦を始める設計）
+  setOnlineStatus('対戦相手が見つかりました！（対戦接続機能は準備中です）');
+}
+
+function cancelOnlineRoom() {
+  if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
+  if (onlineCurrentRoomCode && isOnlineBattleAvailable() && window.LisNoirCloud.leaveBattleRoom) {
+    window.LisNoirCloud.leaveBattleRoom(onlineCurrentRoomCode).catch(err => console.error('leaveBattleRoom failed', err));
+  }
+  onlineCurrentRoomCode = null;
+  openOnlineScreen();
+}
+
 function renderBattleHistory() {
   const history = state.battleHistory || [];
   const wins = history.filter(h => h.won).length;
@@ -5570,6 +5686,14 @@ const SCREEN_HELP = {
       '<b>③ 対戦の詳細（リプレイ）</b><br>「詳細」ボタンをタップすると、そのバトルで実際に起きた行動（カードの使用・攻撃など）を振り返って確認できます。',
     ],
   },
+  online: {
+    title: 'オンライン対戦のヘルプ（β版）',
+    items: [
+      '<b>① 部屋を作る</b><br>「部屋を作る」をタップすると、合言葉コードが発行されます。フレンドにそのコードを伝えましょう。',
+      '<b>② コードで参加する</b><br>フレンドから伝えられたコードを入力し、「参加する」をタップすると対戦が始まります。',
+      '<b>③ この機能について</b><br>現在β版（試験提供）です。ご自身のデッキ・リーダーで、実際にフレンドと対戦できます。不具合が発生した場合はご了承ください。',
+    ],
+  },
 };
 
 function openScreenHelp(key) {
@@ -5643,6 +5767,18 @@ function init() {
   const quickDragonBtn = document.getElementById('quick-dragon');
   if (quickDragonBtn) quickDragonBtn.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
   document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
+  document.getElementById('quick-online').addEventListener('click', openOnlineScreen);
+  document.getElementById('online-create-btn').addEventListener('click', createOnlineRoom);
+  document.getElementById('online-join-btn').addEventListener('click', joinOnlineRoom);
+  document.getElementById('online-cancel-btn').addEventListener('click', cancelOnlineRoom);
+  document.getElementById('online-copy-code-btn').addEventListener('click', () => {
+    const code = document.getElementById('online-room-code-display').textContent;
+    try { navigator.clipboard.writeText(code); } catch (e) {}
+    const btn = document.getElementById('online-copy-code-btn');
+    const original = btn.textContent;
+    btn.textContent = 'コピーしました！';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
   document.getElementById('mission-claimall-btn').addEventListener('click', claimAllMissions);
   document.getElementById('present-claimall-btn').addEventListener('click', claimAllPresents);
   const dragonSummaryEl = document.getElementById('dragon-summary');
@@ -5677,7 +5813,16 @@ function init() {
     renderCardList();
   });
   document.getElementById('cardlist-deckonly-toggle').addEventListener('click', toggleCardListDeckOnly);
-  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail):not(.cg-back-btn-online)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.querySelector('.cg-back-btn-online').addEventListener('click', () => {
+    if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
+    if (onlineCurrentRoomCode && isOnlineBattleAvailable() && window.LisNoirCloud.leaveBattleRoom) {
+      window.LisNoirCloud.leaveBattleRoom(onlineCurrentRoomCode).catch(err => console.error('leaveBattleRoom failed', err));
+    }
+    onlineCurrentRoomCode = null;
+    showScreen('home');
+    renderHome();
+  });
   document.querySelectorAll('.cg-back-btn-detail').forEach(b => b.addEventListener('click', () => openCollectionScreen('list')));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
   document.getElementById('battle-back-btn').addEventListener('click', () => {

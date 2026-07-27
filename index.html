@@ -1066,6 +1066,8 @@
     background:var(--hp-red); color:#fff; font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center;
     box-shadow:0 1px 3px #00000055;}
   .cg-quick-badge.hidden{display:none;}
+  .cg-quick-beta-tag{position:absolute; top:4px; right:6px; background:var(--gold); color:#fff; font-size:8px; font-weight:800;
+    padding:1px 5px; border-radius:8px; box-shadow:0 1px 3px #00000055;}
 
   .cg-featured-mission{margin:0 16px 18px; background:var(--bg-panel); border:1px solid var(--gold); border-radius:14px;
     padding:12px 14px; box-shadow:0 3px 10px #00000033; cursor:pointer;}
@@ -1151,6 +1153,24 @@
 
   /* ---------- 戦績・対戦履歴 ---------- */
   .cg-history-summary{display:flex; gap:10px; margin:0 16px 16px;}
+  .cg-online-beta-banner{margin:0 14px 14px; padding:10px 14px; border-radius:12px; background:var(--gold-soft);
+    border:1px solid var(--gold-bright); font-size:11px; color:var(--gold); text-align:center;}
+  .cg-online-section{margin:0 14px 14px; padding:14px; border-radius:14px; background:var(--bg-panel2);
+    border:1px solid var(--hairline-panel);}
+  .cg-online-section-title{font-size:13px; font-weight:800; color:var(--text-panel); margin-bottom:4px;}
+  .cg-online-section-desc{font-size:11px; color:var(--text-dim-panel); margin-bottom:10px; line-height:1.5;}
+  .cg-online-code-input{width:100%; box-sizing:border-box; font-size:16px; letter-spacing:2px; text-align:center;
+    padding:10px; border-radius:10px; border:1px solid var(--hairline-panel); background:var(--bg-panel);
+    color:var(--text-panel); margin-bottom:10px; font-family:monospace;}
+  .cg-online-status-msg{margin:0 14px; font-size:11px; color:var(--hp-red); text-align:center; min-height:14px;}
+  .cg-online-waiting-panel{margin:20px 14px; padding:28px 20px; border-radius:16px; background:var(--bg-panel2);
+    border:1px solid var(--hairline-panel); text-align:center;}
+  .cg-online-waiting-label{font-size:11px; color:var(--text-dim-panel); margin-bottom:6px;}
+  .cg-online-room-code{font-size:32px; font-weight:800; letter-spacing:6px; color:var(--gold-bright); font-family:monospace; margin-bottom:14px;}
+  .cg-online-waiting-spinner{width:32px; height:32px; margin:18px auto 12px; border-radius:50%;
+    border:3px solid var(--hairline-panel); border-top-color:var(--gold-bright); animation:cgOnlineSpin .8s linear infinite;}
+  @keyframes cgOnlineSpin{to{transform:rotate(360deg);}}
+  .cg-online-waiting-text{font-size:12px; color:var(--text-dim-panel); margin-bottom:16px;}
   .cg-history-summary-card{flex:1; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px;
     padding:10px; text-align:center;}
   .cg-history-summary-value{font-size:18px; font-weight:800; color:var(--gold);}
@@ -1508,6 +1528,7 @@
       <div class="cg-quick-btn" id="quick-present"><span class="ic">🎁</span><span class="lb">プレゼント</span><span class="cg-quick-badge hidden" id="present-badge">0</span></div>
       <div class="cg-quick-btn" id="quick-login-bonus"><span class="ic">📅</span><span class="lb">ログイン</span><span class="cg-quick-badge hidden" id="login-bonus-badge">!</span></div>
       <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
+      <div class="cg-quick-btn" id="quick-online"><span class="ic">🌐</span><span class="lb">オンライン</span><span class="cg-quick-beta-tag">β</span></div>
     </div>
 
     <!-- 相棒ドラゴンの概要カードは一時的に非表示にしています（モバイルでの画面見切れ対策）。
@@ -2058,6 +2079,42 @@
     </div>
     <div id="history-summary" class="cg-history-summary"></div>
     <div id="history-list" class="cg-history-list"></div>
+  </section>
+
+  <!-- ============ オンライン対戦（試験提供） ============ -->
+  <section id="screen-online" class="cg-screen cg-scroll-pad">
+    <div class="cg-top-row">
+      <button class="cg-back-btn cg-back-btn-online">←</button>
+      <span class="cg-section-title" style="padding:0;">オンライン対戦 <span class="cg-quick-beta-tag" style="position:static; margin-left:4px;">β</span></span>
+      <button class="cg-help-btn cg-screen-help-btn" data-help="online" title="ヘルプ">？</button>
+    </div>
+    <div class="cg-online-beta-banner">🧪 この機能は試験提供中です。不具合が発生する場合があります。</div>
+
+    <div id="online-lobby-view">
+      <div class="cg-online-section">
+        <div class="cg-online-section-title">🚪 部屋を作る</div>
+        <div class="cg-online-section-desc">合言葉コードを発行し、フレンドに伝えて参加してもらいましょう。</div>
+        <button class="cg-btn cg-btn-main" id="online-create-btn">部屋を作る</button>
+      </div>
+      <div class="cg-online-section">
+        <div class="cg-online-section-title">🔑 コードで参加する</div>
+        <div class="cg-online-section-desc">フレンドから伝えられた合言葉コードを入力してください。</div>
+        <input id="online-join-code-input" class="cg-online-code-input" placeholder="合言葉コード" maxlength="8">
+        <button class="cg-btn cg-btn-main" id="online-join-btn">参加する</button>
+      </div>
+      <div id="online-status-msg" class="cg-online-status-msg"></div>
+    </div>
+
+    <div id="online-waiting-view" class="hidden">
+      <div class="cg-online-waiting-panel">
+        <div class="cg-online-waiting-label">合言葉コード</div>
+        <div class="cg-online-room-code" id="online-room-code-display">------</div>
+        <button class="cg-btn" id="online-copy-code-btn">コードをコピー</button>
+        <div class="cg-online-waiting-spinner"></div>
+        <div class="cg-online-waiting-text">相手の参加を待っています…</div>
+        <button class="cg-btn" id="online-cancel-btn">キャンセルして戻る</button>
+      </div>
+    </div>
   </section>
 
   <!-- ============ ランクマッチ結果画面 ============ -->
