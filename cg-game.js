@@ -975,9 +975,6 @@ function renderHome() {
   updatePresentBadge();
   checkLoginBonus();
   updateLoginBonusBadge();
-  if (state.beginnerGachaDone && state.hasSeenOnboarding && !state.hasSeenInteractiveTutorial && !interactiveTutorialActive) {
-    setTimeout(() => { if (!interactiveTutorialActive) startInteractiveTutorial(); }, 600);
-  }
   document.getElementById('home-gold').textContent = state.gold.toLocaleString();
   document.getElementById('home-gems').textContent = state.gems.toLocaleString();
   document.getElementById('home-trophy').textContent = state.trophy.toLocaleString();
@@ -5321,6 +5318,11 @@ function showRevealMulti(results) {
 
 function hideReveal() {
   document.getElementById('shop-reveal-overlay').classList.add('hidden');
+  // 初心者ガチャの獲得演出を閉じた直後（＝プレイヤーが実際にカードを見終えたタイミング）に、
+  // 体験型チュートリアルを開始する（購入した瞬間ではなく、演出を見終わってから始まるようにするため）
+  if (state.beginnerGachaDone && state.hasSeenOnboarding && !state.hasSeenInteractiveTutorial && !interactiveTutorialActive) {
+    setTimeout(() => { if (!interactiveTutorialActive) startInteractiveTutorial(); }, 500);
+  }
 }
 
 // ---------- プレゼント ----------
