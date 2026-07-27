@@ -5710,8 +5710,10 @@ function onTutorialDocumentClick(e) {
   const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
   if (!step || !step.matches(e.target)) return;
   interactiveTutorialStepIdx++;
-  // 古いスポットライト（前のステップの対象を囲んでいたマスク）が、新しい画面の上に
-  // そのまま居座って操作をブロックしてしまわないよう、すぐに一旦非表示にする
+  // 前のステップの「定期的に位置を再計算する」タイマーがまだ残っていると、遷移の合間に
+  // それが発火して古いスポットライトを復活させてしまう（新しい画面をブロックする原因になる）ため、
+  // ここで確実にキャンセルしてから、古いスポットライトを非表示にする
+  clearInteractiveTutorialWaiter();
   hideTutorialSpotlight();
   // 画面遷移・再描画の完了を少し待ってから次のステップを表示する
   setTimeout(() => showInteractiveTutorialStep(), 400);
