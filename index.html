@@ -1182,8 +1182,7 @@
     box-shadow:0 2px 8px var(--gold-soft);}
   .cg-profile-save-btn{display:block; width:calc(100% - 32px); margin:0 16px 8px;}
 
-  /* ---------- 戦績・対戦履歴 ---------- */
-  .cg-history-summary{display:flex; gap:10px; margin:0 16px 16px;}
+  /* ---------- オンライン対戦 ---------- */
   .cg-online-beta-banner{margin:0 14px 14px; padding:10px 14px; border-radius:12px; background:var(--gold-soft);
     border:1px solid var(--gold-bright); font-size:11px; color:var(--gold); text-align:center;}
   .cg-online-section{margin:0 14px 14px; padding:14px; border-radius:14px; background:var(--bg-panel2);
@@ -1202,34 +1201,6 @@
     border:3px solid var(--hairline-panel); border-top-color:var(--gold-bright); animation:cgOnlineSpin .8s linear infinite;}
   @keyframes cgOnlineSpin{to{transform:rotate(360deg);}}
   .cg-online-waiting-text{font-size:12px; color:var(--text-dim-panel); margin-bottom:16px;}
-  .cg-history-summary-card{flex:1; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px;
-    padding:10px; text-align:center;}
-  .cg-history-summary-value{font-size:18px; font-weight:800; color:var(--gold);}
-  .cg-history-summary-label{font-size:10px; color:var(--text-dim-panel); margin-top:2px;}
-  .cg-history-list{display:flex; flex-direction:column; gap:6px; padding:0 14px 20px;}
-  .cg-history-item{display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px;
-    background:var(--bg-panel); border:1px solid var(--hairline-panel);}
-  .cg-history-item.win{border-left:4px solid #3d9d6f;}
-  .cg-history-item.lose{border-left:4px solid var(--hp-red);}
-  .cg-history-detail-btn{flex-shrink:0; font-size:10px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
-    background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
-  .cg-battle-replay-panel{max-width:400px;}
-  .cg-replay-log-list{display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; margin-bottom:14px;
-    padding:10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
-  .cg-replay-log-item{display:flex; gap:8px; font-size:11px; align-items:baseline;}
-  .cg-replay-log-turn{flex-shrink:0; font-size:9px; font-weight:800; color:var(--gold); background:var(--gold-soft);
-    padding:2px 6px; border-radius:8px;}
-  .cg-replay-log-text{color:var(--text-panel);}
-  .cg-replay-log-text.enemy{color:var(--hp-red);}
-  .cg-history-result{font-size:11px; font-weight:800; flex-shrink:0; width:38px; text-align:center; border-radius:8px; padding:3px 0;}
-  .cg-history-item.win .cg-history-result{color:#3d9d6f; background:#3d9d6f22;}
-  .cg-history-item.lose .cg-history-result{color:var(--hp-red); background:#c1495e22;}
-  .cg-history-info{flex:1; min-width:0;}
-  .cg-history-stage{font-size:12px; font-weight:700; color:var(--text-panel); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .cg-history-date{font-size:10px; color:var(--text-dim-panel); margin-top:1px;}
-  .cg-history-trophy{font-size:11px; font-weight:700; flex-shrink:0;}
-  .cg-history-trophy.win{color:#3d9d6f;}
-  .cg-history-trophy.lose{color:var(--hp-red);}
   .cg-rank-row{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
     background:var(--bg-panel); border:1px solid var(--hairline-panel);}
   .cg-rank-row.me{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-soft);}
@@ -1409,14 +1380,6 @@
   <!-- カード情報（長押しで表示・全画面共通） -->
   <!-- ターン開始時のカードを引くかどうかの選択 -->
   <!-- ログインボーナスカレンダー -->
-  <!-- 対戦履歴の詳細（バトルリプレイ） -->
-  <div id="battle-replay-overlay" class="cg-help-overlay hidden">
-    <div class="cg-help-panel cg-battle-replay-panel cg-ornate cg-double-frame">
-      <div class="cg-help-title" id="replay-title">対戦の詳細</div>
-      <div class="cg-replay-log-list" id="replay-log-list"></div>
-      <button class="cg-btn cg-btn-main" id="battle-replay-close">閉じる</button>
-    </div>
-  </div>
 
   <div id="login-bonus-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-login-bonus-panel cg-ornate cg-double-frame">
@@ -1579,7 +1542,7 @@
       <div class="cg-quick-btn" id="quick-mission"><span class="ic">📜</span><span class="lb">ミッション</span></div>
       <div class="cg-quick-btn" id="quick-present"><span class="ic">🎁</span><span class="lb">プレゼント</span><span class="cg-quick-badge hidden" id="present-badge">0</span></div>
       <div class="cg-quick-btn" id="quick-login-bonus"><span class="ic">📅</span><span class="lb">ログイン</span><span class="cg-quick-badge hidden" id="login-bonus-badge">!</span></div>
-      <div class="cg-quick-btn" id="quick-history"><span class="ic">📊</span><span class="lb">戦績</span></div>
+      <div class="cg-quick-btn" id="quick-dragon"><span class="ic">🐉</span><span class="lb">ドラゴン</span></div>
       <div class="cg-quick-btn" id="quick-online"><span class="ic">🌐</span><span class="lb">オンライン</span><span class="cg-quick-beta-tag">β</span></div>
     </div>
 
@@ -2104,7 +2067,7 @@
       <div class="cg-dragon-bonus-title">育成による効果</div>
       <div id="dragon-bonus-desc" class="cg-dragon-bonus-desc">バトル開始時の自分のHPが +0</div>
     </div>
-    <button class="cg-btn cg-btn-main cg-dragon-feed-btn" id="dragon-feed-btn">🍖 エサをあげる（💰100）</button>
+    <button class="cg-btn cg-btn-main cg-dragon-feed-btn" id="dragon-feed-btn">🍖 エサをあげる（💰30）</button>
     <div class="cg-dragon-stages">
       <div class="cg-dragon-stages-title">成長段階</div>
       <div id="dragon-stages-list" class="cg-dragon-stages-list"></div>
@@ -2144,17 +2107,6 @@
     </div>
     <button class="cg-btn cg-btn-main cg-profile-save-btn" id="profile-save-btn">保存する</button>
     <div id="profile-save-status" class="cg-backup-status" style="text-align:center;"></div>
-  </section>
-
-  <!-- ============ 戦績・対戦履歴画面 ============ -->
-  <section id="screen-history" class="cg-screen cg-scroll-pad">
-    <div class="cg-top-row">
-      <button class="cg-back-btn cg-back-btn-history">←</button>
-      <span class="cg-section-title" style="padding:0;">戦績・対戦履歴</span>
-      <button class="cg-help-btn cg-screen-help-btn" data-help="history" title="ヘルプ">？</button>
-    </div>
-    <div id="history-summary" class="cg-history-summary"></div>
-    <div id="history-list" class="cg-history-list"></div>
   </section>
 
   <!-- ============ オンライン対戦（試験提供） ============ -->

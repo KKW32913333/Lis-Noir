@@ -265,7 +265,6 @@ function defaultState() {
     tickets: 2,
     pityCounters: {},
     compendiumRewardClaimed: false,
-    battleHistory: [],
     playerLevel: 1,
     playerExp: 0,
     gold: 3000,
@@ -1160,7 +1159,7 @@ function getPlayerMaxHp() {
 }
 
 function dragonFeedCost() {
-  return 100 + (state.dragon.level - 1) * 20;
+  return 30 + (state.dragon.level - 1) * 6;
 }
 
 function gainDragonExp(amount) {
@@ -1184,7 +1183,7 @@ function feedDragon() {
 
 function renderDragonSummary() {
   const emojiEl = document.getElementById('dragon-summary-emoji');
-  if (!emojiEl) return; // ホーム画面の相棒ドラゴンカードは非表示中（要素が無ければ何もしない）
+  if (!emojiEl) return; // ホーム画面の相棒ドラゴンカードは、画面見切れ対策のため意図的に非表示にしている（クイックメニューの「ドラゴン」から利用可能）
   const stage = getDragonStageInfo(state.dragon.level);
   emojiEl.textContent = stage.emoji;
   document.getElementById('dragon-summary-stage').textContent = `${stage.name}・Lv.${state.dragon.level}`;
@@ -1477,7 +1476,6 @@ function executeLeaderUltimate() {
   if (!leader || !leader.ultimateSkill) return;
   if ((battle.leaderUltimateCharge || 0) < ULTIMATE_COOLDOWN_TURNS) return;
   const skill = leader.ultimateSkill;
-  logBattleAction(`💥 アルティメットスキル発動！${skill.name}`);
 
   battle.enemyHp = Math.max(0, battle.enemyHp - skill.dmg);
   impactEffect(document.getElementById('battle-enemy-portrait'), skill.dmg, 0);
@@ -3062,20 +3060,38 @@ function newBattleUnit(id, isPlayerCard) {
   return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
 }
 
-function buildWeightedMonsterDeck(weights, count, spellChance) {
+function buildWeightedMonsterDeck(weights, count, spellChance, maxLegendCount) {
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const dungeonExclusiveIds = new Set(DUNGEON_EQUIPMENT_REWARDS);
   const monsterIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') === 'monster' && !eventExclusiveIds.has(id) && !CARD_DEFS[id].isLeaderCard);
   const otherIds = Object.keys(CARD_DEFS).filter(id => (CARD_DEFS[id].type || 'monster') !== 'monster' && !eventExclusiveIds.has(id) && !dungeonExclusiveIds.has(id));
+  const nonLegendMonsterIds = monsterIds.filter(id => CARD_DEFS[id].rarity !== 'legend');
   const chance = spellChance || 0;
+  // レジェンド抜きの重み（上限に達した後の再抽選用）をあらかじめ用意しておく
+  const noLegendWeights = Object.assign({}, weights, { legend: 0 });
   const deck = [];
+  let legendCount = 0;
   for (let i = 0; i < count; i++) {
     if (otherIds.length && Math.random() < chance) {
       deck.push(otherIds[Math.floor(Math.random() * otherIds.length)]);
       continue;
     }
-    const id = pickWeightedCardId(weights);
-    deck.push(monsterIds.includes(id) ? id : monsterIds[Math.floor(Math.random() * monsterIds.length)]);
+    let id = pickWeightedCardId(weights);
+    let cardId = monsterIds.includes(id) ? id : monsterIds[Math.floor(Math.random() * monsterIds.length)];
+    if (maxLegendCount !== undefined && CARD_DEFS[cardId] && CARD_DEFS[cardId].rarity === 'legend') {
+      if (legendCount >= maxLegendCount) {
+        // 上限に達している場合は、レジェンドを除いた重みで引き直す。
+        // フォールバック先も必ずレジェンド以外のモンスターに限定し、上限を確実に守る
+        const reRolled = pickWeightedCardId(noLegendWeights);
+        const reRolledDef = CARD_DEFS[reRolled];
+        cardId = (monsterIds.includes(reRolled) && reRolledDef.rarity !== 'legend')
+          ? reRolled
+          : (nonLegendMonsterIds.length ? nonLegendMonsterIds[Math.floor(Math.random() * nonLegendMonsterIds.length)] : cardId);
+      } else {
+        legendCount++;
+      }
+    }
+    deck.push(cardId);
   }
   return deck;
 }
@@ -3122,12 +3138,23 @@ function applyLeaderPortraits() {
   }
 }
 
+// ストーリーステージの敵デッキに含めるレジェンドカードの上限枚数を、ワールドの進行度に応じて決める
+// （ダンジョン・高難易度クエスト・特別クエストにはワールドの概念が無いため対象外＝上限なし）
+function getStoryWorldLegendCap(stage) {
+  if (!stage || typeof stage.id !== 'number' || stage.qid || stage.isDungeon) return undefined;
+  const worldNum = Math.ceil(stage.id / 5);
+  if (worldNum <= 3) return 1;  // 序盤（ワールド1〜3）
+  if (worldNum <= 6) return 2;  // 中盤（ワールド4〜6）
+  if (worldNum <= 9) return 3;  // 終盤（ワールド7〜9）
+  return 4;                     // ラスト（ワールド10）
+}
+
 function startBattle(stage) {
   stage = stage || (battle && battle.stage) || STAGES[0];
   // 削除済みカード等、CARD_DEFSに存在しないIDが万一デッキに残っていた場合に備え、安全のため除外してから使用
   const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
   const playerDeck = shuffle(validDeck.length ? validDeck.slice() : Object.keys(state.cards).slice(0, 10));
-  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 40, stage.spellChance || 0));
+  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 40, stage.spellChance || 0, getStoryWorldLegendCap(stage)));
   const playerMaxHp = getPlayerMaxHp();
 
   battle = {
@@ -3153,7 +3180,6 @@ function startBattle(stage) {
     lastPlayedInfo: null,
     leaderUltimateCharge: 1,
     leaderUltimateReady: false,
-    log: [],
   };
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const enemyPortraitEl = document.getElementById('battle-enemy-portrait');
@@ -3915,15 +3941,6 @@ function showHandCardInfo(id, handIdx) {
   }
 }
 
-const MAX_BATTLE_LOG = 60;
-// バトル中の主要な行動（カード使用・攻撃など）を記録する。後で対戦履歴の詳細として振り返れるようにするため
-function logBattleAction(text) {
-  if (!battle) return;
-  battle.log = battle.log || [];
-  battle.log.push({ turn: battle.turn, side: battle.activeSide, text });
-  if (battle.log.length > MAX_BATTLE_LOG) battle.log.shift();
-}
-
 function playCardFromHand(handIdx, fieldIdx) {
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
@@ -3936,7 +3953,6 @@ function playCardFromHand(handIdx, fieldIdx) {
   sfxCardPlay();
   summonEffect();
   if (def.skill) battle.lastPlayedInfo = def;
-  logBattleAction(`🃏 ${def.name} を場に出した`);
   renderBattle();
 }
 
@@ -3993,7 +4009,6 @@ function castSpell(handIdx, targetIdx) {
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
-  logBattleAction(`✨ ${def.name} を使用した`);
   renderBattle();
 }
 
@@ -4007,7 +4022,6 @@ function playFieldCard(handIdx) {
   battle.fieldCard = id;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
-  logBattleAction(`🏞️ ${def.name} を設置した`);
   renderBattle();
 }
 
@@ -4025,7 +4039,6 @@ function equipCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
-  logBattleAction(`🛡️ ${unit.def.name} に ${def.name} を装備した`);
   renderBattle();
 }
 
@@ -4285,7 +4298,6 @@ function attackTarget(attackerIdx, targetIdx) {
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
   impactEffect(targetEl, dmg, mult);
-  logBattleAction(`⚔️ ${attacker.def.name} が${targetIdx === null ? '敵本体' : '敵モンスター'}に${dmg}ダメージ`);
   if (tag && tag.effect === 'lifesteal') {
     // 【ヴァンパイアロード】攻撃時、与えたダメージ分だけ自分のHPを回復する
     const maxHp = attacker.def.hp + (attacker.hpBonus || 0);
@@ -4452,7 +4464,6 @@ function enemyTurn() {
         applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
         battle.enemyHand.splice(i, 1);
         progressed = true;
-        logBattleAction(`🃏 敵が ${def.name} を場に出した`);
         break;
       }
 
@@ -4550,7 +4561,6 @@ function enemyTurn() {
       const valid = getValidTargets(u, battle.playerField);
       const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
       const dmg = Math.max(1, u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) + extraDmg;
-      logBattleAction(`⚔️ 敵の ${u.def.name} が攻撃（${dmg}ダメージ）`);
       let killed = false;
       if (tag && tag.effect === 'novaAttack' && valid.indices.length > 0) {
         battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, dmg); });
@@ -4745,7 +4755,6 @@ function showResult(won) {
     const idNum = stage.isDungeon ? stage.dungeonFloor : (typeof stage.id === 'number' ? stage.id : 5);
     leveledUp = gainPlayerExp(10 + idNum * 6);
   }
-  logBattleHistory(stage, won, delta);
   saveState();
   document.getElementById('result-reward-gold').textContent = (goldReward > 0 ? '+' : '') + goldReward;
   document.getElementById('result-reward-gem').textContent = (gemReward > 0 ? '+' : '') + gemReward;
@@ -4765,23 +4774,6 @@ function showResult(won) {
     showStory(stage.storyVictory, () => revealResultScreen(won, stage));
   } else {
     revealResultScreen(won, stage);
-  }
-}
-
-const MAX_BATTLE_HISTORY = 50;
-
-function logBattleHistory(stage, won, trophyDelta) {
-  state.battleHistory = state.battleHistory || [];
-  state.battleHistory.unshift({
-    name: stage.name,
-    isEvent: typeof stage.id !== 'number',
-    won,
-    trophyDelta,
-    date: Date.now(),
-    log: (battle && battle.log) ? battle.log.slice() : [],
-  });
-  if (state.battleHistory.length > MAX_BATTLE_HISTORY) {
-    state.battleHistory.length = MAX_BATTLE_HISTORY;
   }
 }
 
@@ -4921,53 +4913,6 @@ function cancelOnlineRoom() {
   }
   onlineCurrentRoomCode = null;
   openOnlineScreen();
-}
-
-function renderBattleHistory() {
-  const history = state.battleHistory || [];
-  const wins = history.filter(h => h.won).length;
-  const total = history.length;
-  const winRate = total ? Math.round((wins / total) * 100) : 0;
-  document.getElementById('history-summary').innerHTML = `
-    <div class="cg-history-summary-card"><div class="cg-history-summary-value">${state.totalWins || 0}</div><div class="cg-history-summary-label">通算勝利数</div></div>
-    <div class="cg-history-summary-card"><div class="cg-history-summary-value">${winRate}%</div><div class="cg-history-summary-label">勝率（直近${total}戦）</div></div>`;
-  const listEl = document.getElementById('history-list');
-  if (!history.length) {
-    listEl.innerHTML = '<div class="cg-rank-empty">まだ対戦履歴がありません。<br>バトルに挑戦してみましょう！</div>';
-    return;
-  }
-  listEl.innerHTML = history.map((h, idx) => {
-    const d = new Date(h.date);
-    const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    return `
-      <div class="cg-history-item ${h.won ? 'win' : 'lose'}" data-idx="${idx}">
-        <div class="cg-history-result">${h.won ? 'WIN' : 'LOSE'}</div>
-        <div class="cg-history-info">
-          <div class="cg-history-stage">${h.isEvent ? '🎉 ' : ''}${h.name}</div>
-          <div class="cg-history-date">${dateStr}</div>
-        </div>
-        <div class="cg-history-trophy ${h.won ? 'win' : 'lose'}">${h.trophyDelta > 0 ? '+' : ''}${h.trophyDelta}</div>
-        ${(h.log && h.log.length) ? `<button class="cg-history-detail-btn" data-idx="${idx}">詳細</button>` : ''}
-      </div>`;
-  }).join('');
-  listEl.querySelectorAll('.cg-history-detail-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showBattleReplay(Number(btn.dataset.idx));
-    });
-  });
-}
-
-// 対戦履歴の1件について、記録されている行動ログを振り返り表示する
-function showBattleReplay(idx) {
-  const entry = (state.battleHistory || [])[idx];
-  if (!entry) return;
-  const log = entry.log || [];
-  document.getElementById('replay-title').textContent = `${entry.isEvent ? '🎉 ' : ''}${entry.name}（${entry.won ? 'WIN' : 'LOSE'}）`;
-  document.getElementById('replay-log-list').innerHTML = log.length
-    ? log.map(e => `<div class="cg-replay-log-item"><span class="cg-replay-log-turn">ターン${e.turn}</span><span class="cg-replay-log-text ${e.side === 'enemy' ? 'enemy' : ''}">${e.text}</span></div>`).join('')
-    : '<div class="cg-empty">この対戦の詳細ログはありません</div>';
-  document.getElementById('battle-replay-overlay').classList.remove('hidden');
 }
 
 function revealResultScreen(won, stage) {
@@ -5526,7 +5471,7 @@ const MISSIONS = [
   // ---- 追加ミッション（87回目の修正） ----
   { id: 'win75', category: 'battle', title: 'バトルの覇者', desc: 'バトルに75回勝利する', target: 75, check: s => s.totalWins || 0, reward: { gems: 100 } },
   { id: 'win100', category: 'battle', title: '伝説の挑戦者', desc: 'バトルに100回勝利する', target: 100, check: s => s.totalWins || 0, reward: { gold: 3000, gems: 60 } },
-  { id: 'history50', category: 'battle', title: '戦いの記録者', desc: '対戦履歴を50件残す', target: 50, check: s => (s.battleHistory || []).length, reward: { gold: 600 } },
+  { id: 'dragonLv5', category: 'battle', title: '相棒との絆', desc: 'ドラゴンをLv.5まで育てる', target: 5, check: s => (s.dragon && s.dragon.level) || 1, reward: { gold: 600 } },
   { id: 'trophy4001', category: 'battle', title: 'プラチナランク到達', desc: 'トロフィーを4001以上獲得する', target: 4001, check: s => s.trophy || 0, reward: { gems: 80 } },
   { id: 'trophy6001', category: 'battle', title: 'ダイヤモンドランク到達', desc: 'トロフィーを6001以上獲得する', target: 6001, check: s => s.trophy || 0, reward: { gold: 5000, gems: 150 } },
   { id: 'upgrade50', category: 'growth', title: 'カード強化の鬼', desc: 'カードを50回強化する', target: 50, check: s => s.totalUpgrades || 0, reward: { gold: 2500, gems: 25 } },
@@ -5975,14 +5920,6 @@ const SCREEN_HELP = {
       '<b>② 保存</b><br>「保存する」を押すと確認ダイアログが表示され、OKで変更が反映されます。',
     ],
   },
-  history: {
-    title: '戦績・対戦履歴画面のヘルプ',
-    items: [
-      '<b>① 通算成績</b><br>これまでの通算勝利数・勝率を確認できます。',
-      '<b>② 対戦履歴</b><br>直近の対戦結果とトロフィー増減の履歴を確認できます。',
-      '<b>③ 対戦の詳細（リプレイ）</b><br>「詳細」ボタンをタップすると、そのバトルで実際に起きた行動（カードの使用・攻撃など）を振り返って確認できます。',
-    ],
-  },
   online: {
     title: 'オンライン対戦のヘルプ（β版）',
     items: [
@@ -6070,12 +6007,8 @@ function init() {
   document.getElementById('login-bonus-close').addEventListener('click', () => {
     document.getElementById('login-bonus-overlay').classList.add('hidden');
   });
-  document.getElementById('battle-replay-close').addEventListener('click', () => {
-    document.getElementById('battle-replay-overlay').classList.add('hidden');
-  });
   const quickDragonBtn = document.getElementById('quick-dragon');
   if (quickDragonBtn) quickDragonBtn.addEventListener('click', () => { renderDragon(); showScreen('dragon'); });
-  document.getElementById('quick-history').addEventListener('click', () => { renderBattleHistory(); showScreen('history'); });
   document.getElementById('quick-online').addEventListener('click', openOnlineScreen);
   document.getElementById('online-create-btn').addEventListener('click', createOnlineRoom);
   document.getElementById('online-join-btn').addEventListener('click', joinOnlineRoom);
