@@ -5982,6 +5982,15 @@ function openScreenHelp(key) {
 }
 
 function init() {
+  // アプリが閉じられる・裏に回る直前に、確実に最新の状態を保存しておく
+  // （何らかの理由でこまめな保存が漏れていた場合の保険。iOSでアプリを完全に終了する際に
+  // 特に重要なため、visibilitychange・pagehideの両方で保存する）
+  const flushSaveOnClose = () => { try { saveState(); } catch (e) { console.error('flush save failed', e); } };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSaveOnClose();
+  });
+  window.addEventListener('pagehide', flushSaveOnClose);
+
   // 全てのオーバーレイ（ヘルプ・カード情報・各種モーダル）について、非表示になった後は
   // display:noneにして完全にレンダリングを止める（見えない間もアニメーション等が動き続けて
   // 端末が発熱する問題への対策）。既存の hidden クラスの付け外しはそのままで動作する
