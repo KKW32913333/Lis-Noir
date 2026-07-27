@@ -389,6 +389,18 @@ function loadState() {
       }
       saved.grantedCrimsonStarter_20260725 = true;
     }
+    // 不具合修正: 最終ステージ（50）をクリアしても進行度が50のまま止まってしまい、「クリア済み」と
+    // 表示されない不具合があったため、既存プレイヤーの対戦履歴から実際にクリア済みかどうかを判定し、
+    // 該当する場合は進行度を修正する（既存プレイヤーへ1回限り）
+    if (!saved.fixedFinalStageProgress_20260725) {
+      if (saved.stageProgress === STAGES.length) {
+        const finalStageName = STAGES[STAGES.length - 1].name;
+        const clearedFinalStage = Array.isArray(saved.battleHistory)
+          && saved.battleHistory.some(h => h.won && h.name === finalStageName);
+        if (clearedFinalStage) saved.stageProgress = STAGES.length + 1;
+      }
+      saved.fixedFinalStageProgress_20260725 = true;
+    }
     // 初心者ガチャ必須化に伴う後方互換対応: この仕組みが無かった時期からの既存プレイヤーが、
     // 意図せずロックされて他の画面に進めなくなることがないよう、既に完了済み扱いにする
     if (saved.beginnerGachaDone === undefined) {
@@ -2818,9 +2830,16 @@ function stagePortraitHtml(stage, unlocked) {
   if (!unlocked) return '🔒';
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   if (bossDef && bossDef.image) {
-    return `<div class="cg-stage-portrait-img" style="background-image:url('${bossDef.image}')"></div>`;
+    return `<img src="${bossDef.image}" alt="" class="cg-stage-portrait-img" data-emoji="${stage.portrait}" onerror="handleStagePortraitImgError(this)"/>`;
   }
   return stage.portrait;
+}
+
+// ボスカードの画像が見つからない場合、絵文字のポートレートに差し替える
+function handleStagePortraitImgError(imgEl) {
+  const span = document.createElement('span');
+  span.textContent = imgEl.dataset.emoji || '❓';
+  imgEl.replaceWith(span);
 }
 
 let stageSelectMode = 'story';
@@ -2882,7 +2901,7 @@ function renderQuestList(quests, sectionLabel, unlockStageProgress) {
     return;
   }
   const cardsHtml = quests.map(q => `
-    <div class="cg-stage-card cg-dungeon-boss-card" data-quest="${q.id}">
+    <div class="cg-stage-card" data-quest="${q.id}">
       <div class="cg-stage-portrait">${stagePortraitHtml(q, true)}</div>
       <div class="cg-stage-info">
         <div class="cg-stage-name">${q.name}</div>
@@ -3078,14 +3097,23 @@ function startBattle(stage) {
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const enemyPortraitEl = document.getElementById('battle-enemy-portrait');
   const enemyEmojiEl = document.getElementById('battle-enemy-emoji');
-  if (bossDef && bossDef.image) {
-    enemyPortraitEl.style.backgroundImage = `url('${bossDef.image}')`;
-    enemyPortraitEl.classList.add('has-boss-image');
-    enemyEmojiEl.textContent = '';
-  } else {
+  const showBossFallback = () => {
     enemyPortraitEl.style.backgroundImage = '';
     enemyPortraitEl.classList.remove('has-boss-image');
     enemyEmojiEl.textContent = stage.portrait;
+  };
+  if (bossDef && bossDef.image) {
+    // 画像が実際に読み込めるか確認してから適用する（ファイルが見つからない場合は絵文字にフォールバック）
+    const preload = new Image();
+    preload.onload = () => {
+      enemyPortraitEl.style.backgroundImage = `url('${bossDef.image}')`;
+      enemyPortraitEl.classList.add('has-boss-image');
+      enemyEmojiEl.textContent = '';
+    };
+    preload.onerror = showBossFallback;
+    preload.src = bossDef.image;
+  } else {
+    showBossFallback();
   }
   applyBattleBgTheme(stage.bgTheme, isBossBattleStage(stage));
   applyLeaderPortraits();
@@ -4645,7 +4673,9 @@ function showResult(won) {
         }
       }
     } else if (typeof stage.id === 'number' && stage.id === state.stageProgress) {
-      state.stageProgress = Math.min(STAGES.length, state.stageProgress + 1);
+      // 最終ステージをクリアした場合も、他のステージと同様に進行度を1つ先へ進める。
+      // ここでSTAGES.lengthに制限してしまうと、最終ステージが「クリア済み」判定されなくなるため注意
+      state.stageProgress = Math.min(STAGES.length + 1, state.stageProgress + 1);
     }
     gainDragonExp(15);
   }
@@ -5624,8 +5654,17 @@ function onTutorialDocumentClick(e) {
   const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
   if (!step || !step.matches(e.target)) return;
   interactiveTutorialStepIdx++;
+  // 古いスポットライト（前のステップの対象を囲んでいたマスク）が、新しい画面の上に
+  // そのまま居座って操作をブロックしてしまわないよう、すぐに一旦非表示にする
+  hideTutorialSpotlight();
   // 画面遷移・再描画の完了を少し待ってから次のステップを表示する
   setTimeout(() => showInteractiveTutorialStep(), 400);
+}
+
+function hideTutorialSpotlight() {
+  ['tutorial-mask-top', 'tutorial-mask-bottom', 'tutorial-mask-left', 'tutorial-mask-right', 'tutorial-spotlight-ring', 'tutorial-tooltip'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
 }
 
 function clearInteractiveTutorialWaiter() {
@@ -5710,9 +5749,7 @@ function finishInteractiveTutorial() {
   interactiveTutorialActive = false;
   clearInteractiveTutorialWaiter();
   document.removeEventListener('click', onTutorialDocumentClick, true);
-  ['tutorial-mask-top', 'tutorial-mask-bottom', 'tutorial-mask-left', 'tutorial-mask-right', 'tutorial-spotlight-ring', 'tutorial-tooltip'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
+  hideTutorialSpotlight();
   state.hasSeenInteractiveTutorial = true;
   saveState();
 }
