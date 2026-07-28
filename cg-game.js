@@ -224,7 +224,11 @@ const EVENT_GACHA_PACKS = [
 const EVOLVE_COST = 800;
 const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
-const CARD_MAX_LEVEL = 10;
+const CARD_MAX_LEVEL = 30;
+// レベルが上がるほど、強化に必要なゴールドも増えていく
+function cardUpgradeCost(level) {
+  return 400 + (level - 1) * 100;
+}
 
 // ---------- 絆レベル ----------
 // 同じカードを繰り返し入手（重複取得）した際の、進化のさらに上位段階。純粋に見た目・演出の変化のみで、
@@ -2211,18 +2215,19 @@ function openCardDetail(id) {
     <div class="cg-detail-art" style="${cardArtStyle(def)}">${def.image ? `<img src="${def.image}" data-emoji="${def.emoji}" onerror="handleDetailImgError(this)"/>` : `<span class="cg-detail-emoji">${def.emoji}</span>`}${owned.evolved ? '<span class="cg-card-evolved-badge lg">★</span>' : ''}${(def.rarity === 'legend') ? `<div class="cg-card-foil ${def.rarity}"></div>` : ''}</div>
     <div class="cg-detail-info">
       <div class="cg-detail-name">${def.name}</div>
-      <div class="cg-detail-level">Lv.${owned.level} <span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
+      <div class="cg-detail-level">${isMonster ? `Lv.${owned.level} ` : ''}<span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       ${bondHtml}
       ${deckControlHtml}
-      <div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>
+      ${isMonster ? `<div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>` : ''}
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
         ${detailStatsBlock(def, owned.evolved)}
       </div>
-      ${owned.level >= CARD_MAX_LEVEL
+      ${isMonster ? (owned.level >= CARD_MAX_LEVEL
         ? `<div class="cg-evolve-done">Lv.${CARD_MAX_LEVEL}（最大レベル）</div>`
-        : `<button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰400)</button>`}
+        : `<button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰${cardUpgradeCost(owned.level)})</button>
+           <div class="cg-detail-gold-owned">所持ゴールド：💰${state.gold.toLocaleString()}</div>`) : ''}
       ${isMonster ? `
         <div class="cg-evolve-row">
           ${owned.evolved
@@ -2249,8 +2254,9 @@ function openCardDetail(id) {
   });
   const upgradeBtn = document.getElementById('detail-upgrade-btn');
   if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
-    if (state.gold >= 400 && state.cards[id].level < CARD_MAX_LEVEL) {
-      state.gold -= 400;
+    const cost = cardUpgradeCost(state.cards[id].level);
+    if (state.gold >= cost && state.cards[id].level < CARD_MAX_LEVEL) {
+      state.gold -= cost;
       state.cards[id].exp += 20;
       if (state.cards[id].exp >= 100 && state.cards[id].level < CARD_MAX_LEVEL) {
         state.cards[id].exp = 0;
@@ -5625,8 +5631,9 @@ function applyPackRewards(cardIds) {
     if (isNew) state.cards[cardId] = { level: 1, exp: 0, count: 0, evolved: false };
     const owned = state.cards[cardId];
     owned.count = (owned.count || 1) + 1;
+    const isMonsterCard = (CARD_DEFS[cardId].type || 'monster') === 'monster';
     let leveledUp = false;
-    if (!isNew && owned.level < CARD_MAX_LEVEL) {
+    if (!isNew && isMonsterCard && owned.level < CARD_MAX_LEVEL) {
       owned.exp += 20;
       if (owned.exp >= 100) {
         owned.exp = 0;
@@ -5651,12 +5658,15 @@ function applyPackRewards(cardIds) {
 function showReveal(cardId, leveledUp, isNew) {
   const def = CARD_DEFS[cardId];
   const rarity = RARITY[def.rarity];
+  const isMonsterCard = (def.type || 'monster') === 'monster';
   sfxReveal();
   document.getElementById('shop-reveal-label').textContent = '獲得！';
   document.getElementById('shop-reveal-single').classList.remove('hidden');
   document.getElementById('shop-reveal-grid').classList.add('hidden');
   document.getElementById('shop-reveal-card').innerHTML = renderCardFace(cardId, { evolved: state.cards[cardId].evolved });
-  const subLine = isNew ? '<br>✨NEW！ カード一覧に追加されました' : (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : '<br>強化経験値+20');
+  const subLine = isNew
+    ? '<br>✨NEW！ カード一覧に追加されました'
+    : (leveledUp ? `<br>Lv.${state.cards[cardId].level} にレベルアップ！` : (isMonsterCard ? '<br>強化経験値+20' : '<br>重複獲得（累計枚数+1）'));
   document.getElementById('shop-reveal-caption').innerHTML =
     `<span style="color:${rarity.color}; font-weight:800;">${rarity.name}</span> ${def.name} を獲得！` + subLine;
   document.getElementById('shop-reveal-overlay').classList.remove('hidden');
