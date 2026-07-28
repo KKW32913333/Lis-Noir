@@ -3035,7 +3035,7 @@ function renderStoryStages() {
     const worldUnlocked = worldStages[0].id <= state.stageProgress;
     const stagesHtml = worldStages.map(stage => {
       const unlocked = stage.id <= state.stageProgress;
-      const cleared = stage.id < state.stageProgress;
+      const cleared = stage.id < state.stageProgress && stage.id !== 7;
       return `
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
           <div class="cg-stage-portrait">${stagePortraitHtml(stage, unlocked)}${cleared ? '<span class="cg-stage-cleared-badge">✓</span>' : ''}</div>
