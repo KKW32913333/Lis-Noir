@@ -2917,7 +2917,8 @@ function renderStoryStages() {
     const worldUnlocked = worldStages[0].id <= state.stageProgress;
     const stagesHtml = worldStages.map(stage => {
       const unlocked = stage.id <= state.stageProgress;
-      const cleared = stage.id < state.stageProgress;
+      // ステージ7は要望により「クリア済み」表示（チェックマーク・タグ）の対象から除外する
+      const cleared = stage.id < state.stageProgress && stage.id !== 7;
       return `
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
           <div class="cg-stage-portrait">${stagePortraitHtml(stage, unlocked)}${cleared ? '<span class="cg-stage-cleared-badge">✓</span>' : ''}</div>
@@ -3321,7 +3322,24 @@ function runAutoBattleTurn() {
 }
 
 function showVsIntro(stage) {
-  document.getElementById('vs-enemy-portrait').textContent = stage.portrait;
+  const vsEnemyEl = document.getElementById('vs-enemy-portrait');
+  const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
+  const showVsEnemyFallback = () => {
+    vsEnemyEl.style.backgroundImage = '';
+    vsEnemyEl.textContent = stage.portrait;
+  };
+  if (bossDef && bossDef.image) {
+    // 画像が実際に読み込めるか確認してから適用する（ファイルが見つからない場合は絵文字にフォールバック）
+    const preload = new Image();
+    preload.onload = () => {
+      vsEnemyEl.style.backgroundImage = `url('${bossDef.image}')`;
+      vsEnemyEl.textContent = '';
+    };
+    preload.onerror = showVsEnemyFallback;
+    preload.src = bossDef.image;
+  } else {
+    showVsEnemyFallback();
+  }
   document.getElementById('vs-enemy-name').textContent = stage.name;
   const overlay = document.getElementById('battle-vs-intro');
   overlay.classList.remove('hidden');
