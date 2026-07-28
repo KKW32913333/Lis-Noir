@@ -289,6 +289,8 @@ function defaultState() {
     tickets: 2,
     pityCounters: {},
     compendiumRewardClaimed: false,
+    achievementsUnlocked: {},
+    equippedTitle: null,
     playerLevel: 1,
     playerExp: 0,
     gold: 3000,
@@ -1077,6 +1079,7 @@ function claimDailyReward() {
 
 function renderHome() {
   checkDailyReset();
+  checkAchievements();
   updatePresentBadge();
   updateMissionBadge();
   checkLoginBonus();
@@ -1105,6 +1108,10 @@ function renderHome() {
   const next = RANK_TIERS[tierIdx + 1];
   document.getElementById('rank-name').textContent = state.playerName;
   document.getElementById('rank-tier').textContent = `${tier.name}ランク`;
+  const titleEl = document.getElementById('rank-title');
+  const equippedTitleText = getEquippedTitleText();
+  titleEl.textContent = equippedTitleText || '';
+  titleEl.classList.toggle('hidden', !equippedTitleText);
   renderRankIcon(document.getElementById('rank-card-avatar'), tier);
   if (next) {
     const pct = Math.min(100, Math.round((state.trophy - tier.min) / (next.min - tier.min) * 100));
@@ -1304,6 +1311,7 @@ function renderProfileScreen() {
   document.getElementById('profile-name-input').value = state.playerName;
   renderAvatarInto(document.getElementById('profile-avatar-preview'));
   document.getElementById('profile-save-status').textContent = '';
+  updateProfileTitleDisplay();
   const grid = document.getElementById('profile-avatar-grid');
   grid.innerHTML = AVATAR_OPTIONS.map(ic =>
     `<div class="cg-profile-avatar-opt ${(!state.avatarImage && ic === state.avatarIcon) ? 'selected' : ''}" data-icon="${ic}">${ic}</div>`
@@ -1312,10 +1320,55 @@ function renderProfileScreen() {
     node.addEventListener('click', () => {
       grid.querySelectorAll('.cg-profile-avatar-opt').forEach(n => n.classList.remove('selected'));
       node.classList.add('selected');
-      pendingAvatarImage = null; // 絵文字を選んだので画像はクリア
+      pendingAvatarImage = null; // 絵文字に戻す選択がされた場合
       const preview = document.getElementById('profile-avatar-preview');
       preview.style.backgroundImage = '';
       preview.textContent = node.dataset.icon;
+    });
+  });
+}
+
+function updateProfileTitleDisplay() {
+  const el = document.getElementById('profile-title-display');
+  if (!el) return;
+  const equipped = state.equippedTitle ? ACHIEVEMENTS.find(a => a.id === state.equippedTitle) : null;
+  el.textContent = equipped ? equipped.title : '称号なし';
+}
+
+// 現在装着中の称号のテキストを返す（プレイヤー名の横などに表示するため）
+function getEquippedTitleText() {
+  const equipped = state.equippedTitle ? ACHIEVEMENTS.find(a => a.id === state.equippedTitle) : null;
+  return equipped ? equipped.title : null;
+}
+
+function renderAchievementsScreen() {
+  checkAchievements();
+  const unlockedCount = ACHIEVEMENTS.filter(a => state.achievementsUnlocked[a.id]).length;
+  document.getElementById('achievement-progress-count').textContent = `${unlockedCount}/${ACHIEVEMENTS.length}`;
+  const listEl = document.getElementById('achievement-list');
+  listEl.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = !!state.achievementsUnlocked[a.id];
+    const progress = Math.min(a.target, a.check(state));
+    const equipped = state.equippedTitle === a.id;
+    return `<div class="cg-achievement-card ${unlocked ? 'unlocked' : 'locked'}" data-id="${a.id}">
+      <div class="cg-achievement-card-top">
+        <span class="cg-achievement-card-title">${a.title}</span>
+        <span class="cg-achievement-card-status ${unlocked ? 'done' : 'pending'}">${unlocked ? '達成済み' : '未達成'}</span>
+      </div>
+      <div class="cg-achievement-card-desc">${a.desc}</div>
+      ${!unlocked ? `
+        <div class="cg-achievement-card-track"><div class="cg-achievement-card-fill" style="width:${Math.min(100, (progress / a.target) * 100)}%"></div></div>
+        <div class="cg-achievement-card-progress">${progress}/${a.target}</div>
+      ` : `<button class="cg-achievement-equip-btn ${equipped ? 'equipped' : ''}" data-id="${a.id}">${equipped ? '装着中' : 'この称号を装着する'}</button>`}
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.cg-achievement-equip-btn:not(.equipped)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.equippedTitle = btn.dataset.id;
+      saveState();
+      renderAchievementsScreen();
+      updateProfileTitleDisplay();
+      renderHome();
     });
   });
 }
@@ -4966,6 +5019,7 @@ function showResult(won) {
     }
   }
 
+  checkAchievements();
   if (won && stage.storyVictory && isWorldLastStage(stage)) {
     showStory(stage.storyVictory, () => revealResultScreen(won, stage));
   } else {
@@ -5900,6 +5954,62 @@ function updateMissionBadge() {
   badge.classList.toggle('hidden', count === 0);
 }
 
+// ---------- 実績・称号 ----------
+// 一度達成すると永続的に記録される実績。各実績は専用の称号（プレイヤー名の横に表示できる）を解放する
+const ACHIEVEMENTS = [
+  { id: 'win1', category: 'battle', title: '駆け出しの冒険者', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0 },
+  { id: 'win10', category: 'battle', title: '頼れる戦士', desc: 'バトルに10回勝利する', target: 10, check: s => s.totalWins || 0 },
+  { id: 'win50', category: 'battle', title: '百戦錬磨', desc: 'バトルに50回勝利する', target: 50, check: s => s.totalWins || 0 },
+  { id: 'win100', category: 'battle', title: '伝説の戦士', desc: 'バトルに100回勝利する', target: 100, check: s => s.totalWins || 0 },
+  { id: 'upgrade10', category: 'card', title: '鍛錬の証', desc: 'カードを合計10回強化する', target: 10, check: s => s.totalUpgrades || 0 },
+  { id: 'upgrade50', category: 'card', title: '熟練の鍛冶師', desc: 'カードを合計50回強化する', target: 50, check: s => s.totalUpgrades || 0 },
+  { id: 'legend1', category: 'card', title: '幸運の持ち主', desc: 'レジェンドカードを1枚入手する', target: 1,
+    check: s => Object.keys(s.cards).filter(id => CARD_DEFS[id] && CARD_DEFS[id].rarity === 'legend').length },
+  { id: 'legend5', category: 'card', title: 'レジェンドコレクター', desc: 'レジェンドカードを5種類入手する', target: 5,
+    check: s => Object.keys(s.cards).filter(id => CARD_DEFS[id] && CARD_DEFS[id].rarity === 'legend').length },
+  { id: 'compendium50', category: 'card', title: '収集家の卵', desc: '図鑑の収集率が50%に到達する', target: 50,
+    check: s => { const { ownedCount, total } = getCompendiumProgress(); return total ? Math.floor((ownedCount / total) * 100) : 0; } },
+  { id: 'compendium100', category: 'card', title: '図鑑の達人', desc: '図鑑をコンプリートする', target: 1, check: s => s.compendiumRewardClaimed ? 1 : 0 },
+  { id: 'dragon10', category: 'dragon', title: '竜の育て手', desc: 'ドラゴンをLv.10まで育てる', target: 10, check: s => (s.dragon && s.dragon.level) || 1 },
+  { id: 'dragon30', category: 'dragon', title: '竜王の絆', desc: 'ドラゴンを最大レベルまで育てる', target: CARD_MAX_LEVEL, check: s => (s.dragon && s.dragon.level) || 1 },
+  { id: 'trophy3000', category: 'rank', title: '躍進の証', desc: 'トロフィーを3000以上獲得する', target: 3000, check: s => s.trophy || 0 },
+  { id: 'trophy15000', category: 'rank', title: '栄光のランカー', desc: 'トロフィーを15000以上獲得する', target: 15000, check: s => s.trophy || 0 },
+  { id: 'storyClear', category: 'story', title: '世界を救いし者', desc: 'ストーリーを全てクリアする', target: STAGES.length + 1, check: s => s.stageProgress || 1 },
+  { id: 'dungeon50', category: 'dungeon', title: '深淵の踏破者', desc: 'ダンジョン地下50階に到達する', target: 50, check: s => s.dungeonFloor || 1 },
+  { id: 'dungeon100', category: 'dungeon', title: 'ダンジョンの覇者', desc: 'ダンジョン地下100階に到達する', target: DUNGEON_MAX_FLOOR, check: s => s.dungeonFloor || 1 },
+  { id: 'deckPreset3', category: 'deck', title: '戦略家', desc: 'デッキプリセットを3つ作成する', target: 3, check: s => (s.deckPresets && s.deckPresets.length) || 0 },
+];
+
+// 実績の達成状況を確認し、新たに条件を満たしたものを解放する（画面遷移のたびに呼び出す軽量なチェック）
+function checkAchievements() {
+  let newlyUnlocked = null;
+  ACHIEVEMENTS.forEach(a => {
+    if (state.achievementsUnlocked[a.id]) return;
+    if (a.check(state) >= a.target) {
+      state.achievementsUnlocked[a.id] = true;
+      if (!newlyUnlocked) newlyUnlocked = [];
+      newlyUnlocked.push(a);
+    }
+  });
+  if (newlyUnlocked) {
+    saveState();
+    showAchievementUnlockToast(newlyUnlocked);
+  }
+  return newlyUnlocked;
+}
+
+
+// 実績を新たに解放した際の通知（複数同時解放の場合は代表1件+件数を表示）
+function showAchievementUnlockToast(newlyUnlocked) {
+  const toast = document.getElementById('achievement-unlock-toast');
+  if (!toast || !newlyUnlocked || !newlyUnlocked.length) return;
+  const first = newlyUnlocked[0];
+  const extra = newlyUnlocked.length > 1 ? `　他${newlyUnlocked.length - 1}件` : '';
+  document.getElementById('achievement-unlock-toast-text').textContent = `実績解放：${first.title}${extra}`;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3200);
+}
+
 // ---------- ミッション ----------
 const MISSIONS = [
   { id: 'win1', category: 'battle', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
@@ -6406,6 +6516,14 @@ const SCREEN_HELP = {
     items: [
       '<b>① プレイヤー名・アイコン</b><br>名前の変更や、写真・イラストからのアイコン選択ができます。',
       '<b>② 保存</b><br>「保存する」を押すと確認ダイアログが表示され、OKで変更が反映されます。',
+      '<b>③ 称号</b><br>「実績・称号一覧を見る」から、達成した実績に応じた称号を選んで装着できます。装着した称号は、ホーム画面のランクカードに表示されます。',
+    ],
+  },
+  achievements: {
+    title: '実績・称号画面のヘルプ',
+    items: [
+      '<b>① 実績とは</b><br>バトルの勝利数やカードの収集・強化状況など、様々な条件を満たすと自動的に達成される、恒久的な記録です。一度達成した実績が失われることはありません。',
+      '<b>② 称号</b><br>達成済みの実績には、それぞれ専用の称号が用意されています。カードをタップして「この称号を装着する」を選ぶと、ホーム画面のランクカードに表示されます（いつでも変更できます）。',
     ],
   },
   online: {
@@ -6547,7 +6665,9 @@ function init() {
     renderCardList();
   });
   document.getElementById('cardlist-deckonly-toggle').addEventListener('click', toggleCardListDeckOnly);
-  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail):not(.cg-back-btn-online)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.querySelectorAll('.cg-back-btn:not(#battle-back-btn):not(.cg-back-btn-detail):not(.cg-back-btn-online):not(.cg-back-btn-achievements)').forEach(b => b.addEventListener('click', () => showScreen('home') || renderHome()));
+  document.getElementById('profile-achievements-btn').addEventListener('click', () => { renderAchievementsScreen(); showScreen('achievements'); });
+  document.querySelector('.cg-back-btn-achievements').addEventListener('click', () => { renderProfileScreen(); showScreen('profile'); });
   document.querySelector('.cg-back-btn-online').addEventListener('click', () => {
     if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
     if (onlineCurrentRoomCode && isOnlineBattleAvailable() && window.LisNoirCloud.leaveBattleRoom) {
