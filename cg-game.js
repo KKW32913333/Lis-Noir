@@ -1148,8 +1148,11 @@ const DRAGON_STAGES = [
   { minLevel: 13, name: '成竜',     emoji: '🐉', image: 'dragon-adult.png' },
   { minLevel: 20, name: '古代竜',   emoji: '🐉', glow: true, image: 'dragon-ancient.png' },
 ];
-const DRAGON_EXP_PER_LEVEL = 100;
 const DRAGON_FEED_EXP = 25;
+// レベルが上がるほど、次のレベルに必要な経験値も増えていく（最初は元と同じ100、後半になるほど大きく増加）
+function dragonExpForLevel(level) {
+  return 100 + (level - 1) * 40;
+}
 
 function getDragonStageInfo(level) {
   let stage = DRAGON_STAGES[0];
@@ -1176,8 +1179,8 @@ function dragonFeedCost() {
 function gainDragonExp(amount) {
   const d = state.dragon;
   d.exp += amount;
-  while (d.exp >= DRAGON_EXP_PER_LEVEL) {
-    d.exp -= DRAGON_EXP_PER_LEVEL;
+  while (d.exp >= dragonExpForLevel(d.level)) {
+    d.exp -= dragonExpForLevel(d.level);
     d.level += 1;
   }
   saveState();
@@ -1200,7 +1203,7 @@ function renderDragonSummary() {
     ? `<img src="${stage.image}" alt="" class="cg-dragon-summary-img" data-emoji="${stage.emoji}" onerror="handleDragonImgError(this)"/>`
     : stage.emoji;
   document.getElementById('dragon-summary-stage').textContent = `${stage.name}・Lv.${state.dragon.level}`;
-  document.getElementById('dragon-summary-fill').style.width = Math.min(100, (state.dragon.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
+  document.getElementById('dragon-summary-fill').style.width = Math.min(100, (state.dragon.exp / dragonExpForLevel(state.dragon.level)) * 100) + '%';
 }
 
 // ドラゴンの画像が見つからない場合、絵文字表示に差し替える
@@ -1220,8 +1223,8 @@ function renderDragon() {
   emojiEl.classList.toggle('cg-dragon-emoji-glow', !!stage.glow);
   document.getElementById('dragon-stage-name').textContent = stage.name;
   document.getElementById('dragon-level').textContent = `Lv.${d.level}`;
-  document.getElementById('dragon-exp-fill').style.width = Math.min(100, (d.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
-  document.getElementById('dragon-exp-label').textContent = `${d.exp}/${DRAGON_EXP_PER_LEVEL}`;
+  document.getElementById('dragon-exp-fill').style.width = Math.min(100, (d.exp / dragonExpForLevel(d.level)) * 100) + '%';
+  document.getElementById('dragon-exp-label').textContent = `${d.exp}/${dragonExpForLevel(d.level)}`;
   document.getElementById('dragon-bonus-desc').textContent = `バトル開始時の自分のHPが +${getDragonBonusHp()}（現在の最大HP ${getPlayerMaxHp()}）`;
   document.getElementById('dragon-feed-btn').textContent = `🍖 エサをあげる（💰${dragonFeedCost()}）`;
 
