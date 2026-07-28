@@ -1483,6 +1483,7 @@ function renderLeaderSelect(containerId) {
 // アルティメットスキルの発動：敵本体と敵の場にいる全モンスターに効果を及ぼす（5ターンに1回）
 function executeLeaderUltimate() {
   if (!battle || battle.over) return;
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const leader = getActiveLeader();
   if (!leader || !leader.ultimateSkill) return;
   if ((battle.leaderUltimateCharge || 0) < ULTIMATE_COOLDOWN_TURNS) return;
@@ -1515,6 +1516,12 @@ function executeLeaderUltimate() {
 
   battle.leaderUltimateCharge = 0;
   battle.lastPlayedInfo = { name: skill.name, skill: skill.desc };
+  submitOnlineAction('use_ultimate', {
+    attackerSideField: serializeFieldForSync(battle.playerField),
+    attackerSideHp: battle.playerHp,
+    targetSideField: serializeFieldForSync(battle.enemyField),
+    targetSideHp: battle.enemyHp,
+  });
 
   if (battle.enemyHp <= 0) {
     renderBattle();
@@ -3705,6 +3712,24 @@ function renderBattle() {
 
   bindBattleEvents();
 
+  // オンライン対戦中は、自分のターンでない間は操作できないようにする
+  const battleBoard = document.querySelector('.cg-battle-board');
+  if (battleBoard) {
+    const waitingForOpponent = !!(battle.isOnline && battle.activeSide !== 'player' && !battle.over);
+    battleBoard.classList.toggle('cg-online-waiting-turn', waitingForOpponent);
+  }
+  const endTurnBtn = document.getElementById('battle-end-turn');
+  if (endTurnBtn) {
+    if (battle.isOnline) {
+      endTurnBtn.disabled = battle.activeSide !== 'player' || battle.over;
+      endTurnBtn.textContent = battle.activeSide === 'player' ? 'ターン終了' : '相手のターン…';
+    } else {
+      endTurnBtn.disabled = false;
+      endTurnBtn.textContent = 'ターン終了';
+    }
+  }
+
+  if (battle.isOnline) return; // 勝敗判定はcheckOnlineBattleEndで行うため、以下の通常フローは対象外
   if (battle.playerHp <= 0 || battle.enemyHp <= 0) {
     battle.over = true;
     if (battle.deckOutSide) {
@@ -3971,6 +3996,7 @@ function showHandCardInfo(id, handIdx) {
 }
 
 function playCardFromHand(handIdx, fieldIdx) {
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
   if (!def || def.cost > battle.playerCost || battle.playerField[fieldIdx]) return;
@@ -3982,10 +4008,21 @@ function playCardFromHand(handIdx, fieldIdx) {
   sfxCardPlay();
   summonEffect();
   if (def.skill) battle.lastPlayedInfo = def;
+  // onPlayスキルにランダム要素を持つカードがあり、受信側で再現すると結果がずれる可能性があるため、
+  // 結果が確定した状態をそのまま同期する
+  submitOnlineAction('play_card', {
+    cardId: id, fieldIdx,
+    attackerSideField: serializeFieldForSync(battle.playerField),
+    attackerSideHand: battle.playerHand.slice(),
+    attackerSideCost: battle.playerCost,
+    targetSideField: serializeFieldForSync(battle.enemyField),
+    targetSideHp: battle.enemyHp,
+  });
   renderBattle();
 }
 
 function castSpell(handIdx, targetIdx) {
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
   if (!def || def.cost > battle.playerCost) return;
@@ -3995,20 +4032,21 @@ function castSpell(handIdx, targetIdx) {
   sfxCardPlay();
 
   const eff = def.effect || {};
+  let dealtDmg = 0;
   if (eff.kind === 'damage') {
     const leaderSp = getActiveLeader();
     const dmgPctSp = leaderSp ? (leaderSp.effect.enemyDmgPct || 0) : 0;
-    const dmg = Math.round((eff.value || 0) * (1 + dmgPctSp));
+    dealtDmg = Math.round((eff.value || 0) * (1 + dmgPctSp));
     const targetEl = targetIdx === null
       ? document.getElementById('battle-enemy-portrait')
       : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
-    impactEffect(targetEl, dmg, 0);
+    impactEffect(targetEl, dealtDmg, 0);
     if (targetIdx === null) {
-      battle.enemyHp -= dmg;
+      battle.enemyHp -= dealtDmg;
     } else {
       const target = battle.enemyField[targetIdx];
       if (target) {
-        target.curHp -= mitigateIncomingDamage(target, dmg);
+        target.curHp -= mitigateIncomingDamage(target, dealtDmg);
         if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
       }
     }
@@ -4038,10 +4076,12 @@ function castSpell(handIdx, targetIdx) {
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+  submitOnlineAction('cast_spell', { cardId: id, targetIdx, dmg: dealtDmg });
   renderBattle();
 }
 
 function playFieldCard(handIdx) {
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
   if (!def || def.cost > battle.playerCost) return;
@@ -4051,10 +4091,12 @@ function playFieldCard(handIdx) {
   battle.fieldCard = id;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
+  submitOnlineAction('play_field', { cardId: id });
   renderBattle();
 }
 
 function equipCardFromHand(handIdx, fieldIdx) {
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
   const unit = battle.playerField[fieldIdx];
@@ -4068,6 +4110,7 @@ function equipCardFromHand(handIdx, fieldIdx) {
   battle.selectedHandIdx = null;
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
+  submitOnlineAction('equip_card', { cardId: id, fieldIdx });
   renderBattle();
 }
 
@@ -4309,6 +4352,7 @@ function cleanupField(field, graveyard) {
 }
 
 function attackTarget(attackerIdx, targetIdx) {
+  if (battle.isOnline && battle.activeSide !== 'player') return;
   const attacker = battle.playerField[attackerIdx];
   if (!attacker || !attacker.canAttack) return;
   const valid = getValidTargets(attacker, battle.enemyField);
@@ -4433,11 +4477,31 @@ function attackTarget(attackerIdx, targetIdx) {
   }
   battle.selectedFieldIdx = null;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
+  submitOnlineAction('attack', {
+    attackerSideField: serializeFieldForSync(battle.playerField),
+    attackerSideHp: battle.playerHp,
+    targetSideField: serializeFieldForSync(battle.enemyField),
+    targetSideHp: battle.enemyHp,
+    targetSideCost: battle.enemyCost,
+  });
   renderBattle();
 }
 
 function endTurn() {
   if (!battle || battle.over) return;
+  if (battle.isOnline) {
+    if (battle.activeSide !== 'player') return;
+    battle.playerField.forEach(u => {
+      if (!u) return;
+      if (u.stunned) { u.stunned = false; u.canAttack = false; }
+      else { u.canAttack = true; }
+    });
+    submitOnlineAction('end_turn', {});
+    battle.activeSide = 'enemy'; // 相手のend_turnが届くまで待機
+    showTurnBanner('相手のターン');
+    renderBattle();
+    return;
+  }
   // 自分の場のユニットは次ターンから攻撃可能に（スタン中は1回だけスキップ）
   battle.playerField.forEach(u => {
     if (!u) return;
@@ -4812,6 +4876,8 @@ function showResult(won) {
 let onlineRoomUnsubscribe = null;
 let onlineCurrentRoomCode = null;
 let onlineIsHost = false;
+let onlineActionUnsubscribe = null;
+let onlineOpponentInfo = null;
 
 function isOnlineBattleAvailable() {
   return !!(window.LisNoirCloud && typeof window.LisNoirCloud.createBattleRoom === 'function');
@@ -4930,10 +4996,231 @@ function subscribeToOnlineRoom(roomCode) {
 // 相手が参加し、部屋が'active'になった時点で、両者共通の初期状態を使ってオンライン対戦を開始する
 function startOnlineBattleFromRoom(roomData) {
   if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
-  // 実際のバトル開始処理は、firebase-init.js 側の実装が整い次第つなぎ込みます
-  // （host/guestそれぞれの initialSeed を使って、両者が同じ山札順・初期手札で対戦を始める設計）
-  setOnlineStatus('対戦相手が見つかりました！（対戦接続機能は準備中です）');
+  const myUid = window.LisNoirCloud.getUser().uid;
+  const iAmHost = roomData.hostUid === myUid;
+  const seed = roomData.initialSeed || {};
+
+  const myDeck = iAmHost ? (seed.hostShuffledDeck || []) : (seed.guestShuffledDeck || []);
+  const myHand = iAmHost ? (seed.hostInitialHand || []) : (seed.guestInitialHand || []);
+  const oppDeck = iAmHost ? (seed.guestShuffledDeck || []) : (seed.hostShuffledDeck || []);
+  const oppHand = iAmHost ? (seed.guestInitialHand || []) : (seed.hostInitialHand || []);
+  const oppName = iAmHost ? roomData.guestName : roomData.hostName;
+  const oppLeaderId = iAmHost ? roomData.guestLeaderId : roomData.hostLeaderId;
+
+  const playerMaxHp = getPlayerMaxHp();
+  onlineOpponentInfo = { name: oppName || '相手プレイヤー', leaderId: oppLeaderId };
+
+  battle = {
+    stage: { name: oppName || '相手プレイヤー', portrait: '👤', isOnline: true },
+    isOnline: true,
+    onlineRoomCode: onlineCurrentRoomCode,
+    onlineIAmHost: iAmHost,
+    onlineActionSeq: 0,
+    turn: 1,
+    activeSide: 'player', // ホストが先行。ゲスト側はホストのend_turn受信で自分のターンが始まる
+    playerHp: playerMaxHp, playerMaxHp: playerMaxHp, enemyHp: playerMaxHp,
+    playerMaxCost: 1, enemyMaxCost: 1,
+    playerCost: 1, enemyCost: 1,
+    playerDeck: myDeck.slice(), enemyDeck: oppDeck.slice(),
+    playerHand: myHand.slice(), enemyHand: oppHand.slice(),
+    playerField: [null, null, null, null, null],
+    enemyField: [null, null, null, null, null],
+    fieldCard: null,
+    selectedHandIdx: null,
+    selectedFieldIdx: null,
+    log: '',
+    over: false,
+    deckOutSide: null,
+    playerGraveyard: [],
+    enemyGraveyard: [],
+    lastPlayedInfo: null,
+    leaderUltimateCharge: 1,
+    leaderUltimateReady: false,
+  };
+  document.getElementById('battle-enemy-portrait').style.backgroundImage = '';
+  document.getElementById('battle-enemy-portrait').classList.remove('has-boss-image');
+  document.getElementById('battle-enemy-emoji').textContent = '👤';
+  applyBattleBgTheme('forest', false);
+  applyLeaderPortraits();
+  const playerPortraitEl = document.getElementById('battle-player-portrait');
+  if (playerPortraitEl && !playerPortraitEl.dataset.longpressBound) {
+    playerPortraitEl.dataset.longpressBound = '1';
+    bindLongPress(playerPortraitEl, () => { if (state.leaderId) showLeaderDetailInfo(state.leaderId); });
+  }
+  renderBattle();
+  updateBattleSpeedBtn();
+  document.getElementById('battle-auto-btn').classList.add('hidden'); // オンライン対戦ではオートバトルは使用不可
+  showScreen('battle');
+  showVsIntro(battle.stage);
+
+  // 相手の行動をリアルタイムに購読し、届いたら自分側の「敵」情報として反映する
+  if (onlineActionUnsubscribe) onlineActionUnsubscribe();
+  onlineActionUnsubscribe = window.LisNoirCloud.listenToBattleActions(onlineCurrentRoomCode, (action) => {
+    if (action.uid === myUid) return; // 自分自身の行動は無視（二重適用防止）
+    applyRemoteAction(action);
+  });
+
+  if (!iAmHost) {
+    battle.activeSide = 'enemy'; // ゲストは、ホストの最初のend_turnが届くまで待機
+    renderBattle();
+  }
 }
+
+// オンライン対戦の同期用：場のユニット情報から、Firestoreへ送信できるプレーンなデータに変換する
+// （def はCARD_DEFSへの参照なのでそのままは送れないため、idだけ残して受信側で復元する）
+function serializeFieldForSync(field) {
+  return field.map(u => u ? {
+    id: u.id, curHp: u.curHp, atkBonus: u.atkBonus, hpBonus: u.hpBonus,
+    evolved: u.evolved, leaderBuff: u.leaderBuff, canAttack: u.canAttack,
+    justPlayed: u.justPlayed, stunned: u.stunned, revived: u.revived,
+    usedExtraAttack: u.usedExtraAttack, ailment: u.ailment, shield: u.shield,
+  } : null);
+}
+function deserializeFieldFromSync(serialized) {
+  return (serialized || []).map(u => (u && CARD_DEFS[u.id]) ? Object.assign({}, u, { def: CARD_DEFS[u.id], defId: u.id }) : null);
+}
+
+// オンライン対戦中、自分の行動をクラウドへ送信する（オンライン対戦でない場合は何もしない）
+function submitOnlineAction(type, payload) {
+  if (!battle || !battle.isOnline) return;
+  battle.onlineActionSeq = (battle.onlineActionSeq || 0) + 1;
+  window.LisNoirCloud.submitBattleAction(battle.onlineRoomCode, {
+    turn: battle.turn,
+    type,
+    payload: payload || {},
+  }).catch((err) => console.error('submitBattleAction failed', err));
+}
+
+// 相手から届いた行動を、自分の画面上では「敵」の行動として再現する
+function applyRemoteAction(action) {
+  if (!battle || !battle.isOnline || battle.over) return;
+  const p = action.payload || {};
+  switch (action.type) {
+    case 'draw_choice': {
+      if (p.drew) drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
+      break;
+    }
+    case 'play_card': {
+      battle.enemyField = deserializeFieldFromSync(p.attackerSideField);
+      battle.enemyHand = p.attackerSideHand || battle.enemyHand;
+      battle.enemyCost = (typeof p.attackerSideCost === 'number') ? p.attackerSideCost : battle.enemyCost;
+      battle.playerField = deserializeFieldFromSync(p.targetSideField);
+      if (typeof p.targetSideHp === 'number') battle.playerHp = p.targetSideHp;
+      break;
+    }
+    case 'cast_spell': {
+      const idx = battle.enemyHand.indexOf(p.cardId);
+      if (idx === -1) break;
+      const def = CARD_DEFS[p.cardId];
+      if (!def) break;
+      battle.enemyCost = Math.max(0, battle.enemyCost - def.cost);
+      battle.enemyHand.splice(idx, 1);
+      const eff = def.effect || {};
+      const targetIdx = (p.targetIdx === undefined) ? null : p.targetIdx;
+      if (eff.kind === 'damage') {
+        const dmg = p.dmg || eff.value || 0;
+        if (targetIdx === null) {
+          battle.playerHp -= dmg;
+        } else {
+          const target = battle.playerField[targetIdx];
+          if (target) {
+            target.curHp -= mitigateIncomingDamage(target, dmg);
+            if (target.curHp <= 0) battle.playerField[targetIdx] = null;
+          }
+        }
+      } else if (eff.kind === 'heal') {
+        battle.enemyHp = Math.min(battle.enemyMaxHp || battle.playerMaxHp || 30, battle.enemyHp + (eff.value || 0));
+      } else if (eff.kind === 'draw') {
+        for (let i = 0; i < (eff.value || 0); i++) drawCardToHand(battle.enemyDeck, battle.enemyHand, battle.enemyGraveyard);
+      } else if (eff.kind === 'wipe') {
+        battle.playerField = [null, null, null, null, null];
+      } else if (eff.kind === 'destroy') {
+        if (targetIdx !== null) battle.playerField[targetIdx] = null;
+      }
+      battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
+      break;
+    }
+    case 'play_field': {
+      const idx = battle.enemyHand.indexOf(p.cardId);
+      if (idx === -1) break;
+      const def = CARD_DEFS[p.cardId];
+      battle.enemyCost = Math.max(0, battle.enemyCost - (def ? def.cost : 0));
+      battle.enemyHand.splice(idx, 1);
+      battle.fieldCard = p.cardId;
+      break;
+    }
+    case 'equip_card': {
+      const idx = battle.enemyHand.indexOf(p.cardId);
+      const unit = battle.enemyField[p.fieldIdx];
+      if (idx === -1 || !unit) break;
+      const def = CARD_DEFS[p.cardId];
+      const eff = def.effect || {};
+      battle.enemyCost = Math.max(0, battle.enemyCost - (def ? def.cost : 0));
+      unit.atkBonus = (unit.atkBonus || 0) + (eff.atk || 0);
+      unit.hpBonus = (unit.hpBonus || 0) + (eff.hp || 0);
+      unit.curHp += (eff.hp || 0);
+      battle.enemyHand.splice(idx, 1);
+      break;
+    }
+    case 'attack': {
+      // 相手の「自分側」＝自分から見た「敵側」、相手の「敵側」＝自分から見た「自分側」として反映する
+      battle.enemyField = deserializeFieldFromSync(p.attackerSideField);
+      battle.enemyHp = p.attackerSideHp;
+      battle.playerField = deserializeFieldFromSync(p.targetSideField);
+      battle.playerHp = p.targetSideHp;
+      if (typeof p.targetSideCost === 'number') battle.playerCost = p.targetSideCost;
+      break;
+    }
+    case 'use_ultimate': {
+      battle.enemyField = deserializeFieldFromSync(p.attackerSideField);
+      battle.enemyHp = p.attackerSideHp;
+      battle.playerField = deserializeFieldFromSync(p.targetSideField);
+      battle.playerHp = p.targetSideHp;
+      break;
+    }
+    case 'end_turn': {
+      battle.enemyField.forEach(u => { if (u) { if (u.stunned) { u.stunned = false; u.canAttack = false; } else { u.canAttack = true; } } });
+      battle.turn += 1;
+      battle.activeSide = 'player';
+      battle.playerMaxCost = Math.min(10, battle.playerMaxCost + 1);
+      battle.playerCost = battle.playerMaxCost;
+      battle.leaderUltimateCharge = (battle.leaderUltimateCharge || 0) + 1;
+      battle.playerField.forEach(u => applySkillTag(u, 'turnStart', true));
+      tickAilment(battle.playerField);
+      battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
+      // オンライン対戦では、カードを引くかどうかの選択は行わず、自動的に引く（v1の簡略化）
+      if (battle.playerDeck.length > 0) {
+        drawCardToHand(battle.playerDeck, battle.playerHand, battle.playerGraveyard);
+      } else {
+        battle.playerHp = 0;
+        battle.deckOutSide = 'player';
+      }
+      showTurnBanner('YOUR TURN');
+      break;
+    }
+    case 'surrender': {
+      battle.playerHp = battle.playerMaxHp; // 相手の投了により、自分の勝利で終了する
+      battle.enemyHp = 0;
+      break;
+    }
+  }
+  renderBattle();
+  checkOnlineBattleEnd();
+}
+
+// オンライン対戦の勝敗判定（自分または相手のHPが0になった時点で終了とする）
+function checkOnlineBattleEnd() {
+  if (!battle || !battle.isOnline || battle.over) return;
+  if (battle.playerHp <= 0 || battle.enemyHp <= 0) {
+    battle.over = true;
+    const won = battle.enemyHp <= 0 && battle.playerHp > 0;
+    const myUid = window.LisNoirCloud.getUser().uid;
+    window.LisNoirCloud.finishBattleRoom(battle.onlineRoomCode, won ? myUid : null).catch(() => {});
+    if (onlineActionUnsubscribe) { onlineActionUnsubscribe(); onlineActionUnsubscribe = null; }
+    showResult(won);
+  }
+}
+
 
 function cancelOnlineRoom() {
   if (onlineRoomUnsubscribe) { onlineRoomUnsubscribe(); onlineRoomUnsubscribe = null; }
@@ -5979,7 +6266,8 @@ const SCREEN_HELP = {
     items: [
       '<b>① 部屋を作る</b><br>「部屋を作る」をタップすると、合言葉コードが発行されます。フレンドにそのコードを伝えましょう。',
       '<b>② コードで参加する</b><br>フレンドから伝えられたコードを入力し、「参加する」をタップすると対戦が始まります。',
-      '<b>③ この機能について</b><br>現在β版（試験提供）です。ご自身のデッキ・リーダーで、実際にフレンドと対戦できます。不具合が発生した場合はご了承ください。',
+      '<b>③ 対戦の流れ</b><br>お互いのデッキ・リーダーで実際に対戦します。ターン制で、自分のターン中のみ操作できます（相手のターン中は「相手のターンです…」と表示されます）。カードは毎ターン自動的に1枚引かれます。',
+      '<b>④ この機能について</b><br>現在β版（試験提供）です。不具合が発生する場合があります。オートバトル機能はオンライン対戦では使用できません。',
     ],
   },
 };
