@@ -225,9 +225,17 @@ const EVOLVE_COST = 800;
 const EVOLVE_BONUS_ATK = 2;
 const EVOLVE_BONUS_HP = 3;
 const CARD_MAX_LEVEL = 30;
-// レベルが上がるほど、強化に必要なゴールドも増えていく
-function cardUpgradeCost(level) {
-  return 400 + (level - 1) * 100;
+// レア度ごとの強化コスト基準（基本コスト、レベルごとの増加量）
+const CARD_UPGRADE_COST_BY_RARITY = {
+  normal: { base: 300, perLevel: 80 },
+  rare:   { base: 400, perLevel: 100 },
+  epic:   { base: 550, perLevel: 140 },
+  legend: { base: 700, perLevel: 180 },
+};
+// レベルが上がるほど、また レア度が高いほど、強化に必要なゴールドも増えていく
+function cardUpgradeCost(level, rarity) {
+  const scale = CARD_UPGRADE_COST_BY_RARITY[rarity] || CARD_UPGRADE_COST_BY_RARITY.normal;
+  return scale.base + (level - 1) * scale.perLevel;
 }
 
 // ---------- 絆レベル ----------
@@ -1059,6 +1067,7 @@ function claimDailyReward() {
 function renderHome() {
   checkDailyReset();
   updatePresentBadge();
+  updateMissionBadge();
   checkLoginBonus();
   updateLoginBonusBadge();
   updateCloudBackupBanner();
@@ -2231,7 +2240,7 @@ function openCardDetail(id) {
       </div>
       ${isMonster ? (owned.level >= CARD_MAX_LEVEL
         ? `<div class="cg-evolve-done">Lv.${CARD_MAX_LEVEL}（最大レベル）</div>`
-        : `<button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰${cardUpgradeCost(owned.level)})</button>
+        : `<button class="cg-btn cg-btn-main" id="detail-upgrade-btn">強化 (💰${cardUpgradeCost(owned.level, def.rarity)})</button>
            <div class="cg-detail-gold-owned">所持ゴールド：💰${state.gold.toLocaleString()}</div>`) : ''}
       ${isMonster ? `
         <div class="cg-evolve-row">
@@ -2259,7 +2268,7 @@ function openCardDetail(id) {
   });
   const upgradeBtn = document.getElementById('detail-upgrade-btn');
   if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
-    const cost = cardUpgradeCost(state.cards[id].level);
+    const cost = cardUpgradeCost(state.cards[id].level, CARD_DEFS[id].rarity);
     if (state.gold >= cost && state.cards[id].level < CARD_MAX_LEVEL) {
       state.gold -= cost;
       state.cards[id].exp += 20;
@@ -5813,6 +5822,15 @@ function updatePresentBadge() {
   badge.classList.toggle('hidden', count === 0);
 }
 
+// ホーム画面のミッションボタンに、受け取り可能な達成済みミッション件数のバッジを表示する
+function updateMissionBadge() {
+  const badge = document.getElementById('mission-badge');
+  if (!badge) return;
+  const count = MISSIONS.filter(m => !state.missionsClaimed[m.id] && m.check(state) >= m.target).length;
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+}
+
 // ---------- ミッション ----------
 const MISSIONS = [
   { id: 'win1', category: 'battle', title: 'はじめての勝利', desc: 'バトルに1回勝利する', target: 1, check: s => s.totalWins || 0, reward: { gold: 200 } },
@@ -5934,6 +5952,7 @@ function renderMissions() {
   const claimAllBtn = document.getElementById('mission-claimall-btn');
   claimAllBtn.classList.toggle('hidden', claimableCount === 0);
   claimAllBtn.textContent = `🎁 まとめて受け取る（${claimableCount}件）`;
+  updateMissionBadge();
 }
 
 function claimMission(missionId) {
