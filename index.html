@@ -342,6 +342,9 @@
   /* ---------- Card list / detail ---------- */
   .cg-compendium-panel{margin:14px 14px 4px; background:var(--bg-panel); border:1px solid var(--gold); border-radius:14px;
     padding:12px 14px; box-shadow:0 3px 10px #00000033;}
+  .cg-leader-list-panel{margin:14px 14px 0;}
+  .cg-leader-list-panel .cg-section-title{padding:0 0 8px;}
+  .cg-leader-list-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
   .cg-compendium-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
   .cg-compendium-label{font-size:12px; font-weight:700; color:var(--text-panel);}
   .cg-compendium-count{font-size:12px; font-weight:800; color:var(--gold);}
@@ -1135,7 +1138,8 @@
   .cg-dragon-summary{display:flex; align-items:center; gap:12px; margin:0 16px 18px; background:var(--bg-panel);
     border:1px solid var(--hairline-panel); border-radius:14px; padding:12px 14px; box-shadow:0 3px 10px #00000033; cursor:pointer;}
   .cg-dragon-summary-emoji{font-size:32px; flex-shrink:0;}
-  .cg-dragon-summary-img{width:44px; height:44px; object-fit:contain; display:block;}
+  .cg-dragon-summary-img{width:36px; height:36px; object-fit:contain; display:block; padding:4px;
+    background:radial-gradient(circle, var(--gold-soft) 0%, transparent 75%); border-radius:50%; mix-blend-mode:screen;}
   .cg-dragon-summary-info{flex:1; min-width:0;}
   .cg-dragon-summary-label{font-size:10px; color:var(--text-dim-panel);}
   .cg-dragon-summary-stage{font-size:13px; font-weight:700; color:var(--text-panel); margin:1px 0 4px;}
@@ -1146,9 +1150,14 @@
 
   /* ---------- ドラゴン育成（専用画面） ---------- */
   .cg-dragon-hero{display:flex; flex-direction:column; align-items:center; padding:20px 14px 6px; max-width:100%; overflow:hidden;}
-  .cg-dragon-emoji{font-size:76px; line-height:1; filter:drop-shadow(0 4px 10px #00000033); white-space:nowrap; display:flex; justify-content:center;}
-  .cg-dragon-emoji-img{width:150px; height:150px; object-fit:contain;}
+  .cg-dragon-emoji{font-size:76px; line-height:1; filter:drop-shadow(0 4px 10px #00000033); white-space:nowrap; display:flex; justify-content:center;
+    align-items:center; position:relative; width:190px; height:190px; margin:0 auto;
+    background:radial-gradient(circle, var(--gold-soft) 0%, #8A4FFF22 45%, transparent 72%);
+    border-radius:50%;}
+  .cg-dragon-emoji::before{content:''; position:absolute; inset:14px; border-radius:50%; border:1px solid var(--gold-soft); pointer-events:none;}
+  .cg-dragon-emoji-img{width:150px; height:150px; object-fit:contain; filter:drop-shadow(0 6px 14px #00000055); position:relative; z-index:1; mix-blend-mode:screen;}
   .cg-dragon-emoji-glow{filter:drop-shadow(0 4px 10px #00000033) drop-shadow(0 0 18px var(--true-gold));}
+  .cg-dragon-emoji-glow::before{border-color:var(--true-gold); box-shadow:0 0 16px var(--gold-soft);}
   .cg-dragon-stage-name{font-size:15px; font-weight:700; color:var(--text); margin-top:6px;}
   .cg-dragon-level{font-size:12px; color:var(--text-dim);}
   .cg-dragon-expwrap{padding:10px 20px 4px;}
@@ -1167,7 +1176,7 @@
     background:var(--bg-panel); border:1px solid var(--hairline-panel); font-size:12px; color:var(--text-panel);}
   .cg-dragon-stage-row.current{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-soft);}
   .cg-dragon-stage-row .em{font-size:22px; flex-shrink:0;}
-  .cg-dragon-stage-icon{width:28px; height:28px; object-fit:contain; flex-shrink:0;}
+  .cg-dragon-stage-icon{width:28px; height:28px; object-fit:contain; flex-shrink:0; mix-blend-mode:screen;}
   .cg-dragon-stage-row .lv{margin-left:auto; font-size:10px; color:var(--text-dim);}
 
   /* ---------- ランキング ---------- */
@@ -1644,6 +1653,10 @@
     </div>
 
     <div id="collection-list-view" style="display:none;">
+      <div id="leader-list-panel" class="cg-leader-list-panel">
+        <div class="cg-section-title">リーダー一覧（タップで詳細）</div>
+        <div id="leader-list-grid" class="cg-leader-list-grid"></div>
+      </div>
       <div id="compendium-panel" class="cg-compendium-panel">
         <div class="cg-compendium-row">
           <span class="cg-compendium-label">📖 図鑑コンプリート（全カード収集数）</span>
@@ -1655,7 +1668,6 @@
       <div class="cg-section-title">カード図鑑（タップで詳細・グレー表示は未所持）</div>
       <div class="cg-filter-tabs" id="cardlist-filter-tabs">
         <button class="cg-filter-tab active" data-filter="all">全て</button>
-        <button class="cg-filter-tab" data-filter="leader">リーダー</button>
         <button class="cg-filter-tab" data-filter="monster">モンスター</button>
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
         <button class="cg-filter-tab" data-filter="equipment">装備</button>
