@@ -128,8 +128,8 @@ const LEADERS = {
     name: 'エレナ・ノワール',
     skillName: 'ダークエレガンス',
     element: 'dark',
-    desc: '闇属性ユニットの攻撃力を25%アップ、HPを15%アップ',
-    effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
+    desc: '闇属性ユニットの攻撃力を+2、HPを+2',
+    effect: { atkFlat: 2, hpFlat: 2, enemyDmgFlat: 0 },
     fullImage: 'leader-lisnoir-f-full.png',
     icon: 'leader-lisnoir-f-icon.png',
     ultimateSkill: { name: '漆黒の断罪', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与える', dmg: 5 },
@@ -138,8 +138,8 @@ const LEADERS = {
     name: 'ディアブロ・ノワール',
     skillName: 'ナイトメアドミニオン',
     element: 'dark',
-    desc: '闇属性ユニットの攻撃力を25%アップ、敵全体へのダメージを15%アップ',
-    effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
+    desc: '闇属性ユニットの攻撃力を+2、敵へのダメージを+1',
+    effect: { atkFlat: 2, hpFlat: 0, enemyDmgFlat: 1 },
     fullImage: 'leader-lisnoir-m-full.png',
     icon: 'leader-lisnoir-m-icon.png',
     ultimateSkill: { name: '悪夢の侵食', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、モンスターを1ターン行動不能にする', dmg: 4, stunTurns: 1 },
@@ -148,8 +148,8 @@ const LEADERS = {
     name: 'テスタ・ブラン',
     skillName: 'ホーリーグロウ',
     element: 'light',
-    desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
-    effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
+    desc: '光属性ユニットの攻撃力を+2、HPを+3',
+    effect: { atkFlat: 2, hpFlat: 3, enemyDmgFlat: 0 },
     fullImage: 'leader-lisblanc-f-full.png',
     icon: 'leader-lisblanc-f-icon.png',
     ultimateSkill: { name: '聖なる浄化', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを3回復する', dmg: 4, healAllies: 3 },
@@ -158,8 +158,8 @@ const LEADERS = {
     name: 'ジュード・ブラン',
     skillName: 'ホーリーセイント',
     element: 'light',
-    desc: '光属性ユニットの攻撃力を25%アップ、HPを20%アップ',
-    effect: { atkPct: 0.25, hpPct: 0.20, enemyDmgPct: 0 },
+    desc: '光属性ユニットの攻撃力を+2、HPを+3',
+    effect: { atkFlat: 2, hpFlat: 3, enemyDmgFlat: 0 },
     fullImage: 'leader-luxblanc-m-full.png',
     icon: 'leader-luxblanc-m-icon.png',
     ultimateSkill: { name: '聖域の裁き', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体にシールド2を付与する', dmg: 4, shieldAllies: 2 },
@@ -168,8 +168,8 @@ const LEADERS = {
     name: 'リーラ・マリーン',
     skillName: 'アクアエンパイア',
     element: 'water',
-    desc: '水属性ユニットの攻撃力を25%アップ、HPを15%アップ',
-    effect: { atkPct: 0.25, hpPct: 0.15, enemyDmgPct: 0 },
+    desc: '水属性ユニットの攻撃力を+2、HPを+2',
+    effect: { atkFlat: 2, hpFlat: 2, enemyDmgFlat: 0 },
     fullImage: 'leader-liramaline-full.png',
     icon: 'leader-liramaline-icon.png',
     ultimateSkill: { name: '深海の怒涛', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを2回復する', dmg: 4, healAllies: 2 },
@@ -178,8 +178,8 @@ const LEADERS = {
     name: 'エル・カイエン',
     skillName: 'フレイムブンリト',
     element: 'fire',
-    desc: '火属性ユニットの攻撃力を25%アップ、敵全体の防御力を15%ダウン',
-    effect: { atkPct: 0.25, hpPct: 0, enemyDmgPct: 0.15 },
+    desc: '火属性ユニットの攻撃力を+2、敵へのダメージを+1',
+    effect: { atkFlat: 2, hpFlat: 0, enemyDmgFlat: 1 },
     fullImage: 'leader-kaien-full.png',
     icon: 'leader-kaien-icon.png',
     ultimateSkill: { name: '業火の焔', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与え、敵の場にいるモンスターの攻撃力を永続で1下げる', dmg: 5, atkDownEnemies: 1 },
@@ -188,8 +188,8 @@ const LEADERS = {
     name: 'モナ・ロマネスク',
     skillName: 'ネスコスポーズル',
     element: 'nature',
-    desc: '自然属性ユニットの攻撃力を30%アップ、敵の回復効果を無効化',
-    effect: { atkPct: 0.30, hpPct: 0, enemyDmgPct: 0, nullifyEnemyHeal: true },
+    desc: '自然属性ユニットの攻撃力を+3、敵の回復効果を無効化',
+    effect: { atkFlat: 3, hpFlat: 0, enemyDmgFlat: 0, nullifyEnemyHeal: true },
     fullImage: 'leader-mornabane-full.png',
     icon: 'leader-mornabane-icon.png',
     ultimateSkill: { name: '虚無の審判', desc: '敵本体と敵の場にいる全モンスターに6ダメージを与える', dmg: 6 },
@@ -3101,8 +3101,8 @@ function newBattleUnit(id, isPlayerCard) {
   let leaderBuff = false;
   if (leader && def.element === leader.element) {
     leaderBuff = true;
-    bonusAtk += Math.round((def.atk + bonusAtk) * (leader.effect.atkPct || 0));
-    bonusHp += Math.round((def.hp + bonusHp) * (leader.effect.hpPct || 0));
+    bonusAtk += (leader.effect.atkFlat || 0);
+    bonusHp += (leader.effect.hpFlat || 0);
   }
   return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
 }
@@ -4063,8 +4063,8 @@ function castSpell(handIdx, targetIdx) {
   let dealtDmg = 0;
   if (eff.kind === 'damage') {
     const leaderSp = getActiveLeader();
-    const dmgPctSp = leaderSp ? (leaderSp.effect.enemyDmgPct || 0) : 0;
-    dealtDmg = Math.round((eff.value || 0) * (1 + dmgPctSp));
+    const dmgFlatSp = leaderSp ? (leaderSp.effect.enemyDmgFlat || 0) : 0;
+    dealtDmg = (eff.value || 0) + dmgFlatSp;
     const targetEl = targetIdx === null
       ? document.getElementById('battle-enemy-portrait')
       : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
@@ -4392,9 +4392,9 @@ function attackTarget(attackerIdx, targetIdx) {
   const tag = attacker.def.skillTag;
   const mult = targetIdx === null ? 0 : elementMultiplier(attacker.def.element, battle.enemyField[targetIdx].def.element);
   const leader = getActiveLeader();
-  const dmgPct = leader ? (leader.effect.enemyDmgPct || 0) : 0;
+  const dmgFlat = leader ? (leader.effect.enemyDmgFlat || 0) : 0;
   const extraDmg = (tag && tag.effect === 'extraDamage') ? tag.value : 0;
-  const dmg = Math.max(1, Math.round((attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult) * (1 + dmgPct))) + extraDmg;
+  const dmg = Math.max(1, Math.round(attacker.def.atk + (attacker.atkBonus || 0) + fieldBonusFor(attacker) + mult) + dmgFlat) + extraDmg;
   const targetEl = targetIdx === null
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
