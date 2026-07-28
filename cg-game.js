@@ -90,9 +90,21 @@ const CARD_DEFS = {
   dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: null, emoji: '👑' },
 
   // ---- フィールドカード（場に出ている間、対応属性のモンスター全体（両陣営）に継続効果） ----
-  field_inferno:   { name: 'インフェルノフィールド', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'fire', atk: 1 }, skill: '場に出ている間、火属性モンスターの攻撃力+1（両陣営）', image: 'card-field-inferno.png', emoji: '🌋' },
-  field_sanctuary: { name: 'ホーリーサンクチュアリ', element: 'light', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'light', atk: 1 }, skill: '場に出ている間、光属性モンスターの攻撃力+1（両陣営）', image: 'card-field-sanctuary.png', emoji: '⛩️' },
-  field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none', effect: { boostElement: 'dark', atk: 2 }, skill: '場に出ている間、闇属性モンスターの攻撃力+2（両陣営）', image: 'card-field-abyss.png', emoji: '🕳️' },
+  field_inferno:   { name: 'フレイムコア', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
+    effect: { allyBoost: { element: 'fire', stat: 'atk', value: 1 }, allyDamageReduction: { element: 'fire', percent: 0.10 } },
+    skill: '場に出ている間、火属性の味方全体の攻撃力+1。さらに、火属性の味方が受けるダメージを10%軽減する', image: 'card-field-flamecore.png', emoji: '🔥' },
+  field_aquadeep:  { name: 'アクアディープ', element: 'water', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
+    effect: { allyBoost: { element: 'water', stat: 'atk', value: 1 }, allyDamageReduction: { element: 'water', percent: 0.10 } },
+    skill: '場に出ている間、水属性の味方全体の攻撃力+1。さらに、水属性の味方が受けるダメージを10%軽減する', image: 'card-field-aquadeep.png', emoji: '🌊' },
+  field_evergrove: { name: 'エバーグローブ', element: 'nature', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
+    effect: { allyBoost: { element: 'nature', stat: 'hp', value: 1 }, allyDamageReduction: { element: 'nature', percent: 0.10 } },
+    skill: '場に出ている間、自然属性の味方全体のHP+1。さらに、自然属性の味方が受けるダメージを10%軽減する', image: 'card-field-evergrove.png', emoji: '🌳' },
+  field_sanctuary: { name: 'ホーリーサンクチュアリ', element: 'light', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
+    effect: { allyBoost: { element: 'light', stat: 'atk', value: 1 }, allyDamageReduction: { element: 'all', percent: 0.10 } },
+    skill: '場に出ている間、味方全体が受けるダメージを10%軽減する。さらに、光属性の味方の攻撃力+1', image: 'card-field-sanctuary.png', emoji: '⛩️' },
+  field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none',
+    effect: { enemyDebuff: { element: 'dark', stat: 'atk', value: -1 }, enemyDamageBoost: 0.10 },
+    skill: '場に出ている間、敵全体が受けるダメージが10%増加する。さらに、闇属性の敵の攻撃力を-1する', image: 'card-field-abyss.png', emoji: '🕳️' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -787,9 +799,8 @@ function cardStatsLine(def, evolved, opts) {
     return `<div class="cg-card-stats"><span class="cg-stat equip">装備</span><span class="cg-stat equip-val">${parts.join(' ')}</span></div>`;
   }
   if (type === 'field') {
-    const eff = def.effect || {};
-    const elIcon = ELEMENTS[eff.boostElement] ? ELEMENTS[eff.boostElement].icon : '🌐';
-    return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}+${eff.atk}</span></div>`;
+    const elIcon = ELEMENTS[def.element] ? ELEMENTS[def.element].icon : '🌐';
+    return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}</span></div>`;
   }
   if (opts.hideStats) return ''; // バトル画面では別途バッジで表示するため、重複を避けて非表示にする
   const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
@@ -3106,6 +3117,15 @@ function newBattleUnit(id, isPlayerCard) {
     bonusAtk += (leader.effect.atkFlat || 0);
     bonusHp += (leader.effect.hpFlat || 0);
   }
+  // フィールドカードによる味方限定のHPブースト（設置後に生成されるユニットにのみ反映される簡略仕様）
+  if (battle && battle.fieldCard && battle.fieldCardSide) {
+    const fdef = CARD_DEFS[battle.fieldCard];
+    const allyBoost = fdef && fdef.effect && fdef.effect.allyBoost;
+    if (allyBoost && allyBoost.stat === 'hp' && def.element === allyBoost.element
+        && isPlayerCard === (battle.fieldCardSide === 'player')) {
+      bonusHp += allyBoost.value;
+    }
+  }
   return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
 }
 
@@ -3219,6 +3239,7 @@ function startBattle(stage) {
     playerField: [null, null, null, null, null],
     enemyField: [null, null, null, null, null],
     fieldCard: null,
+    fieldCardSide: null,
     selectedHandIdx: null,
     selectedFieldIdx: null,
     log: '',
@@ -3616,7 +3637,25 @@ function fieldBonusFor(unit) {
   if (!battle || !battle.fieldCard) return 0;
   const fdef = CARD_DEFS[battle.fieldCard];
   if (!fdef || !fdef.effect) return 0;
-  return unit.def.element === fdef.effect.boostElement ? (fdef.effect.atk || 0) : 0;
+  const eff = fdef.effect;
+  let bonus = 0;
+  // 旧形式（両陣営が対象の属性ATKブースト）。現在は使用しているカードは無いが、互換のため残す
+  if (eff.boostElement && unit.def.element === eff.boostElement) bonus += (eff.atk || 0);
+  const isAllySide = isUnitOnFieldCardOwnerSide(unit);
+  if (eff.allyBoost && eff.allyBoost.stat === 'atk' && isAllySide && unit.def.element === eff.allyBoost.element) {
+    bonus += eff.allyBoost.value;
+  }
+  if (eff.enemyDebuff && eff.enemyDebuff.stat === 'atk' && !isAllySide && unit.def.element === eff.enemyDebuff.element) {
+    bonus += eff.enemyDebuff.value; // マイナス値
+  }
+  return bonus;
+}
+
+// 対象ユニットが、現在場に出ているフィールドカードを使用した側と同じ陣営かどうかを判定する
+function isUnitOnFieldCardOwnerSide(unit) {
+  if (!battle || !battle.fieldCardSide) return false;
+  const onPlayerSide = battle.playerField.includes(unit);
+  return battle.fieldCardSide === 'player' ? onPlayerSide : !onPlayerSide;
 }
 
 function previewDamage(attackerUnit, defenderUnit) {
@@ -3649,8 +3688,10 @@ function renderBattle() {
   const fieldIndicatorEl = document.getElementById('battle-field-indicator');
   if (battle.fieldCard) {
     const fdef = CARD_DEFS[battle.fieldCard];
-    const fel = ELEMENTS[fdef.effect.boostElement];
-    fieldIndicatorEl.innerHTML = `${fdef.emoji} ${fdef.name}（${fel.icon}+${fdef.effect.atk}）`;
+    const fel = ELEMENTS[fdef.element];
+    const sideLabel = battle.fieldCardSide === 'player' ? '（自分）' : battle.fieldCardSide === 'enemy' ? '（相手）' : '';
+    fieldIndicatorEl.innerHTML = `${fdef.emoji} ${fdef.name}${sideLabel}`;
+    fieldIndicatorEl.title = fdef.skill || '';
     fieldIndicatorEl.style.display = '';
     fieldIndicatorEl.style.borderColor = fel.color;
   } else {
@@ -4119,6 +4160,7 @@ function playFieldCard(handIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   battle.fieldCard = id;
+  battle.fieldCardSide = 'player';
   sfxCardPlay();
   if (def.skill) battle.lastPlayedInfo = def;
   submitOnlineAction('play_field', { cardId: id });
@@ -4341,6 +4383,20 @@ function mitigateIncomingDamage(target, dmg) {
   const tag = target && target.def && target.def.skillTag;
   if (tag && tag.trigger === 'passiveDamageReduction') {
     dmg = Math.max(1, Math.round(dmg * (1 - tag.value)));
+  }
+  if (battle && battle.fieldCard && target) {
+    const fdef = CARD_DEFS[battle.fieldCard];
+    const eff = fdef && fdef.effect;
+    if (eff) {
+      const isAllySide = isUnitOnFieldCardOwnerSide(target);
+      if (eff.allyDamageReduction && isAllySide
+          && (eff.allyDamageReduction.element === 'all' || target.def.element === eff.allyDamageReduction.element)) {
+        dmg = Math.max(1, Math.round(dmg * (1 - eff.allyDamageReduction.percent)));
+      }
+      if (eff.enemyDamageBoost && !isAllySide) {
+        dmg = Math.max(1, Math.round(dmg * (1 + eff.enemyDamageBoost)));
+      }
+    }
   }
   if (target && target.shield > 0) {
     const absorbed = Math.min(target.shield, dmg);
@@ -4608,6 +4664,7 @@ function enemyTurn() {
       if (type === 'field') {
         if (battle.fieldCard) continue; // 既にフィールドが出ているなら他を優先
         battle.fieldCard = id;
+        battle.fieldCardSide = 'enemy';
         battle.enemyCost -= def.cost;
         battle.enemyHand.splice(i, 1);
         progressed = true;
@@ -5056,6 +5113,7 @@ function startOnlineBattleFromRoom(roomData) {
     playerField: [null, null, null, null, null],
     enemyField: [null, null, null, null, null],
     fieldCard: null,
+    fieldCardSide: null,
     selectedHandIdx: null,
     selectedFieldIdx: null,
     log: '',
@@ -5177,6 +5235,7 @@ function applyRemoteAction(action) {
       battle.enemyCost = Math.max(0, battle.enemyCost - (def ? def.cost : 0));
       battle.enemyHand.splice(idx, 1);
       battle.fieldCard = p.cardId;
+      battle.fieldCardSide = 'enemy';
       break;
     }
     case 'equip_card': {
@@ -5328,8 +5387,8 @@ const SHOP_PACKS = [
     legendPityLimit: 50,
     rarityPool: {
       normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing', 'equip_ironsword'],
-      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield'],
-      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail'],
+      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail', 'field_abyss'],
       legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse', 'equip_aqualance'],
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance', 'spell_apocalypse',
