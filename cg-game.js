@@ -467,6 +467,17 @@ function scheduleCloudSync() {
   }, 1500);
 }
 
+// アプリを閉じる直前など、通常のデバウンス（1.5秒待ち）を待っていられない場面で、
+// 即座にクラウド同期を行う（保留中のタイマーがあればキャンセルして今すぐ実行する）
+function flushCloudSyncNow() {
+  if (!window.LisNoirCloud || !window.LisNoirCloud.getUser()) return;
+  clearTimeout(cloudSyncTimer);
+  window.LisNoirCloud.saveCloud(state)
+    .then(() => setCloudSyncStatus('✅ 同期済み（' + new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + '）'))
+    .catch((err) => { console.error('cloud save failed', err); setCloudSyncStatus('⚠️ 同期に失敗しました：' + (err && err.message ? err.message : '')); });
+  window.LisNoirCloud.updateLeaderboard(state.playerName, state.trophy).catch((err) => console.error('leaderboard update failed', err));
+}
+
 function setCloudSyncStatus(text) {
   const el = document.getElementById('cloud-sync-status');
   if (el) el.textContent = text;
@@ -5984,8 +5995,11 @@ function openScreenHelp(key) {
 function init() {
   // アプリが閉じられる・裏に回る直前に、確実に最新の状態を保存しておく
   // （何らかの理由でこまめな保存が漏れていた場合の保険。iOSでアプリを完全に終了する際に
-  // 特に重要なため、visibilitychange・pagehideの両方で保存する）
-  const flushSaveOnClose = () => { try { saveState(); } catch (e) { console.error('flush save failed', e); } };
+  // 特に重要なため、visibilitychange・pagehideの両方で保存する。クラウド同期は通常1.5秒待ってから
+  // まとめて行うが、アプリが閉じる場面ではその猶予がないため、ここでは即座に同期する）
+  const flushSaveOnClose = () => {
+    try { saveState(); flushCloudSyncNow(); } catch (e) { console.error('flush save failed', e); }
+  };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flushSaveOnClose();
   });

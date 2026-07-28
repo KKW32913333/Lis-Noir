@@ -829,7 +829,8 @@
   .cg-vs-portrait{width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px;
     border:3px solid var(--gold-bright); box-shadow:0 0 20px var(--gold-soft);}
   .cg-vs-portrait.player{background:linear-gradient(160deg,var(--bg-panel2),#e2e4e9); background-image:url('hero-bg.jpg'); background-size:cover; background-position:center 15%; font-size:0;}
-  .cg-vs-portrait.enemy{background:linear-gradient(145deg,#3a2530,#1c1d24); border-color:var(--hp-red); box-shadow:0 0 20px #A2334755;}
+  .cg-vs-portrait.enemy{background:linear-gradient(145deg,#3a2530,#1c1d24); border-color:var(--hp-red); box-shadow:0 0 20px #A2334755;
+    background-size:cover; background-position:center;}
   .cg-vs-name{font-size:12px; color:#EAE6F5; font-weight:700; text-align:center; line-height:1.3;}
   .cg-vs-mark{font-size:22px; color:var(--true-gold); font-weight:900; font-family:"Cinzel",serif;}
 
@@ -2003,8 +2004,9 @@
         <div class="cg-settings-section hidden" id="cloud-section-loggedin">
           <div class="cg-settings-label">☁️ クラウド保存中</div>
           <div class="cg-cloud-desc">ログイン中: <b id="cloud-user-email"></b></div>
+          <div class="cg-cloud-desc">プレイ中は自動的に同期されるため、通常は操作不要です。</div>
           <div id="cloud-sync-status" class="cg-backup-status">同期状態を確認中…</div>
-          <button class="cg-btn cg-settings-action-btn" id="cloud-sync-now-btn">今すぐ同期する</button>
+          <button class="cg-btn cg-settings-action-btn" id="cloud-sync-now-btn">今すぐ同期する（任意）</button>
           <button class="cg-btn" id="cloud-logout-btn">ログアウト</button>
         </div>
         <!-- 手動バックアップ：現在は非表示（機能は維持、内部で使用するボタン・要素はそのまま存在） -->
