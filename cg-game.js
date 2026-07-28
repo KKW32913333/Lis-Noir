@@ -623,7 +623,7 @@ async function handleLogin() {
 }
 
 async function handleLogout() {
-  if (!confirm('ログアウトしますか？（このアカウントで再ログインすれば、いつでも続きから再開できます）')) return;
+  if (!(await showGenericConfirm('ログアウトしますか？（このアカウントで再ログインすれば、いつでも続きから再開できます）', '🔓 ログアウト'))) return;
   await window.LisNoirCloud.signOutUser();
 }
 
@@ -1331,12 +1331,12 @@ async function handleAvatarUpload(fileInput) {
   fileInput.value = '';
 }
 
-function saveProfile() {
+async function saveProfile() {
   const name = document.getElementById('profile-name-input').value.trim();
   const selected = document.querySelector('.cg-profile-avatar-opt.selected');
   const status = document.getElementById('profile-save-status');
   if (!name) { status.textContent = 'プレイヤー名を入力してください。'; return; }
-  if (!confirm('保存してよいですか？')) return;
+  if (!(await showGenericConfirm('保存してよいですか？', '👤 プレイヤー設定'))) return;
   state.playerName = name.slice(0, 12);
   if (pendingAvatarImage === null) {
     // 絵文字に戻す選択がされた場合
@@ -1916,24 +1916,24 @@ function renderDeckPresets() {
       <button class="cg-deck-preset-del-btn" data-index="${i}" aria-label="削除">削除</button>
     </div>`).join('');
   wrap.querySelectorAll('.cg-deck-preset-load-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const i = Number(btn.dataset.index);
       const preset = state.deckPresets[i];
       if (!preset) return;
-      if (!confirm(`「${preset.name}」を読み込みます。現在編成中のデッキは上書きされます。よろしいですか？`)) return;
+      if (!(await showGenericConfirm(`「${preset.name}」を読み込みます。現在編成中のデッキは上書きされます。よろしいですか？`, '📁 デッキ読み込み'))) return;
       state.deck = preset.cards.slice();
       saveState();
       renderDeck();
     });
   });
   wrap.querySelectorAll('.cg-deck-preset-edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const i = Number(btn.dataset.index);
       const preset = state.deckPresets[i];
       if (!preset) return;
       const newName = prompt('デッキ名を編集できます（「OK」を押すと、内容も現在編成中のデッキで上書きされます）', preset.name);
       if (newName === null) return; // キャンセル
-      if (!confirm(`「${newName || preset.name}」として、名前と内容（現在編成中のデッキ）を上書き保存します。よろしいですか？`)) return;
+      if (!(await showGenericConfirm(`「${newName || preset.name}」として、名前と内容（現在編成中のデッキ）を上書き保存します。よろしいですか？`, '📁 デッキ編集'))) return;
       preset.name = (newName || preset.name).slice(0, 16);
       preset.cards = state.deck.slice();
       saveState();
@@ -1941,11 +1941,11 @@ function renderDeckPresets() {
     });
   });
   wrap.querySelectorAll('.cg-deck-preset-del-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const i = Number(btn.dataset.index);
       const preset = state.deckPresets[i];
       if (!preset) return;
-      if (!confirm(`「${preset.name}」を削除します。よろしいですか？`)) return;
+      if (!(await showGenericConfirm(`「${preset.name}」を削除します。よろしいですか？`, '📁 デッキ削除'))) return;
       state.deckPresets.splice(i, 1);
       saveState();
       renderDeck();
@@ -1971,9 +1971,9 @@ function setCollectionFilter(filter) {
   renderDeck();
 }
 
-function clearDeck() {
+async function clearDeck() {
   if (!state.deck.length) return;
-  if (!confirm('デッキ内のカードをすべて外します。よろしいですか？')) return;
+  if (!(await showGenericConfirm('デッキ内のカードをすべて外します。よろしいですか？', '🗑️ デッキを空にする'))) return;
   state.deck = [];
   saveState();
   renderDeck();
@@ -3442,7 +3442,7 @@ function openGraveyard() {
 const GRAVEYARD_RECLAIM_COST = 1;
 
 // 墓地のカードをマナを消費して手札に戻す（長押しでカード情報の確認、タップでこの動作）
-function returnCardFromGraveyard(gyIndex) {
+async function returnCardFromGraveyard(gyIndex) {
   if (!battle || battle.over) return;
   const id = battle.playerGraveyard[gyIndex];
   const def = CARD_DEFS[id];
@@ -3455,7 +3455,7 @@ function returnCardFromGraveyard(gyIndex) {
     skillFlash(`マナが足りず、墓地から戻せません（消費マナ${GRAVEYARD_RECLAIM_COST}）`);
     return;
   }
-  if (!confirm(`「${def.name}」をマナ${GRAVEYARD_RECLAIM_COST}消費して手札に戻します。よろしいですか？`)) return;
+  if (!(await showGenericConfirm(`「${def.name}」をマナ${GRAVEYARD_RECLAIM_COST}消費して手札に戻します。よろしいですか？`, '⚰️ 墓地から回収'))) return;
   battle.playerCost -= GRAVEYARD_RECLAIM_COST;
   battle.playerGraveyard.splice(gyIndex, 1);
   battle.playerHand.push(id);
@@ -3466,12 +3466,12 @@ function returnCardFromGraveyard(gyIndex) {
 }
 
 // 手札のカードを、確認の上で墓地に手動で送る（数合わせや後で「墓地から戻す」を使うための布石として）
-function discardHandCardToGraveyard(handIdx) {
+async function discardHandCardToGraveyard(handIdx) {
   if (!battle || battle.over) return;
   const id = battle.playerHand[handIdx];
   const def = CARD_DEFS[id];
   if (!def) return;
-  if (!confirm(`「${def.name}」を手札から墓地に送ります。よろしいですか？`)) return;
+  if (!(await showGenericConfirm(`「${def.name}」を手札から墓地に送ります。よろしいですか？`, '⚰️ 墓地へ送る'))) return;
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   battle.playerGraveyard.push(id);
@@ -3956,10 +3956,10 @@ function showCardInfo(unit, playerFieldIdx) {
 }
 
 // 自分の場のモンスターを墓地に送る（除外する）
-function discardFieldUnit(idx) {
+async function discardFieldUnit(idx) {
   const unit = battle && battle.playerField && battle.playerField[idx];
   if (!unit) return;
-  if (!confirm(`「${unit.def.name}」を墓地に送ります。場から除外されます。よろしいですか？`)) return;
+  if (!(await showGenericConfirm(`「${unit.def.name}」を墓地に送ります。場から除外されます。よろしいですか？`, '⚰️ 墓地へ送る'))) return;
   battle.playerField[idx] = null;
   battle.playerGraveyard.push(unit.defId);
   document.getElementById('card-info-overlay').classList.add('hidden');
@@ -6436,9 +6436,9 @@ function init() {
   });
   document.querySelectorAll('.cg-back-btn-detail').forEach(b => b.addEventListener('click', () => openCollectionScreen('list')));
   document.getElementById('battle-end-turn').addEventListener('click', endTurn);
-  document.getElementById('battle-back-btn').addEventListener('click', () => {
+  document.getElementById('battle-back-btn').addEventListener('click', async () => {
     if (battle && !battle.over) {
-      if (!confirm('対戦中です。バトルを中断してホームに戻りますか？（勝敗はつきません）')) return;
+      if (!(await showGenericConfirm('対戦中です。バトルを中断してホームに戻りますか？（勝敗はつきません）', '⚔️ バトル中断'))) return;
     }
     // オンライン対戦を中断する場合、行動の購読を確実に解除する（放置するとバックグラウンドで動き続けてしまうため）
     if (battle && battle.isOnline) {
