@@ -2123,27 +2123,21 @@ function renderCardList() {
   const listEl = document.getElementById('cardlist-grid');
   const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
   const deckIdSet = new Set(state.deck);
-  const showLeaders = cardListFilter === 'all' || cardListFilter === 'leader';
-  const leaderIds = (showLeaders && !cardListDeckOnly) ? Object.keys(LEADERS) : [];
-  const ids = cardListFilter === 'leader' ? [] : sortCardIds(Object.keys(CARD_DEFS).filter(id => {
+  const ids = sortCardIds(Object.keys(CARD_DEFS).filter(id => {
     if (eventExclusiveIds.has(id) && !state.cards[id]) return false; // 期間限定カードは入手するまで図鑑にも表示しない
     if (cardListDeckOnly && !deckIdSet.has(id)) return false; // デッキ内のみ表示
     if (cardListFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === cardListFilter;
   }), cardListSortMode);
   cardListOrder = ids.filter(id => !!state.cards[id]); // 前へ/次へナビゲーションの対象は所持カードのみ
-  const leaderHtml = leaderIds.map(lid => renderLeaderCardFace(lid)).join('');
   const cardHtml = ids.map(id => {
     const owned = state.cards[id];
     return owned
       ? renderCardFace(id, { small: true, evolved: owned.evolved, inDeck: deckIdSet.has(id) })
       : renderCardFace(id, { small: true, locked: true });
   }).join('');
-  listEl.innerHTML = leaderHtml + cardHtml
-    + ((ids.length === 0 && leaderIds.length === 0) ? `<div class="cg-empty">${cardListDeckOnly ? 'デッキにカードが入っていません' : '該当するカードがありません'}</div>` : '');
-  listEl.querySelectorAll('.cg-card[data-leader]').forEach(node => {
-    node.addEventListener('click', () => showLeaderDetailInfo(node.dataset.leader));
-  });
+  listEl.innerHTML = cardHtml
+    + (ids.length === 0 ? `<div class="cg-empty">${cardListDeckOnly ? 'デッキにカードが入っていません' : '該当するカードがありません'}</div>` : '');
   listEl.querySelectorAll('.cg-card[data-id]').forEach(node => {
     const id = node.dataset.id;
     if (state.cards[id]) {
@@ -2152,7 +2146,18 @@ function renderCardList() {
       node.addEventListener('click', () => showLockedCardInfo(id));
     }
   });
+  renderLeaderList();
   renderCompendiumPanel();
+}
+
+// リーダー一覧（カード図鑑とは別の、専用セクション）
+function renderLeaderList() {
+  const gridEl = document.getElementById('leader-list-grid');
+  if (!gridEl) return;
+  gridEl.innerHTML = Object.keys(LEADERS).map(lid => renderLeaderCardFace(lid)).join('');
+  gridEl.querySelectorAll('.cg-card[data-leader]').forEach(node => {
+    node.addEventListener('click', () => showLeaderDetailInfo(node.dataset.leader));
+  });
 }
 
 // 未所持カードをタップした時の簡易情報表示（長押しカード情報ポップアップを流用）
@@ -6434,6 +6439,13 @@ function init() {
   document.getElementById('battle-back-btn').addEventListener('click', () => {
     if (battle && !battle.over) {
       if (!confirm('対戦中です。バトルを中断してホームに戻りますか？（勝敗はつきません）')) return;
+    }
+    // オンライン対戦を中断する場合、行動の購読を確実に解除する（放置するとバックグラウンドで動き続けてしまうため）
+    if (battle && battle.isOnline) {
+      if (onlineActionUnsubscribe) { onlineActionUnsubscribe(); onlineActionUnsubscribe = null; }
+      if (window.LisNoirCloud && window.LisNoirCloud.leaveBattleRoom && battle.onlineRoomCode) {
+        window.LisNoirCloud.leaveBattleRoom(battle.onlineRoomCode).catch(err => console.error('leaveBattleRoom failed', err));
+      }
     }
     battle = null;
     showScreen('home');
