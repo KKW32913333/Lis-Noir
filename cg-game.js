@@ -42,7 +42,7 @@ const CARD_DEFS = {
   dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'rare',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: 'card-nature-swiftrabbit.png', emoji: '🐇' },
-  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
+  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
   dark_chaosdemon:    { name: '冥王カオスデーモン', element: 'dark', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkDownAll', value: 2, atkDownValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与え、敵全体の攻撃力を1下げる', image: 'card-dark-chaosdemon.png', emoji: '😈' },
   dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
@@ -5354,6 +5354,10 @@ function showRevealMulti(results) {
 
 function hideReveal() {
   document.getElementById('shop-reveal-overlay').classList.add('hidden');
+  // プレゼントの「まとめて受け取る」で複数のカードを獲得した場合、1つ閉じるごとに次のカードを表示する
+  if (presentRevealQueue.length) {
+    setTimeout(() => advancePresentRevealQueue(), 300);
+  }
 }
 
 // ---------- プレゼント ----------
@@ -5401,18 +5405,26 @@ function claimPresent(presentId) {
   state.gold += p.reward.gold || 0;
   state.gems += p.reward.gems || 0;
   state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
-  if (p.reward.card) grantPresentCard(p.reward.card);
+  if (p.reward.card) {
+    const isNew = !state.cards[p.reward.card];
+    grantPresentCard(p.reward.card);
+    showReveal(p.reward.card, false, isNew);
+  }
   state.presentsClaimed[presentId] = true;
   saveState();
   renderPresents();
   renderHome();
 }
 
+let presentRevealQueue = [];
+
 function claimAllPresents() {
+  presentRevealQueue = [];
   PRESENTS.forEach(p => { if (!state.presentsClaimed[p.id]) claimPresentSilent(p); });
   saveState();
   renderPresents();
   renderHome();
+  advancePresentRevealQueue();
 }
 
 // プレゼントでカードを付与する（既に所持している場合は重複入手として枚数だけ加算する）
@@ -5429,8 +5441,19 @@ function claimPresentSilent(p) {
   state.gold += p.reward.gold || 0;
   state.gems += p.reward.gems || 0;
   state.tickets = (state.tickets || 0) + (p.reward.tickets || 0);
-  if (p.reward.card) grantPresentCard(p.reward.card);
+  if (p.reward.card) {
+    const isNew = !state.cards[p.reward.card];
+    grantPresentCard(p.reward.card);
+    presentRevealQueue.push({ cardId: p.reward.card, isNew });
+  }
   state.presentsClaimed[p.id] = true;
+}
+
+// 「まとめて受け取る」でカードを獲得していた場合、1件ずつ獲得演出を表示する
+function advancePresentRevealQueue() {
+  if (!presentRevealQueue.length) return;
+  const next = presentRevealQueue.shift();
+  showReveal(next.cardId, false, next.isNew);
 }
 
 // ホーム画面のプレゼントボタンに、未受け取り件数のバッジを表示する
