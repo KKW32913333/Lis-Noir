@@ -1142,11 +1142,11 @@ function renderFeaturedMission() {
 
 // ---------- ドラゴン育成 ----------
 const DRAGON_STAGES = [
-  { minLevel: 1,  name: '卵',       emoji: '🥚' },
-  { minLevel: 3,  name: '幼竜',     emoji: '🐣' },
-  { minLevel: 7,  name: '若竜',     emoji: '🐲' },
-  { minLevel: 13, name: '成竜',     emoji: '🐉' },
-  { minLevel: 20, name: '古代竜',   emoji: '🐉', glow: true },
+  { minLevel: 1,  name: '卵',       emoji: '🥚', image: 'dragon-egg.png' },
+  { minLevel: 3,  name: '幼竜',     emoji: '🐣', image: 'dragon-baby.png' },
+  { minLevel: 7,  name: '若竜',     emoji: '🐲', image: 'dragon-young.png' },
+  { minLevel: 13, name: '成竜',     emoji: '🐉', image: 'dragon-adult.png' },
+  { minLevel: 20, name: '古代竜',   emoji: '🐉', glow: true, image: 'dragon-ancient.png' },
 ];
 const DRAGON_EXP_PER_LEVEL = 100;
 const DRAGON_FEED_EXP = 25;
@@ -1196,16 +1196,27 @@ function renderDragonSummary() {
   const emojiEl = document.getElementById('dragon-summary-emoji');
   if (!emojiEl) return; // ホーム画面の相棒ドラゴンカードは、画面見切れ対策のため意図的に非表示にしている（クイックメニューの「ドラゴン」から利用可能）
   const stage = getDragonStageInfo(state.dragon.level);
-  emojiEl.textContent = stage.emoji;
+  emojiEl.innerHTML = stage.image
+    ? `<img src="${stage.image}" alt="" class="cg-dragon-summary-img" data-emoji="${stage.emoji}" onerror="handleDragonImgError(this)"/>`
+    : stage.emoji;
   document.getElementById('dragon-summary-stage').textContent = `${stage.name}・Lv.${state.dragon.level}`;
   document.getElementById('dragon-summary-fill').style.width = Math.min(100, (state.dragon.exp / DRAGON_EXP_PER_LEVEL) * 100) + '%';
+}
+
+// ドラゴンの画像が見つからない場合、絵文字表示に差し替える
+function handleDragonImgError(imgEl) {
+  const span = document.createElement('span');
+  span.textContent = imgEl.dataset.emoji || '🐉';
+  imgEl.replaceWith(span);
 }
 
 function renderDragon() {
   const d = state.dragon;
   const stage = getDragonStageInfo(d.level);
   const emojiEl = document.getElementById('dragon-emoji');
-  emojiEl.textContent = stage.emoji;
+  emojiEl.innerHTML = stage.image
+    ? `<img src="${stage.image}" alt="" class="cg-dragon-emoji-img" data-emoji="${stage.emoji}" onerror="handleDragonImgError(this)"/>`
+    : stage.emoji;
   emojiEl.classList.toggle('cg-dragon-emoji-glow', !!stage.glow);
   document.getElementById('dragon-stage-name').textContent = stage.name;
   document.getElementById('dragon-level').textContent = `Lv.${d.level}`;
@@ -1217,8 +1228,11 @@ function renderDragon() {
   const listEl = document.getElementById('dragon-stages-list');
   listEl.innerHTML = DRAGON_STAGES.map(s => {
     const current = stage.name === s.name;
+    const iconHtml = s.image
+      ? `<img src="${s.image}" alt="" class="cg-dragon-stage-icon" data-emoji="${s.emoji}" onerror="handleDragonImgError(this)"/>`
+      : `<span class="em">${s.emoji}</span>`;
     return `<div class="cg-dragon-stage-row ${current ? 'current' : ''}">
-      <span class="em">${s.emoji}</span><span>${s.name}</span><span class="lv">Lv.${s.minLevel}〜</span>
+      ${iconHtml}<span>${s.name}</span><span class="lv">Lv.${s.minLevel}〜</span>
     </div>`;
   }).join('');
 }
