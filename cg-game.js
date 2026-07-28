@@ -5363,6 +5363,8 @@ const PRESENTS = [
     reward: { gold: 2000, tickets: 2 } },
   { id: 'crimson_gift', title: '🐉 炎龍王クリムゾン 記念配布', desc: '力強い味方、「炎龍王クリムゾン」をプレゼントします。冒険のお供にどうぞ！',
     reward: { card: 'fire_crimson' } },
+  { id: 'vampirelord_gift', title: '🧛 ヴァンパイアロード 記念配布', desc: '力強い味方、「ヴァンパイアロード」をプレゼントします。冒険のお供にどうぞ！',
+    reward: { card: 'dark_demonlord' } },
 ];
 
 function renderPresents() {
