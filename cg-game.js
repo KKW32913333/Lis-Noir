@@ -1106,6 +1106,7 @@ function renderHome() {
 
   renderDragonSummary();
   renderEventBanner();
+  renderPremiumGachaBanner();
 }
 
 function renderEventBanner() {
@@ -1124,6 +1125,25 @@ function renderEventBanner() {
       <div class="cg-event-banner-sub">${active.length > 1 ? `他${active.length - 1}件開催中` : ev.desc}</div>
     </div>`;
   banner.onclick = () => { renderEventList(); showScreen('events'); };
+}
+
+// 現在開催中のプレミアムガチャを、ホーム画面のバナーとして案内する
+function renderPremiumGachaBanner() {
+  const banner = document.getElementById('premium-gacha-banner');
+  if (!banner) return;
+  const featured = SHOP_PACKS.find(p => p.featured);
+  if (!featured) { banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  banner.innerHTML = `
+    <span class="ic">${featured.icon}</span>
+    <div class="cg-premium-gacha-banner-text">
+      <div class="cg-premium-gacha-banner-title-row">
+        <span class="cg-premium-gacha-banner-title">${featured.flavor || featured.name}</span>
+        <span class="cg-premium-gacha-banner-badge">開催中</span>
+      </div>
+      <div class="cg-premium-gacha-banner-sub">${featured.name}を好評開催中！</div>
+    </div>`;
+  banner.onclick = () => { renderShop(); showScreen('shop'); };
 }
 
 // ---------- ドラゴン育成 ----------
@@ -5319,6 +5339,7 @@ const SHOP_PACKS = [
     preview: ['water_slime', 'nature_wolf', 'fire_flarelion'] },
   { id: 'premium1', name: 'プレミアムガチャ第1弾', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
     desc: '「冒険の始まり」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
+    featured: true,
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
     legendPityLimit: 50,
     rarityPool: {
