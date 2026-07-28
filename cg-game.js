@@ -1086,8 +1086,6 @@ function renderHome() {
     dailyBtn.classList.toggle('hidden', !dailyDone || state.dailyClaimed);
     dailyBtn.textContent = state.dailyClaimed ? '受取済み' : `受け取る（💰${DAILY_REWARD_GOLD} 💎${DAILY_REWARD_GEMS}）`;
   }
-  document.getElementById('win-fill').style.width = (state.winProgress / state.winMax * 100) + '%';
-  document.getElementById('win-label').textContent = `${state.winProgress}/${state.winMax}`;
 
   // ランクカード
   let tierIdx = 0;
@@ -1106,8 +1104,6 @@ function renderHome() {
     document.getElementById('rank-sub').textContent = `🏆 ${state.trophy.toLocaleString()}（最高ランク）`;
   }
 
-  // 注目ミッション（未達成のうち一番進捗が近いもの／全達成なら受け取り可能なものを優先）
-  renderFeaturedMission();
   renderDragonSummary();
   renderEventBanner();
 }
@@ -1128,29 +1124,6 @@ function renderEventBanner() {
       <div class="cg-event-banner-sub">${active.length > 1 ? `他${active.length - 1}件開催中` : ev.desc}</div>
     </div>`;
   banner.onclick = () => { renderEventList(); showScreen('events'); };
-}
-
-function renderFeaturedMission() {
-  const wrap = document.getElementById('featured-mission');
-  const claimable = MISSIONS.find(m => m.check(state) >= m.target && !state.missionsClaimed[m.id]);
-  const target = claimable || MISSIONS
-    .filter(m => !state.missionsClaimed[m.id])
-    .sort((a, b) => (b.check(state) / b.target) - (a.check(state) / a.target))[0];
-
-  if (!target) { wrap.innerHTML = ''; wrap.style.display = 'none'; return; }
-  wrap.style.display = '';
-  const progress = Math.min(target.target, target.check(state));
-  const done = progress >= target.target;
-  wrap.innerHTML = `
-    <div class="cg-featured-mission-label">${done ? '受け取り可能なミッション' : '注目のミッション'}</div>
-    <div class="cg-featured-mission-row">
-      <div>
-        <div class="cg-featured-mission-title">${target.title}</div>
-        <div class="cg-featured-mission-desc">${target.desc}（${progress}/${target.target}）</div>
-      </div>
-      <div class="cg-featured-mission-cta">${done ? '受け取る' : '確認する'}</div>
-    </div>`;
-  wrap.onclick = () => { renderMissions(); showScreen('mission'); };
 }
 
 // ---------- ドラゴン育成 ----------

@@ -265,7 +265,6 @@
   .cg-progress-label{font-size:10px; color:var(--text-dim-panel); display:flex; justify-content:space-between; margin-bottom:4px;}
   .cg-progress-track{height:6px; background:#e4e6ea; border-radius:4px; overflow:hidden;}
   .cg-progress-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
-  .cg-progress-fill.cyan{background:linear-gradient(90deg,#3a9d92,var(--cyan));}
   .cg-daily-claim-btn{width:100%; margin-top:6px; font-size:10px; padding:5px; border-radius:8px; cursor:pointer;
     background:var(--bg-panel); border:1.5px solid var(--gold-bright); color:var(--gold); font-weight:700;}
 
@@ -1109,15 +1108,6 @@
   .cg-quick-beta-tag{position:absolute; top:4px; right:6px; background:var(--gold); color:#fff; font-size:8px; font-weight:800;
     padding:1px 5px; border-radius:8px; box-shadow:0 1px 3px #00000055;}
 
-  .cg-featured-mission{margin:0 16px 18px; background:var(--bg-panel); border:1px solid var(--gold); border-radius:14px;
-    padding:12px 14px; box-shadow:0 3px 10px #00000033; cursor:pointer;}
-  .cg-featured-mission-label{font-size:10px; color:var(--gold-bright); letter-spacing:1px; margin-bottom:4px;}
-  .cg-featured-mission-row{display:flex; justify-content:space-between; align-items:center; gap:10px;}
-  .cg-featured-mission-title{font-size:13px; font-weight:700; color:var(--text-panel);}
-  .cg-featured-mission-desc{font-size:11px; color:var(--text-dim-panel); margin-top:2px;}
-  .cg-featured-mission-cta{flex-shrink:0; font-size:11px; color:var(--gold); font-weight:700; background:var(--bg-panel); border:1.5px solid var(--gold-bright);
-    padding:6px 12px; border-radius:14px; white-space:nowrap;}
-
   /* ---------- イベントクエスト（ホームバナー・カード） ---------- */
   .cg-event-banner{margin:0 16px 18px; padding:12px 14px; border-radius:14px; cursor:pointer;
     background:linear-gradient(135deg,#5A2D91,#8A4FFF); color:#fff; box-shadow:0 4px 14px #5A2D9155;
@@ -1580,17 +1570,11 @@
 
     <div id="event-banner" class="cg-event-banner hidden"></div>
 
-    <div id="featured-mission" class="cg-featured-mission"></div>
-
     <div class="cg-progress-row">
       <div class="cg-progress-card">
         <div class="cg-progress-label"><span>デイリー報酬</span><span id="daily-label">0/0</span></div>
         <div class="cg-progress-track"><div class="cg-progress-fill" id="daily-fill"></div></div>
         <button class="cg-daily-claim-btn hidden" id="daily-claim-btn">受け取る</button>
-      </div>
-      <div class="cg-progress-card">
-        <div class="cg-progress-label"><span>勝利報酬</span><span id="win-label">0/0</span></div>
-        <div class="cg-progress-track"><div class="cg-progress-fill cyan" id="win-fill"></div></div>
       </div>
     </div>
   </section>
