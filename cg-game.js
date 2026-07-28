@@ -3216,8 +3216,17 @@ function applyLeaderPortraits() {
 
 // ストーリーステージの敵デッキに含めるレジェンドカードの上限枚数を、ワールドの進行度に応じて決める
 // （ダンジョン・高難易度クエスト・特別クエストにはワールドの概念が無いため対象外＝上限なし）
-function getStoryWorldLegendCap(stage) {
-  if (!stage || typeof stage.id !== 'number' || stage.qid || stage.isDungeon) return undefined;
+function getEnemyLegendCap(stage) {
+  if (!stage || stage.qid) return undefined; // クエストは対象外（従来通り無制限）
+  if (stage.isDungeon) {
+    const floor = stage.dungeonFloor;
+    if (floor <= 10) return 0;   // 序盤（1〜10階）：レジェンドなし
+    if (floor <= 30) return 1;   // 11〜30階
+    if (floor <= 60) return 2;   // 31〜60階
+    if (floor <= 90) return 3;   // 61〜90階
+    return 4;                    // 91〜100階（終盤）
+  }
+  if (typeof stage.id !== 'number') return undefined;
   const worldNum = Math.ceil(stage.id / 5);
   if (worldNum <= 3) return 1;  // 序盤（ワールド1〜3）
   if (worldNum <= 6) return 2;  // 中盤（ワールド4〜6）
@@ -3230,7 +3239,7 @@ function startBattle(stage) {
   // 削除済みカード等、CARD_DEFSに存在しないIDが万一デッキに残っていた場合に備え、安全のため除外してから使用
   const validDeck = state.deck.filter(id => !!CARD_DEFS[id]);
   const playerDeck = shuffle(validDeck.length ? validDeck.slice() : Object.keys(state.cards).slice(0, 10));
-  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 40, stage.spellChance || 0, getStoryWorldLegendCap(stage)));
+  const enemyDeck = shuffle(buildWeightedMonsterDeck(stage.weights, 40, stage.spellChance || 0, getEnemyLegendCap(stage)));
   const playerMaxHp = getPlayerMaxHp();
 
   battle = {
