@@ -1125,17 +1125,15 @@
   .cg-event-reward{font-size:10px; color:var(--gold); margin-top:4px; font-weight:700;}
   .cg-event-countdown{font-size:10px; color:var(--hp-red); text-align:center; font-weight:800; line-height:1.5; flex-shrink:0;}
 
-  .cg-premium-gacha-banner{margin:0 16px 18px; padding:12px 14px; border-radius:14px; cursor:pointer;
-    background:linear-gradient(135deg,#7a5010,#D9B45B); color:#2a1a05; box-shadow:0 4px 14px #B8892E55;
-    display:flex; align-items:flex-start; gap:10px; position:relative;}
-  .cg-premium-gacha-banner.hidden{display:none;}
-  .cg-premium-gacha-banner .ic{font-size:26px; flex-shrink:0; line-height:1.4;}
-  .cg-premium-gacha-banner-text{flex:1; min-width:0;}
-  .cg-premium-gacha-banner-title-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .cg-premium-gacha-banner-title{font-size:13px; font-weight:800; letter-spacing:1px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .cg-premium-gacha-banner-sub{font-size:11px; opacity:.85; margin-top:3px; line-height:1.5; white-space:normal; word-break:break-word;}
-  .cg-premium-gacha-banner-badge{flex-shrink:0; font-size:10px; background:#2a1a05; color:var(--true-gold); font-weight:800;
-    padding:4px 9px; border-radius:10px; white-space:nowrap;}
+  .cg-premium-gacha-card{cursor:pointer; background:linear-gradient(135deg,#7a5010,#D9B45B) !important; color:#2a1a05;
+    border-color:#B8892E !important;}
+  .cg-premium-gacha-card.hidden{display:none;}
+  .cg-premium-gacha-card-title-row{display:flex; align-items:center; gap:4px;}
+  .cg-premium-gacha-card .ic{font-size:15px; flex-shrink:0;}
+  .cg-premium-gacha-card-title{font-size:10px; font-weight:800; letter-spacing:.5px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cg-premium-gacha-card-badge{flex-shrink:0; font-size:9px; background:#2a1a05; color:var(--true-gold); font-weight:800;
+    padding:2px 6px; border-radius:8px; white-space:nowrap;}
+  .cg-premium-gacha-card-sub{font-size:10px; opacity:.85; margin-top:4px; line-height:1.4; white-space:normal; word-break:break-word;}
 
   /* ---------- ドラゴン育成（ホームの概要カード） ---------- */
   .cg-dragon-summary{display:flex; align-items:center; gap:12px; margin:0 16px 18px; background:var(--bg-panel);
@@ -1558,7 +1556,6 @@
     </div>
 
     <div id="event-banner" class="cg-event-banner hidden"></div>
-    <div id="premium-gacha-banner" class="cg-premium-gacha-banner hidden"></div>
 
     <div class="cg-quick-grid">
       <div class="cg-quick-btn" id="quick-stage"><span class="ic">⚔️</span><span class="lb">バトル</span></div>
@@ -1590,6 +1587,7 @@
         <div class="cg-progress-track"><div class="cg-progress-fill" id="daily-fill"></div></div>
         <button class="cg-daily-claim-btn hidden" id="daily-claim-btn">受け取る</button>
       </div>
+      <div id="premium-gacha-card" class="cg-progress-card cg-premium-gacha-card hidden"></div>
     </div>
   </section>
 

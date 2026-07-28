@@ -1140,21 +1140,19 @@ function renderEventBanner() {
 
 // 現在開催中のプレミアムガチャを、ホーム画面のバナーとして案内する
 function renderPremiumGachaBanner() {
-  const banner = document.getElementById('premium-gacha-banner');
-  if (!banner) return;
+  const card = document.getElementById('premium-gacha-card');
+  if (!card) return;
   const featured = SHOP_PACKS.find(p => p.featured);
-  if (!featured) { banner.classList.add('hidden'); return; }
-  banner.classList.remove('hidden');
-  banner.innerHTML = `
-    <span class="ic">${featured.icon}</span>
-    <div class="cg-premium-gacha-banner-text">
-      <div class="cg-premium-gacha-banner-title-row">
-        <span class="cg-premium-gacha-banner-title">${featured.flavor || featured.name}</span>
-        <span class="cg-premium-gacha-banner-badge">開催中</span>
-      </div>
-      <div class="cg-premium-gacha-banner-sub">${featured.name}を好評開催中！</div>
-    </div>`;
-  banner.onclick = () => { renderShop(); showScreen('shop'); };
+  if (!featured) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  card.innerHTML = `
+    <div class="cg-premium-gacha-card-title-row">
+      <span class="ic">${featured.icon}</span>
+      <span class="cg-premium-gacha-card-title">${featured.flavor || featured.name}</span>
+      <span class="cg-premium-gacha-card-badge">開催中</span>
+    </div>
+    <div class="cg-premium-gacha-card-sub">${featured.name}を好評開催中！</div>`;
+  card.onclick = () => { renderShop(); showScreen('shop'); };
 }
 
 // ---------- ドラゴン育成 ----------
@@ -2317,6 +2315,14 @@ function evolveCard(id) {
 // ---------- バトルロジック ----------
 let battle = null;
 
+// チュートリアル専用のステージ（本編のストーリー進行・実績には一切影響しない）。
+// HPを低く設定し、チュートリアルの7ステップが終わった直後にすぐ勝敗がつくようにしている
+const TUTORIAL_STAGE = {
+  id: 'tutorial', name: 'チュートリアルの相手', portrait: '🎓', hp: 6, spellChance: 0, bgTheme: 'forest',
+  weights: { normal: 100, rare: 0, epic: 0, legend: 0 }, rewardGold: 50, rewardGems: 0, trophyDelta: 0,
+  isTutorialStage: true,
+};
+
 const STAGES = [
   { id: 1, name: '森を彷徨う影', portrait: '🐺', hp: 11, bossCard: 'nature_wolf', spellChance: 0.02, bgTheme: 'forest',
     weights: { normal: 95, rare: 5, epic: 0, legend: 0 }, rewardGold: 80, rewardGems: 5, trophyDelta: 20,
@@ -2999,6 +3005,7 @@ function renderStoryStages() {
   }).join('');
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
     node.addEventListener('click', () => {
+      if (interactiveTutorialActive) { startBattle(TUTORIAL_STAGE); return; }
       const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
       const intro = isWorldFirstStage(stage) ? stage.storyIntro : null;
       showStory(intro, () => startBattle(stage));
@@ -3415,7 +3422,7 @@ function showVsIntro(stage) {
   setTimeout(() => overlay.classList.add('hidden'), battleMs(1400));
   setTimeout(() => {
     showTurnBanner('YOUR TURN');
-    if (!state.hasSeenBattleHelp) {
+    if (!state.hasSeenBattleHelp && !interactiveTutorialActive) {
       document.getElementById('battle-help-overlay').classList.remove('hidden');
     }
     if (state.autoBattleMode && battle && !battle.over) {
@@ -6064,8 +6071,13 @@ const INTERACTIVE_TUTORIAL_STEPS = [
   { selector: '#nav-cards',
     matches: (el) => !!el.closest('#nav-cards'),
     text: 'まずは「カード」タブをタップして、デッキ編成画面を開いてみましょう。', hint: '👆 「カード」タブをタップ' },
-  { selector: '#collection-list .cg-coll-item',
-    matches: (el) => !!el.closest('#collection-list .cg-coll-item'),
+  { findTarget: findTutorialAddableCard,
+    matches: (el) => {
+      const card = el.closest('#collection-list .cg-coll-item');
+      if (!card) return false;
+      const id = card.dataset.id;
+      return !!(id && !state.deck.includes(id) && state.cards[id]);
+    },
     text: '下のカード一覧からカードをタップすると、デッキに追加できます。試しに1枚タップしてみましょう。', hint: '👆 好きなカードをタップ' },
   { selector: '#nav-battle',
     matches: (el) => !!el.closest('#nav-battle'),
@@ -6097,6 +6109,17 @@ function findTutorialMonsterHandCard() {
   return document.querySelector(`#battle-hand .cg-hand-card[data-idx="${idx}"]`);
 }
 
+// デッキ編成画面のカード一覧から、まだデッキに入っていないカードを対象にする
+// （既にデッキに入っているカードをタップすると外れてしまい、意図と逆の動作になるため）
+function findTutorialAddableCard() {
+  const nodes = document.querySelectorAll('#collection-list .cg-coll-item');
+  for (const node of nodes) {
+    const id = node.dataset.id;
+    if (id && !state.deck.includes(id) && state.cards[id]) return node;
+  }
+  return null;
+}
+
 function isTutorialTargetVisible(el) {
   if (!el) return false;
   const rect = el.getBoundingClientRect();
@@ -6108,6 +6131,7 @@ function isTutorialTargetVisible(el) {
 function startInteractiveTutorial() {
   interactiveTutorialActive = true;
   interactiveTutorialStepIdx = 0;
+  tutorialScrolledForStep = -1;
   document.addEventListener('click', onTutorialDocumentClick, true);
   showInteractiveTutorialStep();
 }
@@ -6117,8 +6141,15 @@ function startInteractiveTutorial() {
 // 再描画で対象が消えると反応しなくなるため採用していない）
 function onTutorialDocumentClick(e) {
   if (!interactiveTutorialActive) return;
+  // チュートリアル自身のUI（ツールチップ・スキップボタン）は常に操作できるようにする
+  if (e.target.closest('#tutorial-tooltip')) return;
   const step = INTERACTIVE_TUTORIAL_STEPS[interactiveTutorialStepIdx];
-  if (!step || !step.matches(e.target)) return;
+  if (!step || !step.matches(e.target)) {
+    // 案内している対象と一致しない操作は、チュートリアル中は無効化する
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
   interactiveTutorialStepIdx++;
   // 前のステップの「定期的に位置を再計算する」タイマーがまだ残っていると、遷移の合間に
   // それが発火して古いスポットライトを復活させてしまう（新しい画面をブロックする原因になる）ため、
@@ -6156,12 +6187,23 @@ function showInteractiveTutorialStep() {
 
 // 対象要素が現れる（画面遷移・再描画後）まで、短い間隔でポーリングし、見つかり次第スポットライトを合わせる
 // （完了判定そのものはonTutorialDocumentClickが担うため、ここでは表示位置合わせのみ行う）
+let tutorialScrolledForStep = -1;
+
 function waitForTutorialTarget(step, attempts) {
   if (!interactiveTutorialActive) return;
   const vsIntro = document.getElementById('battle-vs-intro');
   const introShowing = vsIntro && !vsIntro.classList.contains('hidden');
   const target = step.findTarget ? step.findTarget() : document.querySelector(step.selector);
   if (!introShowing && target && isTutorialTargetVisible(target)) {
+    // 対象が画面外（要スクロール）にある場合、このステップで初めて見つかった時にだけ自動でスクロールする
+    if (tutorialScrolledForStep !== interactiveTutorialStepIdx) {
+      tutorialScrolledForStep = interactiveTutorialStepIdx;
+      const rect = target.getBoundingClientRect();
+      const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+      if (!fullyVisible) {
+        target.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }
+    }
     positionTutorialSpotlight(target);
     // 再描画で対象の位置がずれることがあるため、このステップの間は定期的に位置を再計算する
     interactiveTutorialWaiter = setTimeout(() => waitForTutorialTarget(step, 0), 400);
