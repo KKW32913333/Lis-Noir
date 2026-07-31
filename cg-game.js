@@ -69,8 +69,8 @@ const CARD_DEFS = {
   spell_iceshard:   { name: 'アイスシャード',   element: 'water', rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 2 }, skill: '敵1体（または敵本体）に2ダメージ', image: 'card-spell-iceshard.png', emoji: '🧊' },
   spell_healing:    { name: 'ヒーリングライト', element: 'light', rarity: 'normal', cost: 2, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'heal', value: 5 }, skill: '自分のHPを5回復', image: 'card-spell-healing.png', emoji: '💫' },
   spell_mindsurge:  { name: 'マインドサージ',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 2 }, skill: 'カードを2枚引く', image: 'card-spell-mindsurge.png', emoji: '📖' },
-  spell_apocalypse: { name: 'アポカリプス',     element: 'dark',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'wipe' }, skill: '相手の場のモンスターを全て撃破する', image: 'card-spell-apocalypse.png', emoji: '💥' },
-  spell_soulbind:   { name: '封印の呪符',       element: 'dark',  rarity: 'epic',   cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'destroy' }, skill: '敵モンスター1体を選択して撃破する（HPに関わらず必ず撃破）', image: null, emoji: '⛓️' },
+  spell_apocalypse: { name: 'メテオシャワー',     element: 'fire',  rarity: 'epic', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'destroyRandom', count: 3 }, skill: '敵モンスターをランダムで3体まで撃破する（HPに関わらず必ず撃破。ただしシールドを持つモンスターは対象外）', image: 'card-spell-meteorshower.png', emoji: '☄️' },
+  spell_soulbind:   { name: 'ソウルストライク',       element: 'dark',  rarity: 'epic',   cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'destroy' }, skill: '敵モンスター1体を選択して撃破する（HPに関わらず必ず撃破）', image: 'card-spell-soulstrike.png', emoji: '⛓️' },
 
   // ---- 装備カード（味方モンスター1体に付与） ----
   equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: 'card-equip-ironsword.png', emoji: '🗡️' },
@@ -110,16 +110,17 @@ const CARD_DEFS = {
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
 // アプリ起動時のstate読み込み処理からも安全に参照できるよう、先にここで定義しておく）
 const BEGINNER_GACHA_CARD_IDS = new Set([
-  'fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing', 'equip_ironsword',
-  'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield',
-  'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail',
-  'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse', 'equip_aqualance',
+  'fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing',
+  'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss',
+  'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse',
+  'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance',
 ]);
 
 
 
 // ---------- ダンジョン（地下1階〜100階） ----------
 const DUNGEON_MAX_FLOOR = 100;
+const ONLINE_BATTLE_HP = 400; // オンライン対戦は、双方の育成状況（プレイヤーレベル・ドラゴンボーナス等）に関わらず、必ずこの値で公平に対戦する
 // フロアボスの見た目（10階ごとに切り替え、既存のレジェンドモンスターを巡回して使用）
 const DUNGEON_BOSS_CARDS = ['fire_crimson', 'fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_whitegriffon', 'dark_reaper', 'light_arcknight', 'dark_demonlord'];
 // 10階ごとの装備報酬（フロアボスを撃破した時に手に入るレジェンド装備。floor/10 - 1 が配列インデックスに対応）
@@ -4247,6 +4248,7 @@ function castSpell(handIdx, targetIdx) {
 
   const eff = def.effect || {};
   let dealtDmg = 0;
+  let destroyRandomTargets = null;
   if (eff.kind === 'damage') {
     const leaderSp = getActiveLeader();
     const dmgFlatSp = leaderSp ? (leaderSp.effect.enemyDmgFlat || 0) : 0;
@@ -4287,10 +4289,26 @@ function castSpell(handIdx, targetIdx) {
         battle.enemyField[targetIdx] = null;
       }
     }
+  } else if (eff.kind === 'destroyRandom') {
+    // シールドを持つモンスターは対象外。対象になり得るモンスターの中からランダムで最大N体を選び、HPに関わらず撃破する
+    const eligibleIdx = battle.enemyField
+      .map((u, i) => (u && !(u.shield > 0)) ? i : -1)
+      .filter(i => i !== -1);
+    for (let i = eligibleIdx.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [eligibleIdx[i], eligibleIdx[j]] = [eligibleIdx[j], eligibleIdx[i]];
+    }
+    destroyRandomTargets = eligibleIdx.slice(0, eff.count || 3);
+    destroyRandomTargets.forEach(i => {
+      const u = battle.enemyField[i];
+      const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
+      impactEffect(targetEl, u.curHp, 0);
+      battle.enemyField[i] = null;
+    });
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
-  submitOnlineAction('cast_spell', { cardId: id, targetIdx, dmg: dealtDmg });
+  submitOnlineAction('cast_spell', { cardId: id, targetIdx, dmg: dealtDmg, destroyRandomTargets });
   renderBattle();
 }
 
@@ -5238,7 +5256,7 @@ function startOnlineBattleFromRoom(roomData) {
   const oppName = iAmHost ? roomData.guestName : roomData.hostName;
   const oppLeaderId = iAmHost ? roomData.guestLeaderId : roomData.hostLeaderId;
 
-  const playerMaxHp = getPlayerMaxHp();
+  const playerMaxHp = ONLINE_BATTLE_HP; // オンライン対戦は、双方の育成状況に関わらず必ずHP400で公平に戦えるようにする
   onlineOpponentInfo = { name: oppName || '相手プレイヤー', leaderId: oppLeaderId };
 
   battle = {
@@ -5368,6 +5386,8 @@ function applyRemoteAction(action) {
         battle.playerField = [null, null, null, null, null];
       } else if (eff.kind === 'destroy') {
         if (targetIdx !== null) battle.playerField[targetIdx] = null;
+      } else if (eff.kind === 'destroyRandom') {
+        (p.destroyRandomTargets || []).forEach(i => { battle.playerField[i] = null; });
       }
       battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
       break;
@@ -5533,10 +5553,10 @@ const SHOP_PACKS = [
     weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     legendPityLimit: 50,
     rarityPool: {
-      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing', 'equip_ironsword'],
-      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
-      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail'],
-      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse', 'equip_aqualance'],
+      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing'],
+      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance'],
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance', 'spell_apocalypse',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon'] },
