@@ -3734,14 +3734,6 @@ function spawnImpactBurst(targetEl, dmg, mult) {
   }
 }
 
-function summonEffect() {
-  const flash = document.getElementById('battle-impact-flash');
-  if (!flash) return;
-  flash.classList.remove('show-summon');
-  void flash.offsetWidth;
-  flash.classList.add('show-summon');
-}
-
 // ---------- サウンド（合成音） ----------
 let audioCtx = null;
 function getAudioCtx() {
@@ -4221,7 +4213,6 @@ function playCardFromHand(handIdx, fieldIdx) {
   battle.playerHand.splice(handIdx, 1);
   battle.selectedHandIdx = null;
   sfxCardPlay();
-  summonEffect();
   if (def.skill) battle.lastPlayedInfo = def;
   // onPlayスキルにランダム要素を持つカードがあり、受信側で再現すると結果がずれる可能性があるため、
   // 結果が確定した状態をそのまま同期する
