@@ -480,9 +480,9 @@
   .cg-shield-icon{position:absolute; top:16px; right:2px; font-size:9px; font-weight:800; color:#fff; z-index:4;
     background:#2f5f8fdd; border-radius:6px; padding:1px 4px; filter:drop-shadow(0 1px 2px #000);}
 
-  .cg-battle-mid-row{display:flex; flex-direction:column; align-items:center; gap:4px; min-height:4px;}
   .cg-field-indicator{font-size:10px; color:var(--text-panel); background:var(--bg-panel2); border:1px solid var(--hairline-panel);
-    padding:4px 10px; border-radius:12px; box-shadow:0 2px 6px #00000033;}
+    padding:4px 10px; border-radius:12px; box-shadow:0 2px 6px #00000033; margin-left:auto; white-space:nowrap; max-width:45%;
+    overflow:hidden; text-overflow:ellipsis;}
 
   .cg-hand-row{display:flex; gap:6px; padding:6px 10px; overflow-x:auto;}
   .cg-hand-card{width:64px; flex-shrink:0; position:relative; transition:transform .1s; touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
@@ -630,6 +630,11 @@
     background:var(--bg-panel2); color:var(--text-dim-panel); cursor:pointer;}
   .cg-gacha-odds-panel{max-width:380px;}
   .cg-cloud-restore-panel{max-width:340px; text-align:center;}
+  .cg-stage-confirm-panel{max-width:320px; text-align:center;}
+  .cg-stage-confirm-portrait{font-size:56px; line-height:1; margin-bottom:8px;}
+  .cg-stage-confirm-portrait img{width:80px; height:80px; object-fit:cover; border-radius:12px; border:2px solid var(--gold);}
+  .cg-stage-confirm-name{font-size:16px; font-weight:800; color:var(--text-panel); margin-bottom:8px;}
+  .cg-stage-confirm-detail{font-size:12px; color:var(--text-dim-panel); line-height:1.7; margin-bottom:18px; white-space:pre-line;}
   .cg-auto-restore-toast{position:fixed; top:calc(14px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
     z-index:300; background:var(--bg-panel); border:1.5px solid var(--gold-bright); border-radius:14px; padding:10px 18px;
     font-size:12px; color:var(--text-panel); box-shadow:0 6px 18px #00000055; white-space:nowrap;
@@ -1825,9 +1830,6 @@
       <div id="battle-direct-attack-label" class="cg-direct-attack-label">タップで直接攻撃</div>
 
       <div class="cg-field-row" id="battle-enemy-field"></div>
-      <div class="cg-battle-mid-row">
-        <div id="battle-field-indicator" class="cg-field-indicator" style="display:none;"></div>
-      </div>
       <div class="cg-field-row" id="battle-player-field"></div>
 
       <div class="cg-side-info-row cg-side-info-player">
@@ -1842,6 +1844,7 @@
             <span class="cg-substat-chip cg-graveyard-chip" id="battle-graveyard-btn" title="墓地を見る">墓地×<span id="battle-graveyard-count">0</span></span>
           </div>
         </div>
+        <div id="battle-field-indicator" class="cg-field-indicator" style="display:none;"></div>
       </div>
 
       <div id="battle-selected-skill-info" class="cg-selected-skill-info hidden">
@@ -1995,6 +1998,16 @@
   <!-- クラウドから自動復元した際の通知（操作不要、自動で消える） -->
   <div id="auto-restore-toast" class="cg-auto-restore-toast hidden">☁️ クラウドのデータを自動で読み込みました</div>
   <div id="achievement-unlock-toast" class="cg-auto-restore-toast cg-achievement-toast hidden"><span id="achievement-unlock-toast-text"></span></div>
+
+  <div id="stage-confirm-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame cg-stage-confirm-panel">
+      <div class="cg-stage-confirm-portrait" id="stage-confirm-portrait"></div>
+      <div class="cg-stage-confirm-name" id="stage-confirm-name"></div>
+      <div class="cg-stage-confirm-detail" id="stage-confirm-detail"></div>
+      <button class="cg-btn cg-btn-main" id="stage-confirm-yes">挑戦する</button>
+      <button class="cg-btn" id="stage-confirm-no">キャンセル</button>
+    </div>
+  </div>
 
   <div id="cloud-restore-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-ornate cg-double-frame cg-cloud-restore-panel">

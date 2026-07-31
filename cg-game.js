@@ -102,7 +102,7 @@ const CARD_DEFS = {
   field_sanctuary: { name: 'ホーリーサンクチュアリ', element: 'light', rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
     effect: { allyBoost: { element: 'light', stat: 'atk', value: 1 }, allyDamageReduction: { element: 'all', percent: 0.10 } },
     skill: '場に出ている間、味方全体が受けるダメージを10%軽減する。さらに、光属性の味方の攻撃力+1', image: 'card-field-sanctuary.png', emoji: '⛩️' },
-  field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'field', target: 'none',
+  field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
     effect: { enemyDebuff: { element: 'dark', stat: 'atk', value: -1 }, enemyDamageBoost: 0.10 },
     skill: '場に出ている間、敵全体が受けるダメージが10%増加する。さらに、闇属性の敵の攻撃力を-1する', image: 'card-field-abyss.png', emoji: '🕳️' },
 };
@@ -533,6 +533,32 @@ function showGenericConfirm(message, title) {
 // window.confirm()はスタンドアロンPWA（ホーム画面に追加したアプリ）では正しく動作しないことがあり、
 // 誤ってfalse相当の挙動になるとクラウドのデータを上書き消去してしまう危険があるため、
 // 確実に表示される専用モーダルに置き換えている
+
+// ステージ・クエスト（ストーリー/ダンジョン/高難易度/特別/イベント）挑戦前の確認ポップアップ
+function showStageConfirm(stage) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('stage-confirm-overlay');
+    document.getElementById('stage-confirm-portrait').innerHTML = stagePortraitHtml(stage, true);
+    document.getElementById('stage-confirm-name').textContent = stage.name;
+    const rewardParts = [`敵HP ${stage.hp}`];
+    if (stage.rewardGold) rewardParts.push(`💰${stage.rewardGold}`);
+    if (stage.rewardGems) rewardParts.push(`💎${stage.rewardGems}`);
+    if (stage.trophyDelta) rewardParts.push(`🏆+${stage.trophyDelta}`);
+    document.getElementById('stage-confirm-detail').textContent = `このクエストに挑戦しますか？\n${rewardParts.join('　')}`;
+    overlay.classList.remove('hidden');
+    const yesBtn = document.getElementById('stage-confirm-yes');
+    const noBtn = document.getElementById('stage-confirm-no');
+    const cleanup = () => {
+      overlay.classList.add('hidden');
+      yesBtn.removeEventListener('click', onYes);
+      noBtn.removeEventListener('click', onNo);
+    };
+    const onYes = () => { cleanup(); resolve(true); };
+    const onNo = () => { cleanup(); resolve(false); };
+    yesBtn.addEventListener('click', onYes);
+    noBtn.addEventListener('click', onNo);
+  });
+}
 function showCloudRestoreConfirm(desc, compareHtml) {
   return new Promise((resolve) => {
     const overlay = document.getElementById('cloud-restore-overlay');
@@ -2989,8 +3015,9 @@ function renderEventList() {
       <div class="cg-event-countdown">残り<br>${daysRemaining(ev)}日</div>
     </div>`).join('');
   wrap.querySelectorAll('.cg-event-card').forEach(node => {
-    node.addEventListener('click', () => {
+    node.addEventListener('click', async () => {
       const ev = EVENTS.find(e => e.id === node.dataset.event);
+      if (!(await showStageConfirm(ev))) return;
       showStory(ev.storyIntro, () => startBattle(ev));
     });
   });
@@ -3090,9 +3117,10 @@ function renderStoryStages() {
       </div>`;
   }).join('');
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
-    node.addEventListener('click', () => {
+    node.addEventListener('click', async () => {
       if (interactiveTutorialActive) { startBattle(TUTORIAL_STAGE); return; }
       const stage = STAGES.find(s => s.id === Number(node.dataset.stage));
+      if (!(await showStageConfirm(stage))) return;
       const intro = isWorldFirstStage(stage) ? stage.storyIntro : null;
       showStory(intro, () => startBattle(stage));
     });
@@ -3129,8 +3157,9 @@ function renderQuestList(quests, sectionLabel, unlockStageProgress) {
       <div class="cg-world-stages">${cardsHtml}</div>
     </div>`;
   wrap.querySelectorAll('.cg-stage-card').forEach(node => {
-    node.addEventListener('click', () => {
+    node.addEventListener('click', async () => {
       const quest = quests.find(q => q.id === node.dataset.quest);
+      if (!(await showStageConfirm(quest))) return;
       startBattle(quest);
     });
   });
@@ -3184,15 +3213,19 @@ function renderDungeonSelect(containerId) {
   }).join('');
 
   wrap.querySelectorAll('.cg-stage-card:not(.locked)').forEach(node => {
-    node.addEventListener('click', () => {
+    node.addEventListener('click', async () => {
       const floor = Number(node.dataset.floor);
-      startBattle(getDungeonFloorStage(floor));
+      const stage = getDungeonFloorStage(floor);
+      if (!(await showStageConfirm(stage))) return;
+      startBattle(stage);
     });
   });
   const jumpBtn = document.getElementById('dungeon-progress-jump-btn');
   if (jumpBtn) {
-    jumpBtn.addEventListener('click', () => {
-      startBattle(getDungeonFloorStage(state.dungeonFloor));
+    jumpBtn.addEventListener('click', async () => {
+      const stage = getDungeonFloorStage(state.dungeonFloor);
+      if (!(await showStageConfirm(stage))) return;
+      startBattle(stage);
     });
   }
 }
@@ -5493,8 +5526,8 @@ const SHOP_PACKS = [
     legendPityLimit: 50,
     rarityPool: {
       normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing', 'equip_ironsword'],
-      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary'],
-      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail', 'field_abyss'],
+      rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'equip_shield', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'equip_dragonmail'],
       legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse', 'equip_aqualance'],
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance', 'spell_apocalypse',
