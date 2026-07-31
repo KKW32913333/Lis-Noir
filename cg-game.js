@@ -887,9 +887,12 @@ function renderCardFace(id, opts) {
   // バトル画面では、カード内表示をイラスト・コスト・ATK・HPの4情報のみに絞るため、名称・属性アイコンを省略
   const nameLine = opts.battleMode ? '' : `<div class="cg-card-name">${def.name}</div>`;
   const elLine = opts.battleMode ? '' : `<div class="cg-card-el" style="color:${el.color}">${el.icon}</div>`;
+  const costBadgeContent = (opts.onField && isMonster)
+    ? `<span class="cg-card-role-oncost ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
+    : def.cost;
   return `
     <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}${bondClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
-      <div class="cg-card-cost">${def.cost}</div>
+      <div class="cg-card-cost">${costBadgeContent}</div>
       <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}${bondBadge}</div>
       ${nameLine}
       ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
@@ -2241,7 +2244,6 @@ function renderCardList() {
       node.addEventListener('click', () => showLockedCardInfo(id));
     }
   });
-  renderLeaderList();
   renderCompendiumPanel();
 }
 
@@ -3834,7 +3836,7 @@ function renderBattle() {
     }
     const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, battleMode: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -3842,7 +3844,7 @@ function renderBattle() {
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
     if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
     const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
-    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, battleMode: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}</div>`;
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}</div>`;
   }).join('');
 
   const handEl = document.getElementById('battle-hand');
@@ -5467,12 +5469,15 @@ function revealResultScreen(won, stage) {
 
 // ---------- カード画面（デッキ編成／カード一覧）セグメント切替 ----------
 function showCollectionSegment(seg) {
-  const isDeck = seg === 'deck';
-  document.getElementById('seg-deck').classList.toggle('active', isDeck);
-  document.getElementById('seg-list').classList.toggle('active', !isDeck);
-  document.getElementById('collection-deck-view').style.display = isDeck ? '' : 'none';
-  document.getElementById('collection-list-view').style.display = isDeck ? 'none' : '';
-  if (isDeck) renderDeck(); else renderCardList();
+  document.getElementById('seg-deck').classList.toggle('active', seg === 'deck');
+  document.getElementById('seg-list').classList.toggle('active', seg === 'list');
+  document.getElementById('seg-leader').classList.toggle('active', seg === 'leader');
+  document.getElementById('collection-deck-view').style.display = seg === 'deck' ? '' : 'none';
+  document.getElementById('collection-list-view').style.display = seg === 'list' ? '' : 'none';
+  document.getElementById('collection-leader-view').style.display = seg === 'leader' ? '' : 'none';
+  if (seg === 'deck') renderDeck();
+  else if (seg === 'leader') renderLeaderList();
+  else renderCardList();
 }
 
 function openCollectionScreen(seg) {
@@ -6671,6 +6676,7 @@ function init() {
   document.getElementById('shop-reveal-close').addEventListener('click', hideReveal);
   document.getElementById('seg-deck').addEventListener('click', () => showCollectionSegment('deck'));
   document.getElementById('seg-list').addEventListener('click', () => showCollectionSegment('list'));
+  document.getElementById('seg-leader').addEventListener('click', () => showCollectionSegment('leader'));
   document.getElementById('auto-build-btn').addEventListener('click', autoBuildDeck);
   document.getElementById('deck-clear-btn').addEventListener('click', clearDeck);
   document.getElementById('deck-share-btn').addEventListener('click', openDeckShareOverlay);
