@@ -3826,7 +3826,6 @@ function renderBattle() {
     const fdef = CARD_DEFS[battle.fieldCard];
     const fel = ELEMENTS[fdef.element];
     document.getElementById('battle-field-indicator-name').textContent = `${fdef.emoji} ${fdef.name}`;
-    document.getElementById('battle-field-indicator-desc').textContent = fdef.skill || '';
     fieldIndicatorEl.style.display = '';
     fieldIndicatorEl.style.borderColor = fel.color;
   } else {
