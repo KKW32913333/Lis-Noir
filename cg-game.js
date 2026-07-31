@@ -3825,9 +3825,8 @@ function renderBattle() {
   if (battle.fieldCard) {
     const fdef = CARD_DEFS[battle.fieldCard];
     const fel = ELEMENTS[fdef.element];
-    const sideLabel = battle.fieldCardSide === 'player' ? '（自分）' : battle.fieldCardSide === 'enemy' ? '（相手）' : '';
-    fieldIndicatorEl.innerHTML = `${fdef.emoji} ${fdef.name}${sideLabel}`;
-    fieldIndicatorEl.title = fdef.skill || '';
+    document.getElementById('battle-field-indicator-name').textContent = `${fdef.emoji} ${fdef.name}`;
+    document.getElementById('battle-field-indicator-desc').textContent = fdef.skill || '';
     fieldIndicatorEl.style.display = '';
     fieldIndicatorEl.style.borderColor = fel.color;
   } else {
