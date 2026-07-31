@@ -489,7 +489,8 @@
 
   .cg-hand-row{display:flex; gap:6px; padding:6px 10px; overflow-x:auto;}
   .cg-hand-card{width:64px; flex-shrink:0; position:relative; transition:transform .1s; touch-action:manipulation; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
-  .cg-hand-card.disabled{opacity:.4;}
+  .cg-hand-card.disabled{opacity:.45; filter:grayscale(85%) brightness(.8);}
+  .cg-hand-card.disabled .cg-card-cost{background:linear-gradient(180deg,#e05a4f,#8f2a1c) !important; border-color:#ffffffaa !important;}
   .cg-hand-card.selected{transform:translateY(-8px);}
 
   .cg-battle-footer{display:flex; align-items:center; justify-content:space-between; padding:6px 14px 10px; flex-shrink:0;}

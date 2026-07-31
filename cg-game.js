@@ -4355,6 +4355,37 @@ function getValidTargets(unit, opponentField) {
   return { indices: allIdxs, faceAllowed: true };
 }
 
+// AIの装備対象選択：最も攻撃力が高いユニットを優先的に強化する（従来は先頭のユニットを機械的に選んでいた）
+function chooseAiBestUnitIdx(field) {
+  let bestIdx = -1;
+  let bestAtk = -Infinity;
+  field.forEach((u, i) => {
+    if (!u) return;
+    const atk = u.def.atk + (u.atkBonus || 0);
+    if (atk > bestAtk) { bestAtk = atk; bestIdx = i; }
+  });
+  return bestIdx;
+}
+
+// AIの攻撃対象選択：撃破できる相手がいれば、その中で最も脅威度（攻撃力）が高い相手を優先する。
+// 撃破できる相手がいない場合は、単純に最も脅威度の高い相手を狙う（従来は先頭の対象を機械的に選んでいた）
+function chooseAiAttackTargetIdx(validIndices, opponentField, dmg) {
+  if (validIndices.length === 0) return null;
+  let bestIdx = validIndices[0];
+  let bestScore = -Infinity;
+  validIndices.forEach(idx => {
+    const t = opponentField[idx];
+    if (!t) return;
+    const threat = t.def.atk + (t.atkBonus || 0);
+    const effectiveHp = t.curHp - (t.shield || 0); // シールド分は簡易的に考慮する
+    const canKill = effectiveHp <= dmg;
+    const score = (canKill ? 1000 : 0) + threat;
+    if (score > bestScore) { bestScore = score; bestIdx = idx; }
+  });
+  return bestIdx;
+}
+
+
 // ---------- モンスター固有スキルの発動処理 ----------
 // プレイヤーのリーダーが「敵の回復無効化」を持っているかどうか
 function isEnemyHealNullified() {
@@ -4798,7 +4829,7 @@ function enemyTurn() {
       }
 
       if (type === 'equipment' && def.target === 'friendly') {
-        const targetIdx = battle.enemyField.findIndex(u => u !== null);
+        const targetIdx = chooseAiBestUnitIdx(battle.enemyField);
         if (targetIdx === -1) continue;
         const eff = def.effect || {};
         const unit = battle.enemyField[targetIdx];
@@ -4898,7 +4929,7 @@ function enemyTurn() {
         skillFlash(`${u.def.name}のスキル！\n攻撃力と同じダメージを敵全体に`);
         killed = battle.playerField.some(p => p && p.curHp <= 0);
       } else if (valid.indices.length > 0) {
-        const targetIdx = valid.indices[0];
+        const targetIdx = chooseAiAttackTargetIdx(valid.indices, battle.playerField, dmg);
         const target = battle.playerField[targetIdx];
         const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
         impactEffect(targetEl, dmg, 0);
