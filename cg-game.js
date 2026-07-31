@@ -3056,8 +3056,15 @@ function advanceStory() {
     return;
   }
   const line = storyQueue.shift();
-  document.getElementById('story-portrait').textContent = line.portrait || '💬';
-  document.getElementById('story-speaker').textContent = line.speaker || '';
+  const isProtagonist = line.speaker === '主人公';
+  const portraitEl = document.getElementById('story-portrait');
+  if (isProtagonist) {
+    renderAvatarInto(portraitEl);
+  } else {
+    portraitEl.style.backgroundImage = '';
+    portraitEl.textContent = line.portrait || '💬';
+  }
+  document.getElementById('story-speaker').textContent = isProtagonist ? (state.playerName || '主人公') : (line.speaker || '');
   document.getElementById('story-text').textContent = line.text || '';
 }
 
@@ -3526,6 +3533,7 @@ function runAutoBattleTurn() {
 }
 
 function showVsIntro(stage) {
+  document.getElementById('vs-player-name').textContent = state.playerName || 'プレイヤー';
   const vsEnemyEl = document.getElementById('vs-enemy-portrait');
   const bossDef = stage.bossCard && CARD_DEFS[stage.bossCard];
   const showVsEnemyFallback = () => {
@@ -3869,7 +3877,7 @@ function renderBattle() {
     }
     const atkVal = u ? (u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u)) : 0;
     return u
-      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}${preview}</div>`
+      ? `<div class="cg-field-slot filled ${blockedCls}" data-side="enemy" data-idx="${i}">${renderCardFace(u.defId, { small: true, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🔷${u.shield}</div>` : ''}${preview}</div>`
       : `<div class="cg-field-slot" data-side="enemy" data-idx="${i}"></div>`;
   }).join('');
 
@@ -3877,7 +3885,7 @@ function renderBattle() {
   playerFieldEl.innerHTML = battle.playerField.map((u, i) => {
     if (!u) return `<div class="cg-field-slot" data-side="player" data-idx="${i}"></div>`;
     const atkVal = u.def.atk + (u.atkBonus || 0) + fieldBonusFor(u);
-    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🛡${u.shield}</div>` : ''}</div>`;
+    return `<div class="cg-field-slot filled ${battle.selectedFieldIdx === i ? 'selected' : ''}" data-side="player" data-idx="${i}">${renderCardFace(u.defId, { small: true, evolved: u.evolved, battleMode: true, onField: true })}<div class="cg-atk-badge">${atkVal}</div><div class="cg-hp-badge">${u.curHp}</div>${u.canAttack ? '<div class="cg-ready-dot"></div>' : ''}${u.stunned ? '<div class="cg-stun-icon">💫</div>' : ''}${u.ailment ? `<div class="cg-poison-icon" title="${u.ailment.kind === 'burn' ? '火傷' : '毒'}">${u.ailment.kind === 'burn' ? '🔥' : '☠️'}</div>` : ''}${u.shield > 0 ? `<div class="cg-shield-icon" title="シールド">🔷${u.shield}</div>` : ''}</div>`;
   }).join('');
 
   const handEl = document.getElementById('battle-hand');
@@ -6499,8 +6507,9 @@ const SCREEN_HELP = {
     items: [
       '<b>① プレイヤー情報</b><br>アイコン・名前をタップすると、プレイヤー設定画面が開きます。',
       '<b>② トロフィー・ジェム・ゴールド</b><br>現在の所持数を確認できます。⚙アイコンから設定・データ管理も可能です。',
-      '<b>③ クイックメニュー</b><br>バトル・カード・ガチャ・ミッションなどへすぐに移動できます。',
-      '<b>④ デイリー報酬・ランクカード</b><br>毎日受け取れる報酬と、現在のランク・トロフィーを確認できます。',
+      '<b>③ 開催中のお知らせ</b><br>ランクカードの下に、開催中のイベントクエストや目玉のプレミアムガチャがあれば案内されます。',
+      '<b>④ クイックメニュー</b><br>バトル・カード・ガチャ・ミッションなどへすぐに移動できます。',
+      '<b>⑤ デイリー報酬・開催中のガチャ</b><br>毎日受け取れる報酬（左）と、現在開催中の目玉ガチャの案内（右）を確認できます。',
     ],
   },
   collection: {
@@ -6518,7 +6527,7 @@ const SCREEN_HELP = {
   cardDetail: {
     title: 'カード強化・進化画面のヘルプ',
     items: [
-      '<b>① 強化</b><br>ゴールドを消費してカードのレベルを上げ、ステータスをアップさせます。',
+      '<b>① 強化</b><br>ゴールドを消費してカードのレベルを上げ、攻撃力・HPをアップさせます（最大Lv.30）。強化に必要なゴールドは、レベルとレア度が高いほど多くなります。この強化は、モンスターカードのみが対象です（スペル・装備・フィールドカードにはレベルの概念がありません）。',
       '<b>② 進化</b><br>規定のレベルに到達すると、ゴールドを消費して進化させ、ステータスを永続的に強化できます。',
       '<b>③ デッキ操作</b><br>この画面から直接、デッキへの追加・削除ができます。',
       '<b>④ 前へ／次へ</b><br>画面上部のボタンで、他の所持カードの詳細に移動できます。',
@@ -6527,7 +6536,7 @@ const SCREEN_HELP = {
   stage: {
     title: 'ステージ選択画面のヘルプ',
     items: [
-      '<b>① ステージ挑戦</b><br>ステージをタップして挑戦します。上から順に難易度が上がっていきます。',
+      '<b>① ステージ挑戦</b><br>ステージをタップすると、挑戦前の確認画面が表示されます。内容を確認し「挑戦する」を選ぶとバトルが始まります（ダンジョン・高難易度・特別クエスト・イベントクエストも同様です）。上から順に難易度が上がっていきます。',
       '<b>② ステージ解放</b><br>ステージをクリアすると、次のステージが解放されます。',
       '<b>③ ダンジョン・高難易度・特別クエスト</b><br>画面上部のタブから切り替えられます。ダンジョンはホーム画面からも同じ内容にアクセスできます。高難易度・特別クエストは、ストーリーとは別枠の強敵クエストで、ステージ26以降を解放すると挑戦できるようになります。',
       '<b>④ ダンジョンについて</b><br>通常のステージとは別の、地下1階〜100階の長期やり込みコンテンツです（トロフィーには影響しません）。階層が深くなるほど敵が強くなり、10階ごとにフロアボスが出現して撃破すると限定のレジェンド装備が手に入ります。現在の到達階層より先には進めません。',

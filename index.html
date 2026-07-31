@@ -408,6 +408,7 @@
   .cg-pp-badge{display:flex; align-items:center; gap:3px; font-size:11px; font-weight:800; color:#fff;
     background:linear-gradient(180deg,#4fa8e0,#1c5a8f); border:1.5px solid #ffffffaa; border-radius:14px; padding:4px 9px;
     box-shadow:0 2px 6px #1c5a8f66; white-space:nowrap;}
+  .cg-pp-badge-enemy{background:linear-gradient(180deg,#e05a4f,#8f2a1c); box-shadow:0 2px 6px #8f2a1c66;}
   .cg-substat-chip{display:flex; align-items:center; gap:3px; font-size:10px; color:#EAE6F5; background:#00000044;
     border:1px solid #ffffff33; border-radius:10px; padding:3px 8px;}
   .cg-graveyard-chip{cursor:pointer;}
@@ -1820,7 +1821,7 @@
         <div class="cg-side-info-main">
           <div class="cg-hp-chip" id="battle-enemy-hp-chip">HP <span class="val" id="battle-enemy-hp">30</span></div>
           <div class="cg-side-sub-row">
-            <span class="cg-pp-badge" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
+            <span class="cg-pp-badge cg-pp-badge-enemy" title="敵のマナ">マナ <span id="battle-enemy-pp-current">1</span>/<span id="battle-enemy-pp-max">1</span></span>
             <span class="cg-substat-chip" title="敵の残り手札枚数">手札×<span id="battle-enemy-hand-count">0</span></span>
             <span class="cg-substat-chip" title="敵の残り山札枚数">山札×<span id="battle-enemy-deck-remaining">0</span></span>
             <span class="cg-substat-chip" title="敵の墓地枚数">墓地×<span id="battle-enemy-graveyard-count">0</span></span>
@@ -1867,7 +1868,7 @@
     <div id="battle-vs-intro" class="cg-vs-intro hidden">
       <div class="cg-vs-side">
         <div class="cg-vs-portrait player" id="vs-player-portrait">🛡️</div>
-        <div class="cg-vs-name">プレイヤー</div>
+        <div class="cg-vs-name" id="vs-player-name">プレイヤー</div>
       </div>
       <div class="cg-vs-mark">VS</div>
       <div class="cg-vs-side">
@@ -1885,11 +1886,12 @@
           <div class="cg-help-item"><b>①' カードを引くかどうかの選択</b><br>自分のターン開始時、カードを引くかどうかを選べます（敵も同様に判断します）。手札がいっぱいの時などは、あえて引かない選択もできます。</div>
           <div class="cg-help-item"><b>② モンスターを出す</b><br>手札のモンスターカードをタップ→空いている自分の場をタップで配置。出したターンは攻撃できません。</div>
           <div class="cg-help-item"><b>③ 攻撃</b><br>攻撃可能な自分のモンスター（左上に緑の点）をタップ→敵モンスターか、敵の顔アイコン・「直接攻撃」ボタンをタップで直接攻撃。<br>💡モンスターを選ばずに敵の顔アイコンをタップするだけでも、攻撃可能なモンスターが自動で選ばれて直接攻撃できます。</div>
-          <div class="cg-help-item"><b>④ スペル・装備・フィールド</b><br>スペルは敵や自分に効果を発動、装備は味方に付けて強化、フィールドは場全体に継続効果を与えます。手札からタップして使用。</div>
+          <div class="cg-help-item"><b>④ スペル・装備・フィールド</b><br>スペルは敵や自分に効果を発動、装備は味方に付けて強化、フィールドは場全体に継続効果を与えます。手札からタップして使用。現在場に出ているフィールドカードは、自分のHP表示の右側に、どちらが使用したか（自分／相手）とあわせて表示されます。</div>
           <div class="cg-help-item"><b>⑤ カード情報</b><br>場のモンスターを長押しすると、詳細（能力・ステータス）を確認できます。自分の場のモンスターは、そこから墓地に送る（除外する）こともできます。</div>
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
-          <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🛡シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
+          <div class="cg-help-item"><b>⑧ 状態異常・シールド</b><br>☠️毒／🔥火傷を受けたモンスターは、以後のターン開始時に自動でダメージを受けます。🔷シールドを持つモンスターは、シールドの数値分だけダメージを肩代わりします。</div>
+          <div class="cg-help-item"><b>⑧' アタッカー・ディフェンダー</b><br>場に出ているモンスターの左上には、⚔（アタッカー）／🛡（ディフェンダー）のアイコンが表示されます。</div>
           <div class="cg-help-item"><b>⑨ 手札上限・墓地</b><br>手札は最大5枚までです。手札が5枚の状態でカードを引くと、そのカードはそのまま墓地に送られます。自分の場のモンスターや手札のカードを長押し→「墓地に送る」で手動で墓地に送ることもできます。🪦アイコンをタップすると墓地の中身を確認できます。</div>
           <div class="cg-help-item"><b>⑩ 墓地から手札に戻す</b><br>🪦アイコンから墓地を開き、カードをタップすると、マナ1を消費して手札に戻せます（手札に空きが必要です）。長押しするとカードの詳細を確認できます。</div>
           <div class="cg-help-item"><b>⑪ スキル効果の確認</b><br>手札の上の欄に、カードのスキル効果が表示されます。カードやモンスターを選択中はそのカードの効果を、何も選択していない時は直近に場に出した／使用したカードの効果を表示します。</div>
