@@ -637,6 +637,10 @@
   .cg-achievement-toast{top:calc(60px + env(safe-area-inset-top)); border-color:var(--true-gold);}
   .cg-cloud-restore-desc{font-size:13px; color:var(--text-panel); margin-bottom:10px; line-height:1.6;}
   .cg-cloud-restore-warning{font-size:12px; color:var(--hp-red); font-weight:700; margin-bottom:16px; line-height:1.5;}
+  .cg-cloud-restore-compare{display:flex; gap:8px; margin-bottom:14px;}
+  .cg-cloud-restore-compare-col{flex:1; background:var(--bg-panel2); border:1px solid var(--hairline-panel); border-radius:10px; padding:8px 10px;}
+  .cg-cloud-restore-compare-label{font-size:10px; color:var(--gold); font-weight:800; margin-bottom:4px; text-align:center;}
+  .cg-cloud-restore-compare-row{font-size:11px; color:var(--text-panel); display:flex; justify-content:space-between; padding:1px 0;}
   .cg-odds-list{display:flex; flex-direction:column; gap:4px; max-height:55vh; overflow-y:auto; margin-bottom:14px;
     padding:8px 10px; border-radius:12px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
   .cg-odds-row{display:flex; align-items:center; gap:8px; font-size:11px; padding:4px 0; border-bottom:1px solid var(--hairline-panel);}
@@ -1991,9 +1995,11 @@
     <div class="cg-help-panel cg-ornate cg-double-frame cg-cloud-restore-panel">
       <div class="cg-help-title">☁️ クラウドデータが見つかりました</div>
       <div class="cg-cloud-restore-desc" id="cloud-restore-desc">クラウドにセーブデータが見つかりました。読み込みますか？</div>
-      <div class="cg-cloud-restore-warning">⚠️ 読み込むと、この端末の現在のデータは上書きされます。</div>
+      <div class="cg-cloud-restore-compare" id="cloud-restore-compare"></div>
+      <div class="cg-cloud-restore-warning">⚠️ 「クラウドのデータを読み込む」を選ぶと、この端末の現在のデータは消えて上書きされます。</div>
       <button class="cg-btn cg-btn-main" id="cloud-restore-yes">クラウドのデータを読み込む</button>
-      <button class="cg-btn" id="cloud-restore-no">この端末のデータのままにする</button>
+      <div class="cg-cloud-restore-warning">⚠️ 「この端末のデータを使う」を選ぶと、クラウドに保存されているデータは消えて上書きされます。</div>
+      <button class="cg-btn" id="cloud-restore-no">この端末のデータを使う</button>
     </div>
   </div>
 

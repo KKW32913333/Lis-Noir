@@ -533,10 +533,13 @@ function showGenericConfirm(message, title) {
 // window.confirm()はスタンドアロンPWA（ホーム画面に追加したアプリ）では正しく動作しないことがあり、
 // 誤ってfalse相当の挙動になるとクラウドのデータを上書き消去してしまう危険があるため、
 // 確実に表示される専用モーダルに置き換えている
-function showCloudRestoreConfirm(desc) {
+function showCloudRestoreConfirm(desc, compareHtml) {
   return new Promise((resolve) => {
     const overlay = document.getElementById('cloud-restore-overlay');
     document.getElementById('cloud-restore-desc').textContent = desc || 'クラウドにセーブデータが見つかりました。読み込みますか？';
+    const compareEl = document.getElementById('cloud-restore-compare');
+    compareEl.innerHTML = compareHtml || '';
+    compareEl.classList.toggle('hidden', !compareHtml);
     overlay.classList.remove('hidden');
     const yesBtn = document.getElementById('cloud-restore-yes');
     const noBtn = document.getElementById('cloud-restore-no');
@@ -550,6 +553,27 @@ function showCloudRestoreConfirm(desc) {
     yesBtn.addEventListener('click', onYes);
     noBtn.addEventListener('click', onNo);
   });
+}
+
+// ログイン時の「クラウド／この端末」選択のために、両者の主要な進行状況を簡潔に比較表示するHTMLを作る
+function buildSaveCompareHtml(localState, cloudState) {
+  const summarize = (s) => ({
+    level: s.playerLevel || 1,
+    trophy: (s.trophy || 0).toLocaleString(),
+    stage: s.stageProgress || 1,
+    cards: Object.keys(s.cards || {}).length,
+  });
+  const l = summarize(localState);
+  const c = summarize(cloudState);
+  const col = (label, sum) => `
+    <div class="cg-cloud-restore-compare-col">
+      <div class="cg-cloud-restore-compare-label">${label}</div>
+      <div class="cg-cloud-restore-compare-row"><span>Lv.</span><span>${sum.level}</span></div>
+      <div class="cg-cloud-restore-compare-row"><span>トロフィー</span><span>${sum.trophy}</span></div>
+      <div class="cg-cloud-restore-compare-row"><span>ステージ</span><span>${sum.stage}</span></div>
+      <div class="cg-cloud-restore-compare-row"><span>所持カード</span><span>${sum.cards}種</span></div>
+    </div>`;
+  return col('この端末', l) + col('クラウド', c);
 }
 
 // 自動でクラウドから復元した際、操作を求めず短く通知するだけのトースト表示
@@ -627,11 +651,18 @@ async function handleLogin() {
     status.textContent = 'ログインしました。クラウドのデータを確認しています…';
     const cloudData = await window.LisNoirCloud.loadCloud();
     if (cloudData) {
-      const useCloud = await showCloudRestoreConfirm('クラウドにセーブデータが見つかりました。読み込みますか？');
+      const compareHtml = buildSaveCompareHtml(state, cloudData);
+      const useCloud = await showCloudRestoreConfirm('クラウドにセーブデータが見つかりました。読み込みますか？', compareHtml);
       if (useCloud) {
         applyCloudData(cloudData);
         status.textContent = 'クラウドのデータを読み込みました！';
       } else {
+        // クラウド側のデータを消してしまう、取り消せない操作のため、念のためもう一度確認する
+        const reallyOverwrite = await showGenericConfirm(
+          'クラウドに保存されているデータは完全に消去され、元に戻せません。本当にこの端末のデータで上書きしますか？',
+          '⚠️ 最終確認'
+        );
+        if (!reallyOverwrite) { status.textContent = ''; return; }
         await window.LisNoirCloud.saveCloud(state);
         status.textContent = 'この端末のデータをクラウドに保存しました。';
       }
@@ -3035,6 +3066,7 @@ function renderStoryStages() {
     const worldUnlocked = worldStages[0].id <= state.stageProgress;
     const stagesHtml = worldStages.map(stage => {
       const unlocked = stage.id <= state.stageProgress;
+      // ステージ7は要望により「クリア済み」表示（チェックマーク・タグ）の対象から除外する
       const cleared = stage.id < state.stageProgress && stage.id !== 7;
       return `
         <div class="cg-stage-card ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}" data-stage="${stage.id}">
@@ -6791,6 +6823,32 @@ function init() {
           }
         } catch (err) {
           console.error('auto cloud restore check failed', err);
+        }
+      } else {
+        // この端末は初期状態ではないが、クラウド側が明らかにこの端末より進行している場合
+        // （何らかの理由でこの端末のデータだけ古い・巻き戻っている可能性があるため）、
+        // 自動での上書きは行わず、必ず確認を挟む
+        try {
+          const cloudData = await window.LisNoirCloud.loadCloud();
+          if (cloudData && cloudData.beginnerGachaDone) {
+            const cloudAhead = (cloudData.trophy || 0) > (state.trophy || 0) + 500
+              || (cloudData.stageProgress || 1) > (state.stageProgress || 1) + 2;
+            if (cloudAhead) {
+              const compareHtml = buildSaveCompareHtml(state, cloudData);
+              const useCloud = await showCloudRestoreConfirm(
+                'クラウドの方が進行状況が大きく進んでいます。この端末のデータより新しい可能性があります。どちらを使いますか？',
+                compareHtml
+              );
+              if (useCloud) {
+                applyCloudData(cloudData);
+                showAutoRestoreToast();
+              }
+              // 「この端末のデータを使う」を選んだ場合は、通常通りこの端末のデータで進行する
+              // （ここでの選択だけではクラウド側を上書きしない。上書きは通常のクラウド同期のタイミングで行われる）
+            }
+          }
+        } catch (err) {
+          console.error('cloud progress comparison check failed', err);
         }
       }
     });
