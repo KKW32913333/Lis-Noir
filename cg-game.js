@@ -172,7 +172,7 @@ const EVOLVE_LEVEL_REQ = 5;
 // デッキに1体だけ設定でき、効果はそのデッキの対象属性モンスター全てに反映される
 const LEADERS = {
   lisnoir_f: {
-    name: 'エレナ・ノワール',
+    name: 'エレナ・ニグルム',
     skillName: 'ダークエレガンス',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を+2、HPを+2',
@@ -182,7 +182,7 @@ const LEADERS = {
     ultimateSkill: { name: '漆黒の断罪', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与える', dmg: 5 },
   },
   lisnoir_m: {
-    name: 'ディアブロ・ノワール',
+    name: 'ディアブロ・ノーチェ',
     skillName: 'ナイトメアドミニオン',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を+2、敵へのダメージを+1',
@@ -222,7 +222,7 @@ const LEADERS = {
     ultimateSkill: { name: '深海の怒涛', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを2回復する', dmg: 4, healAllies: 2 },
   },
   kaien: {
-    name: 'エル・カイエン',
+    name: '灰焔',
     skillName: 'フレイムブンリト',
     element: 'fire',
     desc: '火属性ユニットの攻撃力を+2、敵へのダメージを+1',
