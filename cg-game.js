@@ -74,17 +74,17 @@ const CARD_DEFS = {
 
   // ---- 装備カード（味方モンスター1体に付与） ----
   equip_aqualance:  { name: 'アクアランス',       element: 'water', rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 1 }, skill: '味方1体の攻撃力+6・HP+1', image: 'card-equip-aqualance.png', emoji: '🔱' },
-  // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬。画像は今後差し替え予定（image:nullの間は絵文字で表示） ----
-  dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: null, emoji: '🔮' },
-  dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: null, emoji: '💍' },
-  dungeon_equip_30:  { name: '亡国の紋章',     element: 'fire',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 4 }, skill: '味方1体の攻撃力+5・HP+4', image: null, emoji: '🏵️' },
-  dungeon_equip_40:  { name: '氷結の秘宝',     element: 'water',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 5 }, skill: '味方1体の攻撃力+5・HP+5', image: null, emoji: '❄️' },
-  dungeon_equip_50:  { name: '天空の羽衣',     element: 'light',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 5 }, skill: '味方1体の攻撃力+6・HP+5', image: null, emoji: '🪽' },
-  dungeon_equip_60:  { name: '終焉の書',       element: 'dark',   rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 6 }, skill: '味方1体の攻撃力+6・HP+6', image: null, emoji: '📕' },
-  dungeon_equip_70:  { name: '虚無の指輪',     element: 'dark',   rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 6 }, skill: '味方1体の攻撃力+7・HP+6', image: null, emoji: '⚫' },
-  dungeon_equip_80:  { name: '永劫の鎧',       element: 'nature', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 7 }, skill: '味方1体の攻撃力+7・HP+7', image: null, emoji: '🛡️' },
-  dungeon_equip_90:  { name: '創世の宝珠',     element: 'light',  rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 8, hp: 7 }, skill: '味方1体の攻撃力+8・HP+7', image: null, emoji: '🔆' },
-  dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: null, emoji: '👑' },
+  // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬 ----
+  dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: 'card-equip-dungeon10.png', emoji: '🔮' },
+  dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: 'card-equip-dungeon20.png', emoji: '💍' },
+  dungeon_equip_30:  { name: '亡国の紋章',     element: 'fire',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 4 }, skill: '味方1体の攻撃力+5・HP+4', image: 'card-equip-dungeon30.png', emoji: '🏵️' },
+  dungeon_equip_40:  { name: '氷結の秘宝',     element: 'water',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 5 }, skill: '味方1体の攻撃力+5・HP+5', image: 'card-equip-dungeon40.png', emoji: '❄️' },
+  dungeon_equip_50:  { name: '天空の羽衣',     element: 'light',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 5 }, skill: '味方1体の攻撃力+6・HP+5', image: 'card-equip-dungeon50.png', emoji: '🪽' },
+  dungeon_equip_60:  { name: '終焉の書',       element: 'dark',   rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 6 }, skill: '味方1体の攻撃力+6・HP+6', image: 'card-equip-dungeon60.png', emoji: '📕' },
+  dungeon_equip_70:  { name: '虚無の指輪',     element: 'dark',   rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 6 }, skill: '味方1体の攻撃力+7・HP+6', image: 'card-equip-dungeon70.png', emoji: '⚫' },
+  dungeon_equip_80:  { name: '永劫の鎧',       element: 'nature', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 7 }, skill: '味方1体の攻撃力+7・HP+7', image: 'card-equip-dungeon80.png', emoji: '🛡️' },
+  dungeon_equip_90:  { name: '創世の宝珠',     element: 'light',  rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 8, hp: 7 }, skill: '味方1体の攻撃力+8・HP+7', image: 'card-equip-dungeon90.png', emoji: '🔆' },
+  dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: 'card-equip-dungeon100.png', emoji: '👑' },
 
   // ---- フィールドカード（場に出ている間、対応属性のモンスター全体（両陣営）に継続効果） ----
   field_inferno:   { name: 'フレイムコア', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
@@ -346,6 +346,7 @@ function defaultState() {
     beginnerGachaDone: false,
     cards: owned,
     deck: buildStarterDeck(),
+    cardEquipment: {}, // { モンスターカードID: 装備カードID }。装備カードはデッキには入れず、モンスターに直接装着する
   };
 }
 
@@ -409,11 +410,42 @@ function loadState() {
       });
     }
     if (Array.isArray(saved.deck)) {
-      saved.deck = saved.deck.filter(id => !!CARD_DEFS[id]);
+      // 装備カードはデッキに入れられない仕様に変更したため、旧セーブに残っていた分もあわせて取り除く
+      saved.deck = saved.deck.filter(id => !!CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') !== 'equipment');
     }
     if (Array.isArray(saved.deckPresets)) {
       saved.deckPresets.forEach(preset => {
-        if (Array.isArray(preset.cards)) preset.cards = preset.cards.filter(id => !!CARD_DEFS[id]);
+        if (Array.isArray(preset.cards)) {
+          preset.cards = preset.cards.filter(id => !!CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') !== 'equipment');
+        }
+      });
+    }
+    // 装備カードをモンスターカードへ直接装着する仕様への対応: 旧セーブに無ければ補完し、
+    // 参照切れ（カード削除・モンスター側でない・装備側でない等）のエントリーは自動的に取り除く
+    if (!saved.cardEquipment || typeof saved.cardEquipment !== 'object') saved.cardEquipment = {};
+    Object.keys(saved.cardEquipment).forEach(monsterId => {
+      const equipId = saved.cardEquipment[monsterId];
+      const monsterDef = CARD_DEFS[monsterId];
+      const equipDef = CARD_DEFS[equipId];
+      const ownsMonster = saved.cards && saved.cards[monsterId];
+      const ownsEquip = saved.cards && saved.cards[equipId];
+      if (!monsterDef || (monsterDef.type || 'monster') !== 'monster'
+          || !equipDef || equipDef.type !== 'equipment'
+          || !ownsMonster || !ownsEquip) {
+        delete saved.cardEquipment[monsterId];
+      }
+    });
+    // 同じ装備カードが複数のモンスターに同時装着されている状態（不整合）が万一残っていた場合、
+    // 先に見つかった1件のみを有効とし、それ以外は解除する
+    {
+      const usedEquipIds = new Set();
+      Object.keys(saved.cardEquipment).forEach(monsterId => {
+        const equipId = saved.cardEquipment[monsterId];
+        if (usedEquipIds.has(equipId)) {
+          delete saved.cardEquipment[monsterId];
+        } else {
+          usedEquipIds.add(equipId);
+        }
       });
     }
     // 「夜天の英雄」ガチャ用チケットを1枚追加配布（既存プレイヤーへ1回限り）
@@ -1609,11 +1641,95 @@ function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
   if (!def) return 0;
   if (def.isLeaderCard) return 1; // リーダーカードは唯一無二のキャラクターのため1枚まで
-  return (def.type || 'monster') === 'equipment' ? 1 : 3;
+  if ((def.type || 'monster') === 'equipment') return 0; // 装備カードはデッキに入れられない（モンスターに直接装着する）
+  return 3;
 }
 
 function countInDeck(id) {
   return state.deck.filter(x => x === id).length;
+}
+
+// ---------- 装備システム：装備カードはデッキに入れず、モンスターカードに直接装着する（1体につき1枚まで） ----------
+// 指定した装備カードが、現在どのモンスターに装着されているかを返す（未装着ならnull）
+function getEquippedMonsterFor(equipId) {
+  const entry = Object.entries(state.cardEquipment).find(([, eid]) => eid === equipId);
+  return entry ? entry[0] : null;
+}
+
+// 装備カードをモンスターに装着する（そのモンスターが既に別の装備を装着していた場合は上書きし、
+// その装備カード自身が別のモンスターに装着済みだった場合はそちらから自動的に外す）
+function equipItemToMonster(equipId, monsterId) {
+  Object.keys(state.cardEquipment).forEach(mid => {
+    if (state.cardEquipment[mid] === equipId) delete state.cardEquipment[mid];
+  });
+  state.cardEquipment[monsterId] = equipId;
+  saveState();
+}
+
+// 指定したモンスターから装備を外す
+function unequipMonster(monsterId) {
+  delete state.cardEquipment[monsterId];
+  saveState();
+}
+
+// 装備選択オーバーレイの表示（共通）。itemsは{id, label, sublabel, onSelect}の配列
+function showEquipPickerOverlay(title, items) {
+  document.getElementById('equip-picker-title').textContent = title;
+  const listEl = document.getElementById('equip-picker-list');
+  listEl.innerHTML = items.length
+    ? items.map((it, i) => `
+      <div class="cg-equip-picker-item" data-idx="${i}">
+        ${renderCardFace(it.id, { small: true })}
+        <div class="cg-equip-picker-item-text">
+          <span class="cg-equip-picker-item-name">${it.label}</span>
+          ${it.sublabel ? `<span class="cg-equip-picker-item-sub">${it.sublabel}</span>` : ''}
+        </div>
+      </div>`).join('')
+    : `<div class="cg-empty">${title.includes('モンスター') ? '所持しているモンスターカードがありません' : '所持している装備カードがありません'}</div>`;
+  listEl.querySelectorAll('.cg-equip-picker-item').forEach(node => {
+    node.addEventListener('click', () => {
+      const it = items[Number(node.dataset.idx)];
+      document.getElementById('equip-picker-overlay').classList.add('hidden');
+      if (it && it.onSelect) it.onSelect();
+    });
+  });
+  document.getElementById('equip-picker-overlay').classList.remove('hidden');
+}
+
+// モンスターカードの詳細画面から呼ばれる：装着する装備カードを選ぶ
+function openEquipPicker(monsterId) {
+  const items = Object.keys(state.cards)
+    .filter(id => CARD_DEFS[id] && CARD_DEFS[id].type === 'equipment')
+    .sort((a, b) => (RARITY_SORT_ORDER[CARD_DEFS[a].rarity] ?? 9) - (RARITY_SORT_ORDER[CARD_DEFS[b].rarity] ?? 9))
+    .map(id => {
+      const holderId = getEquippedMonsterFor(id);
+      const holderDef = holderId && holderId !== monsterId ? CARD_DEFS[holderId] : null;
+      return {
+        id,
+        label: CARD_DEFS[id].name,
+        sublabel: (CARD_DEFS[id].skill || '') + (holderDef ? `（現在: ${holderDef.name} に装着中）` : ''),
+        onSelect: () => { equipItemToMonster(id, monsterId); openCardDetail(monsterId); },
+      };
+    });
+  showEquipPickerOverlay(`「${CARD_DEFS[monsterId].name}」に装着する装備を選択`, items);
+}
+
+// 装備カードの詳細画面から呼ばれる：装着先のモンスターカードを選ぶ
+function openMonsterPickerForEquip(equipId) {
+  const items = Object.keys(state.cards)
+    .filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster')
+    .sort((a, b) => (RARITY_SORT_ORDER[CARD_DEFS[a].rarity] ?? 9) - (RARITY_SORT_ORDER[CARD_DEFS[b].rarity] ?? 9))
+    .map(id => {
+      const currentEquipId = state.cardEquipment[id];
+      const currentEquipDef = currentEquipId ? CARD_DEFS[currentEquipId] : null;
+      return {
+        id,
+        label: CARD_DEFS[id].name,
+        sublabel: currentEquipDef ? `（現在: ${currentEquipDef.name} を装着中）` : '装備なし',
+        onSelect: () => { equipItemToMonster(equipId, id); openCardDetail(equipId); },
+      };
+    });
+  showEquipPickerOverlay(`「${CARD_DEFS[equipId].name}」を装着するモンスターを選択`, items);
 }
 
 function renderLeaderSelect(containerId) {
@@ -1753,6 +1869,7 @@ function renderDeck() {
   const collEl = document.getElementById('collection-list');
   const owned = sortCardIds(Object.keys(state.cards).filter(id => {
     if (!CARD_DEFS[id]) return false; // 削除済みカードが紛れていた場合、空白セルにならないよう除外
+    if ((CARD_DEFS[id].type || 'monster') === 'equipment') return false; // 装備カードはデッキに入れられないため、こちらには表示しない（モンスターへの装着はカード詳細画面から行う）
     if (collectionFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === collectionFilter;
   }), collectionSortMode);
@@ -2250,15 +2367,38 @@ function openCardDetail(id) {
   const owned = state.cards[id];
   const el = ELEMENTS[def.element];
   const rarity = RARITY[def.rarity];
-  const isMonster = (def.type || 'monster') === 'monster';
+  const type = def.type || 'monster';
+  const isMonster = type === 'monster';
+  const isEquip = type === 'equipment';
   const deckCount = countInDeck(id);
   const maxCopies = maxCopiesFor(id);
-  const deckControlHtml = `
+  const deckControlHtml = isEquip ? '' : `
     <div class="cg-detail-deck-row ${deckCount > 0 ? 'in-deck' : ''}">
       <span class="cg-detail-deck-count">${deckCount > 0 ? '🃏 デッキ内: ' + deckCount + '/' + maxCopies + '枚' : 'デッキ未編成'}</span>
       <button class="cg-btn cg-detail-deck-btn" id="detail-deck-remove-btn" ${deckCount <= 0 ? 'disabled' : ''}>− 外す</button>
       <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 40) ? 'disabled' : ''}>＋ 追加</button>
     </div>`;
+  // 装備システム: 装備カードはデッキに入れず、モンスターカードへ直接装着する（1体につき1枚まで）
+  let equipControlHtml = '';
+  if (isMonster) {
+    const equippedId = state.cardEquipment[id];
+    const equippedDef = equippedId ? CARD_DEFS[equippedId] : null;
+    equipControlHtml = `
+      <div class="cg-detail-equip-row">
+        <span class="cg-detail-equip-label">${equippedDef ? `⚔️ 装備中: ${equippedDef.name}` : '装備なし'}</span>
+        <button class="cg-btn cg-detail-equip-btn" id="detail-equip-pick-btn">${equippedDef ? '変更' : '装備する'}</button>
+        ${equippedDef ? `<button class="cg-btn cg-detail-equip-btn" id="detail-equip-remove-btn">外す</button>` : ''}
+      </div>`;
+  } else if (isEquip) {
+    const holderId = getEquippedMonsterFor(id);
+    const holderDef = holderId ? CARD_DEFS[holderId] : null;
+    equipControlHtml = `
+      <div class="cg-detail-equip-row">
+        <span class="cg-detail-equip-label">${holderDef ? `⚔️ 装着先: ${holderDef.name}` : '未装着'}</span>
+        <button class="cg-btn cg-btn-main cg-detail-equip-btn" id="detail-equip-assign-btn">${holderDef ? '装着先を変更' : 'モンスターに装着'}</button>
+        ${holderDef ? `<button class="cg-btn cg-detail-equip-btn" id="detail-equip-remove-btn">外す</button>` : ''}
+      </div>`;
+  }
   const bond = getBondLevel(owned.count);
   const bondHtml = `
     <div class="cg-detail-bond-row" style="${bond.level > 0 ? `border-color:${bond.color};` : ''}">
@@ -2272,6 +2412,7 @@ function openCardDetail(id) {
       <div class="cg-detail-level">${isMonster ? `Lv.${owned.level} ` : ''}<span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       ${bondHtml}
       ${deckControlHtml}
+      ${equipControlHtml}
       ${isMonster ? `<div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>` : ''}
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
@@ -2304,6 +2445,16 @@ function openCardDetail(id) {
     if (idx === -1) return;
     state.deck.splice(idx, 1);
     saveState();
+    openCardDetail(id);
+  });
+  const equipPickBtn = document.getElementById('detail-equip-pick-btn');
+  if (equipPickBtn) equipPickBtn.addEventListener('click', () => openEquipPicker(id));
+  const equipAssignBtn = document.getElementById('detail-equip-assign-btn');
+  if (equipAssignBtn) equipAssignBtn.addEventListener('click', () => openMonsterPickerForEquip(id));
+  const equipRemoveBtn = document.getElementById('detail-equip-remove-btn');
+  if (equipRemoveBtn) equipRemoveBtn.addEventListener('click', () => {
+    const monsterId = isMonster ? id : getEquippedMonsterFor(id);
+    if (monsterId) unequipMonster(monsterId);
     openCardDetail(id);
   });
   const upgradeBtn = document.getElementById('detail-upgrade-btn');
@@ -3169,6 +3320,16 @@ function newBattleUnit(id, isPlayerCard) {
   const evolved = !!(owned && owned.evolved);
   let bonusAtk = evolved ? EVOLVE_BONUS_ATK : 0;
   let bonusHp = evolved ? EVOLVE_BONUS_HP : 0;
+  // 装備システム: モンスターカードに装着中の装備があれば、そのステータスボーナスを加算する（プレイヤー側のみ）
+  let equippedId = null;
+  if (isPlayerCard) {
+    equippedId = state.cardEquipment[id] || null;
+    const equippedDef = equippedId ? CARD_DEFS[equippedId] : null;
+    if (equippedDef && equippedDef.effect) {
+      bonusAtk += (equippedDef.effect.atk || 0);
+      bonusHp += (equippedDef.effect.hp || 0);
+    }
+  }
   const leader = isPlayerCard ? getActiveLeader() : null;
   let leaderBuff = false;
   if (leader && def.element === leader.element) {
@@ -3185,7 +3346,7 @@ function newBattleUnit(id, isPlayerCard) {
       bonusHp += allyBoost.value;
     }
   }
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, equippedId, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance, maxLegendCount) {
