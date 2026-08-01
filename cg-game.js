@@ -27,7 +27,7 @@ const RARITY = {
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
   fire_imp:       { name: 'シルフ',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-sylph2.png', emoji: '🐦' },
-  fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
+  fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
   fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 3, burnDmg: 1, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に3ダメージを与え、3ターンの間火傷を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
   fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'normal',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 1,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
@@ -42,13 +42,13 @@ const CARD_DEFS = {
   dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'rare',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: 'card-nature-swiftrabbit.png', emoji: '🐇' },
-  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
+  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
   dark_chaosdemon:    { name: '冥王カオスデーモン', element: 'dark', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkDownAll', value: 2, atkDownValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与え、敵全体の攻撃力を1下げる', image: 'card-dark-chaosdemon.png', emoji: '😈' },
-  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
+  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'defender', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
   dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 2 }, skill: '【固有】場に出た時、自分のコストを2回復する', image: 'card-dark-lunaelf.png', emoji: '🦋' },
   dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 7, atk: 5, hp: 13, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.5 }, skill: '【固有】受けるダメージを常に半減する', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
-  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'deathBuffAllies', value: 2 }, skill: '【固有】撃破された時、味方全体の攻撃力を永続+2する', image: 'card-dark-shadowslime.png', emoji: '🟣' },
+  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'deathBuffAllies', value: 2 }, skill: '【固有】撃破された時、味方全体の攻撃力を永続+2する', image: 'card-dark-shadowslime.png', emoji: '🟣' },
   spell_orbitalgrimoire:   { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 3 }, skill: '【固有】カードを3枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
   // ---- 「光耀の祝福」ガチャ限定カード（全て光属性・レジェンド。実際に引くまで所持しない） ----
   light_shirayuki:      { name: '華光の白姫シラユキ', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 3 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド3を付与する', image: 'card-light-shirayuki.png', emoji: '☂️' },
@@ -115,7 +115,7 @@ const CARD_DEFS = {
   light_ancientunicorn: { name: 'エンシェントユニコーン', element: 'light', rarity: 'rare', cost: 4, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする', image: 'card-light-ancientunicorn.png', emoji: '🦄' },
 
   // ---- プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種） ----
-  fire_cerberus:        { name: 'ヘルハウンド・ケルベロス', element: 'fire',   rarity: 'epic', cost: 4, atk: 5, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージを与える', image: 'card-fire-cerberus.png', emoji: '🐺' },
+  fire_cerberus:        { name: 'ヘルハウンド・ケルベロス', element: 'fire',   rarity: 'epic', cost: 4, atk: 5, hp: 5, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージを与える', image: 'card-fire-cerberus.png', emoji: '🐺' },
   water_icequartz:       { name: 'アイスクォーツ',     element: 'water',  rarity: 'epic', cost: 4, atk: 4, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを1回復する', image: 'card-water-icequartz.png', emoji: '❄️' },
   nature_venusharvest:   { name: 'ヴィーナスハーヴェスト', element: 'nature', rarity: 'epic', cost: 4, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で毒（2ターン）を付与する', image: 'card-nature-venusharvest.png', emoji: '🌺' },
   light_crystalguardian: { name: 'クリスタルガーディアン', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 5, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 3 }, skill: '場に出た時、味方全体にシールド3を付与する', image: 'card-light-crystalguardian.png', emoji: '💎' },
@@ -125,6 +125,12 @@ const CARD_DEFS = {
   nature_foreststag:     { name: 'フォレストスタッグ', element: 'nature', rarity: 'legend', cost: 6, atk: 5, hp: 10, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.3 }, skill: '【固有】受けるダメージを常に30%軽減する', image: 'card-nature-foreststag.png', emoji: '🦌' },
   light_fairylumina:     { name: 'フェアリールミナ',   element: 'light',  rarity: 'legend', cost: 5, atk: 4, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 2 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド2を付与する', image: 'card-light-fairylumina.png', emoji: '🧚' },
   dark_deathwhisperer:   { name: 'デスウィスパラー',   element: 'dark',   rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる', image: 'card-dark-deathwhisperer.png', emoji: '💀' },
+
+  // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
+  water_abyssjelly:      { name: 'アビスジェリー',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-water-abyssjelly.png', emoji: '🎐' },
+  spell_windcutter:      { name: 'ウィンドカッター',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 5 }, skill: '敵全体に5ダメージを与える', image: 'card-spell-windcutter.png', emoji: '🌪️' },
+  spell_tidalwave:       { name: 'タイダルウェイブ',   element: 'water', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 7 }, skill: '敵全体に7ダメージを与える', image: 'card-spell-tidalwave.png', emoji: '🌊' },
+  spell_purification:    { name: 'ピュリフィケーション', element: 'light', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'cleanse' }, skill: '味方全体の状態異常（毒・火傷など）を解除する', image: 'card-spell-purification.png', emoji: '✨' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -140,6 +146,8 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   // プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種）：スタート時の自動編成デッキには含めない
   'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon',
   'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
+  // プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種）：スタート時の自動編成デッキには含めない
+  'water_abyssjelly', 'spell_windcutter', 'spell_tidalwave', 'spell_purification',
 ]);
 
 
@@ -907,6 +915,8 @@ function cardStatsLine(def, evolved, opts) {
     else if (eff.kind === 'draw') label = `🃏${eff.value}`;
     else if (eff.kind === 'wipe') label = `💥全体`;
     else if (eff.kind === 'destroy') label = `💀撃破`;
+    else if (eff.kind === 'aoeDamage') label = `💥${eff.value}`;
+    else if (eff.kind === 'cleanse') label = `✨浄化`;
     return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
   }
   if (type === 'equipment') {
@@ -4381,6 +4391,28 @@ function castSpell(handIdx, targetIdx) {
       impactEffect(targetEl, u.curHp, 0);
       battle.enemyField[i] = null;
     });
+  } else if (eff.kind === 'aoeDamage') {
+    // 敵全体に固定ダメージを与える（対象がいなければ敵本体へ）
+    const leaderSp = getActiveLeader();
+    const dmgFlatSp = leaderSp ? (leaderSp.effect.enemyDmgFlat || 0) : 0;
+    const aoeVal = (eff.value || 0) + dmgFlatSp;
+    dealtDmg = aoeVal;
+    let hitAny = false;
+    battle.enemyField.forEach((u, i) => {
+      if (!u) return;
+      hitAny = true;
+      const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
+      impactEffect(targetEl, aoeVal, 0);
+      u.curHp -= mitigateIncomingDamage(u, aoeVal);
+    });
+    if (!hitAny) {
+      const targetEl = document.getElementById('battle-enemy-portrait');
+      impactEffect(targetEl, aoeVal, 0);
+      battle.enemyHp -= aoeVal;
+    }
+  } else if (eff.kind === 'cleanse') {
+    // 味方全体の状態異常（毒・火傷など）を解除する
+    battle.playerField.forEach(u => { if (u) u.ailment = null; });
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
@@ -4838,6 +4870,11 @@ function attackTarget(attackerIdx, targetIdx) {
       battle.playerField.forEach(p => { if (p) p.shield = (p.shield || 0) + (tag.shieldValue || 0); });
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋味方全体にシールド付与`);
     }
+    if (tag && tag.effect === 'healAllAllies') {
+      // 【アビスジェリー】攻撃時、味方全体のHPを回復
+      battle.playerField.forEach(p => { if (p) { const maxHp = p.def.hp + (p.hpBonus || 0); p.curHp = Math.min(maxHp, p.curHp + tag.value); } });
+      skillFlash(`${attacker.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
+    }
     const killed = target.curHp <= 0;
     killedSomething = killed;
     if (tag && tag.effect === 'stunTarget' && !killed) {
@@ -5038,6 +5075,23 @@ function enemyTurn() {
               }
             });
             battle.playerField = [null, null, null, null, null];
+          } else if (eff.kind === 'aoeDamage') {
+            const aoeVal = eff.value || 0;
+            let hitAny = false;
+            battle.playerField.forEach((u, k) => {
+              if (!u) return;
+              hitAny = true;
+              const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[k];
+              impactEffect(targetEl, aoeVal, 0);
+              u.curHp -= mitigateIncomingDamage(u, aoeVal);
+            });
+            if (!hitAny) {
+              const targetEl = document.getElementById('battle-player-portrait');
+              impactEffect(targetEl, aoeVal, 0);
+              battle.playerHp -= aoeVal;
+            }
+          } else if (eff.kind === 'cleanse') {
+            battle.enemyField.forEach(u => { if (u) u.ailment = null; });
           }
           skillFlash(`${def.name}！\n${def.skill}`);
           progressed = true;
@@ -5119,6 +5173,10 @@ function enemyTurn() {
           battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, tag.value); });
           battle.enemyField.forEach(e => { if (e) e.shield = (e.shield || 0) + (tag.shieldValue || 0); });
           skillFlash(`${u.def.name}のスキル！\n敵全体にダメージ＋敵にシールド付与`);
+        }
+        if (tag && tag.effect === 'healAllAllies') {
+          battle.enemyField.forEach(e => { if (e) { const maxHp = e.def.hp + (e.hpBonus || 0); e.curHp = Math.min(maxHp, e.curHp + tag.value); } });
+          skillFlash(`${u.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
         }
         killed = target.curHp <= 0;
         if (tag && tag.effect === 'stunTarget' && !killed) target.stunned = true;
@@ -5542,6 +5600,13 @@ function applyRemoteAction(action) {
         if (targetIdx !== null) battle.playerField[targetIdx] = null;
       } else if (eff.kind === 'destroyRandom') {
         (p.destroyRandomTargets || []).forEach(i => { battle.playerField[i] = null; });
+      } else if (eff.kind === 'aoeDamage') {
+        const aoeVal = p.dmg || eff.value || 0;
+        let hitAny = false;
+        battle.playerField.forEach(u => { if (u) { hitAny = true; u.curHp -= mitigateIncomingDamage(u, aoeVal); } });
+        if (!hitAny) battle.playerHp -= aoeVal;
+      } else if (eff.kind === 'cleanse') {
+        battle.enemyField.forEach(u => { if (u) u.ailment = null; });
       }
       battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
       break;
@@ -5729,13 +5794,13 @@ const SHOP_PACKS = [
       // 除外: fire_phoenix, water_serpent, nature_dryad, dark_chaosdemon, light_angel（エピック）
       //      fire_bahamut, water_seiren, nature_emeraldgaia, dark_reaper, light_arcknight（レジェンド）
       //      nature_wolf, water_icewolf, nature_swiftrabbit, fire_flarelion, nature_venomscorpion, light_lightguardian（レア）
-      rare: ['fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'],
-      epic: ['fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'],
-      legend: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer'],
+      rare: ['fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn', 'water_abyssjelly'],
+      epic: ['fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon', 'spell_windcutter', 'spell_purification'],
+      legend: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer', 'spell_tidalwave'],
     },
-    preview: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
-              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon',
-              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'] },
+    preview: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer', 'spell_tidalwave',
+              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon', 'spell_windcutter', 'spell_purification',
+              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn', 'water_abyssjelly'] },
 ];
 
 // ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）

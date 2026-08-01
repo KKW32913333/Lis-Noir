@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v212';
+const CACHE_NAME = 'lisnoir-cache-v213';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -114,6 +114,11 @@ const CACHE_ASSETS = [
   'card-nature-foreststag.png',
   'card-light-fairylumina.png',
   'card-dark-deathwhisperer.png',
+  // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
+  'card-water-abyssjelly.png',
+  'card-spell-windcutter.png',
+  'card-spell-tidalwave.png',
+  'card-spell-purification.png',
   'battle-bg-forest.jpg',
   'battle-bg-snow.jpg',
   'battle-bg-cave.jpg',
