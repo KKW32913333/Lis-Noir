@@ -383,6 +383,20 @@
   .cg-detail-bond-label{font-size:11px; font-weight:700; color:var(--text-dim);}
   .cg-detail-bond-progress{font-size:10px; color:var(--text-dim); opacity:.85;}
   .cg-detail-deck-btn:disabled{opacity:.35; cursor:default;}
+  .cg-detail-equip-row{display:flex; align-items:center; gap:6px; margin-bottom:12px; padding:8px 10px; border-radius:12px;
+    background:var(--bg-panel2); border:1px solid var(--hairline-panel); flex-wrap:wrap;}
+  .cg-detail-equip-label{flex:1; font-size:11px; font-weight:700; color:var(--text-dim); min-width:120px;}
+  .cg-detail-equip-btn{flex-shrink:0; font-size:11px; padding:6px 10px;}
+  .cg-equip-picker-panel{max-height:80vh; display:flex; flex-direction:column;}
+  .cg-equip-picker-list{overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; margin:10px 0; -webkit-overflow-scrolling:touch;}
+  .cg-equip-picker-item{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer;
+    min-height:52px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
+  .cg-equip-picker-item:active{background:var(--gold-soft);}
+  .cg-equip-picker-item .cg-card{width:44px; flex-shrink:0;}
+  .cg-equip-picker-item-text{display:flex; flex-direction:column; gap:3px; text-align:left; overflow:hidden;}
+  .cg-equip-picker-item-name{font-size:13px; font-weight:700;}
+  .cg-equip-picker-item-sub{font-size:10px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; line-height:1.3;}
   .cg-detail-bar{height:6px; background:var(--hairline); border-radius:4px; overflow:hidden; margin-bottom:10px;}
   .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-detail-desc{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
@@ -1478,15 +1492,6 @@
     </div>
   </div>
 
-  <!-- 装備選択（モンスターに装備する装備カード／装備カードを装着するモンスターを選ぶ） -->
-  <div id="equip-picker-overlay" class="cg-help-overlay hidden">
-    <div class="cg-help-panel cg-ornate cg-double-frame">
-      <div id="equip-picker-title" class="cg-help-title"></div>
-      <div id="equip-picker-list" class="cg-help-body"></div>
-      <button class="cg-btn cg-btn-main" id="equip-picker-close">閉じる</button>
-    </div>
-  </div>
-
   <!-- デッキ共有（コードでフレンドとデッキを見せ合う） -->
   <div id="deck-share-overlay" class="cg-help-overlay hidden">
     <div class="cg-help-panel cg-ornate cg-double-frame">
@@ -1691,7 +1696,6 @@
         <button class="cg-filter-tab active" data-filter="all">全て</button>
         <button class="cg-filter-tab" data-filter="monster">モンスター</button>
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
-        <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
       <div class="cg-sort-row">
@@ -2014,6 +2018,15 @@
       <div class="cg-cloud-restore-desc" id="generic-confirm-desc"></div>
       <button class="cg-btn cg-btn-main" id="generic-confirm-yes">はい</button>
       <button class="cg-btn" id="generic-confirm-no">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 装備カードをモンスターに装着する際の選択オーバーレイ -->
+  <div id="equip-picker-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame cg-equip-picker-panel">
+      <div class="cg-help-title" id="equip-picker-title">装備を選択</div>
+      <div class="cg-equip-picker-list" id="equip-picker-list"></div>
+      <button class="cg-btn" id="equip-picker-cancel">キャンセル</button>
     </div>
   </div>
 

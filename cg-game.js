@@ -1689,7 +1689,7 @@ function showEquipPickerOverlay(title, items) {
   listEl.innerHTML = items.length
     ? items.map((it, i) => `
       <div class="cg-equip-picker-item" data-idx="${i}">
-        ${renderCardFace(it.id, { small: true })}
+        ${renderCardFace(it.id, { small: true, battleMode: true })}
         <div class="cg-equip-picker-item-text">
           <span class="cg-equip-picker-item-name">${it.label}</span>
           ${it.sublabel ? `<span class="cg-equip-picker-item-sub">${it.sublabel}</span>` : ''}
@@ -7047,6 +7047,9 @@ function init() {
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
+  });
+  document.getElementById('equip-picker-cancel').addEventListener('click', () => {
+    document.getElementById('equip-picker-overlay').classList.add('hidden');
   });
   document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
   document.getElementById('gacha-odds-close').addEventListener('click', () => {
