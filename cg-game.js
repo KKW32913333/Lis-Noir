@@ -4083,6 +4083,20 @@ function bindBattleEvents() {
         }
         return;
       }
+      if (type === 'monster') {
+        // 誤操作防止のため即召喚はせず、1回目のタップで選択（確認）、
+        // 同じカードをもう一度タップすると、空いている枠に左から順番に自動召喚する
+        if (battle.selectedHandIdx === idx) {
+          const emptyIdx = battle.playerField.findIndex(u => u === null);
+          if (emptyIdx !== -1) {
+            playCardFromHand(idx, emptyIdx);
+          }
+          return;
+        }
+        battle.selectedHandIdx = idx;
+        renderBattle();
+        return;
+      }
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
       renderBattle();
     };
