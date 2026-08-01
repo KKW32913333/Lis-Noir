@@ -3727,9 +3727,10 @@ function renderBattle() {
   if (battle.fieldCard) {
     const fdef = CARD_DEFS[battle.fieldCard];
     const fel = ELEMENTS[fdef.element];
-    document.getElementById('battle-field-indicator-name').textContent = `${fdef.emoji} ${fdef.name}`;
+    document.getElementById('battle-field-indicator-name').textContent = fdef.name;
     fieldIndicatorEl.style.display = '';
     fieldIndicatorEl.style.borderColor = fel.color;
+    fieldIndicatorEl.onclick = () => showHandCardInfo(battle.fieldCard);
   } else {
     fieldIndicatorEl.style.display = 'none';
   }
