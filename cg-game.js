@@ -899,6 +899,14 @@ async function restoreBackupCode() {
 }
 
 // ---------- カード表示ヘルパー ----------
+// モンスターカードに装着中の装備によるステータスボーナスを返す（未装着なら0/0）
+function getEquipBonusFor(id) {
+  const equipId = state.cardEquipment && state.cardEquipment[id];
+  const equipDef = equipId ? CARD_DEFS[equipId] : null;
+  if (!equipDef || !equipDef.effect) return { atk: 0, hp: 0 };
+  return { atk: equipDef.effect.atk || 0, hp: equipDef.effect.hp || 0 };
+}
+
 function cardArtStyle(def) {
   const el = ELEMENTS[def.element];
   return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
@@ -931,8 +939,10 @@ function cardStatsLine(def, evolved, opts) {
     return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}</span></div>`;
   }
   if (opts.hideStats) return ''; // バトル画面では別途バッジで表示するため、重複を避けて非表示にする
-  const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
-  const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
+  const equipAtk = opts.equipAtk || 0;
+  const equipHp = opts.equipHp || 0;
+  const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0) + equipAtk;
+  const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0) + equipHp;
   return `<div class="cg-card-stats"><span class="cg-stat atk">ATK ${atk}</span><span class="cg-stat hp">HP ${hp}</span></div>`;
 }
 
@@ -996,12 +1006,14 @@ function renderCardFace(id, opts) {
   const costBadgeContent = (opts.onField && isMonster)
     ? `<span class="cg-card-role-oncost ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : def.cost;
+  // 装備システム: バトル場外（コレクション・デッキ編成画面など）でも、装着中の装備によるステータス上昇を常に表示する
+  const equipBonus = (isMonster && !opts.locked && !opts.battleMode) ? getEquipBonusFor(id) : { atk: 0, hp: 0 };
   return `
     <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}${bondClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${costBadgeContent}</div>
       <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}${bondBadge}</div>
       ${nameLine}
-      ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
+      ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode, equipAtk: equipBonus.atk, equipHp: equipBonus.hp })}
       ${elLine}
     </div>`;
 }
@@ -2366,15 +2378,17 @@ function showLockedCardInfo(id) {
   document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
-function detailStatsBlock(def, evolved) {
+function detailStatsBlock(def, evolved, id) {
   const type = def.type || 'monster';
   if (type === 'monster') {
-    const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
-    const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
+    const equipBonus = id ? getEquipBonusFor(id) : { atk: 0, hp: 0 };
+    const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0) + equipBonus.atk;
+    const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0) + equipBonus.hp;
+    const equipMark = (equipBonus.atk || equipBonus.hp) ? ' ⚔️' : '';
     return `
       <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
-      <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}</b></div>
-      <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}</b></div>`;
+      <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}${equipMark}</b></div>
+      <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}${equipMark}</b></div>`;
   }
   const typeLabel = type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
   return `
@@ -2438,7 +2452,7 @@ function openCardDetail(id) {
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        ${detailStatsBlock(def, owned.evolved)}
+        ${detailStatsBlock(def, owned.evolved, id)}
       </div>
       ${isMonster ? (owned.level >= CARD_MAX_LEVEL
         ? `<div class="cg-evolve-done">Lv.${CARD_MAX_LEVEL}（最大レベル）</div>`
@@ -4312,7 +4326,7 @@ function showHandCardInfo(id, handIdx) {
       ${roleText ? `<div class="cg-detail-desc">${roleText}</div>` : ''}
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        ${detailStatsBlock(def, evolved)}
+        ${detailStatsBlock(def, evolved, id)}
       </div>
       ${discardBtn}
     </div>`;
