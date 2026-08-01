@@ -317,16 +317,7 @@
   /* ---------- Deck screen ---------- */
   .cg-section-title{font-size:13px; color:var(--gold); padding:12px 14px 6px; letter-spacing:1px;}
   .cg-deck-header{display:flex; justify-content:space-between; align-items:center; padding:0 14px;}
-  .cg-deck-sticky-summary{position:sticky; top:0; z-index:20; background:var(--bg); padding:8px 14px 10px;
-    border-bottom:1px solid var(--hairline-panel); box-shadow:0 4px 10px #00000033;}
-  .cg-deck-sticky-header{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:4px; margin-bottom:6px;}
-  .cg-deck-sticky-title{font-size:12px; font-weight:800; color:var(--gold);}
-  .cg-deck-sticky-count{font-size:11px; color:var(--text-dim);}
-  .cg-deck-sticky-cards{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; -webkit-overflow-scrolling:touch;}
-  .cg-deck-sticky-cards .cg-deck-slot-item{width:38px; flex-shrink:0;}
-  .cg-deck-sticky-cards .cg-deck-slot-count{width:16px; height:16px; min-width:16px; font-size:9px;}
-  .cg-deck-sticky-cards .cg-deck-remove-icon{width:15px; height:15px; font-size:8px;}
-  .cg-deck-sticky-empty{font-size:11px; color:var(--text-dim-panel); padding:4px 0;}
+  .cg-deck-content-count{font-size:11px; color:var(--text-dim);}
   .cg-leader-select-row{display:flex; gap:10px; padding:8px 14px 14px; overflow-x:auto;}
   .cg-leader-card{position:relative; flex-shrink:0; width:96px; border-radius:12px; overflow:hidden; cursor:pointer;
     border:2px solid var(--hairline-panel); background:var(--bg-panel); box-shadow:0 3px 8px #00000033; transition:transform .1s;
@@ -1654,14 +1645,6 @@
     </div>
 
     <div id="collection-deck-view">
-      <div id="deck-sticky-summary" class="cg-deck-sticky-summary">
-        <div class="cg-deck-sticky-header">
-          <span class="cg-deck-sticky-title">編成中のデッキ</span>
-          <span class="cg-deck-sticky-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
-        </div>
-        <div id="deck-sticky-cards" class="cg-deck-sticky-cards"></div>
-      </div>
-
       <details class="cg-deck-collapsible">
         <summary class="cg-deck-collapsible-summary">
           <span class="cg-section-title" style="padding:0;">リーダー・デッキ管理</span>
@@ -1685,6 +1668,7 @@
 
       <div class="cg-deck-header">
         <span class="cg-section-title" style="padding:0;">デッキの中身</span>
+        <span class="cg-deck-content-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
       </div>
       <div class="cg-deck-hint">カードをタップすると1枚外れます</div>
       <div id="deck-slots"></div>

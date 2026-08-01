@@ -1679,7 +1679,6 @@ function executeLeaderUltimate() {
 function renderDeck() {
   renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
-  const stickyEl = document.getElementById('deck-sticky-cards');
   // 同じカードは1枠にまとめ、枚数を「×N」バッジで表示する
   const groups = [];
   const idToGroup = {};
@@ -1697,7 +1696,6 @@ function renderDeck() {
        <span class="cg-deck-remove-icon">✕</span>
      </div>`;
   deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
-  stickyEl.innerHTML = groups.map(slotHtml).join('') || '<div class="cg-deck-sticky-empty">まだカードが入っていません。下から追加しましょう</div>';
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
@@ -1717,7 +1715,6 @@ function renderDeck() {
     });
   };
   bindDeckSlotHandlers(deckEl);
-  bindDeckSlotHandlers(stickyEl);
 
   const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
   const avgCost = validDeckIds.length
@@ -6506,7 +6503,7 @@ const SCREEN_HELP = {
     title: 'カード画面のヘルプ',
     items: [
       '<b>① デッキ編成</b><br>カード一覧のカードをタップするとデッキに追加、デッキ側のカードをタップすると1枚外れます（タップする場所によって、追加か削除かが決まるシンプルな操作です）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
-      '<b>② 編成中のデッキが常に見える</b><br>画面上部に、現在編成中のデッキが小さく固定表示されます。カード一覧をスクロールしていても、常にデッキの中身を確認しながらカードを選べます。',
+      '<b>② デッキの中身・枚数</b><br>「デッキの中身」に、現在編成中のカードと枚数・平均コストが表示されます。カードをタップすると1枚外れます。',
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>④ リーダー・デッキ管理</b><br>「リーダー・デッキ管理」をタップすると開き、使用するリーダーの選択や、デッキの保存・読み込み・編集ができます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
