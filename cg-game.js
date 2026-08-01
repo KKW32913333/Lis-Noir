@@ -4287,6 +4287,43 @@ function chooseAiAttackTargetIdx(validIndices, opponentField, dmg) {
   return bestIdx;
 }
 
+// AIの単体対象スペル選択：撃破できる相手がいれば、その中で最も脅威度の高い相手を優先する
+// （dmgがnullの場合＝HPに関わらず必ず撃破できる効果のため、脅威度だけで選ぶ）。従来は場の先頭のユニットを機械的に選んでいた
+function chooseAiSpellTargetIdx(field, dmg) {
+  let bestIdx = -1;
+  let bestScore = -Infinity;
+  field.forEach((t, idx) => {
+    if (!t) return;
+    const threat = t.def.atk + (t.atkBonus || 0);
+    let score = threat;
+    if (dmg != null) {
+      const effectiveHp = t.curHp - (t.shield || 0); // シールド分は簡易的に考慮する
+      const canKill = effectiveHp <= dmg;
+      score += canKill ? 1000 : 0;
+    }
+    if (score > bestScore) { bestScore = score; bestIdx = idx; }
+  });
+  return bestIdx;
+}
+
+// カードのレア度を数値化（AIがモンスターを出す優先順位を決める際に使用）
+const AI_RARITY_RANK = { normal: 0, rare: 1, epic: 2, legend: 3 };
+
+// AIのモンスター配置選択：出せる中で最もレア度・ステータス（攻撃力+HP）の高いカードを優先する
+// （従来は手札の並び順＝ドロー順で機械的に選んでいた）
+function chooseAiBestMonsterHandIdx(hand, availableCost) {
+  let bestIdx = -1;
+  let bestScore = -Infinity;
+  hand.forEach((id, i) => {
+    const def = CARD_DEFS[id];
+    if (!def || (def.type || 'monster') !== 'monster') return;
+    if (def.cost > availableCost) return;
+    const score = (AI_RARITY_RANK[def.rarity] || 0) * 100 + (def.atk || 0) + (def.hp || 0);
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
+  });
+  return bestIdx;
+}
+
 
 // ---------- モンスター固有スキルの発動処理 ----------
 // プレイヤーのリーダーが「敵の回復無効化」を持っているかどうか
@@ -4708,27 +4745,35 @@ function enemyTurn() {
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
 
   // AI: モンスター配置 → 装備 → フィールド → スペルの優先順で、出せるカードを出し続ける
+  // モンスターは手札の並び順（ドロー順）ではなく、出せる中で最もレア度・ステータスの高いカードを優先して出す
   let progressed = true;
   let guard = 0;
   while (progressed && guard < 30) {
     progressed = false;
     guard++;
+
+    // ① モンスター：空きスロットがあれば、出せる中で最も価値の高いカードを優先して出す
+    if (battle.enemyField.some(s => s === null)) {
+      const bestIdx = chooseAiBestMonsterHandIdx(battle.enemyHand, battle.enemyCost);
+      if (bestIdx !== -1) {
+        const id = battle.enemyHand[bestIdx];
+        const def = CARD_DEFS[id];
+        const emptyIdx = battle.enemyField.findIndex(s => s === null);
+        battle.enemyCost -= def.cost;
+        battle.enemyField[emptyIdx] = newBattleUnit(id);
+        applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
+        battle.enemyHand.splice(bestIdx, 1);
+        progressed = true;
+        continue;
+      }
+    }
+
     for (let i = 0; i < battle.enemyHand.length; i++) {
       const id = battle.enemyHand[i];
       const def = CARD_DEFS[id];
       const type = def.type || 'monster';
+      if (type === 'monster') continue; // モンスターは上の①で処理済み
       if (def.cost > battle.enemyCost) continue;
-
-      if (type === 'monster') {
-        const emptyIdx = battle.enemyField.findIndex(s => s === null);
-        if (emptyIdx === -1) continue;
-        battle.enemyCost -= def.cost;
-        battle.enemyField[emptyIdx] = newBattleUnit(id);
-        applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
-        battle.enemyHand.splice(i, 1);
-        progressed = true;
-        break;
-      }
 
       if (type === 'equipment' && def.target === 'friendly') {
         const targetIdx = chooseAiBestUnitIdx(battle.enemyField);
@@ -4765,7 +4810,8 @@ function enemyTurn() {
           battle.enemyCost -= def.cost;
           battle.enemyHand.splice(i, 1);
           if (eff.kind === 'damage') {
-            const targetIdx = battle.playerField.findIndex(u => u !== null);
+            // 撃破できる相手がいればその中で、いなければ単純に最も脅威度の高い相手を狙う（従来は場の先頭を機械的に選択）
+            const targetIdx = chooseAiSpellTargetIdx(battle.playerField, eff.value);
             const targetEl = targetIdx !== -1
               ? document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx]
               : document.getElementById('battle-player-portrait');
@@ -4777,7 +4823,8 @@ function enemyTurn() {
               battle.playerHp -= eff.value;
             }
           } else if (eff.kind === 'destroy') {
-            const targetIdx = battle.playerField.findIndex(u => u !== null);
+            // 必ず撃破できる効果のため、最も脅威度の高い相手を狙う（従来は場の先頭を機械的に選択）
+            const targetIdx = chooseAiSpellTargetIdx(battle.playerField, null);
             if (targetIdx !== -1) {
               const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
               impactEffect(targetEl, battle.playerField[targetIdx].curHp, 0);
