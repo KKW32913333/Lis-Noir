@@ -105,6 +105,17 @@ const CARD_DEFS = {
   field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
     effect: { enemyDebuff: { element: 'dark', stat: 'atk', value: -1 }, enemyDamageBoost: 0.10 },
     skill: '場に出ている間、敵全体が受けるダメージが10%増加する。さらに、闇属性の敵の攻撃力を-1する', image: 'card-field-abyss.png', emoji: '🕳️' },
+
+  // ---- プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種） ----
+  fire_infernoimp:    { name: 'インフェルノインプ', element: 'fire',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'defender', skill: '', image: 'card-fire-infernoimp.png', emoji: '😈' },
+  water_frostwolf:     { name: 'フロストウルフ',   element: 'water',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-water-frostwolf.png', emoji: '🐺' },
+  nature_leafslime:    { name: 'リーフスライム',   element: 'nature', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復する', image: 'card-nature-leafslime.png', emoji: '🍃' },
+  light_sainttiger:    { name: 'セイントタイガー', element: 'light',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-light-sainttiger.png', emoji: '🐯' },
+  dark_scarecrow:      { name: 'スケアクロウ',     element: 'dark',   rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'defender', skill: '', image: 'card-dark-scarecrow.png', emoji: '🎃' },
+  fire_flameboar:      { name: 'フレイムボア',     element: 'fire',   rarity: 'rare', cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 2 }, skill: '攻撃時、追加で2ダメージ', image: 'card-fire-flameboar.png', emoji: '🐗' },
+  dark_wraithbanshee:  { name: 'レイスバンシー',   element: 'dark',   rarity: 'rare', cost: 3, atk: 3, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.7, turns: 2 }, skill: '攻撃時、70%の確率で毒（2ターン）を付与する', image: 'card-dark-wraithbanshee.png', emoji: '👻' },
+  nature_stonesanctuary: { name: 'ストーンサンクチュアリ', element: 'nature', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 2 }, skill: '場に出た時、味方全体にシールド2を付与する', image: 'card-nature-stonesanctuary.png', emoji: '🐢' },
+  light_ancientunicorn: { name: 'エンシェントユニコーン', element: 'light', rarity: 'rare', cost: 4, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする', image: 'card-light-ancientunicorn.png', emoji: '🦄' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -114,6 +125,9 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss',
   'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse',
   'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance',
+  // プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種）：スタート時の自動編成デッキには含めない
+  'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow',
+  'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
 ]);
 
 
@@ -5520,7 +5534,8 @@ const SHOP_PACKS = [
     weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     legendPityLimit: 50,
     rarityPool: {
-      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing'],
+      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing',
+        'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow'],
       rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
       epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse'],
       legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance'],
@@ -5540,7 +5555,8 @@ const SHOP_PACKS = [
       legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight'],
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
-              'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
+              'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel',
+              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'] },
 ];
 
 // ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）
