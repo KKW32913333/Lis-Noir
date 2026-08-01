@@ -150,6 +150,20 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   'water_abyssjelly', 'spell_windcutter', 'spell_tidalwave', 'spell_purification',
 ]);
 
+// 初期デッキ（スターターデッキ）専用の候補カードリスト。BEGINNER_GACHA_CARD_IDSとは意図的に切り離している。
+// （新カードを追加するたびにBEGINNER_GACHA_CARD_IDSへ登録していくと、初期デッキの候補が先細りし、
+// 　最終的に候補が1種類だけになって初期デッキがまともに組めなくなる不具合が過去にあったため、
+// 　初期デッキ用の候補は将来のカード追加の影響を受けないよう、ここで固定リストとして管理する）
+const STARTER_DECK_CANDIDATE_IDS = [
+  'fire_flameslime', 'fire_flarelion',
+  'water_slime', 'water_icewolf',
+  'fire_imp', 'nature_swiftrabbit',
+  'light_holyangel', 'light_lightguardian',
+  'dark_shadowbat', 'nature_wolf',
+];
+
+
+
 
 
 // ---------- ダンジョン（地下1階〜100階） ----------
@@ -362,15 +376,10 @@ function defaultState() {
 // （CARD_DEFSの定義順に依存する「最初の12枚」方式だと、コストの重いレジェンドカードが混ざって
 // 　序盤で身動きが取れなくなる不具合があったため、コストで並べ替えて選ぶ方式に変更）
 function buildStarterDeck() {
-  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
-  // 初心者ガチャの対象カードは、初期デッキには含めない（ガチャで手に入れる楽しみを残すため）
-  const candidates = Object.keys(CARD_DEFS).filter(id => {
-    const def = CARD_DEFS[id];
-    if (eventExclusiveIds.has(id)) return false;
-    if (BEGINNER_GACHA_CARD_IDS.has(id)) return false;
-    if ((def.type || 'monster') !== 'monster') return false;
-    return def.rarity === 'normal' || def.rarity === 'rare';
-  }).sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
+  // 初期デッキ専用の固定候補リストを使用する（BEGINNER_GACHA_CARD_IDSには依存しない。理由はSTARTER_DECK_CANDIDATE_IDSの定義部を参照）
+  const candidates = STARTER_DECK_CANDIDATE_IDS
+    .filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster')
+    .sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
 
   const deck = [];
   let progressed = true;
@@ -6558,7 +6567,7 @@ const INTERACTIVE_TUTORIAL_STEPS = [
       const card = el.closest('#collection-list .cg-coll-item');
       if (!card) return false;
       const id = card.dataset.id;
-      return !!(id && !state.deck.includes(id) && state.cards[id]);
+      return !!(id && state.cards[id] && countInDeck(id) < maxCopiesFor(id));
     },
     text: '下のカード一覧からカードをタップすると、デッキに追加できます。試しに1枚タップしてみましょう。', hint: '👆 好きなカードをタップ' },
   { selector: '#nav-battle',
@@ -6591,13 +6600,14 @@ function findTutorialMonsterHandCard() {
   return document.querySelector(`#battle-hand .cg-hand-card[data-idx="${idx}"]`);
 }
 
-// デッキ編成画面のカード一覧から、まだデッキに入っていないカードを対象にする
-// （既にデッキに入っているカードをタップすると外れてしまい、意図と逆の動作になるため）
+// デッキ編成画面のカード一覧から、まだ上限枚数に達していないカードを対象にする
+// （新規プレイヤーは所持カード＝初期デッキの内容そのものであることが多く、「まだデッキに1枚も入っていないカード」
+// 　に限定すると対象が見つからないことがあるため、「あと1枚以上追加できるカード」を対象にする）
 function findTutorialAddableCard() {
   const nodes = document.querySelectorAll('#collection-list .cg-coll-item');
   for (const node of nodes) {
     const id = node.dataset.id;
-    if (id && !state.deck.includes(id) && state.cards[id]) return node;
+    if (id && state.cards[id] && countInDeck(id) < maxCopiesFor(id)) return node;
   }
   return null;
 }
