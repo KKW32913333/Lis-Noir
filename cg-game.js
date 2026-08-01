@@ -1578,7 +1578,6 @@ function sortCardIds(ids, mode) {
   }
   return arr;
 }
-let deckReorderSelectedId = null;
 
 function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
@@ -1677,74 +1676,10 @@ function executeLeaderUltimate() {
   renderBattle();
 }
 
-// ---------- デッキ内カードの並び替え(長押し→ドラッグ) ----------
-let deckDragState = null; // { fromIndex, pointerId, holdTimer, moved }
-
-function bindDeckDragReorder(deckEl) {
-  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
-    item.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.cg-deck-remove-btn')) return; // 削除ボタンは対象外
-      const idx = Number(item.dataset.index);
-      const startX = e.clientX, startY = e.clientY;
-      const holdTimer = setTimeout(() => {
-        deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer: null, moved: false, startX, startY };
-        item.classList.add('dragging');
-        try { item.setPointerCapture(e.pointerId); } catch (err) {}
-        sfxTap();
-      }, 260);
-      deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer, moved: false, startX, startY };
-    });
-
-    item.addEventListener('pointermove', (e) => {
-      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
-      if (deckDragState.holdTimer) {
-        // 長押し確定前：指が一定以上動いたらスクロール操作とみなし、ドラッグ待機をキャンセルする
-        // （タップ位置から10px以上動いた時点でスクロール意図と判断）
-        const dx = e.clientX - deckDragState.startX;
-        const dy = e.clientY - deckDragState.startY;
-        if (Math.hypot(dx, dy) > 10) {
-          clearTimeout(deckDragState.holdTimer);
-          deckDragState = null;
-        }
-        return;
-      }
-      deckDragState.moved = true;
-      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => s.classList.remove('drop-target'));
-      const target = document.elementFromPoint(e.clientX, e.clientY);
-      const slot = target && target.closest('.cg-deck-slot-item');
-      if (slot && Number(slot.dataset.index) !== deckDragState.fromIndex) slot.classList.add('drop-target');
-    });
-
-    const finishDrag = (e) => {
-      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
-      if (deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
-      if (deckDragState.moved) {
-        const target = document.elementFromPoint(e.clientX, e.clientY);
-        const slot = target && target.closest('.cg-deck-slot-item');
-        if (slot) {
-          const toIndex = Number(slot.dataset.index);
-          if (toIndex !== deckDragState.fromIndex) {
-            const [moved] = state.deck.splice(deckDragState.fromIndex, 1);
-            state.deck.splice(toIndex, 0, moved);
-            saveState();
-          }
-        }
-      }
-      deckDragState = null;
-      renderDeck();
-    };
-    item.addEventListener('pointerup', finishDrag);
-    item.addEventListener('pointercancel', () => {
-      if (deckDragState && deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
-      deckDragState = null;
-      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => { s.classList.remove('dragging'); s.classList.remove('drop-target'); });
-    });
-  });
-}
-
 function renderDeck() {
   renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
+  const stickyEl = document.getElementById('deck-sticky-cards');
   // 同じカードは1枠にまとめ、枚数を「×N」バッジで表示する
   const groups = [];
   const idToGroup = {};
@@ -1756,50 +1691,33 @@ function renderDeck() {
       groups[idToGroup[id]].count++;
     }
   });
-  deckEl.innerHTML = groups.map(g =>
-    `<div class="cg-deck-slot-item ${deckReorderSelectedId === g.id ? 'reorder-selected' : ''}" data-id="${g.id}">
+  const slotHtml = (g) => `<div class="cg-deck-slot-item" data-id="${g.id}">
        ${renderCardFace(g.id, { small: true, evolved: state.cards[g.id] && state.cards[g.id].evolved })}
        ${g.count > 1 ? `<span class="cg-deck-slot-count">×${g.count}</span>` : ''}
-       <button class="cg-deck-remove-btn" data-id="${g.id}" aria-label="デッキから1枚外す">✕</button>
-     </div>`
-  ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
+       <span class="cg-deck-remove-icon">✕</span>
+     </div>`;
+  deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
+  stickyEl.innerHTML = groups.map(slotHtml).join('') || '<div class="cg-deck-sticky-empty">まだカードが入っていません。下から追加しましょう</div>';
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
-  deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.id;
-      const idx = state.deck.indexOf(id); // 同じカードの1枚だけを外す
-      if (idx !== -1) state.deck.splice(idx, 1);
-      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
-      saveState();
-      renderDeck();
-    });
-  });
-
-  // 並べ替え：1枚目をタップして選択→入れ替えたいカードをタップで位置を交換する
-  // （ドラッグ＆ドロップより誤操作が少なく、片手でも操作しやすいため）
-  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      if (e.target.closest('.cg-deck-remove-btn')) return;
-      if (longPressFired) { longPressFired = false; return; }
-      const id = item.dataset.id;
-      if (deckReorderSelectedId === null) {
-        deckReorderSelectedId = id;
-        renderDeck();
-      } else if (deckReorderSelectedId === id) {
-        deckReorderSelectedId = null;
-        renderDeck();
-      } else {
-        swapDeckGroups(deckReorderSelectedId, id);
-        deckReorderSelectedId = null;
+  // タップで1枚外す（デッキ内の並び順はバトル開始時に必ずシャッフルされ、ゲームプレイに影響しないため、
+  // 以前あった「タップで選択→タップで並び替え」という操作は廃止し、「タップ＝外す」に統一している）
+  const bindDeckSlotHandlers = (container) => {
+    container.querySelectorAll('.cg-deck-slot-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (longPressFired) { longPressFired = false; return; }
+        const id = item.dataset.id;
+        const idx = state.deck.indexOf(id);
+        if (idx !== -1) state.deck.splice(idx, 1);
         saveState();
         renderDeck();
-      }
+      });
+      bindLongPress(item, () => showHandCardInfo(item.dataset.id));
     });
-    bindLongPress(item, () => showHandCardInfo(item.dataset.id));
-  });
+  };
+  bindDeckSlotHandlers(deckEl);
+  bindDeckSlotHandlers(stickyEl);
 
   const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
   const avgCost = validDeckIds.length
@@ -1831,7 +1749,6 @@ function renderDeck() {
       const id = btn.dataset.id;
       const idx = state.deck.indexOf(id);
       if (idx !== -1) state.deck.splice(idx, 1);
-      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
       saveState();
       renderDeck();
     });
@@ -1852,21 +1769,6 @@ function renderDeck() {
     });
     bindLongPress(node, () => showHandCardInfo(node.dataset.id));
   });
-}
-
-// 並べ替え用: 2つのカードグループ（同カードのまとまり）の位置を入れ替える。
-// 枚数が違っても正しく動作するよう、一旦「ユニークな並び順」を作ってから、その順序でデッキ配列を再構築する
-function swapDeckGroups(idA, idB) {
-  const uniqueIds = [];
-  const seen = new Set();
-  state.deck.forEach(id => { if (!seen.has(id)) { seen.add(id); uniqueIds.push(id); } });
-  const idxA = uniqueIds.indexOf(idA);
-  const idxB = uniqueIds.indexOf(idB);
-  if (idxA === -1 || idxB === -1 || idxA === idxB) return;
-  [uniqueIds[idxA], uniqueIds[idxB]] = [uniqueIds[idxB], uniqueIds[idxA]];
-  const counts = {};
-  state.deck.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-  state.deck = uniqueIds.flatMap(id => Array(counts[id]).fill(id));
 }
 
 // ---------- デッキシナジー表示 ----------
@@ -6555,12 +6457,12 @@ const SCREEN_HELP = {
   collection: {
     title: 'カード画面のヘルプ',
     items: [
-      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加できます。デッキに入っているカードには、左上に赤い「−」ボタンが表示され、タップすると1枚外せます（デッキ側に移動しなくてもその場で調整できます）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
-      '<b>② カードの並べ替え</b><br>デッキ内のカードをタップして選択（金色に光ります）→入れ替えたい場所のカードをタップすると、位置が入れ替わります。',
+      '<b>① デッキ編成</b><br>カード一覧のカードをタップするとデッキに追加、デッキ側のカードをタップすると1枚外れます（タップする場所によって、追加か削除かが決まるシンプルな操作です）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
+      '<b>② 編成中のデッキが常に見える</b><br>画面上部に、現在編成中のデッキが小さく固定表示されます。カード一覧をスクロールしていても、常にデッキの中身を確認しながらカードを選べます。',
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
-      '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
+      '<b>④ リーダー・デッキ管理</b><br>「リーダー・デッキ管理」をタップすると開き、使用するリーダーの選択や、デッキの保存・読み込み・編集ができます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
-      '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。ここからリーダーを設定することもできます。',
+      '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。',
       '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
     ],
   },
