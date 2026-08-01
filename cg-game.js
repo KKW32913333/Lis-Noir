@@ -5467,6 +5467,7 @@ function startOnlineBattleFromRoom(roomData) {
   const oppHand = iAmHost ? (seed.guestInitialHand || []) : (seed.hostInitialHand || []);
   const oppName = iAmHost ? roomData.guestName : roomData.hostName;
   const oppLeaderId = iAmHost ? roomData.guestLeaderId : roomData.hostLeaderId;
+  const oppUid = iAmHost ? roomData.guestUid : roomData.hostUid;
 
   const playerMaxHp = ONLINE_BATTLE_HP; // オンライン対戦は、双方の育成状況に関わらず必ずHP400で公平に戦えるようにする
   onlineOpponentInfo = { name: oppName || '相手プレイヤー', leaderId: oppLeaderId };
@@ -5476,6 +5477,7 @@ function startOnlineBattleFromRoom(roomData) {
     isOnline: true,
     onlineRoomCode: onlineCurrentRoomCode,
     onlineIAmHost: iAmHost,
+    onlineOpponentUid: oppUid,
     onlineActionSeq: 0,
     turn: 1,
     activeSide: 'player', // ホストが先行。ゲスト側はホストのend_turn受信で自分のターンが始まる
@@ -5519,6 +5521,8 @@ function startOnlineBattleFromRoom(roomData) {
   if (onlineActionUnsubscribe) onlineActionUnsubscribe();
   onlineActionUnsubscribe = window.LisNoirCloud.listenToBattleActions(onlineCurrentRoomCode, (action) => {
     if (action.uid === myUid) return; // 自分自身の行動は無視（二重適用防止）
+    // ルームコードを知る第三者が偽の行動を送り込めないよう、本来の対戦相手以外からの行動は無視する
+    if (action.uid !== battle.onlineOpponentUid) { console.warn('Ignored battle action from unexpected uid', action.uid); return; }
     applyRemoteAction(action);
   });
 
@@ -6878,10 +6882,25 @@ function init() {
   const flushSaveOnClose = () => {
     try { saveState(); flushCloudSyncNow(); } catch (e) { console.error('flush save failed', e); }
   };
+  // pagehideはタブを閉じる・別ページへ移動するなど「実際に離脱する」場面で確実に発火するため、
+  // オンライン対戦中であれば相手を無期限に待たせないよう部屋からの離脱をサーバーに通知する。
+  // （visibilitychangeは一時的にアプリを裏に回しただけでも発火してしまうため、ここでは呼ばない）
+  const leaveOnlineBattleOnClose = () => {
+    try {
+      if (battle && battle.isOnline && battle.onlineRoomCode && window.LisNoirCloud && window.LisNoirCloud.leaveBattleRoom) {
+        window.LisNoirCloud.leaveBattleRoom(battle.onlineRoomCode).catch(err => console.error('leaveBattleRoom failed', err));
+      } else if (onlineCurrentRoomCode && isOnlineBattleAvailable() && window.LisNoirCloud.leaveBattleRoom) {
+        window.LisNoirCloud.leaveBattleRoom(onlineCurrentRoomCode).catch(err => console.error('leaveBattleRoom failed', err));
+      }
+    } catch (e) { console.error('leave battle room on close failed', e); }
+  };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flushSaveOnClose();
   });
-  window.addEventListener('pagehide', flushSaveOnClose);
+  window.addEventListener('pagehide', () => {
+    flushSaveOnClose();
+    leaveOnlineBattleOnClose();
+  });
 
   // 全てのオーバーレイ（ヘルプ・カード情報・各種モーダル）について、非表示になった後は
   // display:noneにして完全にレンダリングを止める（見えない間もアニメーション等が動き続けて
@@ -7047,6 +7066,9 @@ function init() {
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
+  });
+  document.getElementById('equip-picker-close').addEventListener('click', () => {
+    document.getElementById('equip-picker-overlay').classList.add('hidden');
   });
   document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
   document.getElementById('gacha-odds-close').addEventListener('click', () => {
