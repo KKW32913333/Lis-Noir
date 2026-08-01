@@ -116,6 +116,18 @@ const CARD_DEFS = {
   dark_wraithbanshee:  { name: 'レイスバンシー',   element: 'dark',   rarity: 'rare', cost: 3, atk: 3, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.7, turns: 2 }, skill: '攻撃時、70%の確率で毒（2ターン）を付与する', image: 'card-dark-wraithbanshee.png', emoji: '👻' },
   nature_stonesanctuary: { name: 'ストーンサンクチュアリ', element: 'nature', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 2 }, skill: '場に出た時、味方全体にシールド2を付与する', image: 'card-nature-stonesanctuary.png', emoji: '🐢' },
   light_ancientunicorn: { name: 'エンシェントユニコーン', element: 'light', rarity: 'rare', cost: 4, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする', image: 'card-light-ancientunicorn.png', emoji: '🦄' },
+
+  // ---- プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種） ----
+  fire_cerberus:        { name: 'ヘルハウンド・ケルベロス', element: 'fire',   rarity: 'epic', cost: 4, atk: 5, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 2 }, skill: '攻撃時、敵全体に2ダメージを与える', image: 'card-fire-cerberus.png', emoji: '🐺' },
+  water_icequartz:       { name: 'アイスクォーツ',     element: 'water',  rarity: 'epic', cost: 4, atk: 4, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを1回復する', image: 'card-water-icequartz.png', emoji: '❄️' },
+  nature_venusharvest:   { name: 'ヴィーナスハーヴェスト', element: 'nature', rarity: 'epic', cost: 4, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で毒（2ターン）を付与する', image: 'card-nature-venusharvest.png', emoji: '🌺' },
+  light_crystalguardian: { name: 'クリスタルガーディアン', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 5, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 3 }, skill: '場に出た時、味方全体にシールド3を付与する', image: 'card-light-crystalguardian.png', emoji: '💎' },
+  dark_deepabyssdemon:   { name: 'ディープアビスデーモン', element: 'dark',  rarity: 'epic', cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 2 }, skill: '攻撃時、相手の攻撃力を2下げる', image: 'card-dark-deepabyssdemon.png', emoji: '👹' },
+  fire_kagutsuchi:       { name: 'カグツチノ将',       element: 'fire',   rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-fire-kagutsuchi.png', emoji: '⚔️' },
+  water_mermaidsongress: { name: 'マーメイドソングレス', element: 'water', rarity: 'legend', cost: 5, atk: 4, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'cleanseAndHealAllies', value: 2 }, skill: '【固有】場に出た時、味方全体の状態異常を解除し、HPを2回復する', image: 'card-water-mermaidsongress.png', emoji: '🧜' },
+  nature_foreststag:     { name: 'フォレストスタッグ', element: 'nature', rarity: 'legend', cost: 6, atk: 5, hp: 10, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.3 }, skill: '【固有】受けるダメージを常に30%軽減する', image: 'card-nature-foreststag.png', emoji: '🦌' },
+  light_fairylumina:     { name: 'フェアリールミナ',   element: 'light',  rarity: 'legend', cost: 5, atk: 4, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 2 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド2を付与する', image: 'card-light-fairylumina.png', emoji: '🧚' },
+  dark_deathwhisperer:   { name: 'デスウィスパラー',   element: 'dark',   rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる', image: 'card-dark-deathwhisperer.png', emoji: '💀' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -128,6 +140,9 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   // プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種）：スタート時の自動編成デッキには含めない
   'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow',
   'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
+  // プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種）：スタート時の自動編成デッキには含めない
+  'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon',
+  'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
 ]);
 
 
@@ -5551,12 +5566,16 @@ const SHOP_PACKS = [
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
     legendPityLimit: 50,
     rarityPool: {
-      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'],
-      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel',
+        'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
+        'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer'],
     },
     preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel',
-              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'] },
+              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
+              'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
+              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'] },
 ];
 
 // ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）
