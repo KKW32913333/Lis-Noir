@@ -952,6 +952,17 @@ function handleDetailImgError(imgEl) {
   imgEl.replaceWith(span);
 }
 
+// カードのイラスト部分だけを表示する軽量版（コスト表示やテキストは一切含まない）。
+// 装備選択ポップアップのように、カード名や効果が別途テキストで表示されている一覧で使用する
+function renderCardArtOnly(id) {
+  const def = CARD_DEFS[id];
+  if (!def) return '';
+  const img = def.image
+    ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img" data-emoji="${def.emoji}" data-bgstyle="${cardArtStyle(def)}" onerror="handleCardImgError(this)"/>`
+    : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
+  return `<div class="cg-card-art-only" style="--rarity-color:${RARITY[def.rarity].color};">${img}</div>`;
+}
+
 function renderCardFace(id, opts) {
   opts = opts || {};
   const def = CARD_DEFS[id];
@@ -1689,7 +1700,7 @@ function showEquipPickerOverlay(title, items) {
   listEl.innerHTML = items.length
     ? items.map((it, i) => `
       <div class="cg-equip-picker-item" data-idx="${i}">
-        ${renderCardFace(it.id, { small: true, battleMode: true })}
+        ${renderCardArtOnly(it.id)}
         <div class="cg-equip-picker-item-text">
           <span class="cg-equip-picker-item-name">${it.label}</span>
           ${it.sublabel ? `<span class="cg-equip-picker-item-sub">${it.sublabel}</span>` : ''}

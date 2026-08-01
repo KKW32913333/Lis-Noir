@@ -392,7 +392,11 @@
   .cg-equip-picker-item{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer;
     min-height:52px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
   .cg-equip-picker-item:active{background:var(--gold-soft);}
-  .cg-equip-picker-item .cg-card{width:44px; flex-shrink:0;}
+  .cg-equip-picker-item .cg-card-art-only{width:44px; aspect-ratio:3/4; flex-shrink:0; border-radius:8px; overflow:hidden;
+    border:1px solid var(--rarity-color, var(--hairline-panel));}
+  .cg-equip-picker-item .cg-card-art-only .cg-card-img{width:100%; height:100%; object-fit:cover; display:block;
+    pointer-events:none; -webkit-user-drag:none;}
+  .cg-equip-picker-item .cg-card-art-only .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px;}
   .cg-equip-picker-item-text{display:flex; flex-direction:column; gap:3px; text-align:left; overflow:hidden;}
   .cg-equip-picker-item-name{font-size:13px; font-weight:700;}
   .cg-equip-picker-item-sub{font-size:10px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis;
