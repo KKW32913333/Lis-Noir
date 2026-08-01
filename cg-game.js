@@ -5566,16 +5566,18 @@ const SHOP_PACKS = [
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
     legendPityLimit: 50,
     rarityPool: {
-      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel',
-        'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'],
-      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
-        'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer'],
+      // 初心者ガチャ等、他のガチャでも入手できる旧カード（下記コメントの16種）は、
+      // ご要望によりプレミアムガチャ第1弾の排出対象から除外し、このガチャ限定の新規カードのみを対象にしている
+      // 除外: fire_phoenix, water_serpent, nature_dryad, dark_chaosdemon, light_angel（エピック）
+      //      fire_bahamut, water_seiren, nature_emeraldgaia, dark_reaper, light_arcknight（レジェンド）
+      //      nature_wolf, water_icewolf, nature_swiftrabbit, fire_flarelion, nature_venomscorpion, light_lightguardian（レア）
+      rare: ['fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'],
+      epic: ['fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'],
+      legend: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer'],
     },
-    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
-              'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel',
-              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
-              'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
-              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon'] },
+    preview: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
+              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon',
+              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn'] },
 ];
 
 // ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）
