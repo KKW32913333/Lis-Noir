@@ -28,18 +28,18 @@ const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
   fire_imp:       { name: 'シルフ',   element: 'nature',   rarity: 'normal', cost: 2, atk: 1, hp: 2,  role: 'defender', skill: '', image: 'card-nature-sylph2.png', emoji: '🐦' },
   fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor2.png', emoji: '🔥' },
-  fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 4, burnDmg: 2, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に4ダメージを与え、3ターンの間火傷（2ダメージ）を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
+  fire_bahamut:   { name: '炎帝ヴァルカン', element: 'fire', rarity: 'legend', cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 4, burnDmg: 2, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に4ダメージを与え、3ターンの間火傷（2ダメージ）を、さらに攻撃力を永続で1下げる', image: 'card-fire-vulcan.png', emoji: '🐉' },
   fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'normal',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 1,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
   water_serpent:  { name: 'ストームクラーケン', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 5,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 2, healValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与えて1ターン行動不能にし、味方全体のHPを1回復する', image: 'card-water-stormkraken.png', emoji: '🐙' },
-  water_seiren:   { name: '水奏の女王セイレーン', element: 'water', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healShieldAlliesAtkDownEnemies', healValue: 3, shieldValue: 2, atkDownValue: 1 }, skill: '場に出た時、味方全体のHPを3回復してシールド2を付与し、敵全体の攻撃力を永続で1下げる', image: 'card-water-seiren.png', emoji: '👑' },
+  water_seiren:   { name: '深海のセイレーン', element: 'water', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healShieldAlliesAtkDownEnemies', healValue: 3, shieldValue: 2, atkDownValue: 1 }, skill: '場に出た時、味方全体のHPを3回復してシールド2を付与し、敵全体の攻撃力を永続で1下げる', image: 'card-water-deepseiren.png', emoji: '👑' },
   nature_wolf:    { name: 'ダークワーム', element: 'dark', rarity: 'rare', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-darkworm.png', emoji: '🪱' },
   nature_dryad:   { name: 'フォレストウルフ', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamagePoisonShieldAllies', value: 2, poisonDmg: 1, poisonTurns: 2, shieldValue: 1 }, skill: '場に出た時、敵全体に2ダメージを与えて毒（2ターン）を付与し、味方全体にシールド1を付与する', image: 'card-nature-forestwolf.png', emoji: '🐺' },
-  nature_emeraldgaia: { name: '翠嵐龍エメラルドガイア', element: 'nature', rarity: 'legend', cost: 7, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で1上げる', image: 'card-nature-emeraldgaia.png', emoji: '🐲' },
+  nature_emeraldgaia: { name: 'ウィンドレンジャー', element: 'nature', rarity: 'legend', cost: 7, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で1上げる', image: 'card-nature-windranger.png', emoji: '🏹' },
   light_angel:    { name: 'ライトペガサス', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-light-pegasus.png', emoji: '🦄' },
   light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
   dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'normal',   cost: 2, atk: 1, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
-  dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
+  dark_reaper:    { name: 'ダークソーサレス', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-darksorceress.png', emoji: '🔮' },
   water_icewolf:      { name: 'アイスゴーレム',     element: 'water', rarity: 'rare',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-icegolem.png', emoji: '🧊' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: 'card-nature-swiftrabbit.png', emoji: '🐇' },
   dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
@@ -62,7 +62,7 @@ const CARD_DEFS = {
   nature_venomscorpion: { name: 'グリーンスタグ', element: 'nature', rarity: 'rare', cost: 3, atk: 3, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.6, turns: 2 }, skill: '攻撃時、60%の確率で毒（2ターン）を付与する', image: 'card-nature-greenstag.png', emoji: '🦌' },
   light_lightguardian:  { name: 'グリフィン', element: 'light', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 1 }, skill: '場に出た時、味方全体にシールド1を付与する', image: 'card-light-griffin.png', emoji: '🦅' },
   fire_crimson:         { name: '炎龍王クリムゾン', element: 'fire', rarity: 'legend', cost: 6, atk: 7, hp: 8, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAndBurn', value: 2, burnDmg: 1, burnTurns: 2 }, skill: '攻撃時、敵全体に2ダメージを与えて火傷（2ターン）を付与する', image: 'card-fire-crimson2.png', emoji: '🐉' },
-  light_arcknight:      { name: '聖騎士アークナイト', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 9, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 2, shieldValue: 2 }, skill: '場に出た時、味方全体のHPを2回復し、シールド2を付与する', image: 'card-light-arcknight.png', emoji: '🛡️' },
+  light_arcknight:      { name: '光輝の大天使ルシエル', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 9, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 2, shieldValue: 2 }, skill: '場に出た時、味方全体のHPを2回復し、シールド2を付与する', image: 'card-light-luciel.png', emoji: '👼' },
 
   // ---- スペルカード（即時効果・場には残らない） ----
   spell_fireball:   { name: 'ファイアボール',   element: 'fire',  rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'spell', target: 'enemy', effect: { kind: 'damage', value: 4 }, skill: '敵1体（または敵本体）に4ダメージ', image: 'card-spell-fireball.png', emoji: '☄️' },
@@ -4694,7 +4694,7 @@ function applySkillTag(unit, trigger, isPlayerSide) {
     else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
     field.forEach(u => { if (u) u.shield = (u.shield || 0) + (tag.shieldValue || 0); });
   } else if (tag.effect === 'aoeDamageBurnAtkDownAll') {
-    // 【煉獄の焔竜バハムート】場に出た時、敵全体にダメージ＋火傷＋攻撃力ダウン（永続）
+    // 【炎帝ヴァルカン】場に出た時、敵全体にダメージ＋火傷＋攻撃力ダウン（永続）
     const opposingField = isPlayerSide ? battle.enemyField : battle.playerField;
     const selector = isPlayerSide ? '#battle-enemy-field .cg-field-slot' : '#battle-player-field .cg-field-slot';
     opposingField.forEach((u, i) => {
@@ -4711,7 +4711,7 @@ function applySkillTag(unit, trigger, isPlayerSide) {
     if (isPlayerSide) battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
     else battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
   } else if (tag.effect === 'healShieldAlliesAtkDownEnemies') {
-    // 【水奏の女王セイレーン】場に出た時、味方全体を回復＋シールド付与、敵全体の攻撃力ダウン（永続）
+    // 【深海のセイレーン】場に出た時、味方全体を回復＋シールド付与、敵全体の攻撃力ダウン（永続）
     field.forEach(u => {
       if (!u) return;
       if (!healBlocked) {
@@ -4905,13 +4905,13 @@ function attackTarget(attackerIdx, targetIdx) {
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋攻撃力ダウン`);
     }
     if (tag && tag.effect === 'aoeDamageAtkUpAllies') {
-      // 【翠嵐龍エメラルドガイア】攻撃時、敵全体にダメージ＋味方全体の攻撃力アップ（永続）
+      // 【ウィンドレンジャー】攻撃時、敵全体にダメージ＋味方全体の攻撃力アップ（永続）
       battle.enemyField.forEach(u => { if (u) u.curHp -= mitigateIncomingDamage(u, tag.value); });
       battle.playerField.forEach(p => { if (p) p.atkBonus = (p.atkBonus || 0) + (tag.atkUpValue || 1); });
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋味方全体の攻撃力アップ`);
     }
     if (tag && tag.effect === 'aoeDamageStunDrainCost') {
-      // 【虚無の女王ノクターリア】攻撃時、敵全体にダメージ＋行動不能、相手のコストを消費
+      // 【ダークソーサレス】攻撃時、敵全体にダメージ＋行動不能、相手のコストを消費
       battle.enemyField.forEach(u => {
         if (!u) return;
         u.curHp -= mitigateIncomingDamage(u, tag.value);
