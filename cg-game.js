@@ -1933,8 +1933,15 @@ function renderDeck() {
   });
   collEl.querySelectorAll('.cg-coll-item').forEach(node => {
     node.addEventListener('click', () => {
-      if (longPressFired) { longPressFired = false; return; }
       const id = node.dataset.id;
+      const now = Date.now();
+      if (collDoubleTapTracker.id === id && (now - collDoubleTapTracker.time) < COLL_DOUBLE_TAP_MS) {
+        // ダブルタップ判定: カード詳細ポップアップを表示する（デッキへの追加は行わない）
+        collDoubleTapTracker = { id: null, time: 0 };
+        showHandCardInfo(id);
+        return;
+      }
+      collDoubleTapTracker = { id, time: now };
       const max = maxCopiesFor(id);
       if (countInDeck(id) >= max) {
         node.classList.remove('cg-shake'); void node.offsetWidth; node.classList.add('cg-shake');
@@ -1945,7 +1952,6 @@ function renderDeck() {
       saveState();
       renderDeck();
     });
-    bindLongPress(node, () => showHandCardInfo(node.dataset.id));
   });
 }
 
@@ -4312,6 +4318,11 @@ function bindBattleEvents() {
 
 // ---------- 長押し検知（フィールドのモンスターをタップ操作と区別して詳細表示） ----------
 let longPressFired = false;
+// カードコレクション一覧のダブルタップ検知用（スクロール中に誤って長押し判定が発火し、
+// カード詳細ポップアップが開いてしまう不具合の対策として、長押しではなく「同じカードを
+// 短時間内に連続2回タップ」した場合にのみ詳細ポップアップを表示する方式に変更している）
+let collDoubleTapTracker = { id: null, time: 0 };
+const COLL_DOUBLE_TAP_MS = 400;
 function bindLongPress(node, onLongPress) {
   let timer = null;
   const start = (e) => {
@@ -5959,8 +5970,8 @@ const SHOP_PACKS = [
   { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
     desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },
     preview: ['water_slime', 'nature_wolf', 'fire_flarelion'] },
-  { id: 'premium1', name: 'プレミアムガチャ第1弾~オリュンポスの祝祭~', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
-    desc: '「冒険の始まり」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
+  { id: 'premium1', name: 'プレミアムガチャ第1弾~オリュンポスの祝祭~', flavor: 'オリュンポスの神々、降臨', icon: '👑', currency: 'gems', cost: 100,
+    desc: '「オリュンポスの神々、降臨」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
     featured: true,
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
     legendPityLimit: 50,
