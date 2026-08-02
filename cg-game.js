@@ -27,7 +27,7 @@ const RARITY = {
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
   fire_imp:       { name: 'シルフ',   element: 'nature',   rarity: 'normal', cost: 2, atk: 1, hp: 2,  role: 'defender', skill: '', image: 'card-nature-sylph2.png', emoji: '🐦' },
-  fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor2.png', emoji: '🔥' },
+  fire_phoenix:   { name: 'フレイムフェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor2.png', emoji: '🔥' },
   fire_bahamut:   { name: '炎帝ヴァルカン', element: 'fire', rarity: 'legend', cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 4, burnDmg: 2, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に4ダメージを与え、3ターンの間火傷（2ダメージ）を、さらに攻撃力を永続で1下げる', image: 'card-fire-vulcan.png', emoji: '🐉' },
   fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'normal',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 2,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
