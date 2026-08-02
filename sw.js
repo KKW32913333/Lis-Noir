@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v236';
+const CACHE_NAME = 'lisnoir-cache-v237';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -104,11 +104,11 @@ const CACHE_ASSETS = [
   'card-nature-minotaur.png',
   'card-light-pegasus2.png',
   // ---- プレミアムガチャ第1弾 追加カード（エピック・レジェンド） ----
-  'card-fire-cerberus.png',
-  'card-water-icequartz.png',
-  'card-nature-venusharvest.png',
-  'card-light-crystalguardian.png',
-  'card-dark-deepabyssdemon.png',
+  'card-fire-hestia.png',
+  'card-water-hecate.png',
+  'card-nature-dionysus.png',
+  'card-light-hermes.png',
+  'card-dark-thanatos.png',
   'card-fire-kagutsuchi.png',
   'card-water-mermaidsongress.png',
   'card-nature-foreststag.png',
