@@ -26,9 +26,9 @@ const RARITY = {
 // 後で { image: "card-fire-dragon.png" } のように差し替えれば自動でその画像が使われる。
 const CARD_DEFS = {
   // ---- リーダーキャラクターカード（通常のデッキ内カードとして使用可能。1枚まで） ----
-  fire_imp:       { name: 'シルフ',   element: 'nature',   rarity: 'normal', cost: 2, atk: 1, hp: 2,  role: 'defender', skill: '', image: 'card-nature-sylph2.png', emoji: '🐦' },
-  fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
-  fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 4, burnDmg: 2, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に4ダメージを与え、3ターンの間火傷（2ダメージ）を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
+  fire_imp:       { name: 'シルフ',   element: 'nature',   rarity: 'normal', cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-nature-sylph2.png', emoji: '🐦' },
+  fire_phoenix:   { name: '炎帝フェニックス', element: 'fire',   rarity: 'epic',   cost: 4, atk: 4, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活', image: 'card-fire-phoenixemperor.png', emoji: '🔥' },
+  fire_bahamut:   { name: '煉獄の焔竜バハムート', element: 'fire', rarity: 'legend', cost: 6, atk: 5, hp: 7, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamageBurnAtkDownAll', value: 3, burnDmg: 1, burnTurns: 3, atkDownValue: 1 }, skill: '場に出た時、敵全体に3ダメージを与え、3ターンの間火傷を、さらに攻撃力を永続で1下げる', image: 'card-fire-bahamut.png', emoji: '🐉' },
   fire_flameslime: { name: 'フレイムスライム', element: 'fire',  rarity: 'normal',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skill: '', image: 'card-fire-flameslime.png', emoji: '🔥' },
   water_slime:    { name: 'アクアスライム',   element: 'water',  rarity: 'normal', cost: 2, atk: 1, hp: 1,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawCard', value: 1 }, skill: '場に出た時、カードを1枚引く', image: 'card-water-aquaslime.png', emoji: '🔵' },
   water_serpent:  { name: '海皇リヴァイアサン', element: 'water',  rarity: 'epic',   cost: 4, atk: 5, hp: 5,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 2, healValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与えて1ターン行動不能にし、味方全体のHPを1回復する', image: 'card-water-leviathan.png', emoji: '🐍' },
@@ -36,26 +36,26 @@ const CARD_DEFS = {
   nature_wolf:    { name: 'シャドウアサシン', element: 'dark', rarity: 'rare', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-shadowassassin.png', emoji: '🗡️' },
   nature_dryad:   { name: '森羅の樹神ドリアード', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamagePoisonShieldAllies', value: 2, poisonDmg: 1, poisonTurns: 2, shieldValue: 1 }, skill: '場に出た時、敵全体に2ダメージを与えて毒（2ターン）を付与し、味方全体にシールド1を付与する', image: 'card-nature-dryad.png', emoji: '🌲' },
   nature_emeraldgaia: { name: '翠嵐龍エメラルドガイア', element: 'nature', rarity: 'legend', cost: 7, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で1上げる', image: 'card-nature-emeraldgaia.png', emoji: '🐲' },
-  light_angel:    { name: '光輝の大天使ルミナス', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-light-luminous.png', emoji: '👼' },
+  light_angel:    { name: '光輝の大天使ルミナス', element: 'light', rarity: 'epic', cost: 4, atk: 4, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAllAllies', value: 1 }, skill: '場に出た時、味方全体のHPを1回復', image: 'card-light-luminous.png', emoji: '👼' },
   light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
   dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'normal',   cost: 2, atk: 1, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
   dark_reaper:    { name: '虚無の女王ノクターリア', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-nocturia.png', emoji: '😈' },
   water_icewolf:      { name: 'スピリットメイデン',     element: 'water', rarity: 'rare',   cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 1 }, skill: '場に出た時、自分のコストを1回復する', image: 'card-water-spiritmaiden.png', emoji: '🐺' },
   nature_swiftrabbit: { name: '俊足のウサギ',     element: 'nature', rarity: 'rare',  cost: 1, atk: 1, hp: 2, role: 'attacker', rush: true, skill: '【速攻】召喚したこのターンにすぐ攻撃できる（攻撃力は低め）', image: 'card-nature-swiftrabbit.png', emoji: '🐇' },
-  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 8, hp: 6, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
+  dark_demonlord:     { name: 'ヴァンパイアロード',     element: 'dark', rarity: 'legend',  cost: 6, atk: 5, hp: 9, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（吸血）', image: 'card-dark-vampirelord2.png', emoji: '🧛' },
   dark_chaosdemon:    { name: '冥王カオスデーモン', element: 'dark', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkDownAll', value: 2, atkDownValue: 1 }, skill: '攻撃時、敵全体に2ダメージを与え、敵全体の攻撃力を1下げる', image: 'card-dark-chaosdemon.png', emoji: '😈' },
-  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 9, hp: 6,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
+  dark_voidreaper:        { name: 'ヴォイドリーパー',   element: 'dark', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '【固有】敵を撃破した時、行動終了せず続けてもう一度攻撃できる', image: 'card-dark-voidreaper.png', emoji: '💀' },
   dark_nocturnaldragon:    { name: 'ノクターナルドラゴン', element: 'dark', rarity: 'legend', cost: 7, atk: 8, hp: 10,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'novaAttack' }, skill: '【固有】攻撃時、自分の攻撃力と同じダメージを敵全体に与える', image: 'card-dark-nocturnaldragon.png', emoji: '🐉' },
   dark_lunaelf:            { name: 'ルナエルフ',         element: 'dark', rarity: 'legend', cost: 4, atk: 3, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'refundCost', value: 2 }, skill: '【固有】場に出た時、自分のコストを2回復する', image: 'card-dark-lunaelf.png', emoji: '🦋' },
   dark_nightmarecavalier:  { name: 'ナイトメアキャバリア', element: 'dark', rarity: 'legend', cost: 7, atk: 5, hp: 13, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.5 }, skill: '【固有】受けるダメージを常に半減する', image: 'card-dark-nightmarecavalier.png', emoji: '🛡️' },
-  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 8, hp: 4,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 3 }, skill: '【固有】攻撃時、追加で3ダメージ', image: 'card-dark-shadowslime.png', emoji: '🟣' },
+  dark_shadowslime:        { name: 'シャドウスライム',   element: 'dark', rarity: 'legend', cost: 5, atk: 6, hp: 5,  role: 'attacker', skillTag: { trigger: 'onDeath', effect: 'deathBuffAllies', value: 2 }, skill: '【固有】撃破された時、味方全体の攻撃力を永続+2する', image: 'card-dark-shadowslime.png', emoji: '🟣' },
   spell_orbitalgrimoire:   { name: 'オービタルグリモア', element: 'dark', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'draw', value: 3 }, skill: '【固有】カードを3枚引く', image: 'card-dark-orbitalgrimoire.png', emoji: '📖' },
   // ---- 「光耀の祝福」ガチャ限定カード（全て光属性・レジェンド。実際に引くまで所持しない） ----
-  light_shirayuki:      { name: '華光の白姫シラユキ', element: 'light', rarity: 'legend', cost: 6, atk: 4, hp: 10,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 3 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド3を付与する', image: 'card-light-shirayuki.png', emoji: '☂️' },
+  light_shirayuki:      { name: '華光の白姫シラユキ', element: 'light', rarity: 'legend', cost: 6, atk: 6, hp: 8,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 3 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド3を付与する', image: 'card-light-shirayuki.png', emoji: '☂️' },
   light_lucius:          { name: '聖導の賢者ルシウス', element: 'light', rarity: 'legend', cost: 5, atk: 5, hp: 7,  role: 'defender', skillTag: { trigger: 'onPlay', effect: 'drawAndRefundCost', value: 2, refundValue: 2 }, skill: '【固有】場に出た時、カードを2枚引き、自分のコストを2回復する', image: 'card-light-lucius.png', emoji: '📜' },
   light_starlightunicorn:{ name: 'スターライトユニコーン', element: 'light', rarity: 'legend', cost: 6, atk: 7, hp: 8,  role: 'attacker', skillTag: { trigger: 'onPlay', effect: 'cleanseAndHealAllies', value: 2 }, skill: '【固有】場に出た時、味方全体の状態異常を解除し、HPを2回復する', image: 'card-light-starlightunicorn.png', emoji: '🦄' },
   light_stardustwhale:   { name: 'スターダストホエール', element: 'light', rarity: 'legend', cost: 7, atk: 8, hp: 10, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを2回復する', image: 'card-light-stardustwhale.png', emoji: '🐋' },
-  light_sunblazenoble:   { name: 'サンブレイズ・ノーブル', element: 'light', rarity: 'legend', cost: 7, atk: 9, hp: 8, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 3 }, skill: '【固有】攻撃時、追加で3ダメージ', image: 'card-light-sunblazenoble.png', emoji: '🥂' },
+  light_sunblazenoble:   { name: 'サンブレイズ・ノーブル', element: 'light', rarity: 'legend', cost: 7, atk: 6, hp: 11, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.4 }, skill: '【固有】受けるダメージを常に40%軽減する', image: 'card-light-sunblazenoble.png', emoji: '🥂' },
   light_whitegriffon:    { name: 'ホワイトグリフォン', element: 'light', rarity: 'legend', cost: 6, atk: 8, hp: 9,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-light-whitegriffon.png', emoji: '🦅' },
   // ---- 初心者ガチャ用の新規カード ----
   fire_flarelion:      { name: 'フレアライオン', element: 'fire', rarity: 'rare', cost: 3, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-fire-flarelion.png', emoji: '🦁' },
@@ -73,18 +73,21 @@ const CARD_DEFS = {
   spell_soulbind:   { name: 'ソウルストライク',       element: 'dark',  rarity: 'epic',   cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'destroy' }, skill: '敵モンスター1体を選択して撃破する（HPに関わらず必ず撃破）', image: 'card-spell-soulstrike.png', emoji: '⛓️' },
 
   // ---- 装備カード（味方モンスター1体に付与） ----
+  equip_ironsword:  { name: 'アイアンソード',     element: 'fire',  rarity: 'normal', cost: 1, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 0 }, skill: '味方1体の攻撃力+2', image: 'card-equip-ironsword.png', emoji: '🗡️' },
+  equip_shield:     { name: 'ガーディアンシールド', element: 'light', rarity: 'rare',   cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 0, hp: 4 }, skill: '味方1体のHP+4', image: 'card-equip-shield.png', emoji: '🛡️' },
+  equip_dragonmail: { name: 'ドラゴンアーマー',   element: 'dark',  rarity: 'epic',   cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 2, hp: 3 }, skill: '味方1体の攻撃力+2・HP+3', image: 'card-equip-dragonmail.png', emoji: '🎽' },
   equip_aqualance:  { name: 'アクアランス',       element: 'water', rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 1 }, skill: '味方1体の攻撃力+6・HP+1', image: 'card-equip-aqualance.png', emoji: '🔱' },
-  // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬 ----
-  dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: 'card-equip-dungeon10.png', emoji: '🔮' },
-  dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: 'card-equip-dungeon20.png', emoji: '💍' },
-  dungeon_equip_30:  { name: '亡国の紋章',     element: 'fire',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 4 }, skill: '味方1体の攻撃力+5・HP+4', image: 'card-equip-dungeon30.png', emoji: '🏵️' },
-  dungeon_equip_40:  { name: '氷結の秘宝',     element: 'water',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 5 }, skill: '味方1体の攻撃力+5・HP+5', image: 'card-equip-dungeon40.png', emoji: '❄️' },
-  dungeon_equip_50:  { name: '天空の羽衣',     element: 'light',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 5 }, skill: '味方1体の攻撃力+6・HP+5', image: 'card-equip-dungeon50.png', emoji: '🪽' },
-  dungeon_equip_60:  { name: '終焉の書',       element: 'dark',   rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 6 }, skill: '味方1体の攻撃力+6・HP+6', image: 'card-equip-dungeon60.png', emoji: '📕' },
-  dungeon_equip_70:  { name: '虚無の指輪',     element: 'dark',   rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 6 }, skill: '味方1体の攻撃力+7・HP+6', image: 'card-equip-dungeon70.png', emoji: '⚫' },
-  dungeon_equip_80:  { name: '永劫の鎧',       element: 'nature', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 7 }, skill: '味方1体の攻撃力+7・HP+7', image: 'card-equip-dungeon80.png', emoji: '🛡️' },
-  dungeon_equip_90:  { name: '創世の宝珠',     element: 'light',  rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 8, hp: 7 }, skill: '味方1体の攻撃力+8・HP+7', image: 'card-equip-dungeon90.png', emoji: '🔆' },
-  dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: 'card-equip-dungeon100.png', emoji: '👑' },
+  // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬。画像は今後差し替え予定（image:nullの間は絵文字で表示） ----
+  dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: null, emoji: '🔮' },
+  dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: null, emoji: '💍' },
+  dungeon_equip_30:  { name: '亡国の紋章',     element: 'fire',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 4 }, skill: '味方1体の攻撃力+5・HP+4', image: null, emoji: '🏵️' },
+  dungeon_equip_40:  { name: '氷結の秘宝',     element: 'water',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 5, hp: 5 }, skill: '味方1体の攻撃力+5・HP+5', image: null, emoji: '❄️' },
+  dungeon_equip_50:  { name: '天空の羽衣',     element: 'light',  rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 5 }, skill: '味方1体の攻撃力+6・HP+5', image: null, emoji: '🪽' },
+  dungeon_equip_60:  { name: '終焉の書',       element: 'dark',   rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 6 }, skill: '味方1体の攻撃力+6・HP+6', image: null, emoji: '📕' },
+  dungeon_equip_70:  { name: '虚無の指輪',     element: 'dark',   rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 6 }, skill: '味方1体の攻撃力+7・HP+6', image: null, emoji: '⚫' },
+  dungeon_equip_80:  { name: '永劫の鎧',       element: 'nature', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 7, hp: 7 }, skill: '味方1体の攻撃力+7・HP+7', image: null, emoji: '🛡️' },
+  dungeon_equip_90:  { name: '創世の宝珠',     element: 'light',  rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 8, hp: 7 }, skill: '味方1体の攻撃力+8・HP+7', image: null, emoji: '🔆' },
+  dungeon_equip_100: { name: '万物の冠',       element: 'light',  rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 9, hp: 8 }, skill: '味方1体の攻撃力+9・HP+8', image: null, emoji: '👑' },
 
   // ---- フィールドカード（場に出ている間、対応属性のモンスター全体（両陣営）に継続効果） ----
   field_inferno:   { name: 'フレイムコア', element: 'fire',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
@@ -102,35 +105,6 @@ const CARD_DEFS = {
   field_abyss:     { name: 'アビスの深淵',       element: 'dark',  rarity: 'rare', cost: 2, atk: 0, hp: 0, type: 'field', target: 'none',
     effect: { enemyDebuff: { element: 'dark', stat: 'atk', value: -1 }, enemyDamageBoost: 0.10 },
     skill: '場に出ている間、敵全体が受けるダメージが10%増加する。さらに、闇属性の敵の攻撃力を-1する', image: 'card-field-abyss.png', emoji: '🕳️' },
-
-  // ---- プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種） ----
-  fire_infernoimp:    { name: 'インフェルノインプ', element: 'fire',  rarity: 'normal', cost: 2, atk: 3, hp: 1, role: 'attacker', skill: '', image: 'card-fire-infernoimp.png', emoji: '😈' },
-  water_frostwolf:     { name: 'フロストウルフ',   element: 'water',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-water-frostwolf.png', emoji: '🐺' },
-  nature_leafslime:    { name: 'リーフスライム',   element: 'nature', rarity: 'normal', cost: 2, atk: 2, hp: 1, role: 'attacker', skill: '', image: 'card-nature-leafslime.png', emoji: '🍃' },
-  light_sainttiger:    { name: 'セイントタイガー', element: 'light',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-light-sainttiger.png', emoji: '🐯' },
-  dark_scarecrow:      { name: 'スケアクロウ',     element: 'dark',   rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'defender', skill: '', image: 'card-dark-scarecrow.png', emoji: '🎃' },
-  fire_flameboar:      { name: 'フレイムボア',     element: 'fire',   rarity: 'rare', cost: 3, atk: 3, hp: 4, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.2 }, skill: '受けるダメージを常に20%軽減する（硬い体毛）', image: 'card-fire-flameboar.png', emoji: '🐗' },
-  dark_wraithbanshee:  { name: 'レイスバンシー',   element: 'dark',   rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.7, turns: 2 }, skill: '攻撃時、70%の確率で毒（2ターン）を付与する', image: 'card-dark-wraithbanshee.png', emoji: '👻' },
-  nature_stonesanctuary: { name: 'ストーンサンクチュアリ', element: 'nature', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 2 }, skill: '場に出た時、味方全体にシールド2を付与する', image: 'card-nature-stonesanctuary.png', emoji: '🐢' },
-  light_ancientunicorn: { name: 'エンシェントユニコーン', element: 'light', rarity: 'rare', cost: 4, atk: 4, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする', image: 'card-light-ancientunicorn.png', emoji: '🦄' },
-
-  // ---- プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種） ----
-  fire_cerberus:        { name: 'ヘルハウンド・ケルベロス', element: 'fire',   rarity: 'epic', cost: 4, atk: 7, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '攻撃時、敵全体に3ダメージを与える', image: 'card-fire-cerberus.png', emoji: '🐺' },
-  water_icequartz:       { name: 'アイスクォーツ',     element: 'water',  rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunHeal', value: 3, healValue: 2 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、味方全体のHPを2回復する', image: 'card-water-icequartz.png', emoji: '❄️' },
-  nature_venusharvest:   { name: 'ヴィーナスハーヴェスト', element: 'nature', rarity: 'epic', cost: 4, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で毒（2ターン）を付与する', image: 'card-nature-venusharvest.png', emoji: '🌺' },
-  light_crystalguardian: { name: 'クリスタルガーディアン', element: 'light', rarity: 'epic', cost: 4, atk: 3, hp: 5, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 3 }, skill: '場に出た時、味方全体にシールド3を付与する', image: 'card-light-crystalguardian.png', emoji: '💎' },
-  dark_deepabyssdemon:   { name: 'ディープアビスデーモン', element: 'dark',  rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 3 }, skill: '攻撃時、相手の攻撃力を3下げる', image: 'card-dark-deepabyssdemon.png', emoji: '👹' },
-  fire_kagutsuchi:       { name: 'カグツチノ将',       element: 'fire',   rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-fire-kagutsuchi.png', emoji: '⚔️' },
-  water_mermaidsongress: { name: 'マーメイドソングレス', element: 'water', rarity: 'legend', cost: 5, atk: 7, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.6, turns: 2 }, skill: '【固有】攻撃時、60%の確率で毒（2ターン）を付与する（人魚の歌声）', image: 'card-water-mermaidsongress.png', emoji: '🧜' },
-  nature_foreststag:     { name: 'フォレストスタッグ', element: 'nature', rarity: 'legend', cost: 6, atk: 8, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '【固有】攻撃時、敵全体に3ダメージを与える（雄叫びの突撃）', image: 'card-nature-foreststag.png', emoji: '🦌' },
-  light_fairylumina:     { name: 'フェアリールミナ',   element: 'light',  rarity: 'legend', cost: 5, atk: 7, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 2 }, skill: '【固有】攻撃時、味方全体のHPを2回復する', image: 'card-light-fairylumina.png', emoji: '🧚' },
-  dark_deathwhisperer:   { name: 'デスウィスパラー',   element: 'dark',   rarity: 'legend', cost: 6, atk: 6, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる', image: 'card-dark-deathwhisperer.png', emoji: '💀' },
-
-  // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
-  water_abyssjelly:      { name: 'アビスジェリー',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-water-abyssjelly.png', emoji: '🎐' },
-  spell_windcutter:      { name: 'ウィンドカッター',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 5 }, skill: '敵全体に5ダメージを与える', image: 'card-spell-windcutter.png', emoji: '🌪️' },
-  spell_tidalwave:       { name: 'タイダルウェイブ',   element: 'water', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 7 }, skill: '敵全体に7ダメージを与える', image: 'card-spell-tidalwave.png', emoji: '🌊' },
-  spell_purification:    { name: 'ピュリフィケーション', element: 'light', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'cleanse' }, skill: '味方全体の状態異常（毒・火傷など）を解除する', image: 'card-spell-purification.png', emoji: '✨' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -140,29 +114,7 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss',
   'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse',
   'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance',
-  // プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種）：スタート時の自動編成デッキには含めない
-  'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow',
-  'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
-  // プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種）：スタート時の自動編成デッキには含めない
-  'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon',
-  'fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer',
-  // プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種）：スタート時の自動編成デッキには含めない
-  'water_abyssjelly', 'spell_windcutter', 'spell_tidalwave', 'spell_purification',
 ]);
-
-// 初期デッキ（スターターデッキ）専用の候補カードリスト。BEGINNER_GACHA_CARD_IDSとは意図的に切り離している。
-// （新カードを追加するたびにBEGINNER_GACHA_CARD_IDSへ登録していくと、初期デッキの候補が先細りし、
-// 　最終的に候補が1種類だけになって初期デッキがまともに組めなくなる不具合が過去にあったため、
-// 　初期デッキ用の候補は将来のカード追加の影響を受けないよう、ここで固定リストとして管理する）
-const STARTER_DECK_CANDIDATE_IDS = [
-  'fire_flameslime', 'fire_flarelion',
-  'water_slime', 'water_icewolf',
-  'fire_imp', 'nature_swiftrabbit',
-  'light_holyangel', 'light_lightguardian',
-  'dark_shadowbat', 'nature_wolf',
-];
-
-
 
 
 
@@ -186,7 +138,7 @@ const EVOLVE_LEVEL_REQ = 5;
 // デッキに1体だけ設定でき、効果はそのデッキの対象属性モンスター全てに反映される
 const LEADERS = {
   lisnoir_f: {
-    name: 'エレナ・ニグルム',
+    name: 'エレナ・ノワール',
     skillName: 'ダークエレガンス',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を+2、HPを+2',
@@ -196,7 +148,7 @@ const LEADERS = {
     ultimateSkill: { name: '漆黒の断罪', desc: '敵本体と敵の場にいる全モンスターに5ダメージを与える', dmg: 5 },
   },
   lisnoir_m: {
-    name: 'ディアブロ・ノーチェ',
+    name: 'ディアブロ・ノワール',
     skillName: 'ナイトメアドミニオン',
     element: 'dark',
     desc: '闇属性ユニットの攻撃力を+2、敵へのダメージを+1',
@@ -236,7 +188,7 @@ const LEADERS = {
     ultimateSkill: { name: '深海の怒涛', desc: '敵本体と敵の場にいる全モンスターに4ダメージを与え、味方全体のHPを2回復する', dmg: 4, healAllies: 2 },
   },
   kaien: {
-    name: '灰焔',
+    name: 'エル・カイエン',
     skillName: 'フレイムブンリト',
     element: 'fire',
     desc: '火属性ユニットの攻撃力を+2、敵へのダメージを+1',
@@ -368,7 +320,6 @@ function defaultState() {
     beginnerGachaDone: false,
     cards: owned,
     deck: buildStarterDeck(),
-    cardEquipment: {}, // { モンスターカードID: 装備カードID }。装備カードはデッキには入れず、モンスターに直接装着する
   };
 }
 
@@ -376,10 +327,15 @@ function defaultState() {
 // （CARD_DEFSの定義順に依存する「最初の12枚」方式だと、コストの重いレジェンドカードが混ざって
 // 　序盤で身動きが取れなくなる不具合があったため、コストで並べ替えて選ぶ方式に変更）
 function buildStarterDeck() {
-  // 初期デッキ専用の固定候補リストを使用する（BEGINNER_GACHA_CARD_IDSには依存しない。理由はSTARTER_DECK_CANDIDATE_IDSの定義部を参照）
-  const candidates = STARTER_DECK_CANDIDATE_IDS
-    .filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster')
-    .sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
+  const eventExclusiveIds = new Set(EVENT_GACHA_PACKS.flatMap(p => p.pool || []));
+  // 初心者ガチャの対象カードは、初期デッキには含めない（ガチャで手に入れる楽しみを残すため）
+  const candidates = Object.keys(CARD_DEFS).filter(id => {
+    const def = CARD_DEFS[id];
+    if (eventExclusiveIds.has(id)) return false;
+    if (BEGINNER_GACHA_CARD_IDS.has(id)) return false;
+    if ((def.type || 'monster') !== 'monster') return false;
+    return def.rarity === 'normal' || def.rarity === 'rare';
+  }).sort((a, b) => CARD_DEFS[a].cost - CARD_DEFS[b].cost);
 
   const deck = [];
   let progressed = true;
@@ -427,42 +383,11 @@ function loadState() {
       });
     }
     if (Array.isArray(saved.deck)) {
-      // 装備カードはデッキに入れられない仕様に変更したため、旧セーブに残っていた分もあわせて取り除く
-      saved.deck = saved.deck.filter(id => !!CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') !== 'equipment');
+      saved.deck = saved.deck.filter(id => !!CARD_DEFS[id]);
     }
     if (Array.isArray(saved.deckPresets)) {
       saved.deckPresets.forEach(preset => {
-        if (Array.isArray(preset.cards)) {
-          preset.cards = preset.cards.filter(id => !!CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') !== 'equipment');
-        }
-      });
-    }
-    // 装備カードをモンスターカードへ直接装着する仕様への対応: 旧セーブに無ければ補完し、
-    // 参照切れ（カード削除・モンスター側でない・装備側でない等）のエントリーは自動的に取り除く
-    if (!saved.cardEquipment || typeof saved.cardEquipment !== 'object') saved.cardEquipment = {};
-    Object.keys(saved.cardEquipment).forEach(monsterId => {
-      const equipId = saved.cardEquipment[monsterId];
-      const monsterDef = CARD_DEFS[monsterId];
-      const equipDef = CARD_DEFS[equipId];
-      const ownsMonster = saved.cards && saved.cards[monsterId];
-      const ownsEquip = saved.cards && saved.cards[equipId];
-      if (!monsterDef || (monsterDef.type || 'monster') !== 'monster'
-          || !equipDef || equipDef.type !== 'equipment'
-          || !ownsMonster || !ownsEquip) {
-        delete saved.cardEquipment[monsterId];
-      }
-    });
-    // 同じ装備カードが複数のモンスターに同時装着されている状態（不整合）が万一残っていた場合、
-    // 先に見つかった1件のみを有効とし、それ以外は解除する
-    {
-      const usedEquipIds = new Set();
-      Object.keys(saved.cardEquipment).forEach(monsterId => {
-        const equipId = saved.cardEquipment[monsterId];
-        if (usedEquipIds.has(equipId)) {
-          delete saved.cardEquipment[monsterId];
-        } else {
-          usedEquipIds.add(equipId);
-        }
+        if (Array.isArray(preset.cards)) preset.cards = preset.cards.filter(id => !!CARD_DEFS[id]);
       });
     }
     // 「夜天の英雄」ガチャ用チケットを1枚追加配布（既存プレイヤーへ1回限り）
@@ -908,14 +833,6 @@ async function restoreBackupCode() {
 }
 
 // ---------- カード表示ヘルパー ----------
-// モンスターカードに装着中の装備によるステータスボーナスを返す（未装着なら0/0）
-function getEquipBonusFor(id) {
-  const equipId = state.cardEquipment && state.cardEquipment[id];
-  const equipDef = equipId ? CARD_DEFS[equipId] : null;
-  if (!equipDef || !equipDef.effect) return { atk: 0, hp: 0 };
-  return { atk: equipDef.effect.atk || 0, hp: equipDef.effect.hp || 0 };
-}
-
 function cardArtStyle(def) {
   const el = ELEMENTS[def.element];
   return `background: radial-gradient(circle at 30% 20%, ${el.color}55, #14141d 75%);`;
@@ -932,8 +849,6 @@ function cardStatsLine(def, evolved, opts) {
     else if (eff.kind === 'draw') label = `🃏${eff.value}`;
     else if (eff.kind === 'wipe') label = `💥全体`;
     else if (eff.kind === 'destroy') label = `💀撃破`;
-    else if (eff.kind === 'aoeDamage') label = `💥${eff.value}`;
-    else if (eff.kind === 'cleanse') label = `✨浄化`;
     return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
   }
   if (type === 'equipment') {
@@ -948,10 +863,8 @@ function cardStatsLine(def, evolved, opts) {
     return `<div class="cg-card-stats"><span class="cg-stat field">フィールド</span><span class="cg-stat field-val">${elIcon}</span></div>`;
   }
   if (opts.hideStats) return ''; // バトル画面では別途バッジで表示するため、重複を避けて非表示にする
-  const equipAtk = opts.equipAtk || 0;
-  const equipHp = opts.equipHp || 0;
-  const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0) + equipAtk;
-  const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0) + equipHp;
+  const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
+  const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
   return `<div class="cg-card-stats"><span class="cg-stat atk">ATK ${atk}</span><span class="cg-stat hp">HP ${hp}</span></div>`;
 }
 
@@ -969,17 +882,6 @@ function handleDetailImgError(imgEl) {
   span.className = 'cg-detail-emoji';
   span.textContent = imgEl.dataset.emoji || '❓';
   imgEl.replaceWith(span);
-}
-
-// カードのイラスト部分だけを表示する軽量版（コスト表示やテキストは一切含まない）。
-// 装備選択ポップアップのように、カード名や効果が別途テキストで表示されている一覧で使用する
-function renderCardArtOnly(id) {
-  const def = CARD_DEFS[id];
-  if (!def) return '';
-  const img = def.image
-    ? `<img src="${def.image}" alt="${def.name}" class="cg-card-img" data-emoji="${def.emoji}" data-bgstyle="${cardArtStyle(def)}" onerror="handleCardImgError(this)"/>`
-    : `<div class="cg-card-placeholder" style="${cardArtStyle(def)}"><span>${def.emoji}</span></div>`;
-  return `<div class="cg-card-art-only" style="--rarity-color:${RARITY[def.rarity].color};">${img}</div>`;
 }
 
 function renderCardFace(id, opts) {
@@ -1015,14 +917,12 @@ function renderCardFace(id, opts) {
   const costBadgeContent = (opts.onField && isMonster)
     ? `<span class="cg-card-role-oncost ${def.role === 'defender' ? 'defender' : 'attacker'}" title="${def.role === 'defender' ? 'ディフェンダー' : 'アタッカー'}">${def.role === 'defender' ? '🛡' : '⚔'}</span>`
     : def.cost;
-  // 装備システム: バトル場外（コレクション・デッキ編成画面など）でも、装着中の装備によるステータス上昇を常に表示する
-  const equipBonus = (isMonster && !opts.locked && !opts.battleMode) ? getEquipBonusFor(id) : { atk: 0, hp: 0 };
   return `
     <div class="cg-card${small}${evolvedClass}${lockedClass}${inDeckClass}${bondClass}" data-id="${id}" data-rarity="${def.rarity}" style="--rarity-color:${rarity.color}; box-shadow:${rarity.glow};">
       <div class="cg-card-cost">${costBadgeContent}</div>
       <div class="cg-card-art">${img}${lockIcon}${inDeckBadge}${opts.evolved ? '<span class="cg-card-evolved-badge">★</span>' : ''}${roleBadge}${foil}${bondBadge}</div>
       ${nameLine}
-      ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode, equipAtk: equipBonus.atk, equipHp: equipBonus.hp })}
+      ${cardStatsLine(def, opts.evolved, { hideStats: opts.battleMode })}
       ${elLine}
     </div>`;
 }
@@ -1678,100 +1578,17 @@ function sortCardIds(ids, mode) {
   }
   return arr;
 }
+let deckReorderSelectedId = null;
 
 function maxCopiesFor(id) {
   const def = CARD_DEFS[id];
   if (!def) return 0;
   if (def.isLeaderCard) return 1; // リーダーカードは唯一無二のキャラクターのため1枚まで
-  if ((def.type || 'monster') === 'equipment') return 0; // 装備カードはデッキに入れられない（モンスターに直接装着する）
-  return 3;
+  return (def.type || 'monster') === 'equipment' ? 1 : 3;
 }
 
 function countInDeck(id) {
   return state.deck.filter(x => x === id).length;
-}
-
-// ---------- 装備システム：装備カードはデッキに入れず、モンスターカードに直接装着する（1体につき1枚まで） ----------
-// 指定した装備カードが、現在どのモンスターに装着されているかを返す（未装着ならnull）
-function getEquippedMonsterFor(equipId) {
-  const entry = Object.entries(state.cardEquipment).find(([, eid]) => eid === equipId);
-  return entry ? entry[0] : null;
-}
-
-// 装備カードをモンスターに装着する（そのモンスターが既に別の装備を装着していた場合は上書きし、
-// その装備カード自身が別のモンスターに装着済みだった場合はそちらから自動的に外す）
-function equipItemToMonster(equipId, monsterId) {
-  Object.keys(state.cardEquipment).forEach(mid => {
-    if (state.cardEquipment[mid] === equipId) delete state.cardEquipment[mid];
-  });
-  state.cardEquipment[monsterId] = equipId;
-  saveState();
-}
-
-// 指定したモンスターから装備を外す
-function unequipMonster(monsterId) {
-  delete state.cardEquipment[monsterId];
-  saveState();
-}
-
-// 装備選択オーバーレイの表示（共通）。itemsは{id, label, sublabel, onSelect}の配列
-function showEquipPickerOverlay(title, items) {
-  document.getElementById('equip-picker-title').textContent = title;
-  const listEl = document.getElementById('equip-picker-list');
-  listEl.innerHTML = items.length
-    ? items.map((it, i) => `
-      <div class="cg-equip-picker-item" data-idx="${i}">
-        ${renderCardArtOnly(it.id)}
-        <div class="cg-equip-picker-item-text">
-          <span class="cg-equip-picker-item-name">${it.label}</span>
-          ${it.sublabel ? `<span class="cg-equip-picker-item-sub">${it.sublabel}</span>` : ''}
-        </div>
-      </div>`).join('')
-    : `<div class="cg-empty">${title.includes('モンスター') ? '所持しているモンスターカードがありません' : '所持している装備カードがありません'}</div>`;
-  listEl.querySelectorAll('.cg-equip-picker-item').forEach(node => {
-    node.addEventListener('click', () => {
-      const it = items[Number(node.dataset.idx)];
-      document.getElementById('equip-picker-overlay').classList.add('hidden');
-      if (it && it.onSelect) it.onSelect();
-    });
-  });
-  document.getElementById('equip-picker-overlay').classList.remove('hidden');
-}
-
-// モンスターカードの詳細画面から呼ばれる：装着する装備カードを選ぶ
-function openEquipPicker(monsterId) {
-  const items = Object.keys(state.cards)
-    .filter(id => CARD_DEFS[id] && CARD_DEFS[id].type === 'equipment')
-    .sort((a, b) => (RARITY_SORT_ORDER[CARD_DEFS[a].rarity] ?? 9) - (RARITY_SORT_ORDER[CARD_DEFS[b].rarity] ?? 9))
-    .map(id => {
-      const holderId = getEquippedMonsterFor(id);
-      const holderDef = holderId && holderId !== monsterId ? CARD_DEFS[holderId] : null;
-      return {
-        id,
-        label: CARD_DEFS[id].name,
-        sublabel: (CARD_DEFS[id].skill || '') + (holderDef ? `（現在: ${holderDef.name} に装着中）` : ''),
-        onSelect: () => { equipItemToMonster(id, monsterId); openCardDetail(monsterId); },
-      };
-    });
-  showEquipPickerOverlay(`「${CARD_DEFS[monsterId].name}」に装着する装備を選択`, items);
-}
-
-// 装備カードの詳細画面から呼ばれる：装着先のモンスターカードを選ぶ
-function openMonsterPickerForEquip(equipId) {
-  const items = Object.keys(state.cards)
-    .filter(id => CARD_DEFS[id] && (CARD_DEFS[id].type || 'monster') === 'monster')
-    .sort((a, b) => (RARITY_SORT_ORDER[CARD_DEFS[a].rarity] ?? 9) - (RARITY_SORT_ORDER[CARD_DEFS[b].rarity] ?? 9))
-    .map(id => {
-      const currentEquipId = state.cardEquipment[id];
-      const currentEquipDef = currentEquipId ? CARD_DEFS[currentEquipId] : null;
-      return {
-        id,
-        label: CARD_DEFS[id].name,
-        sublabel: currentEquipDef ? `（現在: ${currentEquipDef.name} を装着中）` : '装備なし',
-        onSelect: () => { equipItemToMonster(equipId, id); openCardDetail(equipId); },
-      };
-    });
-  showEquipPickerOverlay(`「${CARD_DEFS[equipId].name}」を装着するモンスターを選択`, items);
 }
 
 function renderLeaderSelect(containerId) {
@@ -1860,6 +1677,71 @@ function executeLeaderUltimate() {
   renderBattle();
 }
 
+// ---------- デッキ内カードの並び替え(長押し→ドラッグ) ----------
+let deckDragState = null; // { fromIndex, pointerId, holdTimer, moved }
+
+function bindDeckDragReorder(deckEl) {
+  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
+    item.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.cg-deck-remove-btn')) return; // 削除ボタンは対象外
+      const idx = Number(item.dataset.index);
+      const startX = e.clientX, startY = e.clientY;
+      const holdTimer = setTimeout(() => {
+        deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer: null, moved: false, startX, startY };
+        item.classList.add('dragging');
+        try { item.setPointerCapture(e.pointerId); } catch (err) {}
+        sfxTap();
+      }, 260);
+      deckDragState = { fromIndex: idx, pointerId: e.pointerId, holdTimer, moved: false, startX, startY };
+    });
+
+    item.addEventListener('pointermove', (e) => {
+      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
+      if (deckDragState.holdTimer) {
+        // 長押し確定前：指が一定以上動いたらスクロール操作とみなし、ドラッグ待機をキャンセルする
+        // （タップ位置から10px以上動いた時点でスクロール意図と判断）
+        const dx = e.clientX - deckDragState.startX;
+        const dy = e.clientY - deckDragState.startY;
+        if (Math.hypot(dx, dy) > 10) {
+          clearTimeout(deckDragState.holdTimer);
+          deckDragState = null;
+        }
+        return;
+      }
+      deckDragState.moved = true;
+      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => s.classList.remove('drop-target'));
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      const slot = target && target.closest('.cg-deck-slot-item');
+      if (slot && Number(slot.dataset.index) !== deckDragState.fromIndex) slot.classList.add('drop-target');
+    });
+
+    const finishDrag = (e) => {
+      if (!deckDragState || deckDragState.pointerId !== e.pointerId) return;
+      if (deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
+      if (deckDragState.moved) {
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const slot = target && target.closest('.cg-deck-slot-item');
+        if (slot) {
+          const toIndex = Number(slot.dataset.index);
+          if (toIndex !== deckDragState.fromIndex) {
+            const [moved] = state.deck.splice(deckDragState.fromIndex, 1);
+            state.deck.splice(toIndex, 0, moved);
+            saveState();
+          }
+        }
+      }
+      deckDragState = null;
+      renderDeck();
+    };
+    item.addEventListener('pointerup', finishDrag);
+    item.addEventListener('pointercancel', () => {
+      if (deckDragState && deckDragState.holdTimer) clearTimeout(deckDragState.holdTimer);
+      deckDragState = null;
+      deckEl.querySelectorAll('.cg-deck-slot-item').forEach(s => { s.classList.remove('dragging'); s.classList.remove('drop-target'); });
+    });
+  });
+}
+
 function renderDeck() {
   renderLeaderSelect();
   const deckEl = document.getElementById('deck-slots');
@@ -1874,31 +1756,50 @@ function renderDeck() {
       groups[idToGroup[id]].count++;
     }
   });
-  const slotHtml = (g) => `<div class="cg-deck-slot-item" data-id="${g.id}">
+  deckEl.innerHTML = groups.map(g =>
+    `<div class="cg-deck-slot-item ${deckReorderSelectedId === g.id ? 'reorder-selected' : ''}" data-id="${g.id}">
        ${renderCardFace(g.id, { small: true, evolved: state.cards[g.id] && state.cards[g.id].evolved })}
        ${g.count > 1 ? `<span class="cg-deck-slot-count">×${g.count}</span>` : ''}
-       <span class="cg-deck-remove-icon">✕</span>
-     </div>`;
-  deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
+       <button class="cg-deck-remove-btn" data-id="${g.id}" aria-label="デッキから1枚外す">✕</button>
+     </div>`
+  ).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
-  // タップで1枚外す（デッキ内の並び順はバトル開始時に必ずシャッフルされ、ゲームプレイに影響しないため、
-  // 以前あった「タップで選択→タップで並び替え」という操作は廃止し、「タップ＝外す」に統一している）
-  const bindDeckSlotHandlers = (container) => {
-    container.querySelectorAll('.cg-deck-slot-item').forEach(item => {
-      item.addEventListener('click', () => {
-        if (longPressFired) { longPressFired = false; return; }
-        const id = item.dataset.id;
-        const idx = state.deck.indexOf(id);
-        if (idx !== -1) state.deck.splice(idx, 1);
+  deckEl.querySelectorAll('.cg-deck-remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const idx = state.deck.indexOf(id); // 同じカードの1枚だけを外す
+      if (idx !== -1) state.deck.splice(idx, 1);
+      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
+      saveState();
+      renderDeck();
+    });
+  });
+
+  // 並べ替え：1枚目をタップして選択→入れ替えたいカードをタップで位置を交換する
+  // （ドラッグ＆ドロップより誤操作が少なく、片手でも操作しやすいため）
+  deckEl.querySelectorAll('.cg-deck-slot-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.cg-deck-remove-btn')) return;
+      if (longPressFired) { longPressFired = false; return; }
+      const id = item.dataset.id;
+      if (deckReorderSelectedId === null) {
+        deckReorderSelectedId = id;
+        renderDeck();
+      } else if (deckReorderSelectedId === id) {
+        deckReorderSelectedId = null;
+        renderDeck();
+      } else {
+        swapDeckGroups(deckReorderSelectedId, id);
+        deckReorderSelectedId = null;
         saveState();
         renderDeck();
-      });
-      bindLongPress(item, () => showHandCardInfo(item.dataset.id));
+      }
     });
-  };
-  bindDeckSlotHandlers(deckEl);
+    bindLongPress(item, () => showHandCardInfo(item.dataset.id));
+  });
 
   const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
   const avgCost = validDeckIds.length
@@ -1911,7 +1812,6 @@ function renderDeck() {
   const collEl = document.getElementById('collection-list');
   const owned = sortCardIds(Object.keys(state.cards).filter(id => {
     if (!CARD_DEFS[id]) return false; // 削除済みカードが紛れていた場合、空白セルにならないよう除外
-    if ((CARD_DEFS[id].type || 'monster') === 'equipment') return false; // 装備カードはデッキに入れられないため、こちらには表示しない（モンスターへの装着はカード詳細画面から行う）
     if (collectionFilter === 'all') return true;
     return (CARD_DEFS[id].type || 'monster') === collectionFilter;
   }), collectionSortMode);
@@ -1931,6 +1831,7 @@ function renderDeck() {
       const id = btn.dataset.id;
       const idx = state.deck.indexOf(id);
       if (idx !== -1) state.deck.splice(idx, 1);
+      if (deckReorderSelectedId === id && countInDeck(id) === 0) deckReorderSelectedId = null;
       saveState();
       renderDeck();
     });
@@ -1951,6 +1852,21 @@ function renderDeck() {
     });
     bindLongPress(node, () => showHandCardInfo(node.dataset.id));
   });
+}
+
+// 並べ替え用: 2つのカードグループ（同カードのまとまり）の位置を入れ替える。
+// 枚数が違っても正しく動作するよう、一旦「ユニークな並び順」を作ってから、その順序でデッキ配列を再構築する
+function swapDeckGroups(idA, idB) {
+  const uniqueIds = [];
+  const seen = new Set();
+  state.deck.forEach(id => { if (!seen.has(id)) { seen.add(id); uniqueIds.push(id); } });
+  const idxA = uniqueIds.indexOf(idA);
+  const idxB = uniqueIds.indexOf(idB);
+  if (idxA === -1 || idxB === -1 || idxA === idxB) return;
+  [uniqueIds[idxA], uniqueIds[idxB]] = [uniqueIds[idxB], uniqueIds[idxA]];
+  const counts = {};
+  state.deck.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+  state.deck = uniqueIds.flatMap(id => Array(counts[id]).fill(id));
 }
 
 // ---------- デッキシナジー表示 ----------
@@ -2387,17 +2303,15 @@ function showLockedCardInfo(id) {
   document.getElementById('card-info-overlay').classList.remove('hidden');
 }
 
-function detailStatsBlock(def, evolved, id) {
+function detailStatsBlock(def, evolved) {
   const type = def.type || 'monster';
   if (type === 'monster') {
-    const equipBonus = id ? getEquipBonusFor(id) : { atk: 0, hp: 0 };
-    const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0) + equipBonus.atk;
-    const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0) + equipBonus.hp;
-    const equipMark = (equipBonus.atk || equipBonus.hp) ? ' ⚔️' : '';
+    const atk = def.atk + (evolved ? EVOLVE_BONUS_ATK : 0);
+    const hp = def.hp + (evolved ? EVOLVE_BONUS_HP : 0);
     return `
       <div class="cg-detail-stat"><span>コスト</span><b>${def.cost}</b></div>
-      <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}${equipMark}</b></div>
-      <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}${equipMark}</b></div>`;
+      <div class="cg-detail-stat"><span>攻撃力</span><b>${atk}${evolved ? ' ↑' : ''}</b></div>
+      <div class="cg-detail-stat"><span>HP</span><b>${hp}${evolved ? ' ↑' : ''}</b></div>`;
   }
   const typeLabel = type === 'spell' ? 'スペル' : type === 'equipment' ? '装備' : 'フィールド';
   return `
@@ -2411,38 +2325,15 @@ function openCardDetail(id) {
   const owned = state.cards[id];
   const el = ELEMENTS[def.element];
   const rarity = RARITY[def.rarity];
-  const type = def.type || 'monster';
-  const isMonster = type === 'monster';
-  const isEquip = type === 'equipment';
+  const isMonster = (def.type || 'monster') === 'monster';
   const deckCount = countInDeck(id);
   const maxCopies = maxCopiesFor(id);
-  const deckControlHtml = isEquip ? '' : `
+  const deckControlHtml = `
     <div class="cg-detail-deck-row ${deckCount > 0 ? 'in-deck' : ''}">
       <span class="cg-detail-deck-count">${deckCount > 0 ? '🃏 デッキ内: ' + deckCount + '/' + maxCopies + '枚' : 'デッキ未編成'}</span>
       <button class="cg-btn cg-detail-deck-btn" id="detail-deck-remove-btn" ${deckCount <= 0 ? 'disabled' : ''}>− 外す</button>
       <button class="cg-btn cg-btn-main cg-detail-deck-btn" id="detail-deck-add-btn" ${(deckCount >= maxCopies || state.deck.length >= 40) ? 'disabled' : ''}>＋ 追加</button>
     </div>`;
-  // 装備システム: 装備カードはデッキに入れず、モンスターカードへ直接装着する（1体につき1枚まで）
-  let equipControlHtml = '';
-  if (isMonster) {
-    const equippedId = state.cardEquipment[id];
-    const equippedDef = equippedId ? CARD_DEFS[equippedId] : null;
-    equipControlHtml = `
-      <div class="cg-detail-equip-row">
-        <span class="cg-detail-equip-label">${equippedDef ? `⚔️ 装備中: ${equippedDef.name}` : '装備なし'}</span>
-        <button class="cg-btn cg-detail-equip-btn" id="detail-equip-pick-btn">${equippedDef ? '変更' : '装備する'}</button>
-        ${equippedDef ? `<button class="cg-btn cg-detail-equip-btn" id="detail-equip-remove-btn">外す</button>` : ''}
-      </div>`;
-  } else if (isEquip) {
-    const holderId = getEquippedMonsterFor(id);
-    const holderDef = holderId ? CARD_DEFS[holderId] : null;
-    equipControlHtml = `
-      <div class="cg-detail-equip-row">
-        <span class="cg-detail-equip-label">${holderDef ? `⚔️ 装着先: ${holderDef.name}` : '未装着'}</span>
-        <button class="cg-btn cg-btn-main cg-detail-equip-btn" id="detail-equip-assign-btn">${holderDef ? '装着先を変更' : 'モンスターに装着'}</button>
-        ${holderDef ? `<button class="cg-btn cg-detail-equip-btn" id="detail-equip-remove-btn">外す</button>` : ''}
-      </div>`;
-  }
   const bond = getBondLevel(owned.count);
   const bondHtml = `
     <div class="cg-detail-bond-row" style="${bond.level > 0 ? `border-color:${bond.color};` : ''}">
@@ -2456,12 +2347,11 @@ function openCardDetail(id) {
       <div class="cg-detail-level">${isMonster ? `Lv.${owned.level} ` : ''}<span class="cg-detail-rarity" style="color:${rarity.color}">${rarity.name}</span>${owned.evolved ? ' <span class="cg-evolved-tag">★進化済</span>' : ''}</div>
       ${bondHtml}
       ${deckControlHtml}
-      ${equipControlHtml}
       ${isMonster ? `<div class="cg-detail-bar"><div class="cg-detail-bar-fill" style="width:${owned.level >= CARD_MAX_LEVEL ? 100 : Math.min(100, owned.exp)}%"></div></div>` : ''}
       <div class="cg-detail-desc">属性: <span style="color:${elementTextColor(def.element)}">${el.icon} ${el.name}</span></div>
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        ${detailStatsBlock(def, owned.evolved, id)}
+        ${detailStatsBlock(def, owned.evolved)}
       </div>
       ${isMonster ? (owned.level >= CARD_MAX_LEVEL
         ? `<div class="cg-evolve-done">Lv.${CARD_MAX_LEVEL}（最大レベル）</div>`
@@ -2489,16 +2379,6 @@ function openCardDetail(id) {
     if (idx === -1) return;
     state.deck.splice(idx, 1);
     saveState();
-    openCardDetail(id);
-  });
-  const equipPickBtn = document.getElementById('detail-equip-pick-btn');
-  if (equipPickBtn) equipPickBtn.addEventListener('click', () => openEquipPicker(id));
-  const equipAssignBtn = document.getElementById('detail-equip-assign-btn');
-  if (equipAssignBtn) equipAssignBtn.addEventListener('click', () => openMonsterPickerForEquip(id));
-  const equipRemoveBtn = document.getElementById('detail-equip-remove-btn');
-  if (equipRemoveBtn) equipRemoveBtn.addEventListener('click', () => {
-    const monsterId = isMonster ? id : getEquippedMonsterFor(id);
-    if (monsterId) unequipMonster(monsterId);
     openCardDetail(id);
   });
   const upgradeBtn = document.getElementById('detail-upgrade-btn');
@@ -3364,16 +3244,6 @@ function newBattleUnit(id, isPlayerCard) {
   const evolved = !!(owned && owned.evolved);
   let bonusAtk = evolved ? EVOLVE_BONUS_ATK : 0;
   let bonusHp = evolved ? EVOLVE_BONUS_HP : 0;
-  // 装備システム: モンスターカードに装着中の装備があれば、そのステータスボーナスを加算する（プレイヤー側のみ）
-  let equippedId = null;
-  if (isPlayerCard) {
-    equippedId = state.cardEquipment[id] || null;
-    const equippedDef = equippedId ? CARD_DEFS[equippedId] : null;
-    if (equippedDef && equippedDef.effect) {
-      bonusAtk += (equippedDef.effect.atk || 0);
-      bonusHp += (equippedDef.effect.hp || 0);
-    }
-  }
   const leader = isPlayerCard ? getActiveLeader() : null;
   let leaderBuff = false;
   if (leader && def.element === leader.element) {
@@ -3390,7 +3260,7 @@ function newBattleUnit(id, isPlayerCard) {
       bonusHp += allyBoost.value;
     }
   }
-  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, equippedId, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
+  return { id, defId: id, def, curHp: def.hp + bonusHp, atkBonus: bonusAtk, hpBonus: bonusHp, evolved, leaderBuff, canAttack: !!def.rush, justPlayed: true, stunned: false, revived: false, usedExtraAttack: false, ailment: null, shield: 0 };
 }
 
 function buildWeightedMonsterDeck(weights, count, spellChance, maxLegendCount) {
@@ -3955,10 +3825,9 @@ function renderBattle() {
   if (battle.fieldCard) {
     const fdef = CARD_DEFS[battle.fieldCard];
     const fel = ELEMENTS[fdef.element];
-    document.getElementById('battle-field-indicator-name').textContent = fdef.name;
+    document.getElementById('battle-field-indicator-name').textContent = `${fdef.emoji} ${fdef.name}`;
     fieldIndicatorEl.style.display = '';
     fieldIndicatorEl.style.borderColor = fel.color;
-    fieldIndicatorEl.onclick = () => showHandCardInfo(battle.fieldCard);
   } else {
     fieldIndicatorEl.style.display = 'none';
   }
@@ -4115,20 +3984,6 @@ function bindBattleEvents() {
           battle.selectedHandIdx = idx;
           renderBattle();
         }
-        return;
-      }
-      if (type === 'monster') {
-        // 誤操作防止のため即召喚はせず、1回目のタップで選択（確認）、
-        // 同じカードをもう一度タップすると、空いている枠に左から順番に自動召喚する
-        if (battle.selectedHandIdx === idx) {
-          const emptyIdx = battle.playerField.findIndex(u => u === null);
-          if (emptyIdx !== -1) {
-            playCardFromHand(idx, emptyIdx);
-          }
-          return;
-        }
-        battle.selectedHandIdx = idx;
-        renderBattle();
         return;
       }
       battle.selectedHandIdx = (battle.selectedHandIdx === idx) ? null : idx;
@@ -4335,7 +4190,7 @@ function showHandCardInfo(id, handIdx) {
       ${roleText ? `<div class="cg-detail-desc">${roleText}</div>` : ''}
       <div class="cg-detail-desc">${def.skill || '固有スキルなし'}</div>
       <div class="cg-detail-stats">
-        ${detailStatsBlock(def, evolved, id)}
+        ${detailStatsBlock(def, evolved)}
       </div>
       ${discardBtn}
     </div>`;
@@ -4439,28 +4294,6 @@ function castSpell(handIdx, targetIdx) {
       impactEffect(targetEl, u.curHp, 0);
       battle.enemyField[i] = null;
     });
-  } else if (eff.kind === 'aoeDamage') {
-    // 敵全体に固定ダメージを与える（対象がいなければ敵本体へ）
-    const leaderSp = getActiveLeader();
-    const dmgFlatSp = leaderSp ? (leaderSp.effect.enemyDmgFlat || 0) : 0;
-    const aoeVal = (eff.value || 0) + dmgFlatSp;
-    dealtDmg = aoeVal;
-    let hitAny = false;
-    battle.enemyField.forEach((u, i) => {
-      if (!u) return;
-      hitAny = true;
-      const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
-      impactEffect(targetEl, aoeVal, 0);
-      u.curHp -= mitigateIncomingDamage(u, aoeVal);
-    });
-    if (!hitAny) {
-      const targetEl = document.getElementById('battle-enemy-portrait');
-      impactEffect(targetEl, aoeVal, 0);
-      battle.enemyHp -= aoeVal;
-    }
-  } else if (eff.kind === 'cleanse') {
-    // 味方全体の状態異常（毒・火傷など）を解除する
-    battle.playerField.forEach(u => { if (u) u.ailment = null; });
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
@@ -4547,43 +4380,6 @@ function chooseAiAttackTargetIdx(validIndices, opponentField, dmg) {
     const canKill = effectiveHp <= dmg;
     const score = (canKill ? 1000 : 0) + threat;
     if (score > bestScore) { bestScore = score; bestIdx = idx; }
-  });
-  return bestIdx;
-}
-
-// AIの単体対象スペル選択：撃破できる相手がいれば、その中で最も脅威度の高い相手を優先する
-// （dmgがnullの場合＝HPに関わらず必ず撃破できる効果のため、脅威度だけで選ぶ）。従来は場の先頭のユニットを機械的に選んでいた
-function chooseAiSpellTargetIdx(field, dmg) {
-  let bestIdx = -1;
-  let bestScore = -Infinity;
-  field.forEach((t, idx) => {
-    if (!t) return;
-    const threat = t.def.atk + (t.atkBonus || 0);
-    let score = threat;
-    if (dmg != null) {
-      const effectiveHp = t.curHp - (t.shield || 0); // シールド分は簡易的に考慮する
-      const canKill = effectiveHp <= dmg;
-      score += canKill ? 1000 : 0;
-    }
-    if (score > bestScore) { bestScore = score; bestIdx = idx; }
-  });
-  return bestIdx;
-}
-
-// カードのレア度を数値化（AIがモンスターを出す優先順位を決める際に使用）
-const AI_RARITY_RANK = { normal: 0, rare: 1, epic: 2, legend: 3 };
-
-// AIのモンスター配置選択：出せる中で最もレア度・ステータス（攻撃力+HP）の高いカードを優先する
-// （従来は手札の並び順＝ドロー順で機械的に選んでいた）
-function chooseAiBestMonsterHandIdx(hand, availableCost) {
-  let bestIdx = -1;
-  let bestScore = -Infinity;
-  hand.forEach((id, i) => {
-    const def = CARD_DEFS[id];
-    if (!def || (def.type || 'monster') !== 'monster') return;
-    if (def.cost > availableCost) return;
-    const score = (AI_RARITY_RANK[def.rarity] || 0) * 100 + (def.atk || 0) + (def.hp || 0);
-    if (score > bestScore) { bestScore = score; bestIdx = i; }
   });
   return bestIdx;
 }
@@ -4918,11 +4714,6 @@ function attackTarget(attackerIdx, targetIdx) {
       battle.playerField.forEach(p => { if (p) p.shield = (p.shield || 0) + (tag.shieldValue || 0); });
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋味方全体にシールド付与`);
     }
-    if (tag && tag.effect === 'healAllAllies') {
-      // 【アビスジェリー】攻撃時、味方全体のHPを回復
-      battle.playerField.forEach(p => { if (p) { const maxHp = p.def.hp + (p.hpBonus || 0); p.curHp = Math.min(maxHp, p.curHp + tag.value); } });
-      skillFlash(`${attacker.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
-    }
     const killed = target.curHp <= 0;
     killedSomething = killed;
     if (tag && tag.effect === 'stunTarget' && !killed) {
@@ -5014,35 +4805,27 @@ function enemyTurn() {
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
 
   // AI: モンスター配置 → 装備 → フィールド → スペルの優先順で、出せるカードを出し続ける
-  // モンスターは手札の並び順（ドロー順）ではなく、出せる中で最もレア度・ステータスの高いカードを優先して出す
   let progressed = true;
   let guard = 0;
   while (progressed && guard < 30) {
     progressed = false;
     guard++;
-
-    // ① モンスター：空きスロットがあれば、出せる中で最も価値の高いカードを優先して出す
-    if (battle.enemyField.some(s => s === null)) {
-      const bestIdx = chooseAiBestMonsterHandIdx(battle.enemyHand, battle.enemyCost);
-      if (bestIdx !== -1) {
-        const id = battle.enemyHand[bestIdx];
-        const def = CARD_DEFS[id];
-        const emptyIdx = battle.enemyField.findIndex(s => s === null);
-        battle.enemyCost -= def.cost;
-        battle.enemyField[emptyIdx] = newBattleUnit(id);
-        applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
-        battle.enemyHand.splice(bestIdx, 1);
-        progressed = true;
-        continue;
-      }
-    }
-
     for (let i = 0; i < battle.enemyHand.length; i++) {
       const id = battle.enemyHand[i];
       const def = CARD_DEFS[id];
       const type = def.type || 'monster';
-      if (type === 'monster') continue; // モンスターは上の①で処理済み
       if (def.cost > battle.enemyCost) continue;
+
+      if (type === 'monster') {
+        const emptyIdx = battle.enemyField.findIndex(s => s === null);
+        if (emptyIdx === -1) continue;
+        battle.enemyCost -= def.cost;
+        battle.enemyField[emptyIdx] = newBattleUnit(id);
+        applySkillTag(battle.enemyField[emptyIdx], 'onPlay', false);
+        battle.enemyHand.splice(i, 1);
+        progressed = true;
+        break;
+      }
 
       if (type === 'equipment' && def.target === 'friendly') {
         const targetIdx = chooseAiBestUnitIdx(battle.enemyField);
@@ -5079,8 +4862,7 @@ function enemyTurn() {
           battle.enemyCost -= def.cost;
           battle.enemyHand.splice(i, 1);
           if (eff.kind === 'damage') {
-            // 撃破できる相手がいればその中で、いなければ単純に最も脅威度の高い相手を狙う（従来は場の先頭を機械的に選択）
-            const targetIdx = chooseAiSpellTargetIdx(battle.playerField, eff.value);
+            const targetIdx = battle.playerField.findIndex(u => u !== null);
             const targetEl = targetIdx !== -1
               ? document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx]
               : document.getElementById('battle-player-portrait');
@@ -5092,8 +4874,7 @@ function enemyTurn() {
               battle.playerHp -= eff.value;
             }
           } else if (eff.kind === 'destroy') {
-            // 必ず撃破できる効果のため、最も脅威度の高い相手を狙う（従来は場の先頭を機械的に選択）
-            const targetIdx = chooseAiSpellTargetIdx(battle.playerField, null);
+            const targetIdx = battle.playerField.findIndex(u => u !== null);
             if (targetIdx !== -1) {
               const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
               impactEffect(targetEl, battle.playerField[targetIdx].curHp, 0);
@@ -5123,23 +4904,6 @@ function enemyTurn() {
               }
             });
             battle.playerField = [null, null, null, null, null];
-          } else if (eff.kind === 'aoeDamage') {
-            const aoeVal = eff.value || 0;
-            let hitAny = false;
-            battle.playerField.forEach((u, k) => {
-              if (!u) return;
-              hitAny = true;
-              const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[k];
-              impactEffect(targetEl, aoeVal, 0);
-              u.curHp -= mitigateIncomingDamage(u, aoeVal);
-            });
-            if (!hitAny) {
-              const targetEl = document.getElementById('battle-player-portrait');
-              impactEffect(targetEl, aoeVal, 0);
-              battle.playerHp -= aoeVal;
-            }
-          } else if (eff.kind === 'cleanse') {
-            battle.enemyField.forEach(u => { if (u) u.ailment = null; });
           }
           skillFlash(`${def.name}！\n${def.skill}`);
           progressed = true;
@@ -5221,10 +4985,6 @@ function enemyTurn() {
           battle.playerField.forEach(p => { if (p) p.curHp -= mitigateIncomingDamage(p, tag.value); });
           battle.enemyField.forEach(e => { if (e) e.shield = (e.shield || 0) + (tag.shieldValue || 0); });
           skillFlash(`${u.def.name}のスキル！\n敵全体にダメージ＋敵にシールド付与`);
-        }
-        if (tag && tag.effect === 'healAllAllies') {
-          battle.enemyField.forEach(e => { if (e) { const maxHp = e.def.hp + (e.hpBonus || 0); e.curHp = Math.min(maxHp, e.curHp + tag.value); } });
-          skillFlash(`${u.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
         }
         killed = target.curHp <= 0;
         if (tag && tag.effect === 'stunTarget' && !killed) target.stunned = true;
@@ -5648,13 +5408,6 @@ function applyRemoteAction(action) {
         if (targetIdx !== null) battle.playerField[targetIdx] = null;
       } else if (eff.kind === 'destroyRandom') {
         (p.destroyRandomTargets || []).forEach(i => { battle.playerField[i] = null; });
-      } else if (eff.kind === 'aoeDamage') {
-        const aoeVal = p.dmg || eff.value || 0;
-        let hitAny = false;
-        battle.playerField.forEach(u => { if (u) { hitAny = true; u.curHp -= mitigateIncomingDamage(u, aoeVal); } });
-        if (!hitAny) battle.playerHp -= aoeVal;
-      } else if (eff.kind === 'cleanse') {
-        battle.enemyField.forEach(u => { if (u) u.ailment = null; });
       }
       battle.playerField = cleanupField(battle.playerField, battle.playerGraveyard);
       break;
@@ -5820,8 +5573,7 @@ const SHOP_PACKS = [
     weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     legendPityLimit: 50,
     rarityPool: {
-      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing',
-        'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow'],
+      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing'],
       rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
       epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse'],
       legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance'],
@@ -5837,18 +5589,11 @@ const SHOP_PACKS = [
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },
     legendPityLimit: 50,
     rarityPool: {
-      // 初心者ガチャ等、他のガチャでも入手できる旧カード（下記コメントの16種）は、
-      // ご要望によりプレミアムガチャ第1弾の排出対象から除外し、このガチャ限定の新規カードのみを対象にしている
-      // 除外: fire_phoenix, water_serpent, nature_dryad, dark_chaosdemon, light_angel（エピック）
-      //      fire_bahamut, water_seiren, nature_emeraldgaia, dark_reaper, light_arcknight（レジェンド）
-      //      nature_wolf, water_icewolf, nature_swiftrabbit, fire_flarelion, nature_venomscorpion, light_lightguardian（レア）
-      rare: ['fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn', 'water_abyssjelly'],
-      epic: ['fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon', 'spell_windcutter', 'spell_purification'],
-      legend: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer', 'spell_tidalwave'],
+      epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight'],
     },
-    preview: ['fire_kagutsuchi', 'water_mermaidsongress', 'nature_foreststag', 'light_fairylumina', 'dark_deathwhisperer', 'spell_tidalwave',
-              'fire_cerberus', 'water_icequartz', 'nature_venusharvest', 'light_crystalguardian', 'dark_deepabyssdemon', 'spell_windcutter', 'spell_purification',
-              'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn', 'water_abyssjelly'] },
+    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'dark_reaper', 'light_arcknight',
+              'fire_phoenix', 'water_serpent', 'nature_dryad', 'dark_chaosdemon', 'light_angel'] },
 ];
 
 // ガチャの排出確率を計算する（Apple App Store等の審査基準に対応するため、カード1枚ごとの正確な確率を開示する）
@@ -6567,7 +6312,7 @@ const INTERACTIVE_TUTORIAL_STEPS = [
       const card = el.closest('#collection-list .cg-coll-item');
       if (!card) return false;
       const id = card.dataset.id;
-      return !!(id && state.cards[id] && countInDeck(id) < maxCopiesFor(id));
+      return !!(id && !state.deck.includes(id) && state.cards[id]);
     },
     text: '下のカード一覧からカードをタップすると、デッキに追加できます。試しに1枚タップしてみましょう。', hint: '👆 好きなカードをタップ' },
   { selector: '#nav-battle',
@@ -6600,14 +6345,13 @@ function findTutorialMonsterHandCard() {
   return document.querySelector(`#battle-hand .cg-hand-card[data-idx="${idx}"]`);
 }
 
-// デッキ編成画面のカード一覧から、まだ上限枚数に達していないカードを対象にする
-// （新規プレイヤーは所持カード＝初期デッキの内容そのものであることが多く、「まだデッキに1枚も入っていないカード」
-// 　に限定すると対象が見つからないことがあるため、「あと1枚以上追加できるカード」を対象にする）
+// デッキ編成画面のカード一覧から、まだデッキに入っていないカードを対象にする
+// （既にデッキに入っているカードをタップすると外れてしまい、意図と逆の動作になるため）
 function findTutorialAddableCard() {
   const nodes = document.querySelectorAll('#collection-list .cg-coll-item');
   for (const node of nodes) {
     const id = node.dataset.id;
-    if (id && state.cards[id] && countInDeck(id) < maxCopiesFor(id)) return node;
+    if (id && !state.deck.includes(id) && state.cards[id]) return node;
   }
   return null;
 }
@@ -6811,12 +6555,12 @@ const SCREEN_HELP = {
   collection: {
     title: 'カード画面のヘルプ',
     items: [
-      '<b>① デッキ編成</b><br>カード一覧のカードをタップするとデッキに追加、デッキ側のカードをタップすると1枚外れます（タップする場所によって、追加か削除かが決まるシンプルな操作です）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
-      '<b>② デッキの中身・枚数</b><br>「デッキの中身」に、現在編成中のカードと枚数・平均コストが表示されます。カードをタップすると1枚外れます。',
+      '<b>① デッキ編成</b><br>カード一覧からタップでデッキに追加できます。デッキに入っているカードには、左上に赤い「−」ボタンが表示され、タップすると1枚外せます（デッキ側に移動しなくてもその場で調整できます）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
+      '<b>② カードの並べ替え</b><br>デッキ内のカードをタップして選択（金色に光ります）→入れ替えたい場所のカードをタップすると、位置が入れ替わります。',
       '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
-      '<b>④ リーダー・デッキ管理</b><br>「リーダー・デッキ管理」をタップすると開き、使用するリーダーの選択や、デッキの保存・読み込み・編集ができます。',
+      '<b>④ デッキの保存・編集</b><br>編成したデッキを名前を付けて保存・読み込み・編集できます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
-      '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。',
+      '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。ここからリーダーを設定することもできます。',
       '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
     ],
   },
@@ -7096,9 +6840,6 @@ function init() {
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
-  });
-  document.getElementById('equip-picker-cancel').addEventListener('click', () => {
-    document.getElementById('equip-picker-overlay').classList.add('hidden');
   });
   document.getElementById('draw-choice-yes').addEventListener('click', () => resolveDrawChoice(true));
   document.getElementById('gacha-odds-close').addEventListener('click', () => {

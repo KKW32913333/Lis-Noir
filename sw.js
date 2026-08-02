@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v221';
+const CACHE_NAME = 'lisnoir-cache-v202';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -62,16 +62,6 @@ const CACHE_ASSETS = [
   'dragon-ancient.png',
   'card-light-arcknight.png',
   'card-equip-aqualance.png',
-  'card-equip-dungeon10.png',
-  'card-equip-dungeon20.png',
-  'card-equip-dungeon30.png',
-  'card-equip-dungeon40.png',
-  'card-equip-dungeon50.png',
-  'card-equip-dungeon60.png',
-  'card-equip-dungeon70.png',
-  'card-equip-dungeon80.png',
-  'card-equip-dungeon90.png',
-  'card-equip-dungeon100.png',
   'card-field-sanctuary.png',
   'card-field-abyss.png',
   'gacha-icon-nightlegends.png',
@@ -87,38 +77,15 @@ const CACHE_ASSETS = [
   'card-fire-bahamut.png',
   'card-dark-nocturia.png',
   'card-spell-healing.png',
+  'card-equip-shield.png',
+  'card-equip-dragonmail.png',
   'card-spell-iceshard.png',
   'card-field-flamecore.png',
   'card-field-aquadeep.png',
   'card-field-evergrove.png',
   'card-spell-fireball.png',
+  'card-equip-ironsword.png',
   'card-spell-mindsurge.png',
-  // ---- プレミアムガチャ第1弾 追加カード ----
-  'card-fire-infernoimp.png',
-  'card-water-frostwolf.png',
-  'card-nature-leafslime.png',
-  'card-light-sainttiger.png',
-  'card-dark-scarecrow.png',
-  'card-fire-flameboar.png',
-  'card-dark-wraithbanshee.png',
-  'card-nature-stonesanctuary.png',
-  'card-light-ancientunicorn.png',
-  // ---- プレミアムガチャ第1弾 追加カード（エピック・レジェンド） ----
-  'card-fire-cerberus.png',
-  'card-water-icequartz.png',
-  'card-nature-venusharvest.png',
-  'card-light-crystalguardian.png',
-  'card-dark-deepabyssdemon.png',
-  'card-fire-kagutsuchi.png',
-  'card-water-mermaidsongress.png',
-  'card-nature-foreststag.png',
-  'card-light-fairylumina.png',
-  'card-dark-deathwhisperer.png',
-  // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
-  'card-water-abyssjelly.png',
-  'card-spell-windcutter.png',
-  'card-spell-tidalwave.png',
-  'card-spell-purification.png',
   'battle-bg-forest.jpg',
   'battle-bg-snow.jpg',
   'battle-bg-cave.jpg',
