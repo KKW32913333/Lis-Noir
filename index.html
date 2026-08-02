@@ -187,11 +187,11 @@
       linear-gradient(180deg, #FFFFFF 0%, #EDEBFF 30%, #C7B6FF 65%, #5A2D91 100%);
     overflow:hidden; box-shadow:0 0 60px #00000022;}
 
-  .cg-screen{position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;
+  .cg-screen{position:absolute; inset:0; height:100%; z-index:1; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
     opacity:0; transform:translateY(22px) scale(.97); pointer-events:none; visibility:hidden;
     transition:opacity .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1), visibility 0s linear .32s;}
-  .cg-screen.active{opacity:1; transform:translateY(0) scale(1); pointer-events:auto; visibility:visible;
+  .cg-screen.active{opacity:1; transform:none; pointer-events:auto; visibility:visible;
     transition:opacity .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1), visibility 0s linear 0s; z-index:2;}
   .cg-screen.cg-screen-idle{display:none;}
 
@@ -317,6 +317,7 @@
   /* ---------- Deck screen ---------- */
   .cg-section-title{font-size:13px; color:var(--gold); padding:12px 14px 6px; letter-spacing:1px;}
   .cg-deck-header{display:flex; justify-content:space-between; align-items:center; padding:0 14px;}
+  .cg-deck-content-count{font-size:11px; color:var(--text-dim);}
   .cg-leader-select-row{display:flex; gap:10px; padding:8px 14px 14px; overflow-x:auto;}
   .cg-leader-card{position:relative; flex-shrink:0; width:96px; border-radius:12px; overflow:hidden; cursor:pointer;
     border:2px solid var(--hairline-panel); background:var(--bg-panel); box-shadow:0 3px 8px #00000033; transition:transform .1s;
@@ -382,6 +383,24 @@
   .cg-detail-bond-label{font-size:11px; font-weight:700; color:var(--text-dim);}
   .cg-detail-bond-progress{font-size:10px; color:var(--text-dim); opacity:.85;}
   .cg-detail-deck-btn:disabled{opacity:.35; cursor:default;}
+  .cg-detail-equip-row{display:flex; align-items:center; gap:6px; margin-bottom:12px; padding:8px 10px; border-radius:12px;
+    background:var(--bg-panel2); border:1px solid var(--hairline-panel); flex-wrap:wrap;}
+  .cg-detail-equip-label{flex:1; font-size:11px; font-weight:700; color:var(--text-dim); min-width:120px;}
+  .cg-detail-equip-btn{flex-shrink:0; font-size:11px; padding:6px 10px;}
+  .cg-equip-picker-panel{max-height:80vh; display:flex; flex-direction:column;}
+  .cg-equip-picker-list{overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; margin:10px 0; -webkit-overflow-scrolling:touch;}
+  .cg-equip-picker-item{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer;
+    min-height:52px; background:var(--bg-panel2); border:1px solid var(--hairline-panel);}
+  .cg-equip-picker-item:active{background:var(--gold-soft);}
+  .cg-equip-picker-item .cg-card-art-only{width:44px; aspect-ratio:3/4; flex-shrink:0; border-radius:8px; overflow:hidden;
+    border:1px solid var(--rarity-color, var(--hairline-panel));}
+  .cg-equip-picker-item .cg-card-art-only .cg-card-img{width:100%; height:100%; object-fit:cover; display:block;
+    pointer-events:none; -webkit-user-drag:none;}
+  .cg-equip-picker-item .cg-card-art-only .cg-card-placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .cg-equip-picker-item-text{display:flex; flex-direction:column; gap:3px; text-align:left; overflow:hidden;}
+  .cg-equip-picker-item-name{font-size:13px; font-weight:700;}
+  .cg-equip-picker-item-sub{font-size:10px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; line-height:1.3;}
   .cg-detail-bar{height:6px; background:var(--hairline); border-radius:4px; overflow:hidden; margin-bottom:10px;}
   .cg-detail-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
   .cg-detail-desc{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
@@ -482,7 +501,7 @@
     background:#2f5f8fdd; border-radius:6px; padding:1px 4px; filter:drop-shadow(0 1px 2px #000);}
 
   .cg-field-indicator{font-size:10px; color:var(--text-panel); background:var(--bg-panel2); border:1px solid var(--hairline-panel);
-    padding:5px 9px; border-radius:10px; box-shadow:0 2px 6px #00000033; margin-left:auto; max-width:34%; box-sizing:border-box; min-width:0;}
+    padding:5px 9px; border-radius:10px; box-shadow:0 2px 6px #00000033; margin-left:auto; max-width:34%; box-sizing:border-box; min-width:0; cursor:pointer;}
   .cg-field-indicator-label{font-size:8px; color:var(--gold-bright); font-weight:800; letter-spacing:.5px; margin-bottom:2px;}
   .cg-field-indicator-name{font-size:11px; font-weight:800; line-height:1.25; word-break:break-word; white-space:normal;}
 
@@ -1012,7 +1031,7 @@
   #card-info-body{width:100%; margin-bottom:14px;}
 
   /* ---------- 初回オンボーディング ---------- */
-  .cg-tutorial-mask{position:fixed; z-index:200; background:rgba(0,0,0,.72); pointer-events:none; transition:all .25s ease;}
+  .cg-tutorial-mask{position:fixed; z-index:200; background:rgba(0,0,0,.72); pointer-events:auto; transition:all .25s ease;}
   .cg-tutorial-mask.hidden{display:none;}
   .cg-tutorial-ring{position:fixed; z-index:201; border-radius:14px; border:3px solid var(--gold-bright);
     box-shadow:0 0 0 4px #00000055, 0 0 18px 3px var(--gold-bright); pointer-events:none; transition:all .25s ease;
@@ -1321,6 +1340,15 @@
   .cg-sort-select{font-family:inherit; font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
     background:var(--bg-panel2); color:var(--text-panel);}
   .cg-deck-toolbar{display:flex; align-items:center; justify-content:space-between; padding:10px 14px 0;}
+  .cg-deck-collapsible{margin:4px 14px 10px; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px; overflow:hidden;}
+  .cg-deck-collapsible-summary{display:flex; align-items:center; justify-content:space-between; padding:11px 14px; cursor:pointer;
+    list-style:none; -webkit-tap-highlight-color:transparent;}
+  .cg-deck-collapsible-summary::-webkit-details-marker{display:none;}
+  .cg-deck-collapsible-summary::marker{content:'';}
+  .cg-deck-collapsible-arrow{font-size:10px; color:var(--text-dim); transition:transform .15s ease;}
+  .cg-deck-collapsible[open] .cg-deck-collapsible-arrow{transform:rotate(180deg);}
+  .cg-deck-collapsible-body{padding:0 0 6px; border-top:1px solid var(--hairline-panel);}
+  .cg-deck-collapsible-body .cg-deck-header{padding:10px 14px 0;}
   .cg-deck-preset-bar{padding:2px 14px 8px; display:flex; gap:8px;}
   .cg-deck-preset-save-btn{flex:1; font-size:12px; padding:9px;}
   .cg-deck-preset-save-btn:disabled{opacity:.4; cursor:default;}
@@ -1380,19 +1408,14 @@
     80%{transform:translateX(4px);}
   }
   .cg-shake{animation:cgShake .35s ease-in-out;}
-  .cg-deck-slot-item{position:relative; touch-action:pan-y; transition:transform .15s ease, opacity .15s ease; cursor:pointer;}
-  .cg-deck-slot-item.dragging{transform:scale(1.08); z-index:10; opacity:.85; box-shadow:0 8px 20px #00000055; touch-action:none;}
-  .cg-deck-slot-item.drop-target .cg-card{outline:3px solid var(--true-gold); outline-offset:2px; border-radius:10px;}
-  .cg-deck-slot-item.reorder-selected{transform:scale(1.06); z-index:6;}
-  .cg-deck-slot-item.reorder-selected .cg-card{outline:3px solid var(--true-gold); outline-offset:2px; border-radius:10px;
-    box-shadow:0 0 12px var(--gold-soft);}
+  .cg-deck-slot-item{position:relative; transition:transform .1s ease; cursor:pointer;}
+  .cg-deck-slot-item:active{transform:scale(.95);}
   .cg-deck-slot-count{position:absolute; top:2px; left:2px; min-width:22px; height:20px; padding:0 5px; border-radius:10px;
     background:var(--gold); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; z-index:5;
     box-shadow:0 2px 4px #00000033;}
-  .cg-deck-remove-btn{position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; z-index:5;
-    background:#23242bdd; color:#ff8a95; border:1px solid var(--hp-red); font-size:11px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; padding:0;}
-  .cg-deck-remove-btn:active{transform:scale(.9);}
+  .cg-deck-remove-icon{position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; z-index:5;
+    background:#23242bdd; color:#ff8a95; border:1px solid var(--hp-red); font-size:10px; pointer-events:none;
+    display:flex; align-items:center; justify-content:center;}
 </style>
 </head>
 <body>
@@ -1470,15 +1493,6 @@
     <div class="cg-help-panel cg-card-info-panel cg-ornate cg-double-frame">
       <div id="card-info-body"></div>
       <button class="cg-btn cg-btn-main" id="card-info-close">閉じる</button>
-    </div>
-  </div>
-
-  <!-- 装備選択（モンスターに装備する装備カード／装備カードを装着するモンスターを選ぶ） -->
-  <div id="equip-picker-overlay" class="cg-help-overlay hidden">
-    <div class="cg-help-panel cg-ornate cg-double-frame">
-      <div id="equip-picker-title" class="cg-help-title"></div>
-      <div id="equip-picker-list" class="cg-help-body"></div>
-      <button class="cg-btn cg-btn-main" id="equip-picker-cancel">閉じる</button>
     </div>
   </div>
 
@@ -1649,26 +1663,34 @@
     </div>
 
     <div id="collection-deck-view">
-      <div class="cg-deck-header">
-        <span class="cg-section-title" style="padding:0;">リーダー</span>
-        <span style="font-size:11px; color:var(--text-dim);">1デッキに1体まで設定可能</span>
-      </div>
-      <div id="leader-select-row" class="cg-leader-select-row"></div>
+      <details class="cg-deck-collapsible">
+        <summary class="cg-deck-collapsible-summary">
+          <span class="cg-section-title" style="padding:0;">リーダー・デッキ管理</span>
+          <span class="cg-deck-collapsible-arrow">▼</span>
+        </summary>
+        <div class="cg-deck-collapsible-body">
+          <div class="cg-deck-header">
+            <span class="cg-section-title" style="padding:0;">リーダー</span>
+            <span style="font-size:11px; color:var(--text-dim);">1デッキに1体まで設定可能</span>
+          </div>
+          <div id="leader-select-row" class="cg-leader-select-row"></div>
+
+          <div class="cg-deck-preset-bar">
+            <button class="cg-btn cg-deck-preset-save-btn" id="deck-preset-save-btn">💾 このデッキを保存</button>
+            <button class="cg-btn cg-deck-clear-btn" id="deck-clear-btn">🗑 一括解除</button>
+            <button class="cg-btn cg-deck-share-btn" id="deck-share-btn">🔗 共有</button>
+          </div>
+          <div id="deck-preset-list" class="cg-deck-preset-list"></div>
+        </div>
+      </details>
 
       <div class="cg-deck-header">
-        <span class="cg-section-title" style="padding:0;">デッキ</span>
-        <span style="font-size:12px; color:var(--text-dim);">枚数: <span id="deck-count">0/30</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
+        <span class="cg-section-title" style="padding:0;">デッキの中身</span>
+        <span class="cg-deck-content-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
       </div>
-      <div class="cg-deck-hint">タップして選択→別のカードをタップで並び替え。外すのは各カードの「−」ボタンから</div>
+      <div class="cg-deck-hint">カードをタップすると1枚外れます</div>
       <div id="deck-slots"></div>
       <div id="deck-synergy-panel" class="cg-deck-synergy-panel"></div>
-
-      <div class="cg-deck-preset-bar">
-        <button class="cg-btn cg-deck-preset-save-btn" id="deck-preset-save-btn">💾 このデッキを保存</button>
-        <button class="cg-btn cg-deck-clear-btn" id="deck-clear-btn">🗑 一括解除</button>
-        <button class="cg-btn cg-deck-share-btn" id="deck-share-btn">🔗 共有</button>
-      </div>
-      <div id="deck-preset-list" class="cg-deck-preset-list"></div>
 
       <div class="cg-deck-toolbar">
         <span class="cg-section-title" style="padding:0;">カードコレクション</span>
@@ -1678,7 +1700,6 @@
         <button class="cg-filter-tab active" data-filter="all">全て</button>
         <button class="cg-filter-tab" data-filter="monster">モンスター</button>
         <button class="cg-filter-tab" data-filter="spell">スペル</button>
-        <button class="cg-filter-tab" data-filter="equipment">装備</button>
         <button class="cg-filter-tab" data-filter="field">フィールド</button>
       </div>
       <div class="cg-sort-row">
@@ -1894,7 +1915,7 @@
           <div class="cg-help-item"><b>①' カードを引くかどうかの選択</b><br>自分のターン開始時、カードを引くかどうかを選べます（敵も同様に判断します）。手札がいっぱいの時などは、あえて引かない選択もできます。</div>
           <div class="cg-help-item"><b>② モンスターを出す</b><br>手札のモンスターカードをタップ→空いている自分の場をタップで配置。出したターンは攻撃できません。</div>
           <div class="cg-help-item"><b>③ 攻撃</b><br>攻撃可能な自分のモンスター（左上に緑の点）をタップ→敵モンスターか、敵の顔アイコン・「直接攻撃」ボタンをタップで直接攻撃。<br>💡モンスターを選ばずに敵の顔アイコンをタップするだけでも、攻撃可能なモンスターが自動で選ばれて直接攻撃できます。</div>
-          <div class="cg-help-item"><b>④ スペル・装備・フィールド</b><br>スペルは敵や自分に効果を発動、装備は味方に付けて強化、フィールドは場全体に継続効果を与えます。手札からタップして使用。現在場に出ているフィールドカードは、自分のHP表示の右側に、名称と効果があわせて表示されます。</div>
+          <div class="cg-help-item"><b>④ スペル・装備・フィールド</b><br>スペルは敵や自分に効果を発動、装備は味方に付けて強化、フィールドは場全体に継続効果を与えます。手札からタップして使用。現在場に出ているフィールドカードは、自分のHP表示の右側に名称が表示され、タップすると効果を確認できます。</div>
           <div class="cg-help-item"><b>⑤ カード情報</b><br>場のモンスターを長押しすると、詳細（能力・ステータス）を確認できます。自分の場のモンスターは、そこから墓地に送る（除外する）こともできます。</div>
           <div class="cg-help-item"><b>⑥ 勝敗</b><br>相手のHPを0にすれば勝利。自分のHPが0になると敗北です。また、山札のカードが0枚の状態でドローするタイミングを迎えると、その時点で敗北となります（相手も同様）。</div>
           <div class="cg-help-item"><b>⑦ 属性相性</b><br>画面上部の相性表の通り、火は自然に、自然は水に、水は火に強い（3すくみ）。光と闇はお互いが弱点です。有利な属性で攻撃するとダメージ+2、不利だと-1されます。</div>
@@ -2001,6 +2022,15 @@
       <div class="cg-cloud-restore-desc" id="generic-confirm-desc"></div>
       <button class="cg-btn cg-btn-main" id="generic-confirm-yes">はい</button>
       <button class="cg-btn" id="generic-confirm-no">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 装備カードをモンスターに装着する際の選択オーバーレイ -->
+  <div id="equip-picker-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-ornate cg-double-frame cg-equip-picker-panel">
+      <div class="cg-help-title" id="equip-picker-title">装備を選択</div>
+      <div class="cg-equip-picker-list" id="equip-picker-list"></div>
+      <button class="cg-btn" id="equip-picker-cancel">キャンセル</button>
     </div>
   </div>
 
