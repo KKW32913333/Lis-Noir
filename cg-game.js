@@ -107,7 +107,7 @@ const CARD_DEFS = {
   fire_infernoimp:    { name: 'レッドサラマンダー', element: 'fire',  rarity: 'normal', cost: 2, atk: 3, hp: 1, role: 'attacker', skill: '', image: 'card-fire-redsalamander.png', emoji: '🦎' },
   water_frostwolf:     { name: 'アクアスピリット',   element: 'water',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-water-aquaspirit.png', emoji: '💧' },
   nature_leafslime:    { name: 'フォレストフェアリー',   element: 'nature', rarity: 'normal', cost: 2, atk: 2, hp: 1, role: 'attacker', skill: '', image: 'card-nature-forestfairy.png', emoji: '🧚' },
-  light_sainttiger:    { name: 'セイントタイガー', element: 'light',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-light-sainttiger.png', emoji: '🐯' },
+  light_sainttiger:    { name: 'ホーリーエンジェル', element: 'light',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel2.png', emoji: '👼' },
   dark_scarecrow:      { name: 'ソウルレイス',     element: 'dark',   rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'defender', skill: '', image: 'card-dark-soulwraith.png', emoji: '👻' },
   fire_flameboar:      { name: 'フレイムボア',     element: 'fire',   rarity: 'rare', cost: 3, atk: 3, hp: 4, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.2 }, skill: '受けるダメージを常に20%軽減する（硬い体毛）', image: 'card-fire-flameboar.png', emoji: '🐗' },
   dark_wraithbanshee:  { name: 'レイスバンシー',   element: 'dark',   rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.7, turns: 2 }, skill: '攻撃時、70%の確率で毒（2ターン）を付与する', image: 'card-dark-wraithbanshee.png', emoji: '👻' },
