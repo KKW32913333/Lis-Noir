@@ -1961,12 +1961,13 @@ function bindDeckDragHandlers(container, groups) {
       item = handle.closest('.cg-deck-slot-item');
       if (!item) return;
       dragging = true;
-      longPressFired = true; // ドラッグ操作を、カードのタップ（外す）・長押し（詳細）と誤って重複発火させないためのガード
+      longPressFired = true; // ドラッグ操作を、カードのタップ（外す）と誤って重複発火させないためのガード
       startX = e.clientX;
       startY = e.clientY;
       item.classList.add('dragging');
       handle.setPointerCapture(e.pointerId);
       e.preventDefault();
+      e.stopPropagation(); // 親要素（カード本体）の長押し判定に伝播させない（伝播すると、そちらの独自タイマーが動いてカード詳細ポップアップが開いてしまう）
     };
     const onPointerMove = (e) => {
       if (!dragging || !item) return;
