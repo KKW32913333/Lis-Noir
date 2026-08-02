@@ -109,10 +109,10 @@ const CARD_DEFS = {
   nature_leafslime:    { name: 'フォレストフェアリー',   element: 'nature', rarity: 'normal', cost: 2, atk: 2, hp: 1, role: 'attacker', skill: '', image: 'card-nature-forestfairy.png', emoji: '🧚' },
   light_sainttiger:    { name: 'ホーリーエンジェル', element: 'light',  rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel2.png', emoji: '👼' },
   dark_scarecrow:      { name: 'ソウルレイス',     element: 'dark',   rarity: 'normal', cost: 2, atk: 2, hp: 2, role: 'defender', skill: '', image: 'card-dark-soulwraith.png', emoji: '👻' },
-  fire_flameboar:      { name: 'フレイムボア',     element: 'fire',   rarity: 'rare', cost: 3, atk: 3, hp: 4, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.2 }, skill: '受けるダメージを常に20%軽減する（硬い体毛）', image: 'card-fire-flameboar.png', emoji: '🐗' },
-  dark_wraithbanshee:  { name: 'レイスバンシー',   element: 'dark',   rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 1, chance: 0.7, turns: 2 }, skill: '攻撃時、70%の確率で毒（2ターン）を付与する', image: 'card-dark-wraithbanshee.png', emoji: '👻' },
-  nature_stonesanctuary: { name: 'ストーンサンクチュアリ', element: 'nature', rarity: 'rare', cost: 3, atk: 2, hp: 4, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 2 }, skill: '場に出た時、味方全体にシールド2を付与する', image: 'card-nature-stonesanctuary.png', emoji: '🐢' },
-  light_ancientunicorn: { name: 'エンシェントユニコーン', element: 'light', rarity: 'rare', cost: 4, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする', image: 'card-light-ancientunicorn.png', emoji: '🦄' },
+  fire_flameboar:      { name: 'ケルベロス',     element: 'fire',   rarity: 'rare', cost: 3, atk: 3, hp: 5, role: 'defender', skillTag: { trigger: 'passiveDamageReduction', value: 0.2 }, skill: '受けるダメージを常に20%軽減する（冥府の門を守る三つの首）', image: 'card-fire-cerberus2.png', emoji: '🐕' },
+  dark_wraithbanshee:  { name: 'カロン',   element: 'dark',   rarity: 'rare', cost: 3, atk: 2, hp: 5, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'cleanseAndHealAllies', value: 1 }, skill: '場に出た時、味方全体の状態異常を解除し、HPを1回復する（冥府へ渡す船頭）', image: 'card-dark-charon.png', emoji: '🛶' },
+  nature_stonesanctuary: { name: 'ミノタウロス', element: 'nature', rarity: 'rare', cost: 3, atk: 5, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 2 }, skill: '攻撃時、追加で2ダメージ（怒れる猛牛の突進）', image: 'card-nature-minotaur.png', emoji: '🐂' },
+  light_ancientunicorn: { name: 'ペガサス', element: 'light', rarity: 'rare', cost: 4, atk: 5, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする（天翔ける一撃）', image: 'card-light-pegasus2.png', emoji: '🐎' },
 
   // ---- プレミアムガチャ第1弾 追加カード（エピック5種・レジェンド5種） ----
   fire_cerberus:        { name: 'ヘルハウンド・ケルベロス', element: 'fire',   rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '攻撃時、敵全体に3ダメージを与える', image: 'card-fire-cerberus.png', emoji: '🐺' },
@@ -127,7 +127,7 @@ const CARD_DEFS = {
   dark_deathwhisperer:   { name: 'デスウィスパラー',   element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる', image: 'card-dark-deathwhisperer.png', emoji: '💀' },
 
   // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
-  water_abyssjelly:      { name: 'アビスジェリー',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-water-abyssjelly.png', emoji: '🎐' },
+  water_abyssjelly:      { name: 'ヒュドラ',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（切っても再生する首）', image: 'card-water-hydra.png', emoji: '🐍' },
   spell_windcutter:      { name: 'ウィンドカッター',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 5 }, skill: '敵全体に5ダメージを与える', image: 'card-spell-windcutter.png', emoji: '🌪️' },
   spell_tidalwave:       { name: 'タイダルウェイブ',   element: 'water', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 7 }, skill: '敵全体に7ダメージを与える', image: 'card-spell-tidalwave.png', emoji: '🌊' },
   spell_purification:    { name: 'ピュリフィケーション', element: 'light', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'cleanse' }, skill: '味方全体の状態異常（毒・火傷など）を解除する', image: 'card-spell-purification.png', emoji: '✨' },
@@ -5003,7 +5003,7 @@ function attackTarget(attackerIdx, targetIdx) {
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋味方全体にシールド付与`);
     }
     if (tag && tag.effect === 'healAllAllies') {
-      // 【アビスジェリー】攻撃時、味方全体のHPを回復
+      // 【ライトペガサス】攻撃時、味方全体のHPを回復
       battle.playerField.forEach(p => { if (p) { const maxHp = p.def.hp + (p.hpBonus || 0); p.curHp = Math.min(maxHp, p.curHp + tag.value); } });
       skillFlash(`${attacker.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
     }
@@ -5917,7 +5917,7 @@ const SHOP_PACKS = [
   { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
     desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },
     preview: ['water_slime', 'nature_wolf', 'fire_flarelion'] },
-  { id: 'premium1', name: 'プレミアムガチャ第1弾', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
+  { id: 'premium1', name: 'プレミアムガチャ第1弾~オリュンポスの祝祭~', flavor: '冒険の始まり', icon: '👑', currency: 'gems', cost: 100,
     desc: '「冒険の始まり」レア〜レジェンドのカードが出る豪華ガチャ（50回以内にレジェンド確定）',
     featured: true,
     weights: { normal: 0, rare: 80, epic: 15, legend: 5 },

@@ -2209,7 +2209,9 @@
       <div id="profile-title-display" class="cg-profile-title-display">称号なし</div>
       <button class="cg-btn cg-profile-achievements-btn" id="profile-achievements-btn">実績・称号一覧を見る</button>
     </div>
-    <div class="cg-profile-section">
+    <!-- 【スクロール不具合の切り分けのため一時的に非表示】「アイコンを選ぶ」欄。原因が別にあると分かった場合は、
+         このコメントと合わせて display:none を外せば元に戻せます -->
+    <div class="cg-profile-section" style="display:none;">
       <div class="cg-profile-label">アイコンを選ぶ（写真を選んでいない場合）</div>
       <div id="profile-avatar-grid" class="cg-profile-avatar-grid"></div>
     </div>
