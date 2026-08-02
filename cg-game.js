@@ -5828,7 +5828,9 @@ const SHOP_PACKS = [
     weights: { normal: 60, rare: 30, epic: 8, legend: 2 },
     legendPityLimit: 50,
     rarityPool: {
-      normal: ['fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing',
+      // ご要望により、フレイムスライム・アクアスライム・シルフ・ホーリーエンジェル（light_holyangel）・
+      // シャドウバットは初心者ガチャの排出対象から除外している（カードデータ自体は削除していない）
+      normal: ['spell_iceshard', 'spell_healing',
         'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow'],
       rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
       epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse'],
