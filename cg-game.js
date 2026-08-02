@@ -485,15 +485,8 @@ function loadState() {
     // 不具合修正: 最終ステージ（50）をクリアしても進行度が50のまま止まってしまい、「クリア済み」と
     // 表示されない不具合があったため、既存プレイヤーの対戦履歴から実際にクリア済みかどうかを判定し、
     // 該当する場合は進行度を修正する（既存プレイヤーへ1回限り）
-    if (!saved.fixedFinalStageProgress_20260725) {
-      if (saved.stageProgress === STAGES.length) {
-        const finalStageName = STAGES[STAGES.length - 1].name;
-        const clearedFinalStage = Array.isArray(saved.battleHistory)
-          && saved.battleHistory.some(h => h.won && h.name === finalStageName);
-        if (clearedFinalStage) saved.stageProgress = STAGES.length + 1;
-      }
-      saved.fixedFinalStageProgress_20260725 = true;
-    }
+    // ※この処理自体は下記のSTAGES定義後（applyFixedFinalStageProgressMigration）で行う。
+    //   ここ（loadState内）ではSTAGES定数がまだ初期化されていないため参照できない
     // 初心者ガチャ必須化に伴う後方互換対応: この仕組みが無かった時期からの既存プレイヤーが、
     // 意図せずロックされて他の画面に進めなくなることがないよう、既に完了済み扱いにする
     if (saved.beginnerGachaDone === undefined) {
@@ -2960,6 +2953,21 @@ const STAGES = [
       { speaker: 'ナレーター', portrait: '📖', text: '白と黒の百合が咲き誇る丘の上で、長い旅はひとまずの終わりを迎えた。' },
     ] },
 ];
+
+// 不具合修正: 最終ステージ（50）をクリアしても進行度が50のまま止まってしまい、「クリア済み」と
+// 表示されない不具合があったため、既存プレイヤーの対戦履歴から実際にクリア済みかどうかを判定し、
+// 該当する場合は進行度を修正する（既存プレイヤーへ1回限り）。
+// ※本来はloadState()内で行うマイグレーション処理だが、STAGES定数（このファイルの後方で定義）を
+// 参照する必要があるため、STAGES定義後のこの位置でstateに対して直接適用する
+if (state && !state.fixedFinalStageProgress_20260725) {
+  if (state.stageProgress === STAGES.length) {
+    const finalStageName = STAGES[STAGES.length - 1].name;
+    const clearedFinalStage = Array.isArray(state.battleHistory)
+      && state.battleHistory.some(h => h.won && h.name === finalStageName);
+    if (clearedFinalStage) state.stageProgress = STAGES.length + 1;
+  }
+  state.fixedFinalStageProgress_20260725 = true;
+}
 
 const WORLDS = [
   { id: 1, name: '見習いの森', stageIds: [1, 2, 3, 4, 5] },
