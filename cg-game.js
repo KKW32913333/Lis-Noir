@@ -120,16 +120,16 @@ const CARD_DEFS = {
   nature_venusharvest:   { name: 'ディオニュソス', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 3 }, skill: '場に出た時、味方全体にシールド3を付与する（宴の高揚感）', image: 'card-nature-dionysus.png', emoji: '🍇' },
   light_crystalguardian: { name: 'ヘルメス', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 2 }, skill: '攻撃時、追加で2ダメージ（俊足の神の一撃）', image: 'card-light-hermes.png', emoji: '🪽' },
   dark_deepabyssdemon:   { name: 'タナトス', element: 'dark',  rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする（死の淵へ誘う一撃）', image: 'card-dark-thanatos.png', emoji: '💀' },
-  fire_kagutsuchi:       { name: 'カグツチノ将',       element: 'fire',   rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる', image: 'card-fire-kagutsuchi.png', emoji: '⚔️' },
-  water_mermaidsongress: { name: 'マーメイドソングレス', element: 'water', rarity: 'legend', cost: 5, atk: 7, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.6, turns: 2 }, skill: '【固有】攻撃時、60%の確率で毒（2ターン）を付与する（人魚の歌声）', image: 'card-water-mermaidsongress.png', emoji: '🧜' },
-  nature_foreststag:     { name: 'フォレストスタッグ', element: 'nature', rarity: 'legend', cost: 6, atk: 8, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '【固有】攻撃時、敵全体に3ダメージを与える（雄叫びの突撃）', image: 'card-nature-foreststag.png', emoji: '🦌' },
-  light_fairylumina:     { name: 'フェアリールミナ',   element: 'light',  rarity: 'legend', cost: 5, atk: 7, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 2 }, skill: '【固有】攻撃時、味方全体のHPを2回復する', image: 'card-light-fairylumina.png', emoji: '🧚' },
-  dark_deathwhisperer:   { name: 'デスウィスパラー',   element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる', image: 'card-dark-deathwhisperer.png', emoji: '💀' },
+  fire_kagutsuchi:       { name: 'アレス',       element: 'fire',   rarity: 'legend', cost: 6, atk: 8, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '【固有】攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる（軍神の号令）', image: 'card-fire-ares.png', emoji: '⚔️' },
+  water_mermaidsongress: { name: 'ポセイドン', element: 'water', rarity: 'legend', cost: 5, atk: 7, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '【固有】攻撃時、敵全体に3ダメージを与える（三叉槍の一撃）', image: 'card-water-poseidon.png', emoji: '🔱' },
+  nature_foreststag:     { name: 'ガイア', element: 'nature', rarity: 'legend', cost: 6, atk: 5, hp: 10, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 3, shieldValue: 2 }, skill: '【固有】場に出た時、味方全体のHPを3回復し、シールド2を付与する（大地母神の慈しみ）', image: 'card-nature-gaia.png', emoji: '🌍' },
+  light_fairylumina:     { name: 'アテナ', element: 'light',  rarity: 'legend', cost: 5, atk: 4, hp: 8, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'healAndShieldAllies', value: 2, shieldValue: 3 }, skill: '【固有】場に出た時、味方全体のHPを2回復し、シールド3を付与する（知略の女神の加護）', image: 'card-light-athena.png', emoji: '🦉' },
+  dark_deathwhisperer:   { name: 'ハデス',   element: 'dark',   rarity: 'legend', cost: 6, atk: 8, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'drainEnemyCost', value: 2 }, skill: '【固有】攻撃で相手を撃破した時、相手のコストを2消費させる（冥府の王の裁定）', image: 'card-dark-hades.png', emoji: '💀' },
 
   // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
   water_abyssjelly:      { name: 'ヒュドラ',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（切っても再生する首）', image: 'card-water-hydra.png', emoji: '🐍' },
   spell_windcutter:      { name: 'ウィンドカッター',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 5 }, skill: '敵全体に5ダメージを与える', image: 'card-spell-windcutter.png', emoji: '🌪️' },
-  spell_tidalwave:       { name: 'タイダルウェイブ',   element: 'water', rarity: 'legend', cost: 5, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 7 }, skill: '敵全体に7ダメージを与える', image: 'card-spell-tidalwave.png', emoji: '🌊' },
+  spell_tidalwave:       { name: '雷霆の裁き',   element: 'light', rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamageStun', value: 8 }, skill: '【固有】敵全体に8ダメージを与え、1ターンの間行動不能にする（ゼウスの雷霆）', image: 'card-spell-thunderjudgment.png', emoji: '⚡' },
   spell_purification:    { name: 'ピュリフィケーション', element: 'light', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'cleanse' }, skill: '味方全体の状態異常（毒・火傷など）を解除する', image: 'card-spell-purification.png', emoji: '✨' },
 };
 
@@ -926,6 +926,7 @@ function cardStatsLine(def, evolved, opts) {
     else if (eff.kind === 'wipe') label = `💥全体`;
     else if (eff.kind === 'destroy') label = `💀撃破`;
     else if (eff.kind === 'aoeDamage') label = `💥${eff.value}`;
+    else if (eff.kind === 'aoeDamageStun') label = `⚡${eff.value}`;
     else if (eff.kind === 'cleanse') label = `✨浄化`;
     return `<div class="cg-card-stats"><span class="cg-stat spell">スペル</span><span class="cg-stat spell-val">${label}</span></div>`;
   }
@@ -4542,6 +4543,26 @@ function castSpell(handIdx, targetIdx) {
       impactEffect(targetEl, aoeVal, 0);
       battle.enemyHp -= aoeVal;
     }
+  } else if (eff.kind === 'aoeDamageStun') {
+    // 【雷霆の裁き】専用: 敵全体に固定ダメージを与え、さらに1ターンの間行動不能にする（対象がいなければ敵本体へ）
+    const leaderSp2 = getActiveLeader();
+    const dmgFlatSp2 = leaderSp2 ? (leaderSp2.effect.enemyDmgFlat || 0) : 0;
+    const aoeVal2 = (eff.value || 0) + dmgFlatSp2;
+    dealtDmg = aoeVal2;
+    let hitAny2 = false;
+    battle.enemyField.forEach((u, i) => {
+      if (!u) return;
+      hitAny2 = true;
+      const targetEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
+      impactEffect(targetEl, aoeVal2, 0);
+      u.curHp -= mitigateIncomingDamage(u, aoeVal2);
+      if (u.curHp > 0) u.stunned = true;
+    });
+    if (!hitAny2) {
+      const targetEl = document.getElementById('battle-enemy-portrait');
+      impactEffect(targetEl, aoeVal2, 0);
+      battle.enemyHp -= aoeVal2;
+    }
   } else if (eff.kind === 'cleanse') {
     // 味方全体の状態異常（毒・火傷など）を解除する
     battle.playerField.forEach(u => { if (u) u.ailment = null; });
@@ -5222,6 +5243,22 @@ function enemyTurn() {
               impactEffect(targetEl, aoeVal, 0);
               battle.playerHp -= aoeVal;
             }
+          } else if (eff.kind === 'aoeDamageStun') {
+            const aoeVal2 = eff.value || 0;
+            let hitAny2 = false;
+            battle.playerField.forEach((u, k) => {
+              if (!u) return;
+              hitAny2 = true;
+              const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[k];
+              impactEffect(targetEl, aoeVal2, 0);
+              u.curHp -= mitigateIncomingDamage(u, aoeVal2);
+              if (u.curHp > 0) u.stunned = true;
+            });
+            if (!hitAny2) {
+              const targetEl = document.getElementById('battle-player-portrait');
+              impactEffect(targetEl, aoeVal2, 0);
+              battle.playerHp -= aoeVal2;
+            }
           } else if (eff.kind === 'cleanse') {
             battle.enemyField.forEach(u => { if (u) u.ailment = null; });
           }
@@ -5737,6 +5774,11 @@ function applyRemoteAction(action) {
         let hitAny = false;
         battle.playerField.forEach(u => { if (u) { hitAny = true; u.curHp -= mitigateIncomingDamage(u, aoeVal); } });
         if (!hitAny) battle.playerHp -= aoeVal;
+      } else if (eff.kind === 'aoeDamageStun') {
+        const aoeVal2 = p.dmg || eff.value || 0;
+        let hitAny2 = false;
+        battle.playerField.forEach(u => { if (u) { hitAny2 = true; u.curHp -= mitigateIncomingDamage(u, aoeVal2); if (u.curHp > 0) u.stunned = true; } });
+        if (!hitAny2) battle.playerHp -= aoeVal2;
       } else if (eff.kind === 'cleanse') {
         battle.enemyField.forEach(u => { if (u) u.ailment = null; });
       }
