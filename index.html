@@ -1410,12 +1410,18 @@
   .cg-shake{animation:cgShake .35s ease-in-out;}
   .cg-deck-slot-item{position:relative; transition:transform .1s ease; cursor:pointer;}
   .cg-deck-slot-item:active{transform:scale(.95);}
+  .cg-deck-slot-item.dragging{z-index:50; transition:none; cursor:grabbing;}
   .cg-deck-slot-count{position:absolute; top:2px; left:2px; min-width:22px; height:20px; padding:0 5px; border-radius:10px;
     background:var(--gold); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; z-index:5;
     box-shadow:0 2px 4px #00000033;}
   .cg-deck-remove-icon{position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; z-index:5;
     background:#23242bdd; color:#ff8a95; border:1px solid var(--hp-red); font-size:10px; pointer-events:none;
     display:flex; align-items:center; justify-content:center;}
+  .cg-deck-drag-handle{position:absolute; bottom:2px; right:2px; width:22px; height:22px; border-radius:50%; z-index:6;
+    background:#23242bdd; color:var(--gold-bright); border:1px solid var(--hairline-panel); font-size:11px;
+    display:flex; align-items:center; justify-content:center; cursor:grab; touch-action:none;}
+  .cg-deck-drag-handle:active{cursor:grabbing;}
+  .cg-deck-slot-item.drag-target{outline:2px dashed var(--gold-bright); outline-offset:2px; border-radius:12px;}
 </style>
 </head>
 <body>
@@ -1688,7 +1694,7 @@
         <span class="cg-section-title" style="padding:0;">デッキの中身</span>
         <span class="cg-deck-content-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
       </div>
-      <div class="cg-deck-hint">カードをタップすると1枚外れます</div>
+      <div class="cg-deck-hint">カードをタップすると1枚外れます。右下の「⠿」をドラッグすると並び替えられます</div>
       <div id="deck-slots"></div>
       <div id="deck-synergy-panel" class="cg-deck-synergy-panel"></div>
 

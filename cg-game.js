@@ -1871,13 +1871,14 @@ function renderDeck() {
        ${renderCardFace(g.id, { small: true, evolved: state.cards[g.id] && state.cards[g.id].evolved })}
        ${g.count > 1 ? `<span class="cg-deck-slot-count">×${g.count}</span>` : ''}
        <span class="cg-deck-remove-icon">✕</span>
+       <span class="cg-deck-drag-handle" title="ドラッグして並び替え">⠿</span>
      </div>`;
   deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
-  // タップで1枚外す（デッキ内の並び順はバトル開始時に必ずシャッフルされ、ゲームプレイに影響しないため、
-  // 以前あった「タップで選択→タップで並び替え」という操作は廃止し、「タップ＝外す」に統一している）
+  // タップで1枚外す（デッキ内の並び順は本来バトル開始時にシャッフルされ、ゲームプレイには影響しないが、
+  // 見やすさ・整理のためにプレイヤーが任意の順番へ並び替えられるようにする＝ドラッグハンドルでの並び替え機能）
   const bindDeckSlotHandlers = (container) => {
     container.querySelectorAll('.cg-deck-slot-item').forEach(item => {
       item.addEventListener('click', () => {
@@ -1892,6 +1893,7 @@ function renderDeck() {
     });
   };
   bindDeckSlotHandlers(deckEl);
+  bindDeckDragHandlers(deckEl, groups);
 
   const validDeckIds = state.deck.filter(id => !!CARD_DEFS[id]);
   const avgCost = validDeckIds.length
@@ -1943,6 +1945,71 @@ function renderDeck() {
       renderDeck();
     });
     bindLongPress(node, () => showHandCardInfo(node.dataset.id));
+  });
+}
+
+// デッキ内のカードを、ドラッグハンドル（⠿）を掴んでドラッグすることで並び替える。
+// カードは同じ種類ごとに1枠へまとめて表示しているため、ここでの並び替えは「カードの種類（グループ）」単位で行い、
+// 確定時にその順序どおりstate.deckを組み直す（同じカードのN枚はまとまって動く）
+function bindDeckDragHandlers(container, groups) {
+  container.querySelectorAll('.cg-deck-drag-handle').forEach(handle => {
+    let dragging = false;
+    let item = null;
+    let startX = 0, startY = 0;
+
+    const onPointerDown = (e) => {
+      item = handle.closest('.cg-deck-slot-item');
+      if (!item) return;
+      dragging = true;
+      longPressFired = true; // ドラッグ操作を、カードのタップ（外す）・長押し（詳細）と誤って重複発火させないためのガード
+      startX = e.clientX;
+      startY = e.clientY;
+      item.classList.add('dragging');
+      handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    };
+    const onPointerMove = (e) => {
+      if (!dragging || !item) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      item.style.transform = `translate(${dx}px, ${dy}px) scale(1.06)`;
+      // ドラッグ中のカード自身の下は判定から除外し、実際に指が重なっている枠を検出する
+      item.style.pointerEvents = 'none';
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      item.style.pointerEvents = '';
+      container.querySelectorAll('.cg-deck-slot-item.drag-target').forEach(n => n.classList.remove('drag-target'));
+      const targetItem = under && under.closest('.cg-deck-slot-item');
+      if (targetItem && targetItem !== item) targetItem.classList.add('drag-target');
+    };
+    const onPointerUp = (e) => {
+      if (!dragging || !item) return;
+      dragging = false;
+      item.classList.remove('dragging');
+      item.style.transform = '';
+      item.style.pointerEvents = 'none';
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      item.style.pointerEvents = '';
+      container.querySelectorAll('.cg-deck-slot-item.drag-target').forEach(n => n.classList.remove('drag-target'));
+      const targetItem = under && under.closest('.cg-deck-slot-item');
+      setTimeout(() => { longPressFired = false; }, 0); // 直後に発火するclickイベント（外す操作）を無効化してから解除する
+      if (!targetItem || targetItem === item) return;
+      const fromId = item.dataset.id;
+      const toId = targetItem.dataset.id;
+      const fromIdx = groups.findIndex(g => g.id === fromId);
+      const toIdx = groups.findIndex(g => g.id === toId);
+      if (fromIdx === -1 || toIdx === -1) return;
+      const [moved] = groups.splice(fromIdx, 1);
+      groups.splice(toIdx, 0, moved);
+      // 並び替え後のグループ順で、同じカードの枚数分だけ展開してstate.deckを組み直す
+      state.deck = groups.flatMap(g => Array(g.count).fill(g.id));
+      saveState();
+      renderDeck();
+    };
+
+    handle.addEventListener('pointerdown', onPointerDown);
+    handle.addEventListener('pointermove', onPointerMove);
+    handle.addEventListener('pointerup', onPointerUp);
+    handle.addEventListener('pointercancel', onPointerUp);
   });
 }
 
