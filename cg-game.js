@@ -36,7 +36,7 @@ const CARD_DEFS = {
   nature_wolf:    { name: 'ダークワーム', element: 'dark', rarity: 'rare', cost: 2, atk: 3, hp: 2,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 1 }, skill: '攻撃時、追加で1ダメージ', image: 'card-dark-darkworm.png', emoji: '🪱' },
   nature_dryad:   { name: 'フォレストウルフ', element: 'nature', rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'shieldAllAllies', value: 2 }, skill: '場に出た時、味方全体にシールド2を付与する', image: 'card-nature-forestwolf.png', emoji: '🐺' },
   nature_emeraldgaia: { name: 'ウィンドレンジャー', element: 'nature', rarity: 'legend', cost: 7, atk: 9, hp: 8, role: 'attacker', skillTag: { trigger: 'onKillAttack', effect: 'extraAttackOnKill' }, skill: '敵を撃破した時、行動終了せず続けてもう一度攻撃できる（疾風の連射）', image: 'card-nature-windranger.png', emoji: '🏹' },
-  light_angel:    { name: 'ライトペガサス', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-light-pegasus.png', emoji: '🦄' },
+  light_angel:    { name: 'サンライオン', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'healAllAllies', value: 1 }, skill: '攻撃時、味方全体のHPを1回復する', image: 'card-light-sunlion.png', emoji: '🦁' },
   light_holyangel: { name: 'ホーリーエンジェル', element: 'light', rarity: 'normal', cost: 2, atk: 1, hp: 2, role: 'attacker', skill: '', image: 'card-light-holyangel.png', emoji: '👼' },
   dark_shadowbat: { name: 'シャドウバット',   element: 'dark',   rarity: 'normal',   cost: 2, atk: 2, hp: 1,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'atkDown', value: 1 }, skill: '攻撃時、相手の攻撃力を1下げる', image: 'card-dark-shadowbat.png', emoji: '🦇' },
   dark_reaper:    { name: 'ダークソーサレス', element: 'dark',   rarity: 'legend', cost: 6, atk: 7, hp: 7,  role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageStunDrainCost', value: 3, drainValue: 1 }, skill: '攻撃時、敵全体に3ダメージを与えて1ターン行動不能にし、相手のコストを1消費させる', image: 'card-dark-darksorceress.png', emoji: '🔮' },
@@ -73,7 +73,6 @@ const CARD_DEFS = {
   spell_soulbind:   { name: 'ソウルストライク',       element: 'dark',  rarity: 'epic',   cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'destroy' }, skill: '敵モンスター1体を選択して撃破する（HPに関わらず必ず撃破）', image: 'card-spell-soulstrike.png', emoji: '⛓️' },
 
   // ---- 装備カード（味方モンスター1体に付与） ----
-  equip_aqualance:  { name: 'アクアランス',       element: 'water', rarity: 'legend', cost: 4, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 6, hp: 1 }, skill: '味方1体の攻撃力+6・HP+1', image: 'card-equip-aqualance.png', emoji: '🔱' },
   // ---- ダンジョン限定装備（レジェンド）：10階ごとのフロアボス撃破報酬 ----
   dungeon_equip_10:  { name: '深淵の欠片',     element: 'dark',   rarity: 'legend', cost: 2, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 3, hp: 3 }, skill: '味方1体の攻撃力+3・HP+3', image: 'card-equip-dungeon10.png', emoji: '🔮' },
   dungeon_equip_20:  { name: '奈落の指輪',     element: 'dark',   rarity: 'legend', cost: 3, atk: 0, hp: 0, type: 'equipment', target: 'friendly', effect: { atk: 4, hp: 4 }, skill: '味方1体の攻撃力+4・HP+4', image: 'card-equip-dungeon20.png', emoji: '💍' },
@@ -119,7 +118,7 @@ const CARD_DEFS = {
   water_icequartz:       { name: 'ヘカテー',     element: 'water',  rarity: 'epic', cost: 4, atk: 3, hp: 6, role: 'defender', skillTag: { trigger: 'onPlay', effect: 'aoeDamage', value: 3 }, skill: '場に出た時、敵全体に3ダメージを与える（月夜の呪詛）', image: 'card-water-hecate.png', emoji: '🌙' },
   nature_venusharvest:   { name: 'ディオニュソス', element: 'nature', rarity: 'epic', cost: 4, atk: 6, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'poisonChance', value: 2, chance: 0.5, turns: 2 }, skill: '攻撃時、50%の確率で毒（2ターン）を付与する（酩酊の宴）', image: 'card-nature-dionysus.png', emoji: '🍇' },
   light_crystalguardian: { name: 'ヘルメス', element: 'light', rarity: 'epic', cost: 4, atk: 6, hp: 3, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'extraDamage', value: 2 }, skill: '攻撃時、追加で2ダメージ（俊足の神の一撃）', image: 'card-light-hermes.png', emoji: '🪽' },
-  dark_deepabyssdemon:   { name: 'タナトス', element: 'dark',  rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする（死の淵へ誘う一撃）', image: 'card-dark-thanatos.png', emoji: '💀' },
+  dark_deepabyssdemon:   { name: 'エリス', element: 'dark',  rarity: 'epic', cost: 4, atk: 6, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'stunTarget' }, skill: '攻撃時、相手を行動不能にする（不和の女神の一撃）', image: 'card-dark-eris.png', emoji: '🍎' },
   fire_kagutsuchi:       { name: 'アレス',       element: 'fire',   rarity: 'legend', cost: 6, atk: 8, hp: 7, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamageAtkUpAllies', value: 3, atkUpValue: 2 }, skill: '攻撃時、敵全体に3ダメージを与え、味方全体の攻撃力を永続で2上げる（軍神の号令）', image: 'card-fire-ares.png', emoji: '⚔️' },
   water_mermaidsongress: { name: 'ポセイドン', element: 'water', rarity: 'legend', cost: 5, atk: 7, hp: 5, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'aoeDamage', value: 3 }, skill: '攻撃時、敵全体に3ダメージを与える（三叉槍の一撃）', image: 'card-water-poseidon.png', emoji: '🔱' },
   nature_foreststag:     { name: 'ガイア', element: 'nature', rarity: 'legend', cost: 6, atk: 5, hp: 10, role: 'defender', skillTag: { trigger: 'onDeath', effect: 'reviveHalfHp' }, skill: '撃破された時、1度だけ1/2のHPで復活する（大地母神の生命力）', image: 'card-nature-gaia.png', emoji: '🌍' },
@@ -128,9 +127,9 @@ const CARD_DEFS = {
 
   // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
   water_abyssjelly:      { name: 'ヒュドラ',     element: 'water', rarity: 'rare', cost: 3, atk: 4, hp: 4, role: 'attacker', skillTag: { trigger: 'onAttack', effect: 'lifesteal' }, skill: '攻撃時、与えたダメージ分だけ自分のHPを回復する（切っても再生する首）', image: 'card-water-hydra.png', emoji: '🐍' },
-  spell_windcutter:      { name: 'ウィンドカッター',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamage', value: 5 }, skill: '敵全体に5ダメージを与える', image: 'card-spell-windcutter.png', emoji: '🌪️' },
+  spell_windcutter:      { name: '大樹の拘束',   element: 'nature', rarity: 'epic', cost: 4, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'damageStun', value: 6 }, skill: '敵単体に6ダメージを与え、1ターンの間行動不能にする', image: 'card-spell-treebind.png', emoji: '🌳' },
   spell_tidalwave:       { name: '雷霆の裁き',   element: 'light', rarity: 'legend', cost: 6, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'aoeDamageStun', value: 8 }, skill: '敵全体に8ダメージを与え、1ターンの間行動不能にする（ゼウスの雷霆）', image: 'card-spell-thunderjudgment.png', emoji: '⚡' },
-  spell_purification:    { name: 'ピュリフィケーション', element: 'light', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'none', effect: { kind: 'cleanse' }, skill: '味方全体の状態異常（毒・火傷など）を解除する', image: 'card-spell-purification.png', emoji: '✨' },
+  spell_purification:    { name: 'タラサの怒涛', element: 'water', rarity: 'epic', cost: 3, atk: 0, hp: 0, type: 'spell', target: 'enemy_monster', effect: { kind: 'damageStunChance', value: 5, chance: 0.5 }, skill: '敵単体に5ダメージを与え、50%の確率で1ターン行動を遅延させる', image: 'card-spell-thalassarage.png', emoji: '🌊' },
 };
 
 // 初心者ガチャの対象カードID一覧（SHOP_PACKS本体はファイル後方で定義されるため、
@@ -139,7 +138,7 @@ const BEGINNER_GACHA_CARD_IDS = new Set([
   'fire_flameslime', 'water_slime', 'fire_imp', 'light_holyangel', 'dark_shadowbat', 'spell_iceshard', 'spell_healing',
   'fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss',
   'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse',
-  'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance',
+  'fire_crimson', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper',
   // プレミアムガチャ第1弾 追加カード（ノーマル5種・レア4種）：スタート時の自動編成デッキには含めない
   'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow',
   'fire_flameboar', 'dark_wraithbanshee', 'nature_stonesanctuary', 'light_ancientunicorn',
@@ -921,6 +920,8 @@ function cardStatsLine(def, evolved, opts) {
     const eff = def.effect || {};
     let label = '効果';
     if (eff.kind === 'damage') label = `⚡${eff.value}`;
+    else if (eff.kind === 'damageStun') label = `💫${eff.value}`;
+    else if (eff.kind === 'damageStunChance') label = `💫${eff.value}`;
     else if (eff.kind === 'heal') label = `➕${eff.value}`;
     else if (eff.kind === 'draw') label = `🃏${eff.value}`;
     else if (eff.kind === 'wipe') label = `💥全体`;
@@ -4478,6 +4479,7 @@ function castSpell(handIdx, targetIdx) {
 
   const eff = def.effect || {};
   let dealtDmg = 0;
+  let dealtStun = false;
   let destroyRandomTargets = null;
   if (eff.kind === 'damage') {
     const leaderSp = getActiveLeader();
@@ -4494,6 +4496,44 @@ function castSpell(handIdx, targetIdx) {
       if (target) {
         target.curHp -= mitigateIncomingDamage(target, dealtDmg);
         if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+      }
+    }
+  } else if (eff.kind === 'damageStun') {
+    // 【大樹の拘束】専用: 敵単体にダメージを与え、必ず1ターンの間行動不能にする
+    const leaderSp3 = getActiveLeader();
+    const dmgFlatSp3 = leaderSp3 ? (leaderSp3.effect.enemyDmgFlat || 0) : 0;
+    dealtDmg = (eff.value || 0) + dmgFlatSp3;
+    const targetEl3 = targetIdx === null
+      ? document.getElementById('battle-enemy-portrait')
+      : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
+    impactEffect(targetEl3, dealtDmg, 0);
+    if (targetIdx === null) {
+      battle.enemyHp -= dealtDmg;
+    } else {
+      const target = battle.enemyField[targetIdx];
+      if (target) {
+        target.curHp -= mitigateIncomingDamage(target, dealtDmg);
+        if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+        else { target.stunned = true; dealtStun = true; }
+      }
+    }
+  } else if (eff.kind === 'damageStunChance') {
+    // 【タラサの怒涛】専用: 敵単体にダメージを与え、一定確率で1ターンの間行動不能にする
+    const leaderSp4 = getActiveLeader();
+    const dmgFlatSp4 = leaderSp4 ? (leaderSp4.effect.enemyDmgFlat || 0) : 0;
+    dealtDmg = (eff.value || 0) + dmgFlatSp4;
+    const targetEl4 = targetIdx === null
+      ? document.getElementById('battle-enemy-portrait')
+      : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
+    impactEffect(targetEl4, dealtDmg, 0);
+    if (targetIdx === null) {
+      battle.enemyHp -= dealtDmg;
+    } else {
+      const target = battle.enemyField[targetIdx];
+      if (target) {
+        target.curHp -= mitigateIncomingDamage(target, dealtDmg);
+        if (target.curHp <= 0) battle.enemyField[targetIdx] = null;
+        else if (Math.random() < (eff.chance || 0.5)) { target.stunned = true; dealtStun = true; }
       }
     }
   } else if (eff.kind === 'heal') {
@@ -4580,7 +4620,7 @@ function castSpell(handIdx, targetIdx) {
   }
   if (def.skill) battle.lastPlayedInfo = def;
   battle.enemyField = cleanupField(battle.enemyField, battle.enemyGraveyard);
-  submitOnlineAction('cast_spell', { cardId: id, targetIdx, dmg: dealtDmg, destroyRandomTargets });
+  submitOnlineAction('cast_spell', { cardId: id, targetIdx, dmg: dealtDmg, destroyRandomTargets, stunned: dealtStun });
   renderBattle();
 }
 
@@ -5035,7 +5075,7 @@ function attackTarget(attackerIdx, targetIdx) {
       skillFlash(`${attacker.def.name}のスキル！\n敵全体にダメージ＋味方全体にシールド付与`);
     }
     if (tag && tag.effect === 'healAllAllies') {
-      // 【ライトペガサス】攻撃時、味方全体のHPを回復
+      // 【サンライオン】攻撃時、味方全体のHPを回復
       battle.playerField.forEach(p => { if (p) { const maxHp = p.def.hp + (p.hpBonus || 0); p.curHp = Math.min(maxHp, p.curHp + tag.value); } });
       skillFlash(`${attacker.def.name}のスキル！\n味方全体のHPを${tag.value}回復`);
     }
@@ -5204,6 +5244,20 @@ function enemyTurn() {
             if (targetIdx !== -1) {
               battle.playerField[targetIdx].curHp -= mitigateIncomingDamage(battle.playerField[targetIdx], eff.value);
               if (battle.playerField[targetIdx].curHp <= 0) battle.playerField[targetIdx] = null;
+            } else {
+              battle.playerHp -= eff.value;
+            }
+          } else if (eff.kind === 'damageStun' || eff.kind === 'damageStunChance') {
+            const targetIdx = chooseAiSpellTargetIdx(battle.playerField, eff.value);
+            const targetEl = targetIdx !== -1
+              ? document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx]
+              : document.getElementById('battle-player-portrait');
+            impactEffect(targetEl, eff.value, 0);
+            if (targetIdx !== -1) {
+              const target = battle.playerField[targetIdx];
+              target.curHp -= mitigateIncomingDamage(target, eff.value);
+              if (target.curHp <= 0) battle.playerField[targetIdx] = null;
+              else if (eff.kind === 'damageStun' || Math.random() < (eff.chance || 0.5)) target.stunned = true;
             } else {
               battle.playerHp -= eff.value;
             }
@@ -5770,6 +5824,18 @@ function applyRemoteAction(action) {
             if (target.curHp <= 0) battle.playerField[targetIdx] = null;
           }
         }
+      } else if (eff.kind === 'damageStun' || eff.kind === 'damageStunChance') {
+        const dmg2 = p.dmg || eff.value || 0;
+        if (targetIdx === null) {
+          battle.playerHp -= dmg2;
+        } else {
+          const target = battle.playerField[targetIdx];
+          if (target) {
+            target.curHp -= mitigateIncomingDamage(target, dmg2);
+            if (target.curHp <= 0) battle.playerField[targetIdx] = null;
+            else if (p.stunned) target.stunned = true;
+          }
+        }
       } else if (eff.kind === 'heal') {
         battle.enemyHp = Math.min(battle.enemyMaxHp || battle.playerMaxHp || 30, battle.enemyHp + (eff.value || 0));
       } else if (eff.kind === 'draw') {
@@ -5963,9 +6029,9 @@ const SHOP_PACKS = [
         'fire_infernoimp', 'water_frostwolf', 'nature_leafslime', 'light_sainttiger', 'dark_scarecrow'],
       rare: ['fire_flarelion', 'water_icewolf', 'nature_venomscorpion', 'light_lightguardian', 'nature_wolf', 'spell_fireball', 'field_inferno', 'field_aquadeep', 'field_evergrove', 'field_sanctuary', 'field_abyss'],
       epic: ['fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon', 'spell_mindsurge', 'spell_soulbind', 'spell_apocalypse'],
-      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance'],
+      legend: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper'],
     },
-    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'equip_aqualance', 'spell_apocalypse',
+    preview: ['fire_bahamut', 'water_seiren', 'nature_emeraldgaia', 'light_arcknight', 'dark_reaper', 'spell_apocalypse',
               'fire_phoenix', 'water_serpent', 'nature_dryad', 'light_angel', 'dark_chaosdemon'] },
   { id: 'normal', name: 'ノーマルガチャ', icon: '📦', currency: 'gems', cost: 100,
     desc: 'ノーマル〜レアのカードが出る基本ガチャ', weights: { normal: 60, rare: 40, epic: 0, legend: 0 },

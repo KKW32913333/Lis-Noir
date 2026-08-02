@@ -3,7 +3,7 @@
    修正のたびに CACHE_NAME のバージョン番号を上げること（例: v1 → v2）
    ========================================================= */
 
-const CACHE_NAME = 'lisnoir-cache-v243';
+const CACHE_NAME = 'lisnoir-cache-v244';
 
 // オフラインでも表示できるようキャッシュする静的アセット一覧
 const CACHE_ASSETS = [
@@ -31,7 +31,7 @@ const CACHE_ASSETS = [
   'splash-art.jpg',
   'card-water-aquaslime.png',
   'card-dark-darkworm.png',
-  'card-light-pegasus.png',
+  'card-light-sunlion.png',
   'card-nature-sylph2.png',
   'card-nature-swiftrabbit.png',
   'card-spell-meteorshower.png',
@@ -61,7 +61,6 @@ const CACHE_ASSETS = [
   'dragon-adult.png',
   'dragon-ancient.png',
   'card-light-luciel.png',
-  'card-equip-aqualance.png',
   'card-equip-dungeon10.png',
   'card-equip-dungeon20.png',
   'card-equip-dungeon30.png',
@@ -108,7 +107,7 @@ const CACHE_ASSETS = [
   'card-water-hecate.png',
   'card-nature-dionysus.png',
   'card-light-hermes.png',
-  'card-dark-thanatos.png',
+  'card-dark-eris.png',
   'card-fire-ares.png',
   'card-water-poseidon.png',
   'card-nature-gaia.png',
@@ -116,9 +115,9 @@ const CACHE_ASSETS = [
   'card-dark-hades.png',
   // ---- プレミアムガチャ第1弾 追加カード（モンスター1種・スペル3種） ----
   'card-water-hydra.png',
-  'card-spell-windcutter.png',
+  'card-spell-treebind.png',
   'card-spell-thunderjudgment.png',
-  'card-spell-purification.png',
+  'card-spell-thalassarage.png',
   'battle-bg-forest.jpg',
   'battle-bg-snow.jpg',
   'battle-bg-cave.jpg',
