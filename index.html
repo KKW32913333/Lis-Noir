@@ -1340,6 +1340,20 @@
   .cg-sort-select{font-family:inherit; font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--hairline-panel);
     background:var(--bg-panel2); color:var(--text-panel);}
   .cg-deck-toolbar{display:flex; align-items:center; justify-content:space-between; padding:10px 14px 0;}
+  .cg-deck-header-section{margin:4px 14px 14px; padding:11px 14px 8px; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px;}
+  .cg-deck-header-section .cg-deck-header{padding:0;}
+  .cg-deck-contents-open-btn{display:flex; align-items:center; gap:12px; width:calc(100% - 28px); margin:0 14px 16px; padding:14px 16px;
+    background:linear-gradient(180deg, var(--gold-soft), var(--bg-panel)); border:1.5px solid var(--gold-bright); border-radius:14px;
+    cursor:pointer; text-align:left; font-family:inherit; box-shadow:0 3px 10px #00000022;}
+  .cg-deck-contents-open-btn:active{transform:scale(.98);}
+  .cg-deck-contents-open-icon{font-size:22px; flex-shrink:0;}
+  .cg-deck-contents-open-text{flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;}
+  .cg-deck-contents-open-title{font-size:13px; font-weight:800; color:var(--gold);}
+  .cg-deck-contents-open-sub{font-size:11px; color:var(--text-dim-panel);}
+  .cg-deck-contents-open-arrow{font-size:20px; color:var(--gold-bright); flex-shrink:0;}
+  .cg-deck-contents-panel{max-width:480px; display:flex; flex-direction:column;}
+  .cg-deck-contents-panel .cg-deck-header{padding:0 0 4px;}
+  .cg-deck-contents-panel #deck-slots{max-height:none;}
   .cg-deck-collapsible{margin:4px 14px 10px; background:var(--bg-panel); border:1px solid var(--hairline-panel); border-radius:12px; overflow:hidden;}
   .cg-deck-collapsible-summary{display:flex; align-items:center; justify-content:space-between; padding:11px 14px; cursor:pointer;
     list-style:none; -webkit-tap-highlight-color:transparent;}
@@ -1368,8 +1382,12 @@
   .cg-deck-clear-btn{flex-shrink:0; font-size:12px; padding:9px 12px; white-space:nowrap;
     background:var(--bg-panel2); color:var(--wine); border:1.5px solid var(--wine);}
   .cg-deck-preset-list{display:flex; flex-direction:column; gap:6px; padding:0 14px 4px;}
+  .cg-deck-preset-empty-hint{font-size:11px; color:var(--text-dim); padding:6px 4px;}
   .cg-deck-preset-item{display:flex; align-items:center; gap:6px; padding:8px 10px; border-radius:10px;
     background:var(--bg-panel); border:1px solid var(--hairline-panel); font-size:12px; color:var(--text-panel);}
+  .cg-deck-preset-item.active{border-color:var(--gold-bright); background:var(--gold-soft);}
+  .cg-deck-preset-active-badge{font-size:9px; color:var(--gold); border:1px solid var(--gold-bright); border-radius:8px;
+    padding:1px 5px; margin-left:6px; font-weight:700;}
   .cg-deck-preset-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700;}
   .cg-deck-preset-count{font-size:10px; color:var(--text-dim-panel); flex-shrink:0;}
   .cg-deck-preset-load-btn{flex-shrink:0; font-size:10px; padding:5px 8px; border-radius:10px; border:1.5px solid var(--gold-bright);
@@ -1492,6 +1510,20 @@
         <button class="cg-btn" id="draw-choice-no">引かない</button>
         <button class="cg-btn cg-btn-main" id="draw-choice-yes">引く</button>
       </div>
+    </div>
+  </div>
+
+  <!-- デッキの中身（一覧・並び替え・削除）を専用の画面として分離表示する -->
+  <div id="deck-contents-overlay" class="cg-help-overlay hidden">
+    <div class="cg-help-panel cg-deck-contents-panel cg-ornate cg-double-frame">
+      <div class="cg-deck-header">
+        <span class="cg-section-title" style="padding:0;">デッキの中身</span>
+        <span class="cg-deck-content-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
+      </div>
+      <div class="cg-deck-hint">カードをタップすると1枚外れます。右下の「⠿」をドラッグすると並び替えられます</div>
+      <div id="deck-slots"></div>
+      <div id="deck-synergy-panel" class="cg-deck-synergy-panel"></div>
+      <button class="cg-btn cg-btn-main" id="deck-contents-close-btn">閉じる</button>
     </div>
   </div>
 
@@ -1669,34 +1701,32 @@
     </div>
 
     <div id="collection-deck-view">
-      <details class="cg-deck-collapsible">
-        <summary class="cg-deck-collapsible-summary">
-          <span class="cg-section-title" style="padding:0;">リーダー・デッキ管理</span>
-          <span class="cg-deck-collapsible-arrow">▼</span>
-        </summary>
-        <div class="cg-deck-collapsible-body">
-          <div class="cg-deck-header">
-            <span class="cg-section-title" style="padding:0;">リーダー</span>
-            <span style="font-size:11px; color:var(--text-dim);">1デッキに1体まで設定可能</span>
-          </div>
-          <div id="leader-select-row" class="cg-leader-select-row"></div>
-
-          <div class="cg-deck-preset-bar">
-            <button class="cg-btn cg-deck-preset-save-btn" id="deck-preset-save-btn">💾 このデッキを保存</button>
-            <button class="cg-btn cg-deck-clear-btn" id="deck-clear-btn">🗑 一括解除</button>
-            <button class="cg-btn cg-deck-share-btn" id="deck-share-btn">🔗 共有</button>
-          </div>
-          <div id="deck-preset-list" class="cg-deck-preset-list"></div>
+      <div class="cg-deck-header-section">
+        <div class="cg-deck-header">
+          <span class="cg-section-title" style="padding:0;">リーダー</span>
+          <span style="font-size:11px; color:var(--text-dim);">1デッキに1体まで設定可能</span>
         </div>
-      </details>
+        <div id="leader-select-row" class="cg-leader-select-row"></div>
 
-      <div class="cg-deck-header">
-        <span class="cg-section-title" style="padding:0;">デッキの中身</span>
-        <span class="cg-deck-content-count">枚数: <span id="deck-count">0/40</span> ／ 平均コスト: <span id="deck-avgcost">0</span></span>
+        <div class="cg-deck-header" style="margin-top:10px;">
+          <span class="cg-section-title" style="padding:0;">保存したデッキ</span>
+        </div>
+        <div class="cg-deck-preset-bar">
+          <button class="cg-btn cg-deck-preset-save-btn" id="deck-preset-save-btn">💾 このデッキを保存</button>
+          <button class="cg-btn cg-deck-clear-btn" id="deck-clear-btn">🗑 一括解除</button>
+          <button class="cg-btn cg-deck-share-btn" id="deck-share-btn">🔗 共有</button>
+        </div>
+        <div id="deck-preset-list" class="cg-deck-preset-list"></div>
       </div>
-      <div class="cg-deck-hint">カードをタップすると1枚外れます。右下の「⠿」をドラッグすると並び替えられます</div>
-      <div id="deck-slots"></div>
-      <div id="deck-synergy-panel" class="cg-deck-synergy-panel"></div>
+
+      <button class="cg-deck-contents-open-btn" id="deck-contents-open-btn">
+        <span class="cg-deck-contents-open-icon">📋</span>
+        <span class="cg-deck-contents-open-text">
+          <span class="cg-deck-contents-open-title">デッキの中身を見る・編集する</span>
+          <span class="cg-deck-contents-open-sub">枚数: <span id="deck-count-summary">0/40</span> ／ 平均コスト: <span id="deck-avgcost-summary">0</span></span>
+        </span>
+        <span class="cg-deck-contents-open-arrow">›</span>
+      </button>
 
       <div class="cg-deck-toolbar">
         <span class="cg-section-title" style="padding:0;">カードコレクション</span>

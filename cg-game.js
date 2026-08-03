@@ -1654,6 +1654,8 @@ async function renderRanking() {
 
 
 let collectionFilter = 'all';
+// 直前に「読み込む」で読み込んだ保存済みデッキのインデックス（保存時に「上書き更新」を選べるようにするための追跡用）
+let activeLoadedPresetIndex = null;
 let collectionSortMode = 'default';
 let cardListSortMode = 'default';
 const RARITY_SORT_ORDER = { legend: 0, epic: 1, rare: 2, normal: 3 };
@@ -1877,6 +1879,7 @@ function renderDeck() {
      </div>`;
   deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
+  document.getElementById('deck-count-summary').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
   // タップで1枚外す（デッキ内の並び順は本来バトル開始時にシャッフルされ、ゲームプレイには影響しないが、
@@ -1902,6 +1905,7 @@ function renderDeck() {
     ? (validDeckIds.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / validDeckIds.length).toFixed(1)
     : '0.0';
   document.getElementById('deck-avgcost').textContent = avgCost;
+  document.getElementById('deck-avgcost-summary').textContent = avgCost;
 
   renderDeckPresets();
 
@@ -2184,13 +2188,13 @@ function renderDeckPresets() {
   const presets = state.deckPresets || [];
   const saveBtn = document.getElementById('deck-preset-save-btn');
   if (saveBtn) saveBtn.disabled = presets.length >= MAX_DECK_PRESETS;
-  if (!presets.length) { wrap.innerHTML = ''; return; }
+  if (!presets.length) { wrap.innerHTML = '<div class="cg-deck-preset-empty-hint">まだ保存したデッキがありません。デッキを組んだら「💾 このデッキを保存」で保存できます。</div>'; return; }
   wrap.innerHTML = presets.map((p, i) => `
-    <div class="cg-deck-preset-item">
-      <span class="cg-deck-preset-name">📁 ${p.name}</span>
+    <div class="cg-deck-preset-item${activeLoadedPresetIndex === i ? ' active' : ''}">
+      <span class="cg-deck-preset-name">📁 ${p.name}${activeLoadedPresetIndex === i ? '<span class="cg-deck-preset-active-badge">編集中</span>' : ''}</span>
       <span class="cg-deck-preset-count">${p.cards.length}枚</span>
       <button class="cg-deck-preset-load-btn" data-index="${i}">読み込む</button>
-      <button class="cg-deck-preset-edit-btn" data-index="${i}">編集</button>
+      <button class="cg-deck-preset-edit-btn" data-index="${i}">名前変更</button>
       <button class="cg-deck-preset-del-btn" data-index="${i}" aria-label="削除">削除</button>
     </div>`).join('');
   wrap.querySelectorAll('.cg-deck-preset-load-btn').forEach(btn => {
@@ -2200,6 +2204,7 @@ function renderDeckPresets() {
       if (!preset) return;
       if (!(await showGenericConfirm(`「${preset.name}」を読み込みます。現在編成中のデッキは上書きされます。よろしいですか？`, '📁 デッキ読み込み'))) return;
       state.deck = preset.cards.slice();
+      activeLoadedPresetIndex = i; // 読み込んだデッキを覚えておき、保存時に「このデッキを上書き更新」を選べるようにする
       saveState();
       renderDeck();
     });
@@ -2209,11 +2214,9 @@ function renderDeckPresets() {
       const i = Number(btn.dataset.index);
       const preset = state.deckPresets[i];
       if (!preset) return;
-      const newName = prompt('デッキ名を編集できます（「OK」を押すと、内容も現在編成中のデッキで上書きされます）', preset.name);
-      if (newName === null) return; // キャンセル
-      if (!(await showGenericConfirm(`「${newName || preset.name}」として、名前と内容（現在編成中のデッキ）を上書き保存します。よろしいですか？`, '📁 デッキ編集'))) return;
-      preset.name = (newName || preset.name).slice(0, 16);
-      preset.cards = state.deck.slice();
+      const newName = prompt('デッキの名前を変更できます（内容は変更されません）', preset.name);
+      if (!newName) return; // キャンセルまたは空欄
+      preset.name = newName.slice(0, 16);
       saveState();
       renderDeck();
     });
@@ -2225,18 +2228,36 @@ function renderDeckPresets() {
       if (!preset) return;
       if (!(await showGenericConfirm(`「${preset.name}」を削除します。よろしいですか？`, '📁 デッキ削除'))) return;
       state.deckPresets.splice(i, 1);
+      if (activeLoadedPresetIndex === i) activeLoadedPresetIndex = null;
+      else if (activeLoadedPresetIndex !== null && activeLoadedPresetIndex > i) activeLoadedPresetIndex--;
       saveState();
       renderDeck();
     });
   });
 }
 
-function saveDeckPreset() {
+async function saveDeckPreset() {
   if (!state.deck.length) { alert('デッキが空です。カードを編成してから保存してください。'); return; }
+  // 直前に読み込んだデッキを編集中の場合は、新規保存ではなく「上書き更新」も選べるようにする
+  // （「保存したデッキの編集方法が分かりづらい」というご意見への対応：読み込む→編集→保存、という流れで
+  // 　迷わず同じデッキを更新できるようにしている）
+  if (activeLoadedPresetIndex !== null && state.deckPresets[activeLoadedPresetIndex]) {
+    const preset = state.deckPresets[activeLoadedPresetIndex];
+    const updateExisting = await showGenericConfirm(
+      `現在編集中の内容を、読み込み元の「${preset.name}」に上書き保存しますか？\n（キャンセルすると、代わりに新しいデッキとして保存できます）`,
+      '💾 デッキを保存');
+    if (updateExisting) {
+      preset.cards = state.deck.slice();
+      saveState();
+      renderDeck();
+      return;
+    }
+  }
   if (state.deckPresets.length >= MAX_DECK_PRESETS) { alert(`保存できるデッキは最大${MAX_DECK_PRESETS}件までです。`); return; }
   const name = prompt('デッキの名前を入力してください（例：アグロデッキ）', `デッキ${state.deckPresets.length + 1}`);
   if (!name) return;
   state.deckPresets.push({ name: name.slice(0, 16), cards: state.deck.slice() });
+  activeLoadedPresetIndex = state.deckPresets.length - 1;
   saveState();
   renderDeck();
 }
@@ -2253,6 +2274,7 @@ async function clearDeck() {
   if (!state.deck.length) return;
   if (!(await showGenericConfirm('デッキ内のカードをすべて外します。よろしいですか？', '🗑️ デッキを空にする'))) return;
   state.deck = [];
+  activeLoadedPresetIndex = null;
   saveState();
   renderDeck();
 }
@@ -7106,10 +7128,10 @@ const SCREEN_HELP = {
   collection: {
     title: 'カード画面のヘルプ',
     items: [
-      '<b>① デッキ編成</b><br>カード一覧のカードをタップするとデッキに追加、デッキ側のカードをタップすると1枚外れます（タップする場所によって、追加か削除かが決まるシンプルな操作です）。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
-      '<b>② デッキの中身・枚数</b><br>「デッキの中身」に、現在編成中のカードと枚数・平均コストが表示されます。カードをタップすると1枚外れます。',
-      '<b>③ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
-      '<b>④ リーダー・デッキ管理</b><br>「リーダー・デッキ管理」をタップすると開き、使用するリーダーの選択や、デッキの保存・読み込み・編集ができます。',
+      '<b>① リーダー・保存したデッキ</b><br>画面の一番上に、使用するリーダーの選択と、デッキの保存・読み込み・削除が常に表示されています。「読み込む」で保存済みデッキを呼び出して編集し、「💾 このデッキを保存」を押すと、そのまま上書き更新するか、新しいデッキとして保存するか選べます。「名前変更」は内容を変えずに名前だけ変更します。',
+      '<b>② デッキ編成</b><br>下のカード一覧のカードをタップするとデッキに追加されます。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
+      '<b>③ デッキの中身を見る・編集する</b><br>金色のボタンをタップすると、現在編成中のデッキの中身（枚数・平均コスト・カード一覧）が別画面で開きます。カードをタップすると1枚外れ、右下の「⠿」をドラッグすると並び替えられます。',
+      '<b>④ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
       '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。',
       '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
@@ -7391,6 +7413,12 @@ function init() {
   });
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
+  });
+  document.getElementById('deck-contents-open-btn').addEventListener('click', () => {
+    document.getElementById('deck-contents-overlay').classList.remove('hidden');
+  });
+  document.getElementById('deck-contents-close-btn').addEventListener('click', () => {
+    document.getElementById('deck-contents-overlay').classList.add('hidden');
   });
   document.getElementById('equip-picker-cancel').addEventListener('click', () => {
     document.getElementById('equip-picker-overlay').classList.add('hidden');
