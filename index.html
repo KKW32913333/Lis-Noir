@@ -874,42 +874,6 @@
   .cg-vs-name{font-size:12px; color:#EAE6F5; font-weight:700; text-align:center; line-height:1.3;}
   .cg-vs-mark{font-size:22px; color:var(--true-gold); font-weight:900; font-family:"Cinzel",serif;}
 
-  /* ---------- アルティメットスキル発動演出 ---------- */
-  .cg-ultimate-cinematic{position:absolute; inset:0; z-index:55; display:flex; align-items:center; justify-content:center;
-    background:rgba(10,10,18,.42); opacity:0; pointer-events:none; overflow:hidden; transition:opacity .18s ease;}
-  .cg-ultimate-cinematic.show{opacity:1;}
-  .cg-ultimate-rays{position:absolute; width:200%; height:200%; left:-50%; top:-50%;
-    background:repeating-conic-gradient(from 0deg, var(--ult-color, #ffd966) 0deg 4deg, transparent 4deg 18deg);
-    opacity:.22; animation:cgUltimateRaysSpin 1.1s linear forwards;}
-  @keyframes cgUltimateRaysSpin{
-    0%{transform:rotate(0deg) scale(.6); opacity:0;}
-    15%{opacity:.28;}
-    100%{transform:rotate(70deg) scale(1.15); opacity:.1;}
-  }
-  .cg-ultimate-burst{position:absolute; width:10px; height:10px; border-radius:50%;
-    background:radial-gradient(circle, #fff 0%, var(--ult-color, #ffd966) 45%, transparent 72%);
-    animation:cgUltimateBurstExpand .9s cubic-bezier(.15,.7,.3,1) forwards;}
-  @keyframes cgUltimateBurstExpand{
-    0%{width:10px; height:10px; opacity:1;}
-    55%{width:520px; height:520px; opacity:.4;}
-    100%{width:700px; height:700px; opacity:0;}
-  }
-  .cg-ultimate-content{position:relative; z-index:2; text-align:center; padding:0 24px;
-    transform:scale(.3); opacity:0; animation:cgUltimateTextPop .55s cubic-bezier(.2,.85,.25,1.3) .1s forwards, cgUltimateTextFadeOut .3s ease .65s forwards;}
-  @keyframes cgUltimateTextPop{
-    0%{transform:scale(.3); opacity:0;}
-    55%{transform:scale(1.18); opacity:1;}
-    75%{transform:scale(.96);}
-    100%{transform:scale(1); opacity:1;}
-  }
-  @keyframes cgUltimateTextFadeOut{
-    0%{opacity:1;} 100%{opacity:0;}
-  }
-  .cg-ultimate-tag{font-family:"Cinzel",serif; font-size:13px; letter-spacing:6px; font-weight:800; margin-bottom:10px;
-    color:var(--ult-color, var(--true-gold)); text-shadow:0 0 12px var(--ult-color, var(--true-gold));}
-  .cg-ultimate-name{font-family:"Cinzel",serif; font-size:clamp(22px, 8vw, 36px); font-weight:900; color:#fff; letter-spacing:2px;
-    text-shadow:0 0 18px var(--ult-color, #fff), 0 0 36px var(--ult-color, #fff), 0 2px 6px #000;}
-
   #turn-banner{position:absolute; top:36%; left:50%; transform:translate(-50%,-50%) scaleX(0); opacity:0;
     background:linear-gradient(90deg,transparent,#23242bee 20%,#23242bee 80%,transparent);
     color:var(--true-gold); font-family:"Cinzel",serif; font-size:20px; font-weight:800; letter-spacing:4px;
@@ -1999,16 +1963,6 @@
       <div class="cg-vs-side">
         <div id="vs-enemy-portrait" class="cg-vs-portrait enemy"></div>
         <div id="vs-enemy-name" class="cg-vs-name"></div>
-      </div>
-    </div>
-
-    <!-- アルティメットスキル発動演出 -->
-    <div id="ultimate-cinematic" class="cg-ultimate-cinematic hidden">
-      <div class="cg-ultimate-rays"></div>
-      <div class="cg-ultimate-burst"></div>
-      <div class="cg-ultimate-content">
-        <div class="cg-ultimate-tag">⚡ ULTIMATE SKILL ⚡</div>
-        <div class="cg-ultimate-name" id="ultimate-cinematic-name"></div>
       </div>
     </div>
 
