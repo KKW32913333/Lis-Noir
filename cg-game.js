@@ -3959,12 +3959,23 @@ function spawnElementParticles(targetEl, element) {
   if (!color || !board || !targetEl) return;
   const boardRect = board.getBoundingClientRect();
   const rect = targetEl.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return; // 要素がまだ画面に描画されていない場合は演出をスキップする
   const cx = rect.left + rect.width / 2 - boardRect.left;
   const cy = rect.top + rect.height / 2 - boardRect.top;
-  const count = 6;
+
+  // 属性色のリング（対象を中心に一瞬パッと広がる輪）：色の違いを一目で分かりやすくする
+  const ring = document.createElement('div');
+  ring.className = 'cg-element-ring';
+  ring.style.left = cx + 'px';
+  ring.style.top = cy + 'px';
+  ring.style.borderColor = color;
+  board.appendChild(ring);
+  setTimeout(() => ring.remove(), battleMs(500));
+
+  const count = 8;
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5 - 0.25);
-    const dist = 22 + Math.random() * 18;
+    const dist = 26 + Math.random() * 20;
     const p = document.createElement('div');
     p.className = 'cg-element-particle';
     p.style.left = cx + 'px';
@@ -3979,21 +3990,38 @@ function spawnElementParticles(targetEl, element) {
 }
 
 // 攻撃側のカードを、対象に向かって軽く突進させてすぐ戻す演出。
-// カードの実際のレイアウト位置は変えず、見た目だけtransformで動かすため、他の要素に影響しない
+// 元の要素に直接アニメーションを付けると、直後に呼ばれるrenderBattle()による再描画（内部のHTMLを
+// 丸ごと作り直す処理）で要素ごと消えてしまい、画面が一度も塗り替わらないうちにアニメーションが
+// 消滅して「何も見えない」状態になってしまう。これを避けるため、見た目だけのコピー（クローン）を
+// 別途重ねて表示し、そちらを動かすことで、再描画のタイミングに影響されないようにしている。
 function playAttackDash(attackerEl, targetEl) {
   if (!attackerEl || !targetEl) return;
+  const board = document.querySelector('.cg-battle-board');
+  if (!board) return;
+  const boardRect = board.getBoundingClientRect();
   const a = attackerEl.getBoundingClientRect();
   const t = targetEl.getBoundingClientRect();
+  if (a.width === 0 || a.height === 0) return; // 要素がまだ画面に描画されていない場合は演出をスキップする
   const dx = (t.left + t.width / 2) - (a.left + a.width / 2);
   const dy = (t.top + t.height / 2) - (a.top + a.height / 2);
   const dist = Math.hypot(dx, dy) || 1;
   const dashDist = Math.min(24, dist * 0.3); // 相手が遠くても、突進しすぎないよう距離を制限する
-  attackerEl.style.setProperty('--dash-x', `${(dx / dist) * dashDist}px`);
-  attackerEl.style.setProperty('--dash-y', `${(dy / dist) * dashDist}px`);
-  attackerEl.classList.remove('cg-attack-dash');
-  void attackerEl.offsetWidth; // アニメーションを確実にリスタートさせるための強制リフロー
-  attackerEl.classList.add('cg-attack-dash');
-  setTimeout(() => attackerEl.classList.remove('cg-attack-dash'), battleMs(420));
+  const dashX = (dx / dist) * dashDist;
+  const dashY = (dy / dist) * dashDist;
+
+  const clone = attackerEl.cloneNode(true);
+  clone.classList.add('cg-attack-dash-clone', 'cg-attack-dash');
+  clone.style.position = 'absolute';
+  clone.style.left = (a.left - boardRect.left) + 'px';
+  clone.style.top = (a.top - boardRect.top) + 'px';
+  clone.style.width = a.width + 'px';
+  clone.style.height = a.height + 'px';
+  clone.style.margin = '0';
+  clone.style.setProperty('--dash-x', `${dashX}px`);
+  clone.style.setProperty('--dash-y', `${dashY}px`);
+  board.appendChild(clone);
+  attackerEl.style.visibility = 'hidden'; // クローンが動いている間、元の要素は隠す（直後の再描画で自動的に元通りになる）
+  setTimeout(() => clone.remove(), battleMs(420));
 }
 
 function spawnImpactBurst(targetEl, dmg, mult) {

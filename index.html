@@ -970,6 +970,7 @@
   }
 
   /* ---------- 攻撃時のダッシュ演出：攻撃側のカードが対象へ向かって少し突進し、すぐ元の位置へ戻る ---------- */
+  .cg-attack-dash-clone{z-index:9; pointer-events:none;}
   .cg-attack-dash{animation:cgAttackDash .4s cubic-bezier(.3,0,.4,1) forwards; z-index:8;}
   @keyframes cgAttackDash{
     0%{transform:translate(0, 0) scale(1);}
@@ -978,8 +979,15 @@
   }
 
   /* ---------- 属性エフェクト：攻撃・スキル発動時に、属性に応じた色の粒子が対象の周りに飛び散る ---------- */
-  .cg-element-particle{position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%;
-    z-index:14; pointer-events:none; box-shadow:0 0 6px 1px currentColor; animation:cgElementParticle .5s ease-out forwards;}
+  /* ---------- 属性エフェクト：攻撃・スキル発動時に、属性に応じた色のリングと粒子が対象の周りに広がる ---------- */
+  .cg-element-ring{position:absolute; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%;
+    border:4px solid #fff; z-index:14; pointer-events:none; animation:cgElementRingExpand .5s ease-out forwards;}
+  @keyframes cgElementRingExpand{
+    0%{width:16px; height:16px; margin:-8px 0 0 -8px; opacity:1;}
+    100%{width:110px; height:110px; margin:-55px 0 0 -55px; opacity:0;}
+  }
+  .cg-element-particle{position:absolute; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%;
+    z-index:14; pointer-events:none; box-shadow:0 0 8px 2px currentColor; animation:cgElementParticle .55s ease-out forwards;}
   @keyframes cgElementParticle{
     0%{transform:translate(0, 0) scale(1); opacity:1;}
     100%{transform:translate(var(--px), var(--py)) scale(.3); opacity:0;}
