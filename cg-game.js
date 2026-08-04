@@ -1816,12 +1816,16 @@ function playUltimateCinematic(leader, onImpact) {
   const color = ELEMENT_PARTICLE_COLOR[leader.element] || '#ffd966';
   overlay.style.setProperty('--ult-color', color);
   nameEl.textContent = leader.ultimateSkill.name;
-  overlay.classList.remove('hidden', 'show');
+  overlay.classList.remove('hidden');
+  overlay.classList.remove('show');
   void overlay.offsetWidth; // アニメーションを確実にリスタートさせるための強制リフロー
   overlay.classList.add('show');
   sfxUltimate();
-  setTimeout(onImpact, battleMs(650)); // 名前の演出が見せ場を迎えたタイミングで、実際のダメージ処理を発動する
-  setTimeout(() => overlay.classList.add('hidden'), battleMs(1500));
+  // スキル名の見せ場が終わる頃合いで実際のダメージ処理を発動し、その直後に暗転を解いて
+  // バトル画面（攻撃対象・ダメージ演出）がしっかり見えるようにする
+  setTimeout(onImpact, battleMs(520));
+  setTimeout(() => overlay.classList.remove('show'), battleMs(780));
+  setTimeout(() => overlay.classList.add('hidden'), battleMs(980));
 }
 
 function executeLeaderUltimate() {
