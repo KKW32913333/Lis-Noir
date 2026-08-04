@@ -1807,12 +1807,34 @@ function renderLeaderSelect(containerId) {
 }
 
 // アルティメットスキルの発動：敵本体と敵の場にいる全モンスターに効果を及ぼす（5ターンに1回）
+// アルティメットスキル発動時の演出（リーダーの属性色に合わせた光の爆発＋スキル名の大きな表示）を再生し、
+// 演出の見せ場（ダメージが炸裂する瞬間）に合わせて実際の効果適用処理を呼び出す
+function playUltimateCinematic(leader, onImpact) {
+  const overlay = document.getElementById('ultimate-cinematic');
+  const nameEl = document.getElementById('ultimate-cinematic-name');
+  if (!overlay || !nameEl) { onImpact(); return; }
+  const color = ELEMENT_PARTICLE_COLOR[leader.element] || '#ffd966';
+  overlay.style.setProperty('--ult-color', color);
+  nameEl.textContent = leader.ultimateSkill.name;
+  overlay.classList.remove('hidden', 'show');
+  void overlay.offsetWidth; // アニメーションを確実にリスタートさせるための強制リフロー
+  overlay.classList.add('show');
+  sfxUltimate();
+  setTimeout(onImpact, battleMs(650)); // 名前の演出が見せ場を迎えたタイミングで、実際のダメージ処理を発動する
+  setTimeout(() => overlay.classList.add('hidden'), battleMs(1500));
+}
+
 function executeLeaderUltimate() {
   if (!battle || battle.over) return;
   if (battle.isOnline && battle.activeSide !== 'player') return;
   const leader = getActiveLeader();
   if (!leader || !leader.ultimateSkill) return;
   if ((battle.leaderUltimateCharge || 0) < ULTIMATE_COOLDOWN_TURNS) return;
+  playUltimateCinematic(leader, () => applyLeaderUltimateEffect(leader));
+}
+
+function applyLeaderUltimateEffect(leader) {
+  if (!battle || battle.over) return;
   const skill = leader.ultimateSkill;
 
   battle.enemyHp = Math.max(0, battle.enemyHp - skill.dmg);
@@ -4051,6 +4073,11 @@ function sfxAttack() { playTone(120, 0.15, 'sawtooth', 0.13); }
 function sfxWin() { [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.25, 'triangle', 0.13, i * 0.12)); }
 function sfxLose() { [400, 300, 220].forEach((f, i) => playTone(f, 0.35, 'sine', 0.11, i * 0.18)); }
 function sfxReveal() { playTone(880, 0.12, 'triangle', 0.13); playTone(1108, 0.15, 'triangle', 0.11, 0.08); }
+function sfxUltimate() {
+  playTone(70, 0.45, 'sawtooth', 0.16);
+  playTone(140, 0.3, 'square', 0.1, 0.1);
+  [440, 554, 659, 880].forEach((f, i) => playTone(f, 0.4, 'triangle', 0.12, 0.22 + i * 0.09));
+}
 
 function fieldBonusFor(unit) {
   if (!battle || !battle.fieldCard) return 0;
