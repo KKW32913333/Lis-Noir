@@ -932,6 +932,22 @@
     0%{transform:rotate(var(--sa)) translateX(0); opacity:1;}
     100%{transform:rotate(var(--sa)) translateX(34px); opacity:0;}
   }
+
+  /* ---------- 攻撃時のダッシュ演出：攻撃側のカードが対象へ向かって少し突進し、すぐ元の位置へ戻る ---------- */
+  .cg-attack-dash{animation:cgAttackDash .4s cubic-bezier(.3,0,.4,1) forwards; z-index:8;}
+  @keyframes cgAttackDash{
+    0%{transform:translate(0, 0) scale(1);}
+    45%{transform:translate(var(--dash-x, 0), var(--dash-y, 0)) scale(1.06);}
+    100%{transform:translate(0, 0) scale(1);}
+  }
+
+  /* ---------- 属性エフェクト：攻撃・スキル発動時に、属性に応じた色の粒子が対象の周りに飛び散る ---------- */
+  .cg-element-particle{position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%;
+    z-index:14; pointer-events:none; box-shadow:0 0 6px 1px currentColor; animation:cgElementParticle .5s ease-out forwards;}
+  @keyframes cgElementParticle{
+    0%{transform:translate(0, 0) scale(1); opacity:1;}
+    100%{transform:translate(var(--px), var(--py)) scale(.3); opacity:0;}
+  }
   .cg-impact-dmg{position:absolute; margin:-32px 0 0 -24px; font-size:19px; font-weight:900; color:#fff; z-index:17;
     pointer-events:none; text-shadow:0 2px 4px #000, 0 0 10px #ff3b3b; animation:cgDmgRise .95s ease-out forwards;
     font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}

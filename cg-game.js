@@ -3912,7 +3912,7 @@ function showTurnBanner(text) {
   el.classList.add('show');
 }
 
-function impactEffect(targetEl, dmg, mult) {
+function impactEffect(targetEl, dmg, mult, element) {
   const app = document.getElementById('app');
   const flash = document.getElementById('battle-impact-flash');
   app.classList.remove('shake');
@@ -3925,6 +3925,53 @@ function impactEffect(targetEl, dmg, mult) {
   }
   sfxAttack();
   if (targetEl && dmg !== undefined) spawnImpactBurst(targetEl, dmg, mult);
+  if (targetEl && element) spawnElementParticles(targetEl, element);
+}
+
+// 属性ごとの演出カラー（攻撃・スキル発動時に対象の周りへ飛び散る粒子の色）
+const ELEMENT_PARTICLE_COLOR = { fire: '#ff7a3d', water: '#4fc3f7', nature: '#7bd35a', light: '#ffd966', dark: '#b28dff' };
+
+function spawnElementParticles(targetEl, element) {
+  const color = ELEMENT_PARTICLE_COLOR[element];
+  const board = document.querySelector('.cg-battle-board');
+  if (!color || !board || !targetEl) return;
+  const boardRect = board.getBoundingClientRect();
+  const rect = targetEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2 - boardRect.left;
+  const cy = rect.top + rect.height / 2 - boardRect.top;
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5 - 0.25);
+    const dist = 22 + Math.random() * 18;
+    const p = document.createElement('div');
+    p.className = 'cg-element-particle';
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.background = color;
+    p.style.color = color;
+    p.style.setProperty('--px', `${Math.cos(angle) * dist}px`);
+    p.style.setProperty('--py', `${Math.sin(angle) * dist}px`);
+    board.appendChild(p);
+    setTimeout(() => p.remove(), battleMs(550));
+  }
+}
+
+// 攻撃側のカードを、対象に向かって軽く突進させてすぐ戻す演出。
+// カードの実際のレイアウト位置は変えず、見た目だけtransformで動かすため、他の要素に影響しない
+function playAttackDash(attackerEl, targetEl) {
+  if (!attackerEl || !targetEl) return;
+  const a = attackerEl.getBoundingClientRect();
+  const t = targetEl.getBoundingClientRect();
+  const dx = (t.left + t.width / 2) - (a.left + a.width / 2);
+  const dy = (t.top + t.height / 2) - (a.top + a.height / 2);
+  const dist = Math.hypot(dx, dy) || 1;
+  const dashDist = Math.min(24, dist * 0.3); // 相手が遠くても、突進しすぎないよう距離を制限する
+  attackerEl.style.setProperty('--dash-x', `${(dx / dist) * dashDist}px`);
+  attackerEl.style.setProperty('--dash-y', `${(dy / dist) * dashDist}px`);
+  attackerEl.classList.remove('cg-attack-dash');
+  void attackerEl.offsetWidth; // アニメーションを確実にリスタートさせるための強制リフロー
+  attackerEl.classList.add('cg-attack-dash');
+  setTimeout(() => attackerEl.classList.remove('cg-attack-dash'), battleMs(420));
 }
 
 function spawnImpactBurst(targetEl, dmg, mult) {
@@ -5019,7 +5066,9 @@ function attackTarget(attackerIdx, targetIdx) {
   const targetEl = targetIdx === null
     ? document.getElementById('battle-enemy-portrait')
     : document.querySelectorAll('#battle-enemy-field .cg-field-slot')[targetIdx];
-  impactEffect(targetEl, dmg, mult);
+  const attackerEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[attackerIdx];
+  playAttackDash(attackerEl, targetEl);
+  impactEffect(targetEl, dmg, mult, attacker.def.element);
   if (tag && tag.effect === 'lifesteal') {
     // 【ヴァンパイアロード】攻撃時、与えたダメージ分だけ自分のHPを回復する
     const maxHp = attacker.def.hp + (attacker.hpBonus || 0);
@@ -5375,7 +5424,9 @@ function enemyTurn() {
         const targetIdx = chooseAiAttackTargetIdx(valid.indices, battle.playerField, dmg);
         const target = battle.playerField[targetIdx];
         const targetEl = document.querySelectorAll('#battle-player-field .cg-field-slot')[targetIdx];
-        impactEffect(targetEl, dmg, 0);
+        const attackerEl = document.querySelectorAll('#battle-enemy-field .cg-field-slot')[i];
+        playAttackDash(attackerEl, targetEl);
+        impactEffect(targetEl, dmg, 0, u.def.element);
         target.curHp -= mitigateIncomingDamage(target, dmg);
         if (tag && tag.effect === 'aoeDamage') {
           const aoeVal = (tag && tag.effect === 'aoeDamage') ? tag.value : 2;
