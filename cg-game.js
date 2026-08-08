@@ -1879,7 +1879,6 @@ function renderDeck() {
      </div>`;
   deckEl.innerHTML = groups.map(slotHtml).join('') + (state.deck.length === 0 ? '<div class="cg-empty">デッキにカードがありません</div>' : '');
   document.getElementById('deck-count').textContent = `${state.deck.length}/40`;
-  document.getElementById('deck-count-summary').textContent = `${state.deck.length}/40`;
   renderDeckSynergy();
 
   // タップで1枚外す（デッキ内の並び順は本来バトル開始時にシャッフルされ、ゲームプレイには影響しないが、
@@ -1905,7 +1904,6 @@ function renderDeck() {
     ? (validDeckIds.reduce((s, id) => s + CARD_DEFS[id].cost, 0) / validDeckIds.length).toFixed(1)
     : '0.0';
   document.getElementById('deck-avgcost').textContent = avgCost;
-  document.getElementById('deck-avgcost-summary').textContent = avgCost;
 
   renderDeckPresets();
 
@@ -7208,12 +7206,12 @@ const SCREEN_HELP = {
     title: 'カード画面のヘルプ',
     items: [
       '<b>① リーダー・保存したデッキ</b><br>画面の一番上に、使用するリーダーの選択と、デッキの保存・読み込み・削除が常に表示されています。「読み込む」で保存済みデッキを呼び出して編集し、「💾 このデッキを保存」を押すと、そのまま上書き更新するか、新しいデッキとして保存するか選べます。「名前変更」は内容を変えずに名前だけ変更します。',
-      '<b>② デッキ編成</b><br>下のカード一覧のカードをタップするとデッキに追加されます。同じカードは1枠にまとめて「×N」で枚数表示されます。属性タブで絞り込みも可能。',
-      '<b>③ デッキの中身を見る・編集する</b><br>金色のボタンをタップすると、現在編成中のデッキの中身（枚数・平均コスト・カード一覧）が別画面で開きます。カードをタップすると1枚外れ、右下の「⠿」をドラッグすると並び替えられます。',
+      '<b>② デッキの中身</b><br>現在編成中のデッキ（枚数・平均コスト・カード一覧・シナジー）が常に画面に表示されています。カードをタップすると1枚外れ、右下の「⠿」をドラッグすると並び替えられます。',
+      '<b>③ カードを追加・変更する</b><br>点線のボタンをタップすると、所持しているカードの一覧が別画面で開きます。そこでカードをタップすると、そのままデッキに追加されます（複数枚まとめて追加も可能）。',
       '<b>④ 自動編成・一括解除</b><br>「自動編成」でおすすめのデッキを組んだり、「一括解除」で全カードを外したりできます。',
       '<b>⑤ カード一覧（図鑑）</b><br>所持カードはカラー、未所持はグレーで表示。長押しで簡易情報、タップで強化画面が開きます。「デッキ内のみ表示」で絞り込みも可能。',
       '<b>⑥ リーダーの詳細確認</b><br>カード一覧の「リーダー」タブから、全リーダーのリーダースキル・アルティメットスキルを確認できます。',
-      '<b>⑦ 並び替え</b><br>「並び替え」のプルダウンから、レアリティ順・属性順・コスト順にカードを並び替えられます。',
+      '<b>⑦ 並び替え</b><br>カードを選ぶ画面の「並び替え」のプルダウンから、レアリティ順・属性順・コスト順に並び替えられます。',
     ],
   },
   cardDetail: {
@@ -7493,11 +7491,11 @@ function init() {
   document.getElementById('card-info-close').addEventListener('click', () => {
     document.getElementById('card-info-overlay').classList.add('hidden');
   });
-  document.getElementById('deck-contents-open-btn').addEventListener('click', () => {
-    document.getElementById('deck-contents-overlay').classList.remove('hidden');
+  document.getElementById('card-picker-open-btn').addEventListener('click', () => {
+    document.getElementById('card-picker-overlay').classList.remove('hidden');
   });
-  document.getElementById('deck-contents-close-btn').addEventListener('click', () => {
-    document.getElementById('deck-contents-overlay').classList.add('hidden');
+  document.getElementById('card-picker-close-btn').addEventListener('click', () => {
+    document.getElementById('card-picker-overlay').classList.add('hidden');
   });
   document.getElementById('equip-picker-cancel').addEventListener('click', () => {
     document.getElementById('equip-picker-overlay').classList.add('hidden');
